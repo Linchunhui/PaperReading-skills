@@ -1,6 +1,7 @@
 # PaperReading
 
 > 一个把研究论文读成"可长期保存的思想笔记"的 Claude Code skill。
+> 参考https://github.com/lijigang/ljg-skill-paper
 
 ## 简介
 
