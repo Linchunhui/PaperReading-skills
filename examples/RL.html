@@ -1,0 +1,1338 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>LLM RL 算法系列阅读笔记</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+  onload="renderMathInElement(document.body,{delimiters:[
+    {left:'$$',right:'$$',display:true},
+    {left:'$',right:'$',display:false}],throwOnError:false});"></script>
+<style>
+:root{
+  --bg:#fcfaf6; --fg:#1f2328; --muted:#6a737d; --accent:#0969da;
+  --ppo:#5b8def;   /* 蓝 */
+  --dpo:#8b5cf6;   /* 紫 */
+  --grpo:#62b88f;  /* 绿 */
+  --dapo:#e08e45;  /* 橙 */
+  --vapo:#c4636e;  /* 玫红 */
+  --gspo:#d4a017;  /* 金黄 */
+  --sapo:#16a085;  /* 青 */
+  --gdpo:#6d597a;  /* 深紫 */
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);
+  font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue","PingFang SC","Noto Sans CJK SC",sans-serif;
+  font-size:17px;line-height:1.78;}
+.wrap{max-width:880px;margin:0 auto;padding:48px 28px 96px}
+h1{font-size:32px;margin:0 0 8px;letter-spacing:.5px}
+.subtitle{color:var(--muted);font-size:16px;margin:0 0 4px}
+.meta{color:var(--muted);font-size:13.5px;margin:0 0 36px}
+.meta a{color:var(--accent);text-decoration:none}
+h2{font-size:24px;margin:56px 0 18px;padding-bottom:6px;border-bottom:2px solid #e1e4e8}
+h3{font-size:19px;margin:30px 0 12px;color:var(--accent)}
+h4{font-size:16.5px;margin:22px 0 10px;color:#444}
+p{margin:0 0 14px}
+.note{background:#f6f8fa;border-left:4px solid var(--accent);padding:10px 14px;border-radius:0 4px 4px 0;font-size:15.5px;color:#374151}
+.tagline{display:inline-block;background:#fff7e6;border-left:4px solid var(--accent);padding:8px 14px;font-size:15px;font-style:italic;color:#444;margin-bottom:18px;border-radius:0 4px 4px 0}
+
+/* 章节卡片 */
+.chapter{padding:24px 28px;margin:36px 0;background:#fff;border-radius:8px;
+  box-shadow:0 1px 3px rgba(0,0,0,.06);border-left:6px solid var(--accent)}
+.chapter.ppo{border-left-color:var(--ppo)}
+.chapter.dpo{border-left-color:var(--dpo)}
+.chapter.grpo{border-left-color:var(--grpo)}
+.chapter.dapo{border-left-color:var(--dapo)}
+.chapter.vapo{border-left-color:var(--vapo)}
+.chapter.gspo{border-left-color:var(--gspo)}
+.chapter.sapo{border-left-color:var(--sapo)}
+.chapter.gdpo{border-left-color:var(--gdpo)}
+.chapter h3:first-child{margin-top:0}
+
+/* 表格 */
+table.cmp{width:100%;border-collapse:collapse;font-size:14px;margin:18px 0}
+table.cmp th,table.cmp td{border:1px solid #e1e4e8;padding:8px 10px;text-align:left;vertical-align:top}
+table.cmp th{background:#f6f8fa;font-weight:600}
+table.cmp td:first-child{font-weight:600;background:#fafbfc;width:120px}
+table.cmp tr:hover{background:#fafbfc}
+.pill{display:inline-block;padding:2px 8px;border-radius:10px;font-size:12px;font-weight:600;color:#fff}
+.pill.ppo{background:var(--ppo)}.pill.dpo{background:var(--dpo)}
+.pill.grpo{background:var(--grpo)}.pill.dapo{background:var(--dapo)}
+.pill.vapo{background:var(--vapo)}.pill.gspo{background:var(--gspo)}
+.pill.sapo{background:var(--sapo)}.pill.gdpo{background:var(--gdpo)}
+
+/* 图片 */
+figure{margin:18px 0;text-align:center}
+figure img{max-width:100%;border:1px solid #e1e4e8;border-radius:6px}
+figcaption{font-size:13.5px;color:var(--muted);margin-top:8px;text-align:left;line-height:1.6}
+
+/* 时间线 SVG 容器 */
+.tl-wrap{margin:18px 0;text-align:center;overflow-x:auto}
+.tl-wrap svg{max-width:100%;height:auto}
+
+/* TOC */
+.toc{position:fixed;top:48px;right:24px;width:220px;font-size:13px;
+  background:#fff;border:1px solid #e1e4e8;border-radius:6px;padding:14px 16px;
+  max-height:calc(100vh - 96px);overflow-y:auto}
+.toc h4{margin:0 0 8px;font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+.toc a{color:#374151;text-decoration:none;display:block;padding:2px 0;line-height:1.5}
+.toc a.l1{font-weight:600;margin-top:6px}
+.toc a.l2{padding-left:14px;color:#6a737d;font-size:12.5px}
+.toc a:hover{color:var(--accent)}
+@media (max-width:1239px){.toc{display:none}}
+
+/* code block */
+.code-block{background:#1e1e1e;color:#d4d4d4;padding:14px 18px;border-radius:6px;
+  font-family:"JetBrains Mono","SF Mono",Consolas,monospace;
+  font-size:13.5px;line-height:1.65;overflow-x:auto;margin:16px 0;white-space:pre}
+.code-block .cmt{color:#7a9c7a}
+.code-block .kw{color:#c586c0}
+.code-block .fn{color:#dcdcaa}
+.code-block .str{color:#ce9178}
+.code-block .num{color:#b5cea8}
+.code-block .title{color:#9cdcfe;font-weight:700}
+
+/* surprise */
+.surprise{background:#fff5f5;border:1px solid #fad4d4;border-radius:6px;padding:16px 20px;margin:16px 0}
+.surprise h4{margin:0 0 8px;color:#c4636e}
+
+ul,ol{padding-left:24px;margin:0 0 14px}
+li{margin-bottom:6px}
+em{color:#444}
+strong{color:#0f1419}
+.kbd{background:#f6f8fa;border:1px solid #d1d5da;border-radius:3px;padding:1px 6px;font-family:monospace;font-size:13px;color:#444}
+</style>
+</head>
+<body>
+
+<nav class="toc">
+<h4>目录</h4>
+<a class="l1" href="#intro">导读 · 时间线</a>
+<a class="l1" href="#table">横向对照表</a>
+<a class="l1" href="#core">共享核心：策略梯度</a>
+<a class="l1" href="#ppo">① PPO</a>
+<a class="l2" href="#ppo-mot">出发点</a>
+<a class="l2" href="#ppo-met">方法详解</a>
+<a class="l2" href="#ppo-exp">关键发现</a>
+<a class="l1" href="#dpo">② DPO</a>
+<a class="l2" href="#dpo-mot">出发点</a>
+<a class="l2" href="#dpo-met">方法详解</a>
+<a class="l2" href="#dpo-exp">关键发现</a>
+<a class="l1" href="#grpo">③ GRPO</a>
+<a class="l2" href="#grpo-mot">出发点</a>
+<a class="l2" href="#grpo-met">方法详解</a>
+<a class="l2" href="#grpo-exp">关键发现</a>
+<a class="l1" href="#dapo">④ DAPO</a>
+<a class="l2" href="#dapo-mot">出发点</a>
+<a class="l2" href="#dapo-met">方法详解</a>
+<a class="l2" href="#dapo-exp">关键发现</a>
+<a class="l1" href="#vapo">⑤ VAPO</a>
+<a class="l2" href="#vapo-mot">出发点</a>
+<a class="l2" href="#vapo-met">方法详解</a>
+<a class="l2" href="#vapo-exp">关键发现</a>
+<a class="l1" href="#gspo">⑥ GSPO</a>
+<a class="l2" href="#gspo-mot">出发点</a>
+<a class="l2" href="#gspo-met">方法详解</a>
+<a class="l2" href="#gspo-exp">关键发现</a>
+<a class="l1" href="#sapo">⑦ SAPO</a>
+<a class="l2" href="#sapo-mot">出发点</a>
+<a class="l2" href="#sapo-met">方法详解</a>
+<a class="l2" href="#sapo-exp">关键发现</a>
+<a class="l1" href="#gdpo">⑧ GDPO</a>
+<a class="l2" href="#gdpo-mot">出发点</a>
+<a class="l2" href="#gdpo-met">方法详解</a>
+<a class="l2" href="#gdpo-exp">关键发现</a>
+<a class="l1" href="#threads">贯穿线</a>
+<a class="l1" href="#summary">三句话总结</a>
+</nav>
+
+<div class="wrap">
+
+<h1>LLM RL 算法系列阅读笔记</h1>
+<p class="subtitle">PPO · DPO · GRPO · DAPO · VAPO · GSPO · SAPO · GDPO — 大模型对齐与推理强化学习方法的演进</p>
+<p class="meta">2026-05-27 · 8 篇论文 / 算法整合 · 来源 PDF 见同目录 ·
+  基础笔记：<a href="./强化学习.md">强化学习.md</a>
+</p>
+
+<!-- ========== 1. 摘要 / 导读 ========== -->
+<section id="intro">
+<h2>导读 · 时间线</h2>
+
+<p>从 2017 年 PPO 把 actor-critic 带进 LLM 对齐起，到 2026 年 GDPO 解决多奖励训练崩溃——
+LLM 强化学习的演进只在做<strong>一件事</strong>：在<em>越来越长的生成序列</em>和<em>越来越大的模型</em>下，
+让<em>策略梯度</em>这把老枪还能稳定地把模型推到更高的推理能力。</p>
+
+<p>每一代要么是<em>砍掉一个开销大的组件</em>（DPO 砍 RL、GRPO 砍 critic），
+要么是<em>换一种更稳的优化粒度</em>（DAPO 砍 KL、VAPO 把 critic 捡回来、GSPO 从 token 升到 sequence、SAPO 把 hard clip 换成 soft gate），
+要么是<em>把单奖励扩展到多奖励</em>（GDPO 把归一化拆开）。
+读完之后你会看见一条清晰的线：
+<strong>「降成本 → 稳大模型 → 修长序列 → 上 MoE → 兜多目标」</strong>。</p>
+
+<div class="tl-wrap">
+<svg viewBox="0 0 880 360" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Helvetica,sans-serif">
+  <!-- baseline -->
+  <line x1="40" y1="120" x2="840" y2="120" stroke="#cbd5e1" stroke-width="2"/>
+
+  <!-- nodes -->
+  <g>
+    <circle cx="60" cy="120" r="10" fill="#5b8def"/>
+    <text x="60" y="100" text-anchor="middle" font-size="13" font-weight="600">PPO</text>
+    <text x="60" y="148" text-anchor="middle" font-size="11" fill="#666">2017</text>
+    <text x="60" y="165" text-anchor="middle" font-size="10" fill="#888">OpenAI</text>
+  </g>
+  <g>
+    <circle cx="170" cy="120" r="10" fill="#8b5cf6"/>
+    <text x="170" y="100" text-anchor="middle" font-size="13" font-weight="600">DPO</text>
+    <text x="170" y="148" text-anchor="middle" font-size="11" fill="#666">2023.05</text>
+    <text x="170" y="165" text-anchor="middle" font-size="10" fill="#888">Stanford</text>
+  </g>
+  <g>
+    <circle cx="290" cy="120" r="10" fill="#62b88f"/>
+    <text x="290" y="100" text-anchor="middle" font-size="13" font-weight="600">GRPO</text>
+    <text x="290" y="148" text-anchor="middle" font-size="11" fill="#666">2024.02</text>
+    <text x="290" y="165" text-anchor="middle" font-size="10" fill="#888">DeepSeek</text>
+  </g>
+  <g>
+    <circle cx="400" cy="120" r="10" fill="#e08e45"/>
+    <text x="400" y="100" text-anchor="middle" font-size="13" font-weight="600">DAPO</text>
+    <text x="400" y="148" text-anchor="middle" font-size="11" fill="#666">2025.03</text>
+    <text x="400" y="165" text-anchor="middle" font-size="10" fill="#888">ByteDance</text>
+  </g>
+  <g>
+    <circle cx="510" cy="120" r="10" fill="#c4636e"/>
+    <text x="510" y="100" text-anchor="middle" font-size="13" font-weight="600">VAPO</text>
+    <text x="510" y="148" text-anchor="middle" font-size="11" fill="#666">2025.04</text>
+    <text x="510" y="165" text-anchor="middle" font-size="10" fill="#888">ByteDance</text>
+  </g>
+  <g>
+    <circle cx="620" cy="120" r="10" fill="#d4a017"/>
+    <text x="620" y="100" text-anchor="middle" font-size="13" font-weight="600">GSPO</text>
+    <text x="620" y="148" text-anchor="middle" font-size="11" fill="#666">2025.07</text>
+    <text x="620" y="165" text-anchor="middle" font-size="10" fill="#888">Qwen</text>
+  </g>
+  <g>
+    <circle cx="730" cy="120" r="10" fill="#16a085"/>
+    <text x="730" y="100" text-anchor="middle" font-size="13" font-weight="600">SAPO</text>
+    <text x="730" y="148" text-anchor="middle" font-size="11" fill="#666">2025.12</text>
+    <text x="730" y="165" text-anchor="middle" font-size="10" fill="#888">Qwen</text>
+  </g>
+  <g>
+    <circle cx="820" cy="120" r="10" fill="#6d597a"/>
+    <text x="820" y="100" text-anchor="middle" font-size="13" font-weight="600">GDPO</text>
+    <text x="820" y="148" text-anchor="middle" font-size="11" fill="#666">2026.01</text>
+    <text x="820" y="165" text-anchor="middle" font-size="10" fill="#888">NVIDIA</text>
+  </g>
+
+  <!-- 叠加块：每代加了什么 -->
+  <text x="40" y="210" font-size="12" font-weight="600" fill="#444">每代的关键变化：</text>
+
+  <rect x="40" y="220" width="100" height="50" rx="4" fill="#dbeafe" stroke="#5b8def"/>
+  <text x="90" y="240" text-anchor="middle" font-size="11" font-weight="600">Actor+Critic</text>
+  <text x="90" y="256" text-anchor="middle" font-size="10">Token clip</text>
+  <text x="90" y="268" text-anchor="middle" font-size="10">+ KL 进 reward</text>
+
+  <rect x="148" y="220" width="100" height="50" rx="4" fill="#ede9fe" stroke="#8b5cf6"/>
+  <text x="198" y="240" text-anchor="middle" font-size="11" font-weight="600">−RL 全流程</text>
+  <text x="198" y="256" text-anchor="middle" font-size="10">直接偏好</text>
+  <text x="198" y="268" text-anchor="middle" font-size="10">闭式 loss</text>
+
+  <rect x="256" y="220" width="100" height="50" rx="4" fill="#d1fae5" stroke="#62b88f"/>
+  <text x="306" y="240" text-anchor="middle" font-size="11" font-weight="600">−Critic 网络</text>
+  <text x="306" y="256" text-anchor="middle" font-size="10">组内归一化</text>
+  <text x="306" y="268" text-anchor="middle" font-size="10">作为 advantage</text>
+
+  <rect x="364" y="220" width="100" height="50" rx="4" fill="#fed7aa" stroke="#e08e45"/>
+  <text x="414" y="240" text-anchor="middle" font-size="11" font-weight="600">4 个稳定 trick</text>
+  <text x="414" y="256" text-anchor="middle" font-size="10">−KL · Clip-Higher</text>
+  <text x="414" y="268" text-anchor="middle" font-size="10">Token-loss · 动态采样</text>
+
+  <rect x="472" y="220" width="100" height="50" rx="4" fill="#fecdd3" stroke="#c4636e"/>
+  <text x="522" y="240" text-anchor="middle" font-size="11" font-weight="600">+Critic 回归</text>
+  <text x="522" y="256" text-anchor="middle" font-size="10">7 trick 救价值</text>
+  <text x="522" y="268" text-anchor="middle" font-size="10">长度自适应 GAE</text>
+
+  <rect x="580" y="220" width="100" height="50" rx="4" fill="#fef3c7" stroke="#d4a017"/>
+  <text x="630" y="240" text-anchor="middle" font-size="11" font-weight="600">Token → Sequence</text>
+  <text x="630" y="256" text-anchor="middle" font-size="10">序列级 importance</text>
+  <text x="630" y="268" text-anchor="middle" font-size="10">MoE 不再崩</text>
+
+  <rect x="688" y="220" width="100" height="50" rx="4" fill="#ccfbf1" stroke="#16a085"/>
+  <text x="738" y="240" text-anchor="middle" font-size="11" font-weight="600">Hard clip → Soft gate</text>
+  <text x="738" y="256" text-anchor="middle" font-size="10">sigmoid 平滑信任域</text>
+  <text x="738" y="268" text-anchor="middle" font-size="10">正负不对称温度</text>
+
+  <rect x="745" y="290" width="100" height="50" rx="4" fill="#e9d5ff" stroke="#6d597a"/>
+  <text x="795" y="310" text-anchor="middle" font-size="11" font-weight="600">多奖励解耦</text>
+  <text x="795" y="326" text-anchor="middle" font-size="10">每奖励单独归一</text>
+  <text x="795" y="338" text-anchor="middle" font-size="10">+batch 归一</text>
+</svg>
+</div>
+
+<p class="note"><strong>读法提示</strong>：表面上是"算法越来越多"，本质上其实是<em>同一套策略梯度框架在不断把组件换掉</em>。
+读完所有论文，你应该能回答：(1) 哪些方法是"砍掉某个东西"，哪些是"换一种粒度"，哪些是"加一个 trick"；
+(2) 为什么 DAPO 砍掉 KL 和 critic 还能更好，VAPO 又把 critic 捡回来；
+(3) 长序列、MoE、多奖励这三个新挑战分别由哪一代解决。</p>
+</section>
+
+<!-- ========== 2. 横向对照表 ========== -->
+<section id="table">
+<h2>横向对照表</h2>
+
+<table class="cmp">
+<thead>
+<tr>
+  <th>维度</th>
+  <th><span class="pill ppo">PPO</span></th>
+  <th><span class="pill dpo">DPO</span></th>
+  <th><span class="pill grpo">GRPO</span></th>
+  <th><span class="pill dapo">DAPO</span></th>
+</tr>
+</thead>
+<tbody>
+<tr><td>发布</td>
+  <td>2017 / Schulman</td>
+  <td>2023.05 / Stanford</td>
+  <td>2024.02 / DeepSeek-Math</td>
+  <td>2025.03 / ByteDance Seed</td></tr>
+<tr><td>训练组件</td>
+  <td>Actor + Critic + RM + Ref</td>
+  <td>Actor + Ref<br>（无 RM、无 RL）</td>
+  <td>Actor + RM + Ref<br>（−Critic）</td>
+  <td>沿用 GRPO</td></tr>
+<tr><td>优势估计</td>
+  <td>GAE on token<br>$V^\pi$ 估</td>
+  <td>无（隐式偏好）</td>
+  <td>组内归一化<br>$A_i=(r_i-\bar r)/\sigma$</td>
+  <td>沿用 GRPO，但去 STD</td></tr>
+<tr><td>重要性比</td>
+  <td>token 级<br>$\pi_\theta/\pi_{old}$</td>
+  <td>序列 log-ratio</td>
+  <td>token 级</td>
+  <td>token 级</td></tr>
+<tr><td>裁剪</td>
+  <td>对称 $[1-\varepsilon,1+\varepsilon]$</td>
+  <td>无</td>
+  <td>同 PPO</td>
+  <td><strong>非对称</strong><br>$[1-0.2,1+0.28]$</td></tr>
+<tr><td>KL 约束</td>
+  <td>加到 reward 里</td>
+  <td>解析包含在 loss</td>
+  <td>加到 loss 里</td>
+  <td><strong>去掉</strong></td></tr>
+<tr><td>损失粒度</td>
+  <td>token 平均</td>
+  <td>整段</td>
+  <td>句内平均、句间平均</td>
+  <td><strong>所有 token 等权</strong></td></tr>
+<tr><td>核心招数</td>
+  <td>actor-critic + clip</td>
+  <td>BT 模型 + 重参数化</td>
+  <td>用同 prompt 一组 rollout 互为 baseline</td>
+  <td>稳定 GRPO 的 4 件套</td></tr>
+<tr><td>关键数字</td>
+  <td>RLHF 默认</td>
+  <td>媲美 RLHF</td>
+  <td>GSM8k 88.2% (7B)</td>
+  <td>AIME24 = 50<br>(DeepSeek-R1-Zero 47)</td></tr>
+</tbody>
+</table>
+
+<table class="cmp">
+<thead>
+<tr>
+  <th>维度</th>
+  <th><span class="pill vapo">VAPO</span></th>
+  <th><span class="pill gspo">GSPO</span></th>
+  <th><span class="pill sapo">SAPO</span></th>
+  <th><span class="pill gdpo">GDPO</span></th>
+</tr>
+</thead>
+<tbody>
+<tr><td>发布</td>
+  <td>2025.04 / ByteDance Seed</td>
+  <td>2025.07 / Qwen</td>
+  <td>2025.12 / Qwen</td>
+  <td>2026.01 / NVIDIA</td></tr>
+<tr><td>训练组件</td>
+  <td><strong>Actor+Critic+RM+Ref</strong><br>（把 critic 又捡回来）</td>
+  <td>沿用 GRPO</td>
+  <td>沿用 GRPO</td>
+  <td>沿用 GRPO</td></tr>
+<tr><td>优势估计</td>
+  <td>GAE + 长度自适应 $\lambda$</td>
+  <td>组归一<br>（同 GRPO）</td>
+  <td>组归一<br>（同 GRPO）</td>
+  <td><strong>每奖励独立归一</strong><br>再 batch 归一</td></tr>
+<tr><td>重要性比</td>
+  <td>token 级</td>
+  <td><strong>序列级</strong><br>$s_i=(\pi_\theta/\pi_{old})^{1/|y|}$</td>
+  <td>token 级</td>
+  <td>token 级</td></tr>
+<tr><td>裁剪</td>
+  <td>Clip-Higher（继承 DAPO）</td>
+  <td>序列级 clip<br>区间小 1-2 数量级</td>
+  <td><strong>Soft gate</strong><br>sech² 平滑</td>
+  <td>沿用 DAPO 区间</td></tr>
+<tr><td>KL 约束</td>
+  <td>去掉（继承 DAPO）</td>
+  <td>未强调</td>
+  <td>未强调</td>
+  <td>放 loss 里（小系数 1e-3）</td></tr>
+<tr><td>损失粒度</td>
+  <td>token 级（继承 DAPO）</td>
+  <td>整序列</td>
+  <td>token，但软门控</td>
+  <td>token 级（继承 DAPO）</td></tr>
+<tr><td>核心招数</td>
+  <td>价值预训 + 长度自适应 GAE + 正例 NLL 等 7 trick</td>
+  <td>把 importance ratio 单位从 token 提到 sequence，对齐奖励单位</td>
+  <td>用 sigmoid 替代 hard clip，正负 token 用不同温度</td>
+  <td>把多个 reward 各自归一再相加，避免奖励组合塌缩</td></tr>
+<tr><td>关键数字</td>
+  <td>AIME24=60.4<br>(5000 步) ↑10 vs DAPO</td>
+  <td>MoE 不需 Routing Replay；裁掉 0.15 比 GRPO 0.0013 还更快</td>
+  <td>训练不崩；Qwen3-VL 全任务正收益</td>
+  <td>多奖励组合从 2 种→3+ 种 distinct advantage</td></tr>
+</tbody>
+</table>
+</section>
+
+<!-- ========== 3. 共享核心 ========== -->
+<section id="core">
+<h2>共享核心：策略梯度</h2>
+
+<p>除了 DPO 之外，其他 7 个方法都是<strong>策略梯度（Policy Gradient）的不同变体</strong>，
+全都长成下面这个统一形式：</p>
+
+<p>$$\mathcal{J}(\theta)=\mathbb{E}_{x\sim\mathcal{D},\, y\sim\pi_{\text{old}}(\cdot|x)}\Big[\,\sum_{t=1}^{|y|}
+f_{i,t}\big(r_{i,t}(\theta)\big)\cdot \hat A_{i,t}\,\Big]$$</p>
+
+<p class="note"><strong>白话翻译</strong>：用旧策略 $\pi_{\text{old}}$ 采样响应 $y$，对每个 token 算一个"权重函数 $f$"乘以"优势 $\hat A$"作为它的得分，
+最后把所有 token 的得分加起来反向传播——优势大就推高这个 token 的概率，优势负就压低。
+不同算法只在两个地方有差别：</p>
+
+<ul>
+<li><strong>$f(\cdot)$ 怎么选</strong> —— PPO/GRPO/DAPO 用 hard clip（$\min$ + clip），GSPO 把 $r_{i,t}$ 换成 sequence-level $s_i$，SAPO 用 sigmoid 平滑门控；</li>
+<li><strong>$\hat A$ 怎么算</strong> —— PPO/VAPO 走 GAE+critic，GRPO/DAPO/GSPO/SAPO 走组内归一化，GDPO 进一步把多奖励拆开归一。</li>
+</ul>
+
+<p>DPO 是唯一脱离这个框架的：它把 RLHF 的目标函数<em>解析地化简</em>掉，直接得到一个可监督学习的偏好损失，不需要采样、不需要 reward model。
+后面会专门讲它。</p>
+
+<p>读这条线时记住两个尺度问题：</p>
+<ol>
+<li><strong>长序列让 token 级 importance ratio 失效</strong>（GSPO 的核心 motivation）；</li>
+<li><strong>稀疏 0/1 奖励让组内归一化容易塌缩</strong>（DAPO 的 dynamic sampling、GDPO 的 decoupled normalization 都在解决这个）。</li>
+</ol>
+</section>
+
+<!-- ========== 4. 各篇彩色章节卡片 ========== -->
+
+<!-- ============= PPO ============= -->
+<div class="chapter ppo" id="ppo">
+<h3>① PPO — Proximal Policy Optimization</h3>
+<div class="tagline">2017 年的"祖师爷"。OpenAI 用它做 RLHF 的默认底盘，后续所有方法都是在跟它做减法或改它的某一环。</div>
+
+<section id="ppo-mot">
+<h4>出发点</h4>
+
+<p>2017 年时强化学习的痛点是：vanilla policy gradient（PG）每步更新都可能<em>过大</em>，模型一旦走出"信任域"
+就再也回不来；TRPO 用二阶约束（KL 散度）解决了这个问题但实现复杂，并行训练困难。</p>
+
+<p>PPO 的目标是：用一个<strong>一阶可优化的代理损失</strong>，达到 TRPO 那样的稳定性。
+办法就是大名鼎鼎的 <strong>clipped surrogate objective</strong>——
+你想朝奖励高的方向走，但每步只能走 $\pm \varepsilon$ 这么远。</p>
+</section>
+
+<section id="ppo-met">
+<h4>方法详解</h4>
+
+<p>PPO 的精彩在于它把<em>策略梯度</em>这条主线，一步一步通过 7 次推导改造成"可大规模、可稳定训练"的实用算法。
+这一节我们顺着这条推导往下走——每一步都源于上一步暴露出的一个具体问题。</p>
+
+<h4>(0) 起点：要最大化什么？</h4>
+
+<p>强化学习的根本目标只有一句话：<strong>最大化策略产生轨迹的期望回报</strong>。</p>
+
+<p>$$J(\theta)=\mathbb{E}_{\tau\sim\pi_\theta}\big[R(\tau)\big]=\sum_{\tau}\pi_\theta(\tau)\,R(\tau)$$</p>
+
+<p class="note"><strong>白话翻译</strong>：$\tau=(s_0,a_0,r_0,s_1,a_1,r_1,\ldots)$ 是一条完整轨迹（episode / rollout），
+$R(\tau)=\sum_t r_t$ 是这条轨迹的总回报（累积奖励）。$J(\theta)$ 是<em>在当前策略 $\pi_\theta$ 下采样无数条轨迹得到的平均回报</em>。
+统计学里期望就是"所有可能结果按概率加权求和"。我们要做的就是<em>对 $\theta$ 求梯度并上升</em>。</p>
+
+<h4>(1) Log-derivative trick：把"对期望求梯度"变成"对 log-prob 求梯度"</h4>
+
+<p>难点是：$\pi_\theta(\tau)$ 同时出现在<em>采样分布</em>和<em>被求和项</em>里，不能直接换序求导。
+关键的数学技巧是 <strong>log-derivative trick</strong>：</p>
+
+<p>$$\nabla_\theta \pi_\theta(\tau)=\pi_\theta(\tau)\cdot\nabla_\theta\log\pi_\theta(\tau)$$</p>
+
+<p>把它代回 $\nabla J$：</p>
+
+<p>$$\nabla_\theta J(\theta)=\sum_\tau \nabla_\theta\pi_\theta(\tau)\,R(\tau)=\sum_\tau\pi_\theta(\tau)\,\nabla_\theta\log\pi_\theta(\tau)\,R(\tau)=\mathbb{E}_{\tau\sim\pi_\theta}\big[R(\tau)\,\nabla_\theta\log\pi_\theta(\tau)\big]$$</p>
+
+<p class="note"><strong>白话翻译</strong>：原来要对"采样这一步"求导，没法做；现在把它<em>转换成一个期望</em>——
+"用现在的策略多采样几条轨迹，每条算 $R(\tau)\cdot\nabla\log\pi_\theta(\tau)$，再做平均"，就是梯度的无偏估计。
+这是策略梯度方法（REINFORCE）的根基。</p>
+
+<h4>(2) 展开 $\log\pi_\theta(\tau)$：环境无关项被消掉</h4>
+
+<p>一条轨迹的联合概率：$\pi_\theta(\tau)=p(s_0)\prod_{t=0}^{T-1}\pi_\theta(a_t|s_t)\,p(s_{t+1}|s_t,a_t)$。
+两边取 log 再对 $\theta$ 求导，<em>初始分布 $p(s_0)$ 和环境转移 $p(s_{t+1}|s_t,a_t)$ 都不含 $\theta$</em>，导数为 0，只剩：</p>
+
+<p>$$\nabla_\theta\log\pi_\theta(\tau)=\sum_{t=0}^{T-1}\nabla_\theta\log\pi_\theta(a_t|s_t)$$</p>
+
+<p>所以策略梯度变成：</p>
+
+<p>$$\nabla_\theta J(\theta)=\mathbb{E}_{\tau\sim\pi_\theta}\Big[R(\tau)\sum_{t=0}^{T-1}\nabla_\theta\log\pi_\theta(a_t|s_t)\Big]$$</p>
+
+<p class="note"><strong>白话翻译</strong>：每一步动作的 log-prob 梯度，被整条轨迹的总回报 $R(\tau)$ 加权。
+回报高 → 把这条轨迹上每个动作的概率都推高；回报低 → 都压低。
+但有个问题：<em>$t$ 时刻之前的奖励 $r_0,\ldots,r_{t-1}$ 早已发生，跟 $a_t$ 的好坏毫无因果关系</em>，
+把它们也算进 $a_t$ 的"功劳"里只会增加方差。</p>
+
+<h4>(3) Reward-to-go：因果性约束</h4>
+
+<p>把"过去的奖励"从 $a_t$ 的权重里剔除，只保留<em>$t$ 时刻及以后</em>的奖励——这叫 <strong>reward-to-go</strong>：</p>
+
+<p>$$G_t=\sum_{t'=t}^{T-1}\gamma^{t'-t}\,r_{t'}\quad\Rightarrow\quad
+\nabla_\theta J=\mathbb{E}\Big[\sum_{t=0}^{T-1}G_t\,\nabla_\theta\log\pi_\theta(a_t|s_t)\Big]$$</p>
+
+<p class="note"><strong>白话翻译</strong>：$G_t$ 是"从 $t$ 步开始到结束的折扣累积奖励"。
+$\gamma\in[0,1)$ 是折扣因子：离 $t$ 越远的奖励权重越小，符合"长远预期但不能无限远看"的直觉。
+这一步把"无关项"剔除，<em>没有引入偏差但方差减小</em>，是策略梯度第一次降方差。</p>
+
+<h4>(4) Baseline：再降一次方差</h4>
+
+<p>$G_t$ 的方差仍然很大（一条轨迹偶然撞上大奖励就会让所有 $t$ 的梯度同时被放大）。
+神奇之处在于：减去一个<em>只跟状态有关</em>的"基准" $b(s_t)$，不改变梯度期望（无偏），却能进一步降方差：</p>
+
+<p>$$\nabla_\theta J=\mathbb{E}\Big[\sum_t \big(G_t-b(s_t)\big)\,\nabla_\theta\log\pi_\theta(a_t|s_t)\Big]$$</p>
+
+<p>为什么减它无害？因为 $\mathbb{E}_{a_t\sim\pi}[b(s_t)\nabla\log\pi_\theta(a_t|s_t)]=b(s_t)\cdot\nabla\sum_{a_t}\pi_\theta(a_t|s_t)=b(s_t)\cdot\nabla 1=0$。
+最优的 $b(s_t)$ 恰好就是<strong>状态价值函数</strong> $V^\pi(s_t)=\mathbb{E}[G_t\,|\,s_t]$，于是定义：</p>
+
+<p>$$\hat A_t=G_t-V^\pi(s_t)$$</p>
+
+<p class="note"><strong>白话翻译</strong>：$\hat A_t$ 是<em>优势函数</em>（Advantage）——"在状态 $s_t$ 下，做出动作 $a_t$ 相较于平均水平好多少"。
+为正就推高 $a_t$ 的概率、为负就压低。<strong>这就是 actor-critic 架构的雏形</strong>：
+actor（$\pi_\theta$）负责选动作，critic（$V^\pi$）负责估"在这个状态下平均能拿多少分"做基线。
+PPO 4 模型中的 Critic Model 就在这里出场。</p>
+
+<h4>(5) 优势怎么算？MC vs TD vs GAE</h4>
+
+<p>$\hat A_t$ 至少有 3 种估计方式，本质都在权衡<em>偏差 (bias)</em> 和<em>方差 (variance)</em>：</p>
+
+<p>① <strong>蒙特卡洛（MC）</strong>——把整段轨迹的真实奖励都用上：</p>
+<p>$$\hat A_t^{\text{MC}}=G_t-V(s_t)=\sum_{l=0}^{T-t-1}\gamma^l r_{t+l}-V(s_t)$$</p>
+<p>无偏，但每条轨迹都包含 $T-t$ 步的随机性叠加 → <em>方差大</em>。长序列下尤其严重。</p>
+
+<p>② <strong>时序差分（TD-1）</strong>——只往后看一步：</p>
+<p>$$\delta_t=r_t+\gamma V(s_{t+1})-V(s_t),\qquad \hat A_t^{\text{TD}}=\delta_t$$</p>
+<p class="note"><strong>白话翻译</strong>：$\delta_t$ 叫 <em>TD 误差</em>——"从当前 $s_t$ 走一步实际拿到的 $r_t$ + 到达下一状态时 critic 的估值，
+减去当前状态原本估的值"，也就是 critic 这一步"猜偏了多少"。
+方差小（只有一步随机性），但<em>有偏</em>（依赖 $V$ 估得准不准；critic 不准就会被它带歪）。</p>
+
+<p>③ <strong>n-step</strong> 和 <strong>GAE</strong>——在两个极端之间插值：</p>
+<p>$$\hat A_t^{(n)}=\sum_{l=0}^{n-1}\gamma^l r_{t+l}+\gamma^n V(s_{t+n})-V(s_t)=\sum_{l=0}^{n-1}\gamma^l\delta_{t+l}$$</p>
+<p>n 越大越像 MC（无偏但方差大），n 越小越像 TD（低方差但有偏）。
+GAE（Generalized Advantage Estimation）给所有 n-step 估计做<em>指数加权平均</em>，由超参 $\lambda\in[0,1]$ 控制权重：</p>
+
+<p>$$\hat A_t^{\text{GAE}(\gamma,\lambda)}=\sum_{l=0}^{\infty}(\gamma\lambda)^l\,\delta_{t+l}$$</p>
+
+<p class="note"><strong>白话翻译</strong>：GAE 用一个总和为 1 的权重序列把所有 n-step 估计加起来，
+<em>"面多了加水、水多了加面"</em>地融合 TD 的低方差和 MC 的低偏差。
+$\lambda=0$ 退化成 TD（最稳但最偏）；$\lambda=1$ 退化成 MC（无偏但最抖）；典型取 $\lambda=0.95$。
+$\gamma$ 控制"对未来收益的折扣强度"，$\lambda$ 控制"对 critic 的信任程度"——两件事被解耦。</p>
+
+<h4>(6) 重要性采样：从 on-policy 走向 off-policy</h4>
+
+<p>策略梯度 $\nabla J=\mathbb{E}_{\tau\sim\pi_\theta}[\ldots]$ 要求<em>每次更新都用当前 $\pi_\theta$ 现采的数据</em>——
+更新一次就要丢掉、重新采一批，<strong>样本利用率极低</strong>。
+解决办法是 <strong>重要性采样（Importance Sampling）</strong>：</p>
+
+<p>$$\mathbb{E}_{x\sim p}[f(x)]=\sum_x p(x)f(x)=\sum_x q(x)\cdot\frac{p(x)}{q(x)}\cdot f(x)=\mathbb{E}_{x\sim q}\Big[\frac{p(x)}{q(x)}f(x)\Big]$$</p>
+
+<p class="note"><strong>白话翻译</strong>：本来要在新分布 $p=\pi_\theta$ 下求期望，没数据；
+那就用旧分布 $q=\pi_{\theta_{\text{old}}}$ 的<em>同一批样本</em>，每个样本加权 $p/q$ 修正——
+权重大的样本"代表"更多新分布的概率质量，权重小的就"代表"更少。
+代价是 $p$ 和 $q$ 不能差太远，否则 $p/q$ 会出现极大值（方差爆炸）。</p>
+
+<p>应用到策略梯度上，<em>从 $\pi_{\theta_{\text{old}}}$ 采样一次，反复更新 $\pi_\theta$ 几个 epoch</em>，目标函数变成：</p>
+
+<p>$$\mathcal{J}^{\text{IS}}(\theta)=\mathbb{E}_{(s_t,a_t)\sim\pi_{\theta_{\text{old}}}}\Big[\frac{\pi_\theta(a_t|s_t)}{\pi_{\theta_{\text{old}}}(a_t|s_t)}\,\hat A_t\Big]$$</p>
+
+<p class="note"><strong>白话翻译</strong>：把"在新策略下采样"换成"在旧策略下采样 + 加权"，
+样本利用率从"用一次就丢"提升到"一批数据训 K 个 epoch"。这就是 PPO/GRPO/DAPO/GSPO/SAPO 全家
+<em>能高效复用 rollout</em> 的根基。</p>
+
+<h4>(7) Clipped Surrogate：PPO 的临门一脚</h4>
+
+<p>重要性比 $w_t=\pi_\theta/\pi_{\text{old}}$ 万一爆炸怎么办？TRPO 用二阶 KL 约束（实现复杂），
+PPO 用一阶<strong>硬性裁剪</strong>把它锁在 $[1-\varepsilon,1+\varepsilon]$ 区间内：</p>
+
+<p>$$\mathcal{J}_{\text{PPO}}(\theta)=\mathbb{E}_{t}\Big[\min\big(w_t\,\hat A_t,\;\text{clip}(w_t,1-\varepsilon,1+\varepsilon)\,\hat A_t\big)\Big],\quad w_t=\frac{\pi_\theta(a_t|s_t)}{\pi_{\theta_{\text{old}}}(a_t|s_t)}$$</p>
+
+<p class="note"><strong>白话翻译</strong>：分两种情况看 $\min$ 的作用——
+<br><strong>① $\hat A_t>0$（这个动作好，要推高它的概率）</strong>：
+$w_t\hat A_t$ 是希望往上走的目标；如果 $w_t>1+\varepsilon$（新策略概率涨太多了），$\text{clip}$ 把它锁在 $1+\varepsilon$，
+$\min$ 取较小的——梯度被截断，<em>不再继续推高，防止过冲</em>。
+<br><strong>② $\hat A_t<0$（这个动作坏，要压低它）</strong>：
+情况对称，如果 $w_t<1-\varepsilon$（新策略概率跌太多了），$\min$ 取裁后那项——<em>不再继续压低</em>。
+<br>结果：<em>每步更新都被锁在信任域里</em>，无需 TRPO 的二阶优化，一阶 SGD 就能稳。
+$\varepsilon$ 通常取 0.1～0.2。</p>
+
+<h4>(8) RLHF-PPO 的 4 模型架构</h4>
+
+<p>把上述推导落地到 LLM RLHF，PPO 训练循环需要同时驻留 <strong>4 个模型</strong>：</p>
+
+<ul>
+<li><strong>Actor Model</strong>：要训练的语言模型本体，输出动作分布 $\pi_\theta(a_t|s_t)$；</li>
+<li><strong>Critic Model</strong>：状态价值函数 $V^\pi(s_t)$，预测"从当前 token 起到回答结束的期望累积收益"，
+为 GAE 提供基线；</li>
+<li><strong>Reward Model</strong>：从人类偏好数据训出的打分器，给出整段回答的标量 reward；</li>
+<li><strong>Reference Model</strong>：SFT 阶段的初始模型 $\pi_{\text{ref}}$，提供 KL 锚点防止 actor 漂太远。</li>
+</ul>
+
+<p>每个 token 拿到的"实际奖励"还要扣一份 KL 惩罚，防止 reward hacking：</p>
+
+<p>$$r_t^{\text{total}}=r_t^{\text{RM}}-\beta\,\text{KL}\big(\pi_\theta(\cdot|s_t)\,\|\,\pi_{\text{ref}}(\cdot|s_t)\big)$$</p>
+
+<p class="note"><strong>白话翻译</strong>：每一步给 actor 的奖励不是只看 RM 打分，还要扣一份"你比初始 SFT 模型偏离了多少"的惩罚。
+这样模型不会为了 hack RM 高分就乱说话。$\beta$ 是惩罚系数。
+注意 KL 是<em>按 token 加进 reward</em> 的，所以"哪个 token 偏得多就在哪个 token 处被罚"——
+这一点后面 GRPO 把 KL 放进 loss，DAPO 干脆把 KL 删掉，是有意识地在质疑这条做法。</p>
+
+<h4>(9) 完整 PPO 训练循环</h4>
+
+<div class="code-block"><span class="cmt"># 一轮 PPO 训练（外层重复 N 次）</span>
+<span class="cmt"># Stage 1: rollout（用旧策略采一批数据）</span>
+{(q, o, r_RM)} = []
+<span class="kw">for</span> q <span class="kw">in</span> batch_queries:
+    o = policy_old.<span class="fn">generate</span>(q)              <span class="cmt"># 1. actor 生成回答</span>
+    r_RM = reward_model.<span class="fn">score</span>(q, o)         <span class="cmt"># 2. RM 整段打分</span>
+    kl = <span class="fn">per_token_kl</span>(policy_old, ref, o)  <span class="cmt"># 3. 算每 token KL</span>
+    r_t = r_RM_at_last_token - β * kl       <span class="cmt"># 4. 拼成 token 级 reward</span>
+    V_t = critic.<span class="fn">value</span>(q, o)               <span class="cmt"># 5. critic 估每 token 价值</span>
+    A_t = <span class="fn">gae</span>(r_t, V_t, γ=0.99, λ=0.95)    <span class="cmt"># 6. GAE 算优势</span>
+    {(q, o, r_RM)}.<span class="fn">append</span>((q, o, A_t, V_t))
+
+<span class="cmt"># Stage 2: 多 epoch 更新（重要性采样允许复用）</span>
+<span class="kw">for</span> epoch <span class="kw">in</span> range(K):
+    <span class="kw">for</span> (q, o, A_t, V_t) <span class="kw">in</span> minibatches:
+        w_t = π_θ(o|q) / π_old(o|q)
+        <span class="cmt"># actor: clipped surrogate</span>
+        L_actor = -mean(<span class="fn">min</span>(w_t * A_t,
+                            <span class="fn">clip</span>(w_t, 1-ε, 1+ε) * A_t))
+        <span class="cmt"># critic: MSE 拟合回报</span>
+        L_critic = mean((critic(q, o) - (A_t + V_t)) ** 2)
+        loss = L_actor + c_v * L_critic - c_h * entropy
+        loss.<span class="fn">backward</span>()</div>
+
+<p class="note"><strong>读完这一节，你应该能回答</strong>：
+(1) 策略梯度怎么从一个"无法直接求导"的目标变成可优化形式（log-trick + 因果 reward-to-go + baseline）；
+(2) GAE 的两个超参 $\gamma,\lambda$ 各管什么（折扣 vs critic 信任度）；
+(3) clip 为什么能稳住 importance sampling（防止比值爆炸 + min 单边截断）；
+(4) PPO 4 模型每个的具体职责，以及哪些环节是"后续算法可以动手"的地方——
+critic、reward 里的 KL、token 级 clip 这三处恰好是 GRPO/DAPO/GSPO 接下来要逐个改的。</p>
+</section>
+
+<section id="ppo-exp">
+<h4>关键发现</h4>
+
+<p>PPO 没有特别 fancy 的实验数字，它的贡献是<em>定义了 RLHF 的标准范式</em>：
+4 模型架构 + clipped objective + GAE + KL 锚点。
+这套范式从 InstructGPT、ChatGPT 一路用到 GPT-4，后面所有方法都在它身上做手术。</p>
+
+<p class="note"><strong>它的两个"原罪"</strong>（决定了后续演进方向）：
+(1) <em>4 模型同时驻留显存</em>，显存成本和训练成本是 SFT 的 4 倍以上；
+(2) <em>Critic 在长序列上很难学准</em>，奖励是给整段的、value 却要给每个 token 一个估计——目标错位。
+后续 7 个方法基本都是冲着这两条原罪去的。</p>
+</section>
+</div>
+
+<!-- ============= DPO ============= -->
+<div class="chapter dpo" id="dpo">
+<h3>② DPO — Direct Preference Optimization</h3>
+<div class="tagline">"为什么非要训 reward model 再做 RL？我能直接推导出 RLHF 最优解的形式，然后把它变成一个普通的偏好交叉熵 loss。" — 一记降维打击。</div>
+
+<section id="dpo-mot">
+<h4>出发点</h4>
+
+<p>RLHF-PPO 流程长这样：<em>SFT → 训 RM → PPO 训 actor</em>。问题：</p>
+<ol>
+<li>训 RM 需要 preference 数据，PPO 又要再用一次 preference 数据采样 + 在线训练；</li>
+<li>PPO 实现复杂（4 模型、KL、clip、GAE、超参敏感），稳定性差；</li>
+<li>训出来的 RM 容易被 actor "hack"（reward hacking）。</li>
+</ol>
+
+<p>DPO 问的问题是：<strong>有没有可能跳过 RM、跳过 RL，直接从偏好数据上做 SFT-style 的训练？</strong>
+答案是肯定的——只要你愿意做点数学。</p>
+</section>
+
+<section id="dpo-met">
+<h4>方法详解</h4>
+
+<h4>(1) RLHF 的最优解长什么样</h4>
+
+<p>RLHF 目标是<strong>带 KL 约束的奖励最大化</strong>：</p>
+
+<p>$$\max_\pi \mathbb{E}_{x\sim D,\,y\sim\pi(\cdot|x)}\big[r(x,y)\big]-\beta \,\text{KL}\big(\pi(\cdot|x)\,\|\,\pi_{\text{ref}}(\cdot|x)\big)$$</p>
+
+<p>这是一个有<em>解析最优解</em>的优化问题（标准的"KL 约束 + 线性目标"，解形如 softmax）：</p>
+
+<p>$$\pi^*(y|x)=\frac{1}{Z(x)}\pi_{\text{ref}}(y|x)\exp\!\Big(\frac{1}{\beta}r(x,y)\Big)$$</p>
+
+<p class="note"><strong>白话翻译</strong>：RLHF 训出来的最优 actor，相当于在 $\pi_{\text{ref}}$ 上做一次"按奖励指数加权"的重塑——
+奖励高的 $y$ 概率被放大、奖励低的被压缩，强度由 $\beta$ 控制，$Z(x)=\sum_y\pi_{\text{ref}}(y|x)\exp(r/\beta)$ 是归一化常数。
+关键观察：<em>知道 $\pi^*$ 和 $\pi_{\text{ref}}$，就能反解出 $r$</em>。</p>
+
+<h4>(2) 反解：用策略表达 reward</h4>
+
+<p>$$r(x,y)=\beta\log\frac{\pi^*(y|x)}{\pi_{\text{ref}}(y|x)}+\beta\log Z(x)$$</p>
+
+<p class="note"><strong>白话翻译</strong>：奖励等于"新策略对参考策略的对数比"（乘以 $\beta$）再加一个只跟 $x$ 有关的常数。
+这个等式的意义在于：<em>奖励不再需要一个单独的 RM 网络来表示</em>——它就是策略本身的隐式输出。</p>
+
+<h4>(3) 代入 Bradley-Terry，常数项被消掉</h4>
+
+<p>BT 模型说"偏好概率"长这样：$P(y_w\succ y_l|x)=\sigma(r(x,y_w)-r(x,y_l))$。
+把上面的 $r$ 代进去，$\log Z(x)$ 在两个 $y$ 之间被抵消！剩下的就是 DPO loss：</p>
+
+<p>$$\mathcal{L}_{\text{DPO}}=-\mathbb{E}_{(x,y_w,y_l)\sim D}\Big[\log\sigma\Big(\beta\log\frac{\pi_\theta(y_w|x)}{\pi_{\text{ref}}(y_w|x)}-\beta\log\frac{\pi_\theta(y_l|x)}{\pi_{\text{ref}}(y_l|x)}\Big)\Big]$$</p>
+
+<p class="note"><strong>白话翻译</strong>：对每对 $(y_w, y_l)$（$y_w$ 是"赢的回答"、$y_l$ 是"输的回答"），让 $\pi_\theta$ <em>相对于 $\pi_{\text{ref}}$</em> 在 $y_w$ 上的提升幅度，
+比在 $y_l$ 上的提升幅度更大——这个差值经过 sigmoid 后做二分类。
+这就是<strong>一个普通的监督学习交叉熵</strong>，没有采样、没有 RM、没有 critic，
+只需要 $\pi_\theta$ 和 $\pi_{\text{ref}}$ 两个模型。
+如果你去掉它推导上的所有花哨，其实就是在做"对比学习"——
+推高 chosen 的概率、压低 rejected 的概率，同时用 ref 当 anchor 防漂。</p>
+
+<h4>(4) 梯度的物理意义</h4>
+
+<p>$$\nabla\mathcal{L}_{\text{DPO}}\propto \sigma(\hat r_l-\hat r_w)\cdot\big[\nabla\log\pi_\theta(y_w)-\nabla\log\pi_\theta(y_l)\big]$$</p>
+
+<p class="note"><strong>白话翻译</strong>：当当前模型把 $y_l$ 看得比 $y_w$ 还好（$\hat r_l > \hat r_w$）时，sigmoid 项接近 1——梯度最大，
+模型被狠狠拉去推高 $y_w$、压低 $y_l$；当模型已经把 $y_w$ 看得很高时，sigmoid 接近 0——梯度小，<em>已经学会的样本不会被反复折腾</em>。
+这是 DPO 的"自动难度调节"机制。</p>
+</section>
+
+<section id="dpo-exp">
+<h4>关键发现</h4>
+
+<ul>
+<li><strong>DPO ≈ RLHF</strong>：在 IMDb 情感控制、Anthropic HH 对话、TL;DR 摘要三个任务上，DPO 都<em>追平或略优于</em>有 RM 的 PPO，且<strong>对超参更鲁棒</strong>。</li>
+<li><strong>训练成本降低</strong>：4 个模型变 2 个，不需要在线采样，可以用任何监督学习框架训。</li>
+<li><strong>开启了一个流派</strong>：后续 IPO、KTO、SimPO、ORPO、SLiC-HF 全是 DPO 衍生物。</li>
+</ul>
+
+<p class="note"><strong>但</strong>：DPO 是<em>纯离线</em>方法——只能学到偏好数据里已经见过的对比，不能像 PPO 那样"自己采样、自己进步"。
+这正是它在长链推理（math/code）任务上后来被 GRPO/DAPO 反超的原因——<em>推理任务需要在线 rollout 来探索新解法</em>，
+而 DPO 没法做到这一点。所以 2024 之后"R1-style"的推理训练几乎全部回归到了在线 RL（GRPO 家族）。</p>
+</section>
+</div>
+
+<!-- ============= GRPO ============= -->
+<div class="chapter grpo" id="grpo">
+<h3>③ GRPO — Group Relative Policy Optimization</h3>
+<div class="tagline">DeepSeekMath 提出。"我能不能只留 actor 和 reward model，把那个又贵又训不准的 critic 扔掉？" 答案：用同一个 prompt 采 G 个回答，互为基线。</div>
+
+<section id="grpo-mot">
+<h4>出发点</h4>
+
+<p>PPO 在 LLM 上有两个具体的痛：</p>
+<ol>
+<li><strong>Critic 网络很贵</strong>：参数量跟 actor 同级，显存翻倍；</li>
+<li><strong>Critic 在 LLM 里很难训准</strong>：reward 是给整段的、value 要给每个 token 估期望收益——
+RM 设计上就只对完整答案打分，用它去监督 critic 学习 partial 输入的价值，目标错位。</li>
+</ol>
+
+<p>GRPO 的思路朴素得令人会心一笑：<strong>我对同一个 prompt 采 $G$ 个回答，那这 $G$ 个回答的 reward 互相一比，
+不就天然形成了一个 baseline 吗？</strong>不需要 critic 来估这个 baseline 了。</p>
+</section>
+
+<section id="grpo-met">
+<h4>方法详解</h4>
+
+<h4>(1) 组内归一化优势</h4>
+
+<p>对同一 prompt $q$ 采 $G$ 个回答 $\{o_1,\ldots,o_G\}$，得到一组 reward $\{r_1,\ldots,r_G\}$，那么第 $i$ 个回答的优势就是：</p>
+
+<p>$$\hat A_{i,t}=\frac{r_i-\text{mean}(\{r_1,\ldots,r_G\})}{\text{std}(\{r_1,\ldots,r_G\})}$$</p>
+
+<p class="note"><strong>白话翻译</strong>：把这一组 reward 做 z-score 归一化，结果就是每个回答的"相对优势"。
+回答 $i$ 里<em>所有 token 共享同一个 advantage</em>（因为奖励是给整段的，没有 token-level 的细化信号）。
+这相当于把 critic 那个"估期望收益"的活儿，<strong>外包给了 G 个 rollouts 自己的平均</strong>——
+便宜、无偏、不需要再训一个网络。</p>
+
+<h4>(2) GRPO 目标函数</h4>
+
+<p>$$\mathcal{J}_{\text{GRPO}}(\theta)=\mathbb{E}_{q,\{o_i\}}\Bigg[\frac{1}{G}\sum_{i=1}^G\frac{1}{|o_i|}\sum_{t=1}^{|o_i|}\min\!\big(w_{i,t}\hat A_{i,t},\;\text{clip}(w_{i,t},1-\varepsilon,1+\varepsilon)\hat A_{i,t}\big)-\beta\,\text{KL}\big(\pi_\theta\,\|\,\pi_{\text{ref}}\big)\Bigg]$$</p>
+
+<p class="note"><strong>白话翻译</strong>：跟 PPO 的差别有三处。
+(1) 外层多了"对 G 个回答求平均"——这是 group relative 的 G；
+(2) 内层依然是 token 级的 min+clip，<em>但 advantage 是这个回答的整体 advantage</em>；
+(3) <strong>KL 散度从 reward 里拿出来，作为单独一项放进 loss</strong>。
+为什么？因为没有 critic 了，KL 加在 reward 里再去算 GAE 没有意义，不如直接放 loss 里和策略目标一起优化。</p>
+
+<h4>(3) 长序列 GAE 的问题（GRPO 的副产品 motivation）</h4>
+
+<p>用户笔记里准确地指出了 PPO/GRPO 在<em>长文本</em>上的核心痛点：奖励通过 critic 和 GAE 一层层"折现"分配到 token 上，
+但 $\gamma=0.99$ 时 $0.99^{1000}\approx 0.04\%$——长序列里前面的 token 几乎拿不到后面的奖励信号。
+GRPO 直接放弃这个折现链，<strong>奖励就是整段的奖励，组内归一化得到的 advantage 就是整段的 advantage</strong>，
+组内每个 token 共享这一个值。粒度变粗了但偏差也变小了。</p>
+
+<h4>(4) 训练流程</h4>
+
+<div class="code-block"><span class="cmt"># GRPO 训练循环（极简版）</span>
+<span class="kw">for</span> step <span class="kw">in</span> range(num_steps):
+    q = sample_query()
+    <span class="cmt"># 同一个 query 采 G 个回答</span>
+    {o_i} = [policy_old.<span class="fn">generate</span>(q) <span class="kw">for</span> _ <span class="kw">in</span> range(G)]
+    {r_i} = [reward_model.<span class="fn">score</span>(q, o_i) <span class="kw">for</span> o_i <span class="kw">in</span> {o_i}]
+    <span class="cmt"># 组内 z-score</span>
+    {A_i} = [(r_i - mean({r})) / std({r}) <span class="kw">for</span> r_i <span class="kw">in</span> {r}]
+    <span class="cmt"># 多 epoch 复用这批数据</span>
+    <span class="kw">for</span> epoch <span class="kw">in</span> range(ppo_epochs):
+        <span class="fn">update_policy</span>(loss=<span class="fn">GRPO_objective</span>({o_i}, {A_i}))</div>
+</section>
+
+<section id="grpo-exp">
+<h4>关键发现</h4>
+
+<ul>
+<li><strong>DeepSeekMath-7B 用 GRPO 训练后 GSM8k 达到 88.2%、MATH 51.7%</strong>，超过同期所有 7-70B 开源模型；</li>
+<li>训练成本相比 PPO 大幅下降——critic 模型完全不需要；</li>
+<li>这一手法的<em>真正爆发是 2025 年的 DeepSeek-R1</em>，把 GRPO + rule-based reward 玩成了"reasoning RL"的标准答案。</li>
+</ul>
+
+<p class="note"><strong>GRPO 留下的"伏笔"</strong>：
+(1) 组内全对或全错时 advantage 全 0，学不到东西（DAPO 修）；
+(2) token 级 importance ratio 在长序列+MoE 下方差爆炸（GSPO 修）；
+(3) 多奖励直接相加再归一会塌缩成只有 2 种 advantage 值（GDPO 修）。
+后面三代基本就是在补这三个洞。</p>
+</section>
+</div>
+
+<!-- ============= DAPO ============= -->
+<div class="chapter dapo" id="dapo">
+<h3>④ DAPO — Decoupled Clip + Dynamic Sampling Policy Optimization</h3>
+<div class="tagline">字节跳动 Seed。"我们想用 Qwen2.5-32B 复现 DeepSeek-R1-Zero。直接套 GRPO 训不出来。" — 于是搞了 4 件套补丁。</div>
+
+<section id="dapo-mot">
+<h4>出发点</h4>
+
+<p>2025 年初，所有人都在追 DeepSeek-R1 的"long CoT + GRPO"配方。
+字节 Seed 团队照搬，结果发现<strong>训练不稳定、效果远低于 R1-Zero</strong>。深入 debug 后发现 GRPO 在大规模训练下有 4 个问题：</p>
+
+<ol>
+<li><strong>熵塌缩</strong>：策略熵掉得太快，模型早早收敛到几条固定推理模式，失去探索能力；</li>
+<li><strong>梯度被浪费</strong>：组里所有回答全对或全错时，归一化后 advantage 全 0，这一组数据相当于白采样；</li>
+<li><strong>长 / 短 response 权重不均</strong>：GRPO 在内层除以 $|o_i|$ 做平均，长 response 里每个 token 的权重被稀释，
+变相鼓励模型"用废话灌长度"；</li>
+<li><strong>超长截断带来错误信号</strong>：rollout 因 max_length 截断被打 0 分，等于在惩罚"思考太长"——
+但有时长思考其实是对的，只是没说完。</li>
+</ol>
+</section>
+
+<section id="dapo-met">
+<h4>方法详解</h4>
+
+<h4>(1) Clip-Higher — 非对称裁剪救探索</h4>
+
+<p>$$\text{clip}\!\Big(w_{i,t},\; 1-\varepsilon_{\text{low}},\; 1+\varepsilon_{\text{high}}\Big),\quad \varepsilon_{\text{low}}=0.2,\;\varepsilon_{\text{high}}=0.28$$</p>
+
+<p class="note"><strong>白话翻译</strong>：传统 PPO 对正/负 advantage 用<em>同一个</em> clip 区间 $[1-\varepsilon, 1+\varepsilon]$。
+问题是：低概率的探索性 token，一旦得到正 advantage，新 / 旧概率比很容易超过 $1+\varepsilon$，
+被 clip 后梯度为 0——也就是<em>探索性 token 的"上涨"被堵死了</em>，长此以往策略熵快速塌缩。
+DAPO 把上界拉到 1.28、下界保持 1.2，<strong>给探索性 token 更大的"上涨空间"</strong>——
+但为了防止过度，下界（防止过度推低主流 token 概率）保持 0.8 不变。</p>
+
+<h4>(2) Dynamic Sampling — 过滤无效组</h4>
+
+<div class="code-block"><span class="cmt"># DAPO 的 dynamic sampling 伪码</span>
+batch = []
+<span class="kw">while</span> len(batch) &lt; target_size:
+    q = sample_query()
+    {o_i}, {r_i} = <span class="fn">rollout_group</span>(q, G)
+    acc = mean({r_i})
+    <span class="kw">if</span> 0 &lt; acc &lt; 1:   <span class="cmt"># 既不全对也不全错</span>
+        batch.<span class="fn">append</span>((q, {o_i}, {r_i}))
+    <span class="cmt"># 否则丢弃，继续采</span></div>
+
+<p class="note"><strong>白话翻译</strong>：GRPO 用 z-score 归一化时，如果组里全对（reward 都是 1）或全错（reward 都是 0），
+归一化后的 advantage 全是 0，这条数据完全没有学习信号。
+DAPO 在采样阶段就过滤掉这些组、继续补采，<strong>保证每个 batch 都是"难度刚好"的混合样本</strong>——
+既有对的也有错的，对比信号最强。代价是早期模型差时要采更多次才能凑够 batch。</p>
+
+<h4>(3) Token-Level Loss — 不再按句长平均</h4>
+
+<p>$$\mathcal{J}_{\text{DAPO}}(\theta)=\mathbb{E}_{q,\{o_i\}}\Bigg[\frac{1}{\sum_{i=1}^G|o_i|}\sum_{i=1}^G\sum_{t=1}^{|o_i|}\min\!\big(w_{i,t}\hat A_{i,t},\,\text{clip}(w_{i,t},1-\varepsilon_l,1+\varepsilon_h)\hat A_{i,t}\big)\Bigg]$$</p>
+
+<p class="note"><strong>白话翻译</strong>：GRPO 内层 $\frac{1}{|o_i|}\sum_t$ 是对每个回答内部的 token <em>取平均</em>——
+这导致长回答里每个 token 的权重被稀释（一个 2000 token 的回答里每个 token 权重是 1/2000），
+短回答的 token 权重高（200 token 时是 1/200）。
+DAPO 把分母改成 $\sum_i|o_i|$（整个 batch 的 token 数），<strong>每个 token 等权</strong>——
+长回答自然贡献更多梯度，短回答少。
+后果：模型不再因为"灌废话"被奖励，且<em>长 CoT 推理的关键 token 不会被淹没</em>。</p>
+
+<h4>(4) Soft Overlong Punishment — 软长度惩罚</h4>
+
+<p>$$R_{\text{length}}(y)=\begin{cases}0,&|y|\le L_{\max}-L_{\text{cache}}\\ \dfrac{(L_{\max}-L_{\text{cache}})-|y|}{L_{\text{cache}}},&L_{\max}-L_{\text{cache}}<|y|\le L_{\max}\\ -1,&|y|>L_{\max}\end{cases}$$</p>
+
+<p class="note"><strong>白话翻译</strong>：原来是"超 max_length 一刀切扣分"——但有些<em>正确思路</em>因为没说完被截断扣分，
+模型学到的信号是"这样思考是错的"。DAPO 定义一个缓冲区 $L_{\text{cache}}$（如 4k），
+长度落在 $[L_{\max}-L_{\text{cache}}, L_{\max}]$ 区间内时<em>线性</em>扣分（从 0 到 −1），
+真正超 $L_{\max}$ 才打满 −1。这样模型对"逐渐变长"有平滑的反馈，不会被噪声梯度带偏。</p>
+
+<h4>(5) 砍掉 KL：解放探索</h4>
+
+<p class="note">PPO/GRPO 都有 $\beta \,\text{KL}(\pi_\theta\|\pi_{\text{ref}})$ 来防止 actor 漂太远。
+但在<em>复杂推理任务</em>里，我们要的就是模型偏离原本的对话型分布、学会"长链推理"这种新模式。
+KL 把模型拽回 SFT 时的分布，<strong>反而限制了能力上限</strong>。DAPO 直接把 KL 去掉，
+让 actor 自由演化——实验证明在 reasoning RL 上效果更好。</p>
+</section>
+
+<section id="dapo-exp">
+<h4>关键发现</h4>
+
+<p><strong>消融实验（Qwen2.5-32B 在 AIME 2024 上）</strong>：</p>
+
+<table class="cmp">
+<thead><tr><th>配置</th><th>AIME 2024</th><th>说明</th></tr></thead>
+<tbody>
+<tr><td>Naive GRPO</td><td>30</td><td>直接照搬，不行</td></tr>
+<tr><td>+Overlong Filter</td><td>36</td><td>过滤掉截断样本</td></tr>
+<tr><td>+Clip-Higher</td><td>38</td><td>非对称 clip</td></tr>
+<tr><td>+Soft Overlong</td><td>41</td><td>软长度惩罚</td></tr>
+<tr><td>+Token-Level Loss</td><td>42</td><td>token 等权</td></tr>
+<tr><td>+Dynamic Sampling</td><td><strong>50</strong></td><td>过滤全对/全错</td></tr>
+</tbody>
+</table>
+
+<p>对比基线：<em>DeepSeek-R1-Zero-Qwen-32B 是 47</em>。DAPO 用一半训练步数达到 50，并且全套是开源的。</p>
+
+<p class="note"><strong>DAPO 的方法论</strong>：每一个 trick 都是<em>对 GRPO 某个具体失败模式的精准补丁</em>。
+没有玄学超参，每一处改动都对应一种可观察的训练病征（熵塌缩 → Clip-Higher；advantage 全零 → Dynamic Sampling；
+灌长度 → Token-Level；截断噪声 → Soft Overlong）。这种"诊断 → 处方"的工程范式是后续 VAPO/GSPO/SAPO 都借鉴的。</p>
+</section>
+</div>
+
+<!-- ============= VAPO ============= -->
+<div class="chapter vapo" id="vapo">
+<h3>⑤ VAPO — Value-Augmented Policy Optimization</h3>
+<div class="tagline">ByteDance Seed 一个月后的姊妹篇。"DAPO 把 critic 扔了，但 critic 真的没用吗？我们用 7 件套把它救回来，结果比 DAPO 还高 10 分。"</div>
+
+<section id="vapo-mot">
+<h4>出发点</h4>
+
+<p>DAPO 走的是 value-free 路线（继承 GRPO），优点是简单。
+但 ByteDance 同期在思考一个反方向：<strong>value model 在长 CoT 上是否真的没救？如果能修好它，理论上能给出 token 级的细粒度信用分配，
+比 GRPO 那种"整段一个 advantage"信号更丰富。</strong></p>
+
+<p>他们识别出 value-based 方法在长序列上的 3 个具体痛点：</p>
+
+<ol>
+<li><strong>Value 模型初始化偏差</strong>：用 RM 初始化 critic 时，RM 是"给完整答案打分"训出来的，
+拿去给"半截答案"打分会系统性偏低；</li>
+<li><strong>GAE 的 $\lambda$ 在不同长度上行为不同</strong>：句子 10 token 和 2000 token，
+同一个 $\lambda$ 会一个偏差太大、一个方差太大；</li>
+<li><strong>稀疏奖励学习低效</strong>：复杂推理早期成功率低，正样本太少。</li>
+</ol>
+</section>
+
+<section id="vapo-met">
+<h4>方法详解</h4>
+
+<h4>(1) Value-Pretraining — 先单独烤热 critic</h4>
+
+<p class="note"><strong>白话翻译</strong>：开正式 RL 之前，先用 SFT 模型采一批 rollout、用 RM 标分，
+然后<em>只训 critic 不动 actor</em>，跑到 value loss 收敛。
+这样进 RL 时 critic 已经认识"半截答案"应该值多少分，不再被 RM 初始化的偏差拖累。
+消融显示：去掉 Value-Pretrain → AIME 从 60.4 降到 11.4，<strong>−49 分，最致命的一项</strong>。</p>
+
+<h4>(2) Decoupled GAE — policy 和 critic 用不同 λ</h4>
+
+<p>训 critic 时用 $\lambda_{\text{critic}}=1.0$（蒙特卡洛，无偏，让 critic 学准）；
+做 advantage 给 policy 时用 $\lambda_{\text{policy}}=0.95$（折中方差与偏差）。</p>
+
+<p class="note"><strong>白话翻译</strong>：critic 自己学习时希望尽量无偏，所以用 $\lambda=1$ 直接拟合蒙特卡洛回报；
+但用 critic 输出给 policy 算 advantage 时，要的是<em>低方差</em>的训练信号，所以用 $\lambda=0.95$。
+两个目的不同的事，不必绑在同一个 $\lambda$ 上。</p>
+
+<h4>(3) Length-Adaptive GAE — λ 随长度自适应</h4>
+
+<p>$$\lambda_{\text{policy}}=1-\frac{1}{\alpha\cdot l},\quad \alpha=0.05$$</p>
+
+<p class="note"><strong>白话翻译</strong>：句子越长，$\lambda$ 越接近 1（更接近蒙特卡洛、长期信号被保留）；
+句子越短，$\lambda$ 越小（更接近 TD、避免被那点 reward 折现到几近 0）。
+具体来说：$l=20\Rightarrow\lambda=0$（TD），$l=400\Rightarrow\lambda=0.95$。
+这一手解决了 GAE 在<em>训练过程中 response 长度跨越几个数量级</em>时的"一个 $\lambda$ 顾此失彼"问题。</p>
+
+<h4>(4) 继承 DAPO 的三件</h4>
+
+<p>VAPO 直接把 DAPO 的 <em>Clip-Higher</em>、<em>Token-Level Loss</em>、<em>Dynamic Sampling (改名 Group-Sampling)</em>
+全部拿过来。消融显示去掉 Clip-Higher 掉 5 分、去掉 Token-Level 掉 4 分、去掉 Group-Sampling 掉 6 分——都很关键。</p>
+
+<h4>(5) Positive Example LM Loss — 给正样本加 NLL</h4>
+
+<p>$$\mathcal{L}_{\text{NLL}}=-\mu \cdot\mathbb{E}_{y\in\text{positive}}\big[\log\pi_\theta(y|x)\big]$$</p>
+
+<p class="note"><strong>白话翻译</strong>：在 RL loss 之外，额外对<em>正样本</em>（reward=1 的 rollout）加一个普通的 SFT 损失。
+这样早期采样里的少量正样本能<em>同时</em>提供 RL 信号和 SFT 信号，加快学习。
+消融显示去掉它在 AIME 上掉 4.6 分。本质上是 RL + SFT 的混合训练。</p>
+
+<h4>(6) 完整 VAPO 训练流程</h4>
+
+<div class="code-block"><span class="cmt"># Phase 1: 单独训 critic 到收敛</span>
+<span class="fn">pretrain_critic</span>(actor=SFT, rollouts, reward_model)
+
+<span class="cmt"># Phase 2: 联合 RL</span>
+<span class="kw">for</span> step <span class="kw">in</span> range(N):
+    q = <span class="fn">sample_query</span>()
+    {o_i} = [policy.<span class="fn">generate</span>(q) <span class="kw">for</span> _ <span class="kw">in</span> range(G)]
+    <span class="cmt"># 动态采样过滤全对全错</span>
+    <span class="kw">if</span> mean({r_i}) <span class="kw">in</span> (0, 1): <span class="kw">continue</span>
+
+    <span class="cmt"># 长度自适应 GAE</span>
+    <span class="kw">for</span> o_i <span class="kw">in</span> {o_i}:
+        λ = 1 - 1 / (0.05 * len(o_i))
+        A_i = <span class="fn">gae</span>(critic, o_i, r_i, λ_policy=λ)
+
+    <span class="cmt"># Actor: token-level + Clip-Higher</span>
+    loss_actor = <span class="fn">dapo_loss</span>({o_i}, {A_i}, ε_low=0.2, ε_high=0.28)
+    <span class="cmt"># Critic: λ_critic=1.0 训准</span>
+    loss_critic = <span class="fn">value_mse</span>(critic, {o_i}, MC_returns)
+    <span class="cmt"># 额外正样本 NLL</span>
+    loss_nll = -<span class="fn">log_prob</span>(policy, positive_rollouts)
+
+    loss = loss_actor + loss_critic + μ * loss_nll
+    loss.<span class="fn">backward</span>()</div>
+</section>
+
+<section id="vapo-exp">
+<h4>关键发现</h4>
+
+<table class="cmp">
+<thead><tr><th>方法</th><th>AIME 2024</th><th>训练步数</th></tr></thead>
+<tbody>
+<tr><td>Vanilla PPO</td><td>5</td><td>—</td></tr>
+<tr><td>DAPO</td><td>50</td><td>5000</td></tr>
+<tr><td><strong>VAPO</strong></td><td><strong>60.4</strong></td><td><strong>5000</strong></td></tr>
+</tbody>
+</table>
+
+<p>同一基座（Qwen2.5-32B）、同样 5000 步，VAPO 比 DAPO 高 10 分。</p>
+
+<p class="note"><strong>VAPO 的核心 message</strong>：value-based 方法<em>没有死</em>。GRPO 抛弃 critic 是因为 critic 没训好；
+只要给 critic 单独的预热阶段、用对的 GAE 参数、配合 DAPO 的稳定 trick，<strong>value-based 反而能给出比 group-relative 更细粒度的信用分配</strong>。
+这也是为什么 2025 年后大家又开始重新研究 critic 设计——VAPO 算是给"value-free vs value-based"这场争论加了重磅码。</p>
+</section>
+</div>
+
+<!-- ============= GSPO ============= -->
+<div class="chapter gspo" id="gspo">
+<h3>⑥ GSPO — Group Sequence Policy Optimization</h3>
+<div class="tagline">Qwen 团队。"GRPO 训 Qwen3-MoE 老是崩，我们查到根上：重要性采样的单位错了。"</div>
+
+<section id="gspo-mot">
+<h4>出发点</h4>
+
+<p>GRPO/PPO 的 importance ratio 长这样：</p>
+
+<p>$$w_{i,t}=\frac{\pi_\theta(y_{i,t}\mid x,y_{i,&lt;t})}{\pi_{\theta_{\text{old}}}(y_{i,t}\mid x,y_{i,&lt;t})}$$</p>
+
+<p>这是个 <strong>token 级</strong>的比值。Qwen 团队训 Qwen3-MoE 时发现：</p>
+<ol>
+<li>训着训着 reward 突然崩盘，回退 checkpoint、调 clip 区间都救不回来；</li>
+<li>问题在 MoE 上尤其明显：每次梯度更新，<em>同一个 token 在 $\pi_\theta$ 和 $\pi_{\text{old}}$ 上激活的 expert 不一样</em>，
+导致 $w_{i,t}$ 剧烈波动。他们之前用 "Routing Replay" 缓解，但开销大；</li>
+<li>更深层的问题：<em>importance sampling 的数学前提是"对同一个 $\pi_{\text{old}}$ 多次采样取平均"</em>，
+但 GRPO 在每个 token 位置只有一个样本——这根本就不是合法的重要性采样！它只是个名字像 IS 的 noise。</li>
+</ol>
+</section>
+
+<section id="gspo-met">
+<h4>方法详解</h4>
+
+<h4>(1) 核心洞察：奖励的单位 vs 优化的单位</h4>
+
+<p class="note"><strong>白话翻译</strong>：reward 是给<em>整段回答</em>打的（"这个数学题答对了 1 分"），
+但 GRPO 的 clip 和 importance ratio 是按<em>每个 token</em>算的——优化单位和奖励单位不一致。
+GSPO 的主张：<strong>既然奖励是序列级的，那 importance ratio 和 clip 也应该是序列级的</strong>。</p>
+
+<h4>(2) 序列级 importance ratio</h4>
+
+<p>$$s_i(\theta)=\Big(\frac{\pi_\theta(y_i\mid x)}{\pi_{\theta_{\text{old}}}(y_i\mid x)}\Big)^{1/|y_i|}=\exp\!\Big(\frac{1}{|y_i|}\sum_{t=1}^{|y_i|}\log\frac{\pi_\theta(y_{i,t}\mid x,y_{i,&lt;t})}{\pi_{\theta_{\text{old}}}(y_{i,t}\mid x,y_{i,&lt;t})}\Big)$$</p>
+
+<p class="note"><strong>白话翻译</strong>：把"整段回答在新策略下的概率 / 在旧策略下的概率"开 $|y_i|$ 次方——
+也就是 <em>token log-ratio 的几何平均</em>。
+为什么开方？因为不同回答长度差异巨大，不开方的话长回答的 ratio 会是几百次方的乘积，数值上完全不可控；
+开方等价于把它放在跟单个 token ratio 同一个数量级，clip 区间就能用合理的值（GSPO 用 3e-4 这种比 GRPO 0.2 小 3 个数量级的 $\varepsilon$）。</p>
+
+<h4>(3) GSPO 目标函数</h4>
+
+<p>$$\mathcal{J}_{\text{GSPO}}(\theta)=\mathbb{E}_{x,\{y_i\}}\Big[\frac{1}{G}\sum_{i=1}^G\min\!\big(s_i(\theta)\hat A_i,\,\text{clip}(s_i(\theta),1-\varepsilon,1+\varepsilon)\hat A_i\big)\Big]$$</p>
+
+<p class="note"><strong>白话翻译</strong>：跟 GRPO 比，<em>外层求和直接到序列级，内层求和消失了</em>——
+clip 整个序列、整个序列的所有 token 共享同一个权重 $s_i$。
+$\hat A_i$ 还是组内 z-score（跟 GRPO 一样）。这样 importance ratio 就回归了 "<em>每个 $\pi_{\text{old}}$ 样本一次</em>" 的合法 IS 形式，
+长序列的噪声不再累积、MoE 的 expert 漂移在序列平均下被抚平。</p>
+
+<h4>(4) GSPO-token — 兼容 token 级 advantage</h4>
+
+<p>在 multi-turn RL 等场景需要 token 级 advantage 时，GSPO 给了一个 hybrid 变体：</p>
+
+<p>$$s_{i,t}(\theta)=\text{sg}[s_i(\theta)]\cdot\frac{\pi_\theta(y_{i,t}\mid x,y_{i,&lt;t})}{\text{sg}\big[\pi_\theta(y_{i,t}\mid x,y_{i,&lt;t})\big]}$$</p>
+
+<p>其中 $\text{sg}[\cdot]$ 是 stop-gradient。前向数值上 $s_{i,t}=s_i$（序列级权重），
+反向梯度上只对当前 token 的 log-prob 求导——结合了序列级 clip 的稳定性和 token 级 advantage 的灵活性。</p>
+</section>
+
+<section id="gspo-exp">
+<h4>关键发现</h4>
+
+<ul>
+<li><strong>MoE 训练不再崩</strong>：GSPO 完全不需要 Routing Replay，省下大量内存和通信；</li>
+<li><strong>更高的训练效率</strong>：同等 compute 下 reward 和 benchmark 全面超 GRPO；</li>
+<li><strong>对推理-训练精度差异更鲁棒</strong>：可以直接用推理引擎（vLLM/SGLang）的 logprobs 而非重算，
+省去 partial rollout / multi-turn 场景下的额外开销。</li>
+</ul>
+
+<p class="note"><strong>一个有趣的数据点</strong>：GSPO 平均裁掉 <strong>15%</strong> 的 token（GRPO 只裁 0.13%），
+看起来"用了更少数据训"，但<em>训练效率反而更高</em>——说明 GRPO 留下的那部分 token 其实是"高方差噪声"，
+裁掉反而是好事。这是个反直觉的发现，后面单独讨论。</p>
+</section>
+</div>
+
+<!-- ============= SAPO ============= -->
+<div class="chapter sapo" id="sapo">
+<h3>⑦ SAPO — Soft Adaptive Policy Optimization</h3>
+<div class="tagline">Qwen 团队 5 个月后的进化版。"hard clip 像一刀切——你要么进信任域要么死，能不能搞个柔软点的开关？"</div>
+
+<section id="sapo-mot">
+<h4>出发点</h4>
+
+<p>GSPO 解决了 importance ratio 的单位问题，但<strong>裁剪机制本身依然是 hard 的</strong>——
+$w$ 一旦超出 $[1-\varepsilon, 1+\varepsilon]$，梯度直接被截断为 0。Qwen 团队继续质疑：</p>
+
+<ul>
+<li>对正 advantage 的 token，$w>1+\varepsilon$ 时直接没梯度——错过了大量"近 on-policy 但有效"的样本；</li>
+<li>对负 advantage 的 token，$w<1-\varepsilon$ 时同样没梯度——但负 token 本来就更容易引入不稳定性，
+"一刀切"地放手反而危险；</li>
+<li>GSPO 在序列层级 hard clip，<em>整条序列被牺牲</em>——其实可能只是少数 outlier token 把序列 ratio 拉飞了，
+其他 token 都是 informative 的，整条都丢掉是浪费。</li>
+</ul>
+</section>
+
+<section id="sapo-met">
+<h4>方法详解</h4>
+
+<h4>(1) Soft Gate — 用 sigmoid 替代 hard clip</h4>
+
+<p>$$\mathcal{J}_{\text{SAPO}}(\theta)=\mathbb{E}\Big[\frac{1}{G}\sum_{i=1}^G\frac{1}{|y_i|}\sum_{t=1}^{|y_i|}f_{i,t}\big(r_{i,t}(\theta)\big)\hat A_{i,t}\Big]$$</p>
+<p>$$f_{i,t}(x)=\sigma\big(\tau_{i,t}(x-1)\big)\cdot\frac{4}{\tau_{i,t}},\quad \tau_{i,t}=\begin{cases}\tau_{\text{pos}}=1.0,&\hat A_i>0\\ \tau_{\text{neg}}=1.05,&\hat A_i\le 0\end{cases}$$</p>
+
+<p class="note"><strong>白话翻译</strong>：把 PPO/GRPO 的 hard clip 换成<em>以 $r=1$ 为中心的 sigmoid 软门</em>。
+当 $r$ 接近 1（on-policy）时门完全打开（权重 $w=1$），梯度跟无约束的策略梯度一样；
+随着 $r$ 偏离 1，门<em>平滑地</em>关上（权重按 $\text{sech}^2$ 衰减）——
+有限大的 off-policy ratio 仍能贡献小但非零的梯度，避免"一刀切"。
+更妙的是：在小步长 + 序列内 log-ratio 方差小的假设下，
+SAPO 的<em>平均 token gate ≈ 序列级 gate</em>，
+所以 SAPO 在大多数序列上等价于一个"软版 GSPO"，但在少数 outlier token 的序列上还能<em>选择性地</em>压制 outlier、保留 informative token——
+比 GSPO 的"整条丢"更精细。</p>
+
+<h4>(2) 不对称温度：负 token 衰减更快</h4>
+
+<p>为什么 $\tau_{\text{neg}} > \tau_{\text{pos}}$？论文从梯度通过 logits 传播的角度做了分析：</p>
+
+<p>$$\frac{\partial\,\log\pi_\theta(y_{i,t})\,\hat A_{i,t}}{\partial z_v}=\begin{cases}\big(1-\pi_\theta(y_{i,t})\big)\,\hat A_{i,t},&v=y_{i,t}\\ -\pi_\theta(v)\,\hat A_{i,t},&v\ne y_{i,t}\end{cases}$$</p>
+<p style="text-align:center;font-size:13.5px;color:#666;margin-top:-6px">（上式中 $v=y_{i,t}$ 表示"被采样到的 token"，$v\ne y_{i,t}$ 表示"词表里其他未被采样的 token"）</p>
+
+<p class="note"><strong>白话翻译</strong>：
+正 advantage 推高<em>采样到的</em>那个 token，并轻微压低其他所有 token——影响集中、可控；
+负 advantage 反过来，会<em>抬高词表里所有未被采样的 token</em>——影响发散到几万个 token 上，
+变相鼓励"任何别的输出都行，就是不要这个"。这种发散性梯度容易引入不稳定。
+SAPO 用更大的 $\tau_{\text{neg}}$（更宽的钟形 → 钟峰更低 → 梯度衰减更快）来<em>更激进地压制负 token 梯度</em>，
+这是 SAPO 实证最关键的 trick。Figure 5 显示 $\tau_{\text{neg}}<\tau_{\text{pos}}$ 时训练显著不稳。</p>
+
+<h4>(3) 三方对照：SAPO / GSPO / GRPO 的统一视角</h4>
+
+<p>论文写了一个漂亮的统一框架：</p>
+
+<ul>
+<li><strong>GRPO</strong>：$f_{i,t}$ = 矩形门（token 级 hard clip），$r$ 出界则梯度为 0；</li>
+<li><strong>GSPO</strong>：$f_{i,t}$ 是序列级矩形门，整条序列共享；</li>
+<li><strong>SAPO</strong>：$f_{i,t}$ 是平滑 sigmoid 门，正/负不对称温度。</li>
+</ul>
+
+<p>三者都可以写成 $\mathcal{J}=\mathbb{E}[\sum_t f(r_{i,t})\hat A_{i,t}]$ 这个通用形式，只是 $f$ 选得不一样。</p>
+</section>
+
+<section id="sapo-exp">
+<h4>关键发现</h4>
+
+<ul>
+<li><strong>不崩</strong>：GSPO 和 GRPO-R2 在训练 1300+ steps 后会突然崩盘（reward 暴跌），SAPO 训到 1800+ steps 仍稳定向上；</li>
+<li><strong>更高 final reward</strong>：在 AIME25/HMMT25/BeyondAIME 上一致优于 GSPO/GRPO-R2；</li>
+<li><strong>Qwen3-VL 实战</strong>：在 Qwen3-VL-30B-A3B 多模态训练上，SAPO 在 AIME25/LiveCodeBench/ZebraLogic/MathVision 上一致正收益。</li>
+</ul>
+
+<p class="note"><strong>SAPO 的方法论</strong>：从"如何选择 $f$"这个新角度审视所有 group-based 算法。
+GRPO/GSPO/SAPO 不是三个独立的方法，而是<em>同一个 surrogate 框架下的三种 gate 选择</em>。
+这种"先抽象统一形式、再做 design space search"的视角非常有研究意义——
+接下来很可能会看到更多基于这个 surrogate 框架的新 gate 设计。</p>
+</section>
+</div>
+
+<!-- ============= GDPO ============= -->
+<div class="chapter gdpo" id="gdpo">
+<h3>⑧ GDPO — Group reward-Decoupled Normalization Policy Optimization</h3>
+<div class="tagline">NVIDIA 在 2026 年的发现：GRPO 一旦遇到多奖励（accuracy + length + format ...），会把不同的奖励组合塌缩成<em>同一个 advantage 值</em>，训练崩盘。</div>
+
+<section id="gdpo-mot">
+<h4>出发点</h4>
+
+<p>2025 年后大家训 LLM 时奖励早已不是单一的"答对/答错"，而是<em>多个奖励的混合</em>：
+准确性、格式、长度、安全、风格、bug-free……
+默认做法是把它们<strong>相加</strong>再丢给 GRPO 归一化。这个做法看似无害但有个致命问题：</p>
+
+<p>考虑两个二元奖励 $r_1, r_2 \in \{0,1\}$，每个 prompt 采 2 个 rollout。
+总 reward 可以是 0/1/2。GRPO 对 sum 归一化后，</p>
+
+<ul>
+<li>$(r_1,r_2)$ 组合 $(0,1), (1,0)$ → sum=1，与 $(0,2), (2,0)$ → sum=2 走相同的归一化路径；</li>
+<li>结果：<strong>6 种 distinct 的 reward 组合塌缩成只有 2 种 distinct 的 advantage 值</strong>。</li>
+</ul>
+
+<p>原本 "(0,2) 比 (0,1) 学习信号应该更强（达成两个目标 vs 一个）" 的细分被抹掉了——
+模型拿到的是模糊的、信号严重压缩的训练梯度，最终训练崩。</p>
+</section>
+
+<section id="gdpo-met">
+<h4>方法详解</h4>
+
+<h4>(1) Per-reward 组归一化</h4>
+
+<p>对每个 reward 分量 $r_k\,(k=1,\ldots,n)$ 单独做组内 z-score：</p>
+
+<p>$$A_k^{(i,j)}=\frac{r_k^{(i,j)}-\text{mean}\{r_k^{(i,1)},\ldots,r_k^{(i,G)}\}}{\text{std}\{r_k^{(i,1)},\ldots,r_k^{(i,G)}\}}$$</p>
+
+<p>然后<em>分量优势求和</em>得到这个 rollout 的总 advantage：</p>
+
+<p>$$A_{\text{sum}}^{(i,j)}=\sum_{k=1}^n A_k^{(i,j)}$$</p>
+
+<p class="note"><strong>白话翻译</strong>：以前是先 sum 再 normalize，现在是先 normalize 再 sum——
+顺序换了一下，但因为<em>每个 reward 分量有自己的 std</em>，分量信号被独立保留下来。
+两个 reward 都达成时，两个分量的 advantage 都是正、加起来更大；只达成一个时，只有一个分量是正。
+信号不再因 sum 被压缩。</p>
+
+<h4>(2) Batch-wise 归一化 — 防止 advantage 量级随 reward 数膨胀</h4>
+
+<p>$$\hat A_{\text{sum}}^{(i,j)}=\frac{A_{\text{sum}}^{(i,j)}-\text{mean}_{\text{batch}}\{A_{\text{sum}}\}}{\text{std}_{\text{batch}}\{A_{\text{sum}}\}+\epsilon}$$</p>
+
+<p class="note"><strong>白话翻译</strong>：步骤 (1) 求和后，advantage 的方差会随 reward 数 $n$ 线性增长（每加一个 reward 就多一份方差）。
+所以再做一次 batch-wise 归一化，把数值稳定在一个固定的尺度上——<em>这一步不影响 distinct advantage 的数量</em>，
+但对训练稳定性至关重要：Appendix A 显示去掉它后训练会偶发不收敛。</p>
+
+<h4>(3) 完整 GDPO 目标</h4>
+
+<p>$$\mathcal{J}_{\text{GDPO}}(\theta)=\mathbb{E}\Big[\frac{1}{G}\sum_{j=1}^G\frac{1}{|o_j|}\sum_{t=1}^{|o_j|}\min\!\big(s_t(\theta)\hat A_{\text{sum}}^{(i,j)},\,\text{clip}(s_t,1-\varepsilon_l,1+\varepsilon_h)\hat A_{\text{sum}}^{(i,j)}\big)\Big]$$</p>
+
+<p class="note">看起来跟 DAPO/GRPO 几乎一样——是的，<em>GDPO 的全部创新都在 advantage 怎么算上</em>。
+其他都沿用 DAPO（Clip-Higher、Token-level loss、动态采样、小 KL 系数 1e-3）。
+这是一个"<em>非常局部、非常精准</em>"的修复——但效果立竿见影。</p>
+
+<h4>(4) 难度差异时怎么调权重</h4>
+
+<p>论文还做了一个有意思的实验：当两个 reward 难度差异大（如 "answer correct" 难，"length within bound" 容易）时，
+即使按 GDPO 归一化，模型仍会优先满足容易的那个。</p>
+
+<p>解决方法 1：<em>调权重</em> $A_{\text{sum}}=\sum_k w_k A_k$。但实验显示效果有限。</p>
+
+<p>解决方法 2：<strong>条件奖励</strong>——让容易的奖励"条件依赖于难的"：</p>
+
+<p>$$\tilde r_k=\begin{cases}r_k,&r_l\ge t\\ 0,&\text{otherwise}\end{cases}$$</p>
+
+<p class="note"><strong>白话翻译</strong>：模型只有先答对 ($r_l \ge t$) 才能拿到长度奖励 ($r_k$)。
+强制模型先优化难的、再优化容易的，避免"灌长度水"的捷径学习。
+实验显示用 $\tilde{\mathcal{R}}_{\text{length}}=\mathbb{1}[|y|\le l \,\wedge\, r_{\text{correct}}=1]$ 时，
+AIME 准确率从 50.2% 提升到 57.7%，同时超长率从 85.6% 降到 12.3%。</p>
+</section>
+
+<section id="gdpo-exp">
+<h4>关键发现</h4>
+
+<ul>
+<li><strong>distinct advantage 数随 rollout/reward 数量近指数增长</strong>（Figure 3）—— 信号粒度比 GRPO 高一个数量级；</li>
+<li><strong>tool calling</strong>：Qwen2.5-1.5B + GDPO 在 BFCL-v3 上 avg accuracy 32.81% / format 80.66%，
+显著超 GRPO 的 30.18% / 76.33%；</li>
+<li><strong>math reasoning</strong>：DeepSeek-R1-7B + GDPO，AIME 53.1%（GRPO 50.2%）、超长率 0.2%（GRPO 2.1%）；</li>
+<li><strong>code reasoning</strong>：3 reward（pass + length + bug）下，GDPO 在 Codecontests pass rate 65.8% vs GRPO 65.6%，
+但 bug rate 2.5% vs 3.9%——一致更优。</li>
+</ul>
+
+<p class="note"><strong>GDPO 的核心洞察</strong>：当 RL 训练从"单目标"走向"多目标"时，
+GRPO 的 "sum-then-normalize" 范式会信息塌缩。这个问题在 2025 年前没人提，因为大家还在做"答对/答错"单奖励；
+当 R1-style 训练扩展到长度控制、tool calling、safety、coding bug-free 等多目标场景，
+这个"上一代埋的雷"才显露出来——GDPO 是给"多奖励 RL 阶段"做的对症修补。</p>
+</section>
+</div>
+
+<!-- ========== 5. 贯穿线 ========== -->
+<section id="threads">
+<h2>贯穿线</h2>
+
+<p>把 8 个方法横着看，至少有 4 条贯穿全系列的演化线索：</p>
+
+<h3>线 1：训练成本与组件的不断削减（再回升）</h3>
+<p>PPO 起步是 <em>Actor + Critic + RM + Ref</em> 四模型；
+DPO 一刀砍到 <em>Actor + Ref</em>（顺便把 RM 也省了）；
+GRPO 留 <em>Actor + RM + Ref</em>（砍 Critic）；
+DAPO/GSPO/SAPO/GDPO 都继承 GRPO 的 3 模型架构；
+唯独 <strong>VAPO 把 Critic 又请回来了</strong>——
+代价是 4 模型，回报是 +10 AIME 分。
+这条线告诉你：<em>没有放之四海的成本-效果权衡，要看任务复杂度</em>。短任务、偏好对齐用 DPO；推理任务、value 能学好的话 VAPO 仍是上限。</p>
+
+<h3>线 2：优化粒度从 token → sequence → multi-reward 分解</h3>
+<p>PPO/GRPO 是 token 级 importance ratio + clip；
+GSPO 把 ratio 升到序列级（"奖励单位与优化单位对齐"）；
+SAPO 再把序列级的 hard clip 换成 token-soft + sequence-coherent 的混合体；
+GDPO 进一步把 advantage 拆到多个 reward 分量上分别归一。
+<strong>方向是：从单一标量梯度，走向能保留更丰富信号结构的梯度。</strong></p>
+
+<h3>线 3：KL 约束的取舍演化</h3>
+<p>PPO 把 KL 加到 reward 里（按 token），目的是防 reward hacking；
+GRPO 把 KL 拿出来放到 loss 里（依然是约束）；
+DAPO <strong>把 KL 完全去掉</strong>，主张"reasoning 需要偏离原分布、KL 限制了上限"；
+VAPO 跟随 DAPO 去 KL；GDPO 又把 KL 加回 loss 里但系数极小（0.001）。
+这条线说明：<strong>KL 不再是必需的安全护栏，越是高能力的推理 RL 越倾向于放手让 actor 演化</strong>——
+风险由其他机制（clip、value、normalization）承担。</p>
+
+<h3>线 4：从单奖励到多奖励的渐进过渡</h3>
+<p>PPO/GRPO 一开始假设单一标量 reward；
+DAPO 引入"长度软惩罚"——其实是混入了多奖励但简单加和；
+VAPO 加了 NLL 辅助 loss——又是一种多目标；
+GDPO 真正点破了"多奖励 + GRPO 直接加和" 的塌缩问题，做出第一个为多奖励设计的归一化方案。
+<strong>未来训练目标会越来越复杂（safety + accuracy + coherence + cost + ...）</strong>，
+GDPO 这一类"多奖励原生"的方法会成为新底座。</p>
+
+</section>
+
+<!-- ========== 6. 三句话总结 ========== -->
+<section id="summary">
+<h2>三句话总结</h2>
+
+<ol>
+<li><strong>系列在做什么</strong>：让策略梯度在 LLM 这种"长序列 + 大模型 + 稀疏 0/1 奖励 + 多目标"的极端 setting 下，仍然能稳定且高效地把模型推到更高的推理与对齐能力。</li>
+<li><strong>它走到了哪里</strong>：从 PPO 的 4 模型重型流程，演化到 GRPO/DAPO 的 3 模型轻量流程、再到 GSPO/SAPO 把优化粒度从 token 提升到 sequence/soft-gate、最后 GDPO 让多奖励训练第一次真正可行；
+Qwen3、DeepSeek-R1 这些 2025 年顶级开源模型都建立在这条线上。</li>
+<li><strong>核心方法论</strong>：每一代都<em>识别上一代的具体失败模式</em>（critic 难训、KL 限制上限、token-ratio 在 MoE 上崩、多奖励塌缩 ...）<em>然后开出精准的处方</em>——RL for LLM 早已不是"试超参"的玄学，而是"诊断—修补—验证"的工程科学。</li>
+</ol>
+
+</section>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,2678 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VLA 四种 Policy 代码级解读 — starVLA 实现剖析</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+  onload="renderMathInElement(document.body, {
+    delimiters: [
+      {left: '$$', right: '$$', display: true},
+      {left: '$',  right: '$',  display: false}
+    ],
+    throwOnError: false
+  });"></script>
+
+<style>
+:root{
+  --bg:#fafaf7;
+  --bg-card:#ffffff;
+  --fg:#2c2c2c;
+  --fg-soft:#555;
+  --muted:#888;
+  --accent:#4a6fa5;
+  --accent-2:#c97064;
+  --accent-3:#7ea16b;
+  --accent-4:#b58a3d;
+  --rule:#e6e2d6;
+  --quote-bg:#f5f5f0;
+  --code-bg:#f3f0e6;
+  --shadow:0 1px 0 rgba(0,0,0,.04);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--fg);}
+body{
+  font-family:"Noto Serif CJK SC","Source Han Serif SC","Songti SC","STSong","Times New Roman",serif;
+  font-size:17px;
+  line-height:1.78;
+  -webkit-font-smoothing:antialiased;
+}
+.layout{display:grid;grid-template-columns:240px minmax(0,1fr);max-width:1280px;margin:0 auto;}
+@media(max-width:1023px){
+  .layout{grid-template-columns:1fr;}
+  aside#toc{position:relative !important;border:none;height:auto;overflow:visible;padding:12px 18px;border-bottom:1px solid var(--rule);}
+  aside#toc .toc-list{display:none}
+  aside#toc.open .toc-list{display:block}
+  aside#toc .toc-toggle{display:block !important;}
+}
+aside#toc{
+  position:sticky;top:0;align-self:start;height:100vh;overflow-y:auto;
+  padding:32px 18px 32px 28px;border-right:1px solid var(--rule);
+  font-family:-apple-system,"Helvetica Neue",sans-serif;font-size:13px;line-height:1.55;
+}
+aside#toc .toc-toggle{display:none;cursor:pointer;font-weight:600;color:var(--accent);}
+aside#toc .toc-title{font-size:11px;letter-spacing:.12em;color:var(--muted);text-transform:uppercase;margin-bottom:14px;}
+aside#toc a{color:var(--fg-soft);text-decoration:none;display:block;padding:4px 0;border-left:2px solid transparent;padding-left:10px;margin-left:-10px;}
+aside#toc a:hover{color:var(--accent);}
+aside#toc a.active{color:var(--accent);border-left-color:var(--accent);background:rgba(74,111,165,.05);}
+aside#toc .l2{padding-left:22px;font-size:12px;color:var(--muted);}
+main{padding:48px 56px 80px;max-width:920px;}
+@media(max-width:1023px){main{padding:24px 22px 60px;}}
+header.head{margin-bottom:48px;padding-bottom:24px;border-bottom:1px solid var(--rule);}
+h1{
+  font-size:34px;line-height:1.25;margin:.4em 0 .3em;letter-spacing:-.01em;
+  font-weight:700;
+}
+h1 .accent{color:var(--accent);}
+.subtitle{color:var(--fg-soft);font-size:17px;margin:0 0 8px;font-style:italic;}
+.meta{color:var(--muted);font-size:13px;font-family:-apple-system,sans-serif;margin:0;}
+.meta a{color:var(--accent);text-decoration:none;border-bottom:1px dashed var(--rule);}
+h2{
+  font-size:26px;margin:64px 0 16px;
+  padding-bottom:8px;border-bottom:2px solid var(--rule);
+  font-weight:700;letter-spacing:-.005em;
+}
+h2 .num{color:var(--accent);font-family:Georgia,serif;font-style:italic;margin-right:10px;}
+h3{font-size:20px;margin:36px 0 12px;font-weight:700;color:#1f1f1f;}
+h4{font-size:17px;margin:22px 0 8px;font-weight:700;color:var(--accent);}
+p{margin:14px 0;}
+strong,b{color:#111;font-weight:700;}
+em,i{color:#3a3a3a;}
+code{
+  background:var(--code-bg);padding:2px 6px;border-radius:3px;
+  font-family:"SF Mono","Menlo",Consolas,monospace;font-size:.88em;color:#634e1c;
+}
+pre{
+  background:#272b33;color:#dcdfe5;padding:16px 18px;border-radius:6px;
+  overflow-x:auto;font-family:"SF Mono","Menlo",monospace;font-size:13px;line-height:1.62;
+}
+pre code{background:none;color:inherit;padding:0;font-size:13px;}
+/* ── Python 语法高亮：让注释/字符串/关键字/数字一眼分开 ───────── */
+pre code .tok-cmt { color:#8a9aa3; font-style:italic; }   /* 注释（# ...）：灰蓝偏冷，明显比代码暗 */
+pre code .tok-str { color:#e8c08e; }                      /* 字符串："..." / '...' */
+pre code .tok-doc { color:#c8a878; font-style:italic; }   /* docstring（"""..."""） */
+pre code .tok-kw  { color:#c792ea; font-weight:600; }     /* 关键字 def/class/if/for/return... */
+pre code .tok-bi  { color:#82aaff; }                      /* 内置 / self / True/False/None */
+pre code .tok-num { color:#f78c6c; }                      /* 数字字面量 */
+pre code .tok-fn  { color:#82d9c5; }                      /* 函数名（def 后面 / 调用） */
+pre code .tok-dec { color:#ffcb6b; }                      /* @decorator */
+.callout{
+  background:var(--quote-bg);border-left:4px solid var(--accent);
+  padding:14px 20px;margin:20px 0;border-radius:0 4px 4px 0;
+}
+.callout.warn{border-left-color:var(--accent-2);}
+.callout.good{border-left-color:var(--accent-3);}
+.callout .label{display:inline-block;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);font-weight:700;margin-bottom:4px;font-family:-apple-system,sans-serif;}
+.callout.warn .label{color:var(--accent-2);}
+.callout.good .label{color:var(--accent-3);}
+ul,ol{padding-left:28px;}
+li{margin:6px 0;}
+li::marker{color:var(--accent);}
+hr{border:none;border-top:1px solid var(--rule);margin:40px 0;}
+table{
+  border-collapse:collapse;width:100%;font-size:14px;margin:18px 0;
+  font-family:-apple-system,"Helvetica Neue",sans-serif;
+}
+table th,table td{border:1px solid var(--rule);padding:8px 10px;text-align:left;vertical-align:top;}
+table th{background:#f0ece0;font-weight:700;color:#333;}
+table tr:nth-child(even) td{background:#fbf9f3;}
+.svg-block{margin:24px 0;text-align:center;background:#fff;border:1px solid var(--rule);border-radius:6px;padding:18px;box-shadow:var(--shadow);}
+.svg-block svg{max-width:100%;height:auto;}
+.svg-caption{font-size:12px;color:var(--muted);margin-top:8px;font-family:-apple-system,sans-serif;}
+.tag{
+  display:inline-block;padding:2px 9px;border-radius:11px;font-size:11px;font-weight:600;
+  font-family:-apple-system,sans-serif;letter-spacing:.04em;margin-right:6px;
+}
+.tag.pi0{background:#e7e3d2;color:#6b5314;}
+.tag.oft{background:#dee5f0;color:#1f3d6e;}
+.tag.fast{background:#f3dcc9;color:#7a3812;}
+.tag.gr00t{background:#dde8d4;color:#3a5d2c;}
+.policy-card{
+  border:1px solid var(--rule);border-radius:8px;padding:18px 22px;margin:14px 0;
+  background:var(--bg-card);box-shadow:var(--shadow);
+}
+.policy-card h4{margin-top:0;}
+.kv{display:grid;grid-template-columns:160px 1fr;gap:6px 18px;font-size:14px;font-family:-apple-system,sans-serif;}
+.kv .k{color:var(--muted);}
+.kv .v{color:var(--fg);}
+.file-ref{
+  display:inline-block;font-family:"SF Mono","Menlo",monospace;
+  font-size:12px;background:#eef2f7;color:#1f3d6e;
+  padding:2px 8px;border-radius:3px;border:1px solid #d6dde6;
+  margin:0 2px;
+}
+.code-label{
+  display:block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--muted);font-family:-apple-system,sans-serif;font-weight:600;
+  margin:14px 0 4px;
+}
+.io-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:14px 0;}
+@media(max-width:720px){.io-grid{grid-template-columns:1fr;}}
+.io-box{border:1px solid var(--rule);border-radius:6px;padding:12px 16px;background:#fbf9f3;}
+.io-box h5{margin:0 0 6px;font-size:13px;color:var(--accent);font-family:-apple-system,sans-serif;letter-spacing:.04em;text-transform:uppercase;}
+.io-box ul{margin:6px 0 0;padding-left:18px;font-size:14px;}
+.io-box li{margin:3px 0;font-family:-apple-system,sans-serif;}
+.io-box code{font-size:12px;}
+.flow-box{
+  border:1px dashed var(--rule);background:#fafaf3;border-radius:6px;
+  padding:14px 18px;margin:16px 0;font-size:14px;
+}
+.flow-box .step{display:flex;gap:12px;margin:6px 0;align-items:flex-start;}
+.flow-box .step .n{
+  flex-shrink:0;width:22px;height:22px;border-radius:50%;
+  background:var(--accent);color:white;font-size:12px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;font-family:-apple-system,sans-serif;
+}
+</style>
+</head>
+<body>
+
+<div class="layout">
+
+<aside id="toc">
+  <div class="toc-toggle" onclick="this.parentNode.classList.toggle('open')">▼ 目录</div>
+  <div class="toc-title">目录</div>
+  <div class="toc-list">
+    <a href="#abstract">摘要</a>
+    <a href="#overview">代码总览</a>
+    <a href="#oft">一、OpenVLA-OFT</a>
+    <a href="#oft-arch" class="l2">  网络结构</a>
+    <a href="#oft-io" class="l2">  输入/输出</a>
+    <a href="#oft-loss" class="l2">  Loss</a>
+    <a href="#fast">二、FAST</a>
+    <a href="#fast-arch" class="l2">  网络结构</a>
+    <a href="#fast-io" class="l2">  输入/输出</a>
+    <a href="#fast-loss" class="l2">  Loss</a>
+    <a href="#pi0">三、π0</a>
+    <a href="#pi0-arch" class="l2">  网络结构</a>
+    <a href="#pi0-io" class="l2">  输入/输出</a>
+    <a href="#pi0-loss" class="l2">  Loss</a>
+    <a href="#groot">四、GR00T N1</a>
+    <a href="#groot-arch" class="l2">  网络结构</a>
+    <a href="#groot-io" class="l2">  输入/输出</a>
+    <a href="#groot-loss" class="l2">  Loss</a>
+    <a href="#pi05">附：π0.5 风格变体</a>
+    <a href="#modules">五、公共子模块</a>
+    <a href="#m-action-enc" class="l2">  ActionEncoder</a>
+    <a href="#m-multi-emb" class="l2">  MultiEmbodiment</a>
+    <a href="#m-mlp" class="l2">  MLP / decoder</a>
+    <a href="#m-future" class="l2">  future_tokens</a>
+    <a href="#m-pos" class="l2">  Sinusoidal PE</a>
+    <a href="#m-share-tools" class="l2">  populate_dit_cfg</a>
+    <a href="#m-share-state" class="l2">  state→text</a>
+    <a href="#compare">六、横向对比</a>
+    <a href="#pitfalls">七、踩坑提示</a>
+  </div>
+</aside>
+
+<main>
+
+<header class="head">
+  <h1>VLA 四种 Policy <span class="accent">代码级解读</span></h1>
+  <p class="subtitle">From paper to <code>starVLA</code> — 网络结构 / 输入输出 / Loss 函数</p>
+  <p class="meta">配套阅读：<a href="vla-four-policies.html">VLA 四种 Policy 阅读笔记</a> · 代码仓库 <code>starVLA/starVLA/model/</code></p>
+</header>
+
+<!-- ============================================================== -->
+<section id="abstract">
+<h2><span class="num">§0</span>摘要</h2>
+
+<p>原阅读笔记把 OpenVLA-OFT、FAST、π0、GR00T N1 四种 policy 抽象成"动作表示 / 生成方式 / 训练目标 / 耦合方式"四条设计轴。本文反过来：从 <code>starVLA</code> 实际代码出发，<b>把每条设计轴落到一个具体的类与一行损失函数上</b>，并附结构示意图。读完应该可以做到：看到任何一份新 VLA paper，能快速猜到它对应的 framework 类和 head 类长什么样。</p>
+
+<div class="callout">
+  <span class="label">阅读约定</span>
+  本文涉及的代码全部位于 <code>starVLA/starVLA/model/</code>。Framework 类位于 <code>framework/VLM4A/</code>，Action Head 类位于 <code>modules/action_model/</code>。<span class="file-ref">文件:行号</span> 标记表示在该文件中的相对位置。
+</div>
+</section>
+
+<!-- ============================================================== -->
+<section id="overview">
+<h2><span class="num">§1</span>代码总览：四套 policy 在 starVLA 的对应关系</h2>
+
+<table>
+<thead>
+<tr><th>Policy</th><th>Framework 类</th><th>Action Head 类</th><th>核心思想</th></tr>
+</thead>
+<tbody>
+<tr>
+  <td><span class="tag oft">OFT</span>OpenVLA-OFT</td>
+  <td><span class="file-ref">QwenOFT.py</span></td>
+  <td><code>L1RegressionActionHead</code><br><span class="file-ref">MLP_ActionHeader.py</span></td>
+  <td>占位 token + MLP 回归</td>
+</tr>
+<tr>
+  <td><span class="tag fast">FAST</span></td>
+  <td><span class="file-ref">QwenFast.py</span></td>
+  <td><code>Fast_Action_Tokenizer</code><br><span class="file-ref">fast_ActionHeader.py</span></td>
+  <td>DCT+BPE → VLM next-token</td>
+</tr>
+<tr>
+  <td><span class="tag pi0">π0</span></td>
+  <td><span class="file-ref">QwenPI.py</span></td>
+  <td><code>LayerwiseFlowmatchingActionHead</code><br><span class="file-ref">LayerwiseFM_ActionHeader.py</span></td>
+  <td>逐层 cross-attn DiT + 流匹配</td>
+</tr>
+<tr>
+  <td><span class="tag gr00t">GR00T</span>GR00T N1</td>
+  <td><span class="file-ref">QwenGR00T.py</span></td>
+  <td><code>FlowmatchingActionHead</code><br><span class="file-ref">GR00T_ActionHeader.py</span></td>
+  <td>单 cross-attn DiT + 流匹配</td>
+</tr>
+<tr>
+  <td><span class="tag pi0">π0.5</span>风格变体</td>
+  <td><span class="file-ref">QwenPI_v3.py</span></td>
+  <td>同 π0 + <code>project_layers</code> + 离散化 state</td>
+  <td>压缩 DiT + state-as-text</td>
+</tr>
+</tbody>
+</table>
+
+<p>主干都是 Qwen2.5-VL / Qwen3-VL（≈4B 参数），区别全部在 <b>action 表示</b> 与 <b>VLM↔Action 的耦合方式</b>。下面四节按设计复杂度递增展开。</p>
+
+</section>
+
+<!-- ============================================================== -->
+<!-- ===================== OFT ==================================== -->
+<!-- ============================================================== -->
+<section id="oft">
+<h2><span class="num">§2</span><span class="tag oft">OFT</span>OpenVLA-OFT — 注入 action token + L1 回归</h2>
+
+<h3 id="oft-arch">2.1 网络结构</h3>
+
+<div class="svg-block">
+<svg viewBox="0 0 800 360" xmlns="http://www.w3.org/2000/svg">
+  <!-- background -->
+  <rect width="800" height="360" fill="#fbf9f3"/>
+
+  <!-- inputs -->
+  <rect x="30" y="40" width="120" height="60" rx="4" fill="#dee5f0" stroke="#1f3d6e"/>
+  <text x="90" y="65" text-anchor="middle" font-family="sans-serif" font-size="13" font-weight="700">图像 (B,3,H,W)</text>
+  <text x="90" y="85" text-anchor="middle" font-family="sans-serif" font-size="11">vision encoder</text>
+
+  <rect x="30" y="120" width="120" height="60" rx="4" fill="#dee5f0" stroke="#1f3d6e"/>
+  <text x="90" y="145" text-anchor="middle" font-family="sans-serif" font-size="13" font-weight="700">指令 + 占位</text>
+  <text x="90" y="165" text-anchor="middle" font-family="sans-serif" font-size="11">"... 🔍🔍...🔍 ..."</text>
+
+  <!-- VLM block -->
+  <rect x="200" y="40" width="220" height="140" rx="6" fill="#fff" stroke="#4a6fa5" stroke-width="2"/>
+  <text x="310" y="65" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="700">Qwen2.5-VL</text>
+  <text x="310" y="84" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#888">(N 层 transformer)</text>
+  <line x1="220" y1="100" x2="400" y2="100" stroke="#e6e2d6"/>
+  <text x="310" y="120" text-anchor="middle" font-family="sans-serif" font-size="11">last_hidden:</text>
+  <text x="310" y="138" text-anchor="middle" font-family="sans-serif" font-size="11">(B, L_total, 2048)</text>
+  <text x="310" y="160" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#c97064">⚠ 不走 LM head</text>
+
+  <!-- gather op -->
+  <rect x="450" y="60" width="150" height="100" rx="6" fill="#f5f5f0" stroke="#b58a3d" stroke-width="2"/>
+  <text x="525" y="85" text-anchor="middle" font-family="sans-serif" font-size="13" font-weight="700">_gather()</text>
+  <text x="525" y="105" text-anchor="middle" font-family="sans-serif" font-size="11">topk + 排序</text>
+  <text x="525" y="123" text-anchor="middle" font-family="sans-serif" font-size="11">→ action_queries</text>
+  <text x="525" y="145" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#888">(B, K, 2048)</text>
+
+  <!-- MLP head -->
+  <rect x="640" y="60" width="130" height="100" rx="6" fill="#dee5f0" stroke="#1f3d6e" stroke-width="2"/>
+  <text x="705" y="85" text-anchor="middle" font-family="sans-serif" font-size="13" font-weight="700">MLPResNet</text>
+  <text x="705" y="103" text-anchor="middle" font-family="sans-serif" font-size="11">2 blocks</text>
+  <text x="705" y="121" text-anchor="middle" font-family="sans-serif" font-size="11">2048 → 4096</text>
+  <text x="705" y="139" text-anchor="middle" font-family="sans-serif" font-size="11">→ action_dim</text>
+
+  <!-- output -->
+  <rect x="640" y="200" width="130" height="60" rx="4" fill="#dde8d4" stroke="#3a5d2c"/>
+  <text x="705" y="225" text-anchor="middle" font-family="sans-serif" font-size="13" font-weight="700">pred_actions</text>
+  <text x="705" y="244" text-anchor="middle" font-family="sans-serif" font-size="11">(B, K=8, 7)</text>
+
+  <!-- loss -->
+  <rect x="450" y="200" width="150" height="60" rx="4" fill="#f3dcc9" stroke="#7a3812"/>
+  <text x="525" y="225" text-anchor="middle" font-family="sans-serif" font-size="13" font-weight="700">L1 Loss</text>
+  <text x="525" y="244" text-anchor="middle" font-family="sans-serif" font-size="11">|pred − gt|</text>
+
+  <!-- arrows -->
+  <defs>
+    <marker id="arrow1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#555"/>
+    </marker>
+  </defs>
+  <line x1="150" y1="70" x2="200" y2="80" stroke="#555" marker-end="url(#arrow1)"/>
+  <line x1="150" y1="150" x2="200" y2="140" stroke="#555" marker-end="url(#arrow1)"/>
+  <line x1="420" y1="110" x2="450" y2="110" stroke="#555" marker-end="url(#arrow1)"/>
+  <line x1="600" y1="110" x2="640" y2="110" stroke="#555" marker-end="url(#arrow1)"/>
+  <line x1="705" y1="160" x2="705" y2="200" stroke="#555" marker-end="url(#arrow1)"/>
+  <line x1="640" y1="230" x2="600" y2="230" stroke="#555" marker-end="url(#arrow1)"/>
+
+  <!-- bottom note -->
+  <text x="400" y="320" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#888">VLM 只产生条件特征；动作回归发生在 LM head 之外，所有 chunk 一次性并行得到。</text>
+</svg>
+<div class="svg-caption">图 2-1　OpenVLA-OFT 数据流：占位 token → 取 hidden → MLP → 连续动作</div>
+</div>
+
+<h4>关键模块</h4>
+<ul>
+  <li><b>主干</b>：Qwen2.5-VL（保留原 LM head 但<u>不用</u>，仅取 hidden state）</li>
+  <li><b>Action Head</b>：<code>L1RegressionActionHead</code> <span class="file-ref">MLP_ActionHeader.py:60</span>
+    <ul>
+      <li><code>MLPResNet</code>：<code>LayerNorm → Linear(in→hidden) → ReLU → 2× ResBlock → LayerNorm → Linear(hidden→action_dim)</code></li>
+      <li>默认形状 <code>input_dim=2048, hidden_dim=4096, action_dim=7, NUM_ACTIONS_CHUNK=8</code></li>
+      <li>每个 ResBlock = <code>LayerNorm → Linear → ReLU</code> + identity skip（Pre-LN 风格）</li>
+    </ul>
+  </li>
+</ul>
+
+<h3 id="oft-io">2.2 输入与输出</h3>
+
+<div class="io-grid">
+  <div class="io-box">
+    <h5>输入</h5>
+    <ul>
+      <li><code>images: List[PIL.Image]</code> 多视角</li>
+      <li><code>instruction: str</code> 自然语言</li>
+      <li><code>action: ndarray (T_full, D)</code> 监督标签</li>
+      <li><code>state: ndarray (1, state_dim)</code> 可选</li>
+    </ul>
+  </div>
+  <div class="io-box">
+    <h5>输出</h5>
+    <ul>
+      <li>训练：<code>{"action_loss": Tensor}</code></li>
+      <li>推理：<code>{"normalized_actions": ndarray (B, K, D)}</code></li>
+      <li>e.g. <code>(B, 8, 7)</code>，一次前向 → 整段 chunk</li>
+    </ul>
+  </div>
+</div>
+
+<h4>① 默认配置 — <span class="file-ref">QwenOFT.py:53</span></h4>
+<pre><code>@dataclass
+class QwenOFTDefaultConfig:
+    name: str = "QwenOFT"
+
+    # === VLM backbone (Qwen2.5-VL / Qwen3-VL) ===
+    qwenvl: dict = field(default_factory=lambda: {
+        "base_vlm": "./playground/Pretrained_models/Qwen3-VL-4B-Instruct-Action",
+        "attn_implementation": "flash_attention_2",
+    })
+
+    # === Action head (MLP regression over action special tokens) ===
+    action_model: dict = field(default_factory=lambda: {
+        "action_model_type": "MLP",
+        "action_dim": 7,
+        "action_hidden_dim": 2560,         # auto-aligned to VLM hidden_size at runtime
+        "future_action_window_size": 8,    # legacy alias → action_horizon
+        "past_action_window_size": 0,
+    })</code></pre>
+
+<h4>② 模型构造 — <span class="file-ref">QwenOFT.py:104</span></h4>
+<pre><code>def __init__(self, config=None, **kwargs):
+    # ─── Step 0：父类 nn.Module 必须先 super().__init__() ───────────────
+    # 不写这一句的话，self._parameters / self._modules 字典都还没建好，
+    # 后面 self.xxx = nn.Linear(...) 不会被 PyTorch 注册成可训练参数。
+    super().__init__()
+
+    # ─── Step 1：合并外部 yaml 配置 与 默认配置 ───────────────────────
+    # merge_framework_config 把用户 yaml 里写到的字段覆盖默认值，
+    # 没写的字段就保留 QwenOFTDefaultConfig 的默认。结果是一个嵌套
+    # OmegaConf 对象，可以用 self.config.framework.action_model.xxx 访问。
+    self.config = merge_framework_config(QwenOFTDefaultConfig, config)
+
+    # ─── Step 2：构造 VLM backbone（Qwen2.5-VL / Qwen3-VL）─────────────
+    # qwen_vl_interface 是一个 wrapper，里面挂了 .model（HF 模型本体）、
+    # .processor（图像+文本 tokenizer）和 build_qwenvl_inputs() 工具。
+    self.qwen_vl_interface = get_vlm_model(config=self.config)
+
+    # ─── Step 3：把 action head 的输入维度自动对齐到 VLM 输出维度 ─────
+    # OFT 的核心思路是"取 VLM 最后一层 hidden_state 当 action query"，
+    # 所以 head 的 input_dim 必须 == VLM hidden_size。
+    # Qwen2.5-VL-3B → 2048；Qwen3-VL-4B → 2560，写死会出 bug，所以这里
+    # 直接读模型的 config.hidden_size 覆盖配置。
+    self.config.framework.action_model.action_hidden_dim = \
+        self.qwen_vl_interface.model.config.hidden_size
+
+    # ─── Step 4：构造 Action Head（这里是 L1RegressionActionHead）─────
+    # 进 head 的形状是 (B, K, H)，出 head 是 (B, K, action_dim)。
+    self.action_model = get_action_model(config=self.config)
+
+    # ─── Step 5：动作 chunk 长度 ────────────────────────────────────
+    # action_horizon 是"一次预测多少步动作"的唯一真理源（例如 8）。
+    # 旧 yaml 用 future_action_window_size，share_tools 已经规范化，
+    # 这里直接读新字段就行。
+    self.action_horizon = int(self.config.framework.action_model.action_horizon)
+    self.chunk_len = self.action_horizon                  # 别名，方便阅读
+
+    # ─── Step 6：定义"动作占位 token" ──────────────────────────────
+    # OFT 不用真的让 LM 生成 token，而是把"🔍" 这个 emoji 重复 K 次塞进
+    # prompt，再把这 K 个位置在最后一层 hidden_state 中的向量"挑出来"
+    # 当成 K 条 action query，喂给 MLP 回归出动作。
+    # 选 emoji 的好处：它在所有 BPE tokenizer 里都是单 token，不会被切碎。
+    self.action_token = "🔍"
+
+    # 把 emoji 编码成它在 Qwen tokenizer 里的整数 id（后面用来定位）。
+    # add_special_tokens=False：不要前后自动加 &lt;bos&gt;/&lt;eos&gt;。
+    # 取 [0]：tokenizer 返回 list[int]，单字符就只有一个 id。
+    self.action_token_id = self.qwen_vl_interface.processor.tokenizer(
+        "🔍", add_special_tokens=False
+    )["input_ids"][0]
+
+    # ─── Step 7：训练目标——L1 回归 ───────────────────────────────
+    # 即 mean(|pred - gt|)，对动作量纲不敏感、抗 outlier。
+    self.l1_loss = nn.L1Loss()</code></pre>
+
+<h4>③ 训练前向 — <span class="file-ref">QwenOFT.py:138</span></h4>
+<pre><code>def forward(self, examples, **kwargs):
+    # examples 是一批样本 list，每个 dict 都有 image / lang / action / (state)。
+    # 这里用列表推导式把同一字段抽出成一个 batch 列表，方便后续打包。
+    batch_images = [e["image"]  for e in examples]   # 长度 B 的 list，每项是 PIL.Image
+    instructions = [e["lang"]   for e in examples]   # 长度 B 的 list[str]
+    actions      = [e["action"] for e in examples]   # 长度 B 的 list，每项形状 [T_full, D]
+
+    # 不是每个数据集都有 proprioceptive state（机械臂关节角等）。
+    # 用第 0 条样本"嗅探"一下有没有 state 这个 key 即可。
+    state = [e["state"] for e in examples] if "state" in examples[0] else None
+
+    # ─── π0.5 风格的 state 注入 ───────────────────────────────────
+    # 把连续 state 离散化（每维分箱 256 桶），转成形如 "[STATE] 12 87 ... [/STATE]"
+    # 的字符串拼到 prompt 里。让 VLM 自己用文字读懂关节状态，无需额外 encoder。
+    if state is not None:
+        instructions = self.add_discretized_state_to_instruction(instructions, state)
+
+    # ─── 关键：拼接 K 个动作占位符 ─────────────────────────────────
+    # "🔍" * 8 → "🔍🔍🔍🔍🔍🔍🔍🔍"。
+    # 注意：emoji 之间不能有空格——空格会被 BPE 切成额外 token，导致计数错乱。
+    action_tokens = self.action_token * self.chunk_len
+
+    # 把占位符夹在 &lt;action&gt;...&lt;/action&gt; 标签里，让模型一眼能看出"动作区间"。
+    # 对 BPE 而言这就是一段普通文本，并不需要词表扩展。
+    prompt_suffix = (
+        f" Please predict the next {self.chunk_len} robot actions: "
+        f"&lt;action&gt;{action_tokens}&lt;action&gt;."
+    )
+    instructions = [ins + prompt_suffix for ins in instructions]
+
+    # ─── 调 VLM backbone ──────────────────────────────────────────
+    # build_qwenvl_inputs 内部做了三件事：
+    #   1) 把 PIL 图像走 image processor → pixel_values
+    #   2) 把 instruction 走 tokenizer  → input_ids / attention_mask
+    #   3) 按 Qwen-VL 的对话模板拼起来
+    qwen_inputs = self.qwen_vl_interface.build_qwenvl_inputs(
+        images=batch_images, instructions=instructions
+    )
+
+    # bfloat16 跑前向：节省一半显存，Qwen-VL 在 bf16 下数值非常稳。
+    with torch.autocast("cuda", dtype=torch.bfloat16):
+        qwenvl_outputs = self.qwen_vl_interface(
+            **qwen_inputs,
+            output_attentions=False,        # 不要注意力图，省内存
+            output_hidden_states=True,      # 要中间层 hidden_states（OFT 只用最后一层）
+            return_dict=True,
+        )
+        # hidden_states 是 tuple(num_layers + 1)，[-1] 即最后一层输出。
+        # 形状 [B, L, H]：B=batch，L=token 总数（包含图像 token），H=隐藏维度
+        last_hidden = qwenvl_outputs.hidden_states[-1]
+
+    # ─── 回归用 fp32 ──────────────────────────────────────────────
+    # bf16 的尾数只有 7 bit，做小幅度 L1 回归会出现量化误差；
+    # head 的参数量很小，强行升 fp32 显存代价可忽略。
+    with torch.autocast("cuda", dtype=torch.float32):
+        input_ids = qwen_inputs.get("input_ids", None)
+
+        # 在 [B, L, H] 中找出 K 个 "🔍" 位置的向量 → [B, K, H]。
+        # 内部用 mask + topk + sort 做"取最后 K 个并按时间序排列"，下面单独讲。
+        action_queries = self._gather_action_token_embeddings(
+            last_hidden, input_ids, action_token_id=self.action_token_id
+        )
+
+        # 喂给 MLPResNet：reshape 成 (B*K, H) 过 MLP，再 view 回 (B, K, D)。
+        pred_actions = self.action_model.predict_action(action_queries)  # [B, K, D]
+
+        # 把 actions（list of np.ndarray）→ torch.Tensor，对齐 device / dtype。
+        actions = torch.tensor(np.array(actions),
+                               device=pred_actions.device, dtype=pred_actions.dtype)
+
+        # 数据集里每条 trajectory 可能有 T_full = past + future 步动作；
+        # 这里只取最后 action_horizon 步作为监督目标（GT 与 pred 形状对齐）。
+        actions_target = actions[:, -self.action_horizon:, :]            # [B, K, D]
+
+        # mean(|pred - gt|)：对每个维度、每步都求均值再总平均。
+        action_loss = self.l1_loss(pred_actions, actions_target)
+
+    # 训练 loop 拿这个 dict 去做 backward。
+    return {"action_loss": action_loss}</code></pre>
+
+<h4>④ 推理前向 — <span class="file-ref">QwenOFT.py:213</span></h4>
+<pre><code>@torch.inference_mode()                  # 比 no_grad 更彻底——还会关掉 version counter，速度更快
+def predict_action(self, examples, **kwargs):
+    # 部署时通常一帧一调用，传进来可能是单 dict 而非 list。
+    # 统一包成 batch=1，这样后面所有代码都和训练共享。
+    if type(examples) is not list:
+        examples = [examples]
+
+    # to_pil_preserve：把 numpy / tensor / 路径统统转成 PIL.Image，但保留分辨率与色彩空间。
+    batch_images = [to_pil_preserve(e["image"]) for e in examples]
+    instructions = [e["lang"] for e in examples]
+    state = [e["state"] for e in examples] if "state" in examples[0] else None
+
+    # 与训练保持一致：state 注入 → prompt 后缀。否则训练/推理分布会偏。
+    if state is not None:
+        instructions = self.add_discretized_state_to_instruction(instructions, state)
+
+    # ─── 推理图像分辨率必须与训练一致 ─────────────────────────────
+    # 训练时常 224×224 / 384×384，部署相机可能给 720p。
+    # 这里读训练时的 obs_image_size，把图统一 resize，避免 patch 数量错位。
+    train_obs_image_size = getattr(self.config.datasets.vla_data, "obs_image_size", None)
+    if train_obs_image_size:
+        batch_images = resize_images(batch_images, target_size=train_obs_image_size)
+
+    # 训练里怎么拼 prompt，这里就怎么拼，一字不差——这是 OFT 不出 OOD 的关键。
+    action_tokens = self.action_token * self.chunk_len
+    prompt_suffix = (
+        f" Please predict the next {self.chunk_len} robot actions: "
+        f"&lt;action&gt;{action_tokens}&lt;action&gt;."
+    )
+    instructions = [ins + prompt_suffix for ins in instructions]
+
+    qwen_inputs = self.qwen_vl_interface.build_qwenvl_inputs(
+        images=batch_images, instructions=instructions
+    )
+
+    # bf16 forward，省显存
+    with torch.autocast("cuda", dtype=torch.bfloat16):
+        qwenvl_outputs = self.qwen_vl_interface(
+            **qwen_inputs, output_hidden_states=True, return_dict=True
+        )
+        last_hidden = qwenvl_outputs.hidden_states[-1]    # [B, L, H]
+
+    # head 用 fp32，跟训练对齐
+    with torch.autocast("cuda", dtype=torch.float32):
+        # 同样的 mask+topk 取 K 个 query
+        action_queries = self._gather_action_token_embeddings(
+            last_hidden, qwen_inputs.get("input_ids"),
+            action_token_id=self.action_token_id,
+        )                                              # [B, K, H]
+
+        # 一次前向直接拿到完整动作 chunk——OFT 的核心卖点：parallel decoding，无自回归。
+        pred_actions = self.action_model.predict_action(action_queries)
+
+    # 部署 pipeline 习惯吃 numpy；后处理（反归一化）一般在框架外面做。
+    return {"normalized_actions": pred_actions.detach().cpu().numpy()}</code></pre>
+
+<h4>⑤ 取 query 的核心：topk + 时间排序 — <span class="file-ref">QwenOFT.py:278</span></h4>
+<pre><code>def _gather_action_token_embeddings(self, last_hidden, input_ids, action_token_id):
+    """
+    目标：在长长的 input_ids 序列里，定位 K 个 "🔍" 的位置，把 last_hidden 里
+         对应的 K 条向量"原地拎出来"，并保证按时间顺序排列。
+
+    last_hidden: [B, L, H]   B=batch  L=token 数  H=隐藏维度
+    input_ids:   [B, L]      每个位置一个整数 token id
+    返回:        [B, K, H]   K = chunk_len = self.action_horizon
+    """
+    device = input_ids.device
+    B, L, H = last_hidden.shape
+
+    # ─── Step 1：构造 mask（[B, L] 的 bool）──────────────────────
+    # 记号：True 表示这个位置是 "🔍"，需要被挑出来。
+    # 兼容两种调用：
+    #   action_token_id=42         （单值）
+    #   action_token_id=[42, 99]   （多值，例如有多套占位符）
+    if isinstance(action_token_id, (list, tuple, set)):
+        id_list = torch.tensor(list(action_token_id),
+                               device=device, dtype=input_ids.dtype)
+        # torch.isin：input_ids 中元素是否落在 id_list 集合里
+        mask = torch.isin(input_ids, id_list)
+    else:
+        mask = (input_ids == action_token_id)         # 元素级比较，结果是 bool [B, L]
+
+    # ─── Step 2：防御式校验 ──────────────────────────────────────
+    # 如果哪个样本的占位符数量小于 K，直接报错——拼 prompt 的环节肯定哪里写漏了。
+    counts = mask.sum(dim=1)                          # [B] 每条样本里 True 的个数
+    if (counts &lt; self.chunk_len).any():
+        raise RuntimeError(f"insufficient action tokens, counts={counts.tolist()}")
+
+    # ─── Step 3：把"位置下标"在非占位处置为 -1 ────────────────────
+    # 思路：我们想要"序列中最靠后的 K 个 🔍 位置"。
+    # 先生成一份 [B, L] 的下标矩阵 0,1,2,...,L-1；
+    # 再用 mask 把"非 🔍"的位置改成 -1（任何 ≥0 的下标都比它大）。
+    idx = torch.arange(L, device=device).unsqueeze(0).expand(B, L)   # [B, L]
+    masked_pos = torch.where(mask, idx, torch.full_like(idx, -1))
+
+    # ─── Step 4：topk 取最大的 K 个 → 即"最靠右"的 K 个 🔍 位置 ────
+    # topk 默认 sorted=True，但它按"值大小"排，不是"下标大小"。这里恰好
+    # 我们的"值"就是下标，所以"值最大" == "位置最靠右"。但顺序还可能乱。
+    topk_pos = masked_pos.topk(k=self.chunk_len, dim=-1).values      # [B, K] 可能乱序
+
+    # 再 sort 一次，保证按时间升序——这样第 i 列对应的就是动作的第 i 步。
+    selected_pos = topk_pos.sort(dim=-1).values                      # [B, K] 升序
+
+    # ─── Step 5：用 gather 把对应位置的 hidden 向量挑出来 ─────────
+    # gather 沿 dim=1 取，要求 index 与 src 维度数一致：
+    #   src   形状 [B, L, H]
+    #   index 形状 [B, K, H]（把每个位置 id 在 H 维上 broadcast 复制）
+    # 结果形状 [B, K, H]：第 b 个样本、第 k 个动作步、对应的 H 维特征向量。
+    expanded_index = selected_pos.unsqueeze(-1).expand(-1, -1, H)
+    action_queries = last_hidden.gather(dim=1, index=expanded_index)
+    return action_queries</code></pre>
+
+<h4>⑥ Action Head 的 MLPResNet — <span class="file-ref">MLP_ActionHeader.py:34</span></h4>
+<pre><code>class MLPResNetBlock(nn.Module):
+    """
+    一个标准的"Pre-LayerNorm 残差块"——和 GPT、ViT 里的 FFN 子层是同款配方。
+    数学：out = x + Linear(ReLU(LayerNorm(x))) ↑↑↑ 残差让深层网络好训练
+    """
+    def __init__(self, dim):
+        super().__init__()
+        # nn.Sequential 里写的顺序就是 forward 的顺序
+        self.ffn = nn.Sequential(
+            nn.LayerNorm(dim),    # 先归一化（pre-norm 风格，比 post-norm 更稳）
+            nn.Linear(dim, dim),  # 一层全连接，维度不变
+            nn.ReLU(),            # 非线性激活
+        )
+
+    def forward(self, x):
+        # 残差连接：把输入直接加到 ffn 输出上。
+        # 即便 ffn 全是 0，整个 block 也等价于恒等映射，不会拖累网络。
+        return x + self.ffn(x)
+
+
+class MLPResNet(nn.Module):
+    """
+    把若干 MLPResNetBlock 串起来，前后各加一段"投影 + 归一化"。
+        input_dim → hidden_dim → ... → hidden_dim → output_dim
+    OFT 这里用：input=2048/2560(VLM hidden), hidden=2*input, output=7(action_dim).
+    """
+    def __init__(self, num_blocks, input_dim, hidden_dim, output_dim):
+        super().__init__()
+        # 入口归一化 + 升维到 hidden（让中间块在更宽的空间里"思考"）
+        self.layer_norm1 = nn.LayerNorm(input_dim)
+        self.fc1   = nn.Linear(input_dim, hidden_dim)
+        self.relu  = nn.ReLU()
+
+        # ModuleList 里的子模块会被 PyTorch 自动注册成可训练参数（用普通 list 不会！）
+        self.mlp_resnet_blocks = nn.ModuleList(
+            [MLPResNetBlock(dim=hidden_dim) for _ in range(num_blocks)]
+        )
+
+        # 出口归一化 + 投影到动作维度（如 7：xyz + rpy + gripper）
+        self.layer_norm2 = nn.LayerNorm(hidden_dim)
+        self.fc2   = nn.Linear(hidden_dim, output_dim)
+
+    def forward(self, x):
+        # x: (N, input_dim)，N 在 OFT 里 = B*K
+        x = self.layer_norm1(x); x = self.fc1(x); x = self.relu(x)   # (N, hidden_dim)
+        for block in self.mlp_resnet_blocks:
+            x = block(x)                                              # 形状不变
+        x = self.layer_norm2(x); x = self.fc2(x)                      # (N, output_dim)
+        return x
+
+
+class L1RegressionActionHead(nn.Module):
+    """
+    OFT 的 head 主体：把 K 条 query 向量回归成 K 步 action。
+    设计选择：完全没有时序耦合——K 步动作每一步独立预测，
+              依赖 VLM 的注意力把上下文已经聚合到每个 🔍 位置上。
+    """
+    def __init__(self, input_dim=2048, hidden_dim=4096,
+                 action_dim=7, NUM_ACTIONS_CHUNK=8):
+        super().__init__()
+        self.action_dim = action_dim
+        self.NUM_ACTIONS_CHUNK = NUM_ACTIONS_CHUNK
+        # 注意 num_blocks=2 是写死的；如需更深可改 yaml + factory
+        self.model = MLPResNet(num_blocks=2, input_dim=input_dim,
+                               hidden_dim=hidden_dim, output_dim=action_dim)
+
+    def predict_action(self, actions_hidden_states):
+        # 入：(B, K, H) —— B 个样本、K 个动作步、每步 H 维特征
+        B, K, H = actions_hidden_states.shape
+
+        # 把前两维合并成一个大 batch，让 MLP 能并行处理 B*K 条样本。
+        # 这是因为本 MLP 是 per-token 的，不需要也不会跨步交互。
+        x = actions_hidden_states.reshape(B * K, H)
+        x = self.model(x)                              # (B*K, action_dim)
+
+        # 还原回 (B, K, action_dim)，第 k 列即第 k 步动作的 7 维向量。
+        return x.view(B, K, self.action_dim)</code></pre>
+
+<h3 id="oft-loss">2.3 Loss 函数</h3>
+
+<span class="code-label">完整 loss 链 — QwenOFT.py:209</span>
+<pre><code># forward 末尾
+actions_target = actions[:, -self.action_horizon:, :]   # 标签对齐：取末尾 K 步
+action_loss    = self.l1_loss(pred_actions, actions_target)
+# self.l1_loss = nn.L1Loss()  → mean(|pred - gt|)</code></pre>
+
+<p>$$\mathcal{L}_{\text{OFT}} = \frac{1}{B \cdot K \cdot D}\sum_{b,k,d} \big| \hat{a}_{b,k,d} - a_{b,k,d}^{\text{gt}} \big|$$</p>
+
+<div class="callout good">
+  <span class="label">设计要点</span>
+  <b>条件特征用 VLM 的 hidden state，但绕过了 LM head</b> —— 把"语言生成"换成"特征 → MLP → 连续动作"。整条数据流没有任何 sampling、没有 noise，从输入到 loss 仅 O(1) 步前向：<code>VLM 一次 → topk 索引 → MLP → L1</code>。
+</div>
+</section>
+
+<!-- ============================================================== -->
+<!-- ===================== FAST =================================== -->
+<!-- ============================================================== -->
+<section id="fast">
+<h2><span class="num">§3</span><span class="tag fast">FAST</span>FAST — 把动作压缩成 token 序列，复用 VLM 自身 CE</h2>
+
+<h3 id="fast-arch">3.1 网络结构</h3>
+
+<div class="svg-block">
+<svg viewBox="0 0 800 380" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="380" fill="#fbf9f3"/>
+
+  <!-- training pipeline -->
+  <text x="20" y="30" font-family="sans-serif" font-size="13" font-weight="700" fill="#4a6fa5">训练阶段</text>
+
+  <rect x="20" y="50" width="130" height="60" rx="4" fill="#f3dcc9" stroke="#7a3812"/>
+  <text x="85" y="75" text-anchor="middle" font-family="sans-serif" font-size="12" font-weight="700">raw_actions</text>
+  <text x="85" y="93" text-anchor="middle" font-family="sans-serif" font-size="11">(B, T=15, 7)</text>
+
+  <rect x="180" y="50" width="130" height="60" rx="4" fill="#fff" stroke="#b58a3d" stroke-width="2"/>
+  <text x="245" y="73" text-anchor="middle" font-family="sans-serif" font-size="12" font-weight="700">FAST tokenizer</text>
+  <text x="245" y="91" text-anchor="middle" font-family="sans-serif" font-size="11">DCT + BPE</text>
+
+  <rect x="340" y="50" width="160" height="60" rx="4" fill="#f3dcc9" stroke="#7a3812"/>
+  <text x="420" y="73" text-anchor="middle" font-family="sans-serif" font-size="12" font-weight="700">action token IDs</text>
+  <text x="420" y="91" text-anchor="middle" font-family="sans-serif" font-size="11">变长 + offset 偏移</text>
+
+  <rect x="530" y="40" width="150" height="80" rx="4" fill="#fff" stroke="#4a6fa5" stroke-width="2"/>
+  <text x="605" y="62" text-anchor="middle" font-family="sans-serif" font-size="12" font-weight="700">prompt 拼接</text>
+  <text x="605" y="80" text-anchor="middle" font-family="sans-serif" font-size="11">"... &lt;robot_action_xxx&gt;"</text>
+  <text x="605" y="98" text-anchor="middle" font-family="sans-serif" font-size="11">→ Qwen2.5-VL</text>
+
+  <rect x="700" y="60" width="80" height="40" rx="4" fill="#dde8d4" stroke="#3a5d2c"/>
+  <text x="740" y="85" text-anchor="middle" font-family="sans-serif" font-size="12" font-weight="700">CE Loss</text>
+
+  <line x1="150" y1="80" x2="180" y2="80" stroke="#555" marker-end="url(#arrow2)"/>
+  <line x1="310" y1="80" x2="340" y2="80" stroke="#555" marker-end="url(#arrow2)"/>
+  <line x1="500" y1="80" x2="530" y2="80" stroke="#555" marker-end="url(#arrow2)"/>
+  <line x1="680" y1="80" x2="700" y2="80" stroke="#555" marker-end="url(#arrow2)"/>
+
+  <line x1="0" y1="160" x2="800" y2="160" stroke="#e6e2d6"/>
+
+  <!-- inference pipeline -->
+  <text x="20" y="190" font-family="sans-serif" font-size="13" font-weight="700" fill="#c97064">推理阶段</text>
+
+  <rect x="20" y="210" width="130" height="60" rx="4" fill="#dee5f0" stroke="#1f3d6e"/>
+  <text x="85" y="235" text-anchor="middle" font-family="sans-serif" font-size="12" font-weight="700">image+instr</text>
+  <text x="85" y="253" text-anchor="middle" font-family="sans-serif" font-size="11">(prompt)</text>
+
+  <rect x="180" y="200" width="170" height="80" rx="4" fill="#fff" stroke="#4a6fa5" stroke-width="2"/>
+  <text x="265" y="225" text-anchor="middle" font-family="sans-serif" font-size="12" font-weight="700">model.generate()</text>
+  <text x="265" y="243" text-anchor="middle" font-family="sans-serif" font-size="11">max_length=2048</text>
+  <text x="265" y="261" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#c97064">自回归 解码</text>
+
+  <rect x="380" y="200" width="180" height="80" rx="4" fill="#f5f5f0" stroke="#b58a3d" stroke-width="2"/>
+  <text x="470" y="225" text-anchor="middle" font-family="sans-serif" font-size="12" font-weight="700">过滤区间</text>
+  <text x="470" y="243" text-anchor="middle" font-family="sans-serif" font-size="11">[MIN, MAX]</text>
+  <text x="470" y="261" text-anchor="middle" font-family="sans-serif" font-size="11">- offset</text>
+
+  <rect x="590" y="200" width="190" height="80" rx="4" fill="#fff" stroke="#b58a3d" stroke-width="2"/>
+  <text x="685" y="225" text-anchor="middle" font-family="sans-serif" font-size="12" font-weight="700">FAST decoder</text>
+  <text x="685" y="243" text-anchor="middle" font-family="sans-serif" font-size="11">→ pred_actions</text>
+  <text x="685" y="261" text-anchor="middle" font-family="sans-serif" font-size="11">(B, T+1, 7)</text>
+
+  <line x1="150" y1="240" x2="180" y2="240" stroke="#555" marker-end="url(#arrow2)"/>
+  <line x1="350" y1="240" x2="380" y2="240" stroke="#555" marker-end="url(#arrow2)"/>
+  <line x1="560" y1="240" x2="590" y2="240" stroke="#555" marker-end="url(#arrow2)"/>
+
+  <defs>
+    <marker id="arrow2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#555"/>
+    </marker>
+  </defs>
+
+  <text x="400" y="350" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#888">FAST 不引入新参数化 head — 只新增 vocabulary（&lt;robot_action_{N}&gt;），完全复用 LM 的 next-token 训练/生成机制。</text>
+</svg>
+<div class="svg-caption">图 3-1　FAST 训练 / 推理双阶段流水线</div>
+</div>
+
+<h4>关键模块</h4>
+<ul>
+  <li><b>主干</b>：Qwen2.5-VL（<u>完全使用原生 LM 行为</u>：next-token 训练 + <code>model.generate</code> 推理）</li>
+  <li><b>Action Tokenizer</b>：<code>Fast_Action_Tokenizer</code> <span class="file-ref">fast_ActionHeader.py:68</span>
+    <ul>
+      <li>包装 HuggingFace <code>physical-intelligence/fast</code> 的 <code>AutoProcessor</code></li>
+      <li>不引入新参数化 head，只新增 vocabulary：把 FAST 输出的整数 token 映射到 <code>&lt;robot_action_{N}&gt;</code> 这类 special tokens</li>
+    </ul>
+  </li>
+</ul>
+
+<h3 id="fast-io">3.2 输入与输出</h3>
+
+<div class="io-grid">
+  <div class="io-box">
+    <h5>训练输入</h5>
+    <ul>
+      <li><code>images, instruction</code></li>
+      <li><code>actions: (B, T=15, D)</code></li>
+      <li>FAST → token IDs → +offset → 通过 <code>solutions=</code> 接到 prompt</li>
+    </ul>
+  </div>
+  <div class="io-box">
+    <h5>推理输出</h5>
+    <ul>
+      <li><code>model.generate</code> 出 token 流</li>
+      <li>过滤 <code>[MIN, MAX]</code> → 减 offset → FAST decode</li>
+      <li><code>normalized_actions: ndarray</code>（<b>token 长度变长</b>）</li>
+    </ul>
+  </div>
+</div>
+
+<h4>① 默认配置 — <span class="file-ref">QwenFast.py:48</span></h4>
+<pre><code>@dataclass
+class QwenFastDefaultConfig:
+    name: str = "QwenFast"
+
+    qwenvl: dict = field(default_factory=lambda: {
+        # 必须使用扩展过 vocabulary 的 checkpoint（含 &lt;robot_action_N&gt; 特殊 token）
+        "base_vlm": "./playground/Pretrained_models/Qwen3-VL-4B-Instruct-Action",
+        "attn_implementation": "flash_attention_2",
+    })
+
+    action_model: dict = field(default_factory=lambda: {
+        "action_model_type": "FAST",
+        "action_dim": 7,
+        "future_action_window_size": 15,   # → action_horizon = 16
+        "past_action_window_size": 0,
+    })</code></pre>
+
+<h4>② 模型构造 — <span class="file-ref">QwenFast.py:97</span></h4>
+<pre><code>def __init__(self, config=None, **kwargs):
+    # 必须先调父类，注册 _modules / _parameters
+    super().__init__()
+
+    # ─── Step 1：合并配置 ────────────────────────────────────────
+    self.config = merge_framework_config(QwenFastDefaultConfig, config)
+
+    # ─── Step 2：构造 VLM backbone ───────────────────────────────
+    # 注意：base_vlm 必须是"扩展过 vocabulary"的 checkpoint——
+    # 即词表里已经新增了 &lt;robot_action_0&gt; ... &lt;robot_action_2047&gt; 这些 token。
+    # 没扩词表的话，模型既看不懂训练标签也生成不出动作 token。
+    self.qwen_vl_interface = get_vlm_model(config=self.config)
+
+    # ─── Step 3：构造 Action Tokenizer（注意：这不是网络，只是个包装器）─
+    # FAST 不引入新的可训练 head，"head" 角色由 VLM 的 LM head 兼任。
+    # action_model 在这里只是 DCT+BPE 的"动作字符串编解码器"。
+    self.action_model = get_action_model(config=self.config)   # Fast_Action_Tokenizer
+
+    # ─── Step 4：chunk 长度 ──────────────────────────────────────
+    # FAST 的 chunk 通常较长（如 16），因为压缩后 token 序列短，自回归代价低。
+    self.action_horizon = int(self.config.framework.action_model.action_horizon)
+
+    # ─── Step 5：把 chunk 形状回写到 FAST tokenizer ──────────────
+    # FAST 内部 DCT 是按 (T, D) 二维矩阵做的，必须知道 T、D 才能正确分块。
+    # 这里把外层 yaml 决定的 horizon、action_dim 直接灌进去，避免对不上。
+    self.action_model.fast_tokenizer.time_horizon = self.action_horizon
+    self.action_model.fast_tokenizer.action_dim   = self.config.framework.action_model.action_dim</code></pre>
+
+<h4>③ 训练前向 — <span class="file-ref">QwenFast.py:125</span></h4>
+<pre><code>def forward(self, examples, **kwargs):
+    # 跟 OFT 一样的"按字段抽列"
+    batch_images = [e["image"]  for e in examples]   # list[PIL]，长度 B
+    instructions = [e["lang"]   for e in examples]   # list[str]，长度 B
+    actions      = [e["action"] for e in examples]   # list[ndarray (T, D)]，长度 B
+
+    # ─── Step 0：连续动作 → FAST 整数 token 序列 ───────────────────
+    # encoder_action2fastoken 内部三步：
+    #   ① np.stack 把 list 变 (B, T, D) 整块矩阵
+    #   ② DCT 沿 T 轴变换成稀疏频域系数（光滑动作 → 大部分系数接近 0）
+    #   ③ 量化 + BPE，把系数序列编成"变长"的整数 id 列表
+    # 返回形状为 List[List[int]]：第 i 条样本的 token 个数可能不同！
+    batch_fast_tokens = self.action_model.encoder_action2fastoken(actions)
+
+    # ─── Step 1：整数 id → "&lt;robot_action_{id}&gt;" 字符串 ───────────
+    # FAST 的 id 范围 0~2047；我们用字符串模板把它们包成"特殊 token 文本"。
+    # 之所以走字符串而不是直接拼 id：tokenizer 已经把这些字符串注册成
+    # special tokens，pipeline 还能保留普通文本流的 build/log 逻辑。
+    vlm_action_tokens = [
+        self.map_fast_token_to_vlm_action(fast_tokens)
+        for fast_tokens in batch_fast_tokens
+    ]
+
+    # ─── Step 2：把动作 token 通过 solutions= 拼到对话末尾 ─────────
+    # build_qwenvl_inputs 看到 solutions= 时会做两件事：
+    #   ① 把 instruction + answer 拼成完整对话
+    #   ② 给 input_ids 同步生成 labels：prompt 部分置 IGNORE_INDEX(-100)，
+    #      只对 answer（即 action token）那段算 CE。
+    # 这样 loss 就只惩罚"模型预测动作 token"的错误，文本部分不参与 loss。
+    qwen_inputs = self.qwen_vl_interface.build_qwenvl_inputs(
+        images=batch_images,
+        instructions=instructions,
+        solutions=vlm_action_tokens,
+    )
+
+    # ─── Step 3：标准 LM 前向，loss 由 HF 内部计算 ─────────────────
+    # FAST 完全复用 LM head：模型自动按 labels 算 next-token CE。
+    # 我们不需要 hidden_states（不像 OFT 要拎 query 出来），关掉省显存。
+    with torch.autocast("cuda", dtype=torch.bfloat16):
+        qwenvl_outputs = self.qwen_vl_interface(
+            **qwen_inputs,
+            output_attentions=False,
+            output_hidden_states=False,
+            return_dict=True,
+        )
+
+    vlm_action_loss = qwenvl_outputs.loss
+
+    # ─── 兜底：防 NaN 反传 ────────────────────────────────────────
+    # 极端情况下，labels 整段都是 IGNORE_INDEX（例如 batch 里全是空动作），
+    # HF 会返回 loss=None 或 NaN。这里替换成 0 张量，让 backward 安全。
+    if vlm_action_loss is None or torch.isnan(vlm_action_loss):
+        vlm_action_loss = torch.tensor(0.0, device=self.qwen_vl_interface.model.device)
+
+    return {"action_loss": vlm_action_loss}</code></pre>
+
+<h4>④ 推理前向 — <span class="file-ref">QwenFast.py:178</span></h4>
+<pre><code>@torch.inference_mode()
+def predict_action(self, examples, **kwargs):
+    # 同 OFT：单条/批量统一成 list，方便共用代码
+    if type(examples) is not list:
+        examples = [examples]
+    batch_images = [to_pil_preserve(e["image"]) for e in examples]
+    instructions = [e["lang"] for e in examples]
+
+    # ─── Step 1：构造 prompt（不带 solutions）─────────────────────
+    # 不传 solutions= 时，build_qwenvl_inputs 只生成"问句"部分；
+    # 模型自己负责续写"答句"——也就是动作 token 序列。
+    qwen_inputs = self.qwen_vl_interface.build_qwenvl_inputs(
+        images=batch_images, instructions=instructions
+    )
+
+    # ─── Step 2：自回归生成 ──────────────────────────────────────
+    # model.generate() 是 HuggingFace 的标准生成接口，内部做：
+    #   while not eos and len &lt; max_length:
+    #       logits = forward(prefix); next_id = sample/argmax; prefix.append(next_id)
+    # FAST 通常一段 chunk 不超过 ~50 token，max_length=2048 留得很宽松。
+    with torch.autocast("cuda", dtype=torch.bfloat16):
+        generated_ids = self.qwen_vl_interface.model.generate(
+            **qwen_inputs, max_length=2048,
+        )
+
+    # ─── Step 3：三阶段解码 ─────────────────────────────────────
+    #   ① _extract_action_token_ids
+    #        在生成序列里只挑落在 [_ACTION_TOKEN_MIN, _ACTION_TOKEN_MAX] 范围内的 id；
+    #        其它（普通文本 token、EOS 等）一律丢弃。
+    #   ② _decode_action_tokens
+    #        把 VLM 词表的全局 id 减去偏移 offset，还原成 FAST tokenizer 自己的 0~2047 id。
+    #   ③ fast_tokenizer.decode
+    #        反 BPE → 反量化 → 反 DCT，得到连续动作矩阵 (T, D)。
+    batch_vlm_action_token_ids  = self._extract_action_token_ids(generated_ids)
+    batch_fast_action_token_idx = self._decode_action_tokens(batch_vlm_action_token_ids)
+    normalized_actions          = self.action_model.fast_tokenizer.decode(batch_fast_action_token_idx)
+
+    # 注意 normalized_actions 是 List[ndarray]，每条样本 T 可能不同（变长 token → 不定长解码）。
+    return {"normalized_actions": normalized_actions}</code></pre>
+
+<h4>⑤ 三个解码辅助函数 — <span class="file-ref">QwenFast.py:224</span></h4>
+<pre><code>def _extract_action_token_ids(self, generated_ids):
+    """
+    从 generate() 的整段输出里，把"动作 token"挑出来。
+
+    generated_ids: torch.LongTensor [B, L]
+        每个位置一个 VLM 词表 id；包括对话模板、EOS、用户输入回显、模型自回归生成的全部内容。
+    return: List[List[int]]，长度 B；每条是该样本里出现过的动作 id（保持原顺序）。
+    """
+    # 词表里"动作 token"的 id 区间，例如 [151000, 153047]
+    act_min = self.qwen_vl_interface._ACTION_TOKEN_MIN
+    act_max = self.qwen_vl_interface._ACTION_TOKEN_MAX
+
+    # &amp; 是按位与，配合 ≥/≤ 两端做"区间内"判断。结果是 bool [B, L]。
+    mask = (generated_ids &gt;= act_min) &amp; (generated_ids &lt;= act_max)
+
+    results = []
+    for b in range(generated_ids.size(0)):
+        # nonzero 返回所有 True 的位置；as_tuple=False → 返回 (n, 1) 张量，再 flatten 成 (n,)
+        idx = mask[b].nonzero(as_tuple=False).flatten()
+        if idx.numel() == 0:
+            # 模型有时会"复读 prompt"或直接 EOS，导致没有动作 token。返回空列表。
+            results.append([]); continue
+        # 按出现顺序取出来，再转成 Python list[int]，方便后续做整数减法
+        results.append(generated_ids[b, idx].tolist())
+    return results
+
+
+def _decode_action_tokens(self, batch_vlm_tokens):
+    """
+    扣掉 offset：FAST 自身的词表是 0~2047，但被映射到 VLM 词表的高位区间。
+    例如 VLM 词表里 151000=&lt;robot_action_0&gt;、151001=&lt;robot_action_1&gt; ...
+    所以要取回 FAST id，只需 token - act_min。
+    """
+    act_min = self.qwen_vl_interface._ACTION_TOKEN_MIN
+    return [
+        [t - act_min for t in seq] if seq else None    # 空序列保留为 None，让下游 decode 知道"无动作"
+        for seq in batch_vlm_tokens
+    ]
+
+
+def map_fast_token_to_vlm_action(self, tokens):
+    """
+    训练阶段用的反向映射：FAST id → 字符串。
+    例如 [3, 12, 87] → "&lt;robot_action_3&gt;&lt;robot_action_12&gt;&lt;robot_action_87&gt;"。
+
+    前提：VLM tokenizer 在 vocabulary 扩展时已经把这些字符串登记为 single special token，
+          否则 BPE 会把 "&lt;robot_action_3&gt;" 切成多段普通字符。
+    """
+    return "".join([f"&lt;robot_action_{token}&gt;" for token in tokens])</code></pre>
+
+<h4>⑥ Fast_Action_Tokenizer — <span class="file-ref">fast_ActionHeader.py:68</span></h4>
+<pre><code>class Fast_Action_Tokenizer(nn.Module):
+    """
+    一个"看起来是网络其实没参数"的 nn.Module 包装器。
+    继承 nn.Module 只是为了能挂到 framework 里、被 .to(device) 等递归遍历，
+    内部实际只是 HuggingFace AutoProcessor 的薄包装。
+    """
+    def __init__(self, fast_tokenizer_name="playground/Pretrained_models/fast"):
+        super().__init__()
+
+        # AutoProcessor.from_pretrained 加载的是 physical-intelligence/fast：
+        #   它把 (T, D) 连续动作 → DCT 频域 → 量化 → BPE 编码 → 整数 id 序列；
+        #   反之亦然。trust_remote_code=True 是因为该 processor 自带 Python 文件。
+        self.fast_tokenizer = AutoProcessor.from_pretrained(
+            fast_tokenizer_name, trust_remote_code=True
+        )
+
+    def encoder_action2fastoken(self, raw_actions):
+        """连续动作 → 整数 id 序列。"""
+        # raw_actions: List[ndarray (T, D)]，长度 B
+        batch_actions = np.stack(raw_actions, axis=0)        # (B, T, D)
+        # 直接调 processor.__call__：内部走 DCT + 量化 + BPE，输出 List[List[int]]
+        batch_fast_tokens = self.fast_tokenizer(batch_actions)
+        return batch_fast_tokens
+
+    def decoder_action(self, generated_ids):
+        """
+        整数 id 序列 → 连续动作。
+        注意：传进来的 generated_ids 应该是"VLM 词表中的 id"，
+              这里再次减一遍 _ACTION_TOKEN_MIN 才能丢回 FAST tokenizer。
+        """
+        pred_actions = self.fast_tokenizer.decode(
+            [generated_ids - self._ACTION_TOKEN_MIN]
+        )
+        return pred_actions
+
+    def fit_tokenizer_on_datasets(self, action_dataset, datasets_path="..."):
+        """
+        可选步骤：在自家数据集上重新拟合 BPE 词表，提升压缩率。
+        多数情况下用 physical-intelligence/fast 默认词表已经够好。
+        """
+        # 如果之前已经 fit 过并保存，直接 load 就行
+        if os.path.exists(datasets_path):
+            self.fast_tokenizer = AutoProcessor.from_pretrained(
+                datasets_path, trust_remote_code=True
+            ); return
+
+        # 否则在新数据集上 fit BPE，然后存盘以备下次复用
+        new_tokenizer = self.fast_tokenizer.tokenizer.fit(action_dataset)
+        self.fast_tokenizer = new_tokenizer
+        self.fast_tokenizer.save_pretrained(datasets_path)</code></pre>
+
+<h3 id="fast-loss">3.3 Loss 函数</h3>
+
+<span class="code-label">完整 loss — QwenFast.py:172</span>
+<pre><code>vlm_action_loss = qwenvl_outputs.loss   # HuggingFace 内部已算好的 next-token CE
+# 兜底：极端情况下整个序列被 mask → loss=NaN → 替换为 0 防止反传 NaN
+if vlm_action_loss is None or torch.isnan(vlm_action_loss):
+    vlm_action_loss = torch.tensor(0.0, device=...)</code></pre>
+
+<p>$$\mathcal{L}_{\text{FAST}} = -\sum_{t=1}^{T_{\text{token}}} \log p_\theta\big(y_t \mid y_{&lt;t}, \text{img}, \text{instr}\big),\quad y_t \in \{\langle\text{robot\_action\_0}\rangle, \dots\}$$</p>
+
+<div class="callout">
+  <span class="label">优劣权衡</span>
+  ✅ 完全复用 LM 训练栈，可"无痛"接到任何 LLM 上；零新参数。<br>
+  ⚠️ 推理需自回归，速度受 token 长度影响（DCT 后稀疏度不同 → 长度变化）。<br>
+  ⚠️ <b>必须先把 <code>&lt;robot_action_N&gt;</code> 注册为 special token</b>（仓库里给了 <code>add_qwen_special_tokens/</code> 工具脚本），否则会被 BPE 切碎。
+</div>
+</section>
+
+<!-- ============================================================== -->
+<!-- ===================== π0 ===================================== -->
+<!-- ============================================================== -->
+<section id="pi0">
+<h2><span class="num">§4</span><span class="tag pi0">π0</span>π0 — 逐层 cross-attention DiT + 流匹配</h2>
+
+<h3 id="pi0-arch">4.1 网络结构</h3>
+
+<div class="svg-block">
+<svg viewBox="0 0 820 460" xmlns="http://www.w3.org/2000/svg">
+  <rect width="820" height="460" fill="#fbf9f3"/>
+
+  <!-- VLM stack -->
+  <rect x="30" y="40" width="180" height="380" rx="6" fill="#fff" stroke="#4a6fa5" stroke-width="2"/>
+  <text x="120" y="62" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="700">Qwen3-VL</text>
+  <text x="120" y="80" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#888">(36 层)</text>
+
+  <rect x="50" y="100" width="140" height="36" rx="3" fill="#dee5f0"/>
+  <text x="120" y="123" text-anchor="middle" font-family="sans-serif" font-size="12">VLM layer 0</text>
+  <rect x="50" y="145" width="140" height="36" rx="3" fill="#dee5f0"/>
+  <text x="120" y="168" text-anchor="middle" font-family="sans-serif" font-size="12">VLM layer 1</text>
+  <text x="120" y="200" text-anchor="middle" font-family="sans-serif" font-size="14">⋮</text>
+  <rect x="50" y="220" width="140" height="36" rx="3" fill="#dee5f0"/>
+  <text x="120" y="243" text-anchor="middle" font-family="sans-serif" font-size="12">VLM layer i</text>
+  <text x="120" y="275" text-anchor="middle" font-family="sans-serif" font-size="14">⋮</text>
+  <rect x="50" y="295" width="140" height="36" rx="3" fill="#dee5f0"/>
+  <text x="120" y="318" text-anchor="middle" font-family="sans-serif" font-size="12">VLM layer N-1</text>
+
+  <text x="120" y="365" text-anchor="middle" font-family="sans-serif" font-size="11" font-weight="700" fill="#4a6fa5">vl_embs_list</text>
+  <text x="120" y="383" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#888">List[Tensor], len=N</text>
+  <text x="120" y="400" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#888">每个 (B, L, D_vlm)</text>
+
+  <!-- DiT stack -->
+  <rect x="370" y="40" width="220" height="380" rx="6" fill="#fff" stroke="#7a3812" stroke-width="2"/>
+  <text x="480" y="62" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="700">Layerwise DiT</text>
+  <text x="480" y="80" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#888">(深度 = VLM 层数)</text>
+
+  <rect x="390" y="100" width="180" height="36" rx="3" fill="#f3dcc9"/>
+  <text x="480" y="123" text-anchor="middle" font-family="sans-serif" font-size="12">DiT block 0</text>
+  <rect x="390" y="145" width="180" height="36" rx="3" fill="#f3dcc9"/>
+  <text x="480" y="168" text-anchor="middle" font-family="sans-serif" font-size="12">DiT block 1</text>
+  <text x="480" y="200" text-anchor="middle" font-family="sans-serif" font-size="14">⋮</text>
+  <rect x="390" y="220" width="180" height="36" rx="3" fill="#f3dcc9"/>
+  <text x="480" y="243" text-anchor="middle" font-family="sans-serif" font-size="12">DiT block i</text>
+  <text x="480" y="275" text-anchor="middle" font-family="sans-serif" font-size="14">⋮</text>
+  <rect x="390" y="295" width="180" height="36" rx="3" fill="#f3dcc9"/>
+  <text x="480" y="318" text-anchor="middle" font-family="sans-serif" font-size="12">DiT block N-1</text>
+
+  <!-- arrows: VLM layer i -> DiT block i -->
+  <line x1="190" y1="118" x2="390" y2="118" stroke="#c97064" stroke-dasharray="4 3" marker-end="url(#arrow3)"/>
+  <line x1="190" y1="163" x2="390" y2="163" stroke="#c97064" stroke-dasharray="4 3" marker-end="url(#arrow3)"/>
+  <line x1="190" y1="238" x2="390" y2="238" stroke="#c97064" stroke-dasharray="4 3" marker-end="url(#arrow3)"/>
+  <line x1="190" y1="313" x2="390" y2="313" stroke="#c97064" stroke-dasharray="4 3" marker-end="url(#arrow3)"/>
+  <text x="280" y="80" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#c97064" font-style="italic">逐层 cross-attn</text>
+
+  <!-- input / output side -->
+  <rect x="640" y="50" width="160" height="80" rx="4" fill="#dde8d4" stroke="#3a5d2c"/>
+  <text x="720" y="73" text-anchor="middle" font-family="sans-serif" font-size="12" font-weight="700">noisy_trajectory</text>
+  <text x="720" y="91" text-anchor="middle" font-family="sans-serif" font-size="11">(1−t)·noise + t·a</text>
+  <text x="720" y="109" text-anchor="middle" font-family="sans-serif" font-size="11">+ state + future_tok</text>
+
+  <line x1="640" y1="90" x2="590" y2="118" stroke="#555" marker-end="url(#arrow3)"/>
+
+  <rect x="640" y="160" width="160" height="60" rx="4" fill="#fff" stroke="#b58a3d"/>
+  <text x="720" y="183" text-anchor="middle" font-family="sans-serif" font-size="12" font-weight="700">action_decoder</text>
+  <text x="720" y="201" text-anchor="middle" font-family="sans-serif" font-size="11">MLP → action_dim</text>
+
+  <line x1="590" y1="313" x2="640" y2="190" stroke="#555" marker-end="url(#arrow3)"/>
+
+  <rect x="640" y="250" width="160" height="60" rx="4" fill="#dde8d4" stroke="#3a5d2c"/>
+  <text x="720" y="273" text-anchor="middle" font-family="sans-serif" font-size="12" font-weight="700">pred_actions</text>
+  <text x="720" y="291" text-anchor="middle" font-family="sans-serif" font-size="11">(B, 16, D)</text>
+
+  <line x1="720" y1="220" x2="720" y2="250" stroke="#555" marker-end="url(#arrow3)"/>
+
+  <rect x="640" y="350" width="160" height="60" rx="4" fill="#f3dcc9" stroke="#7a3812"/>
+  <text x="720" y="373" text-anchor="middle" font-family="sans-serif" font-size="12" font-weight="700">FM Loss</text>
+  <text x="720" y="391" text-anchor="middle" font-family="sans-serif" font-size="11">||pred − velocity||²</text>
+
+  <line x1="720" y1="310" x2="720" y2="350" stroke="#555" marker-end="url(#arrow3)"/>
+
+  <defs>
+    <marker id="arrow3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#555"/>
+    </marker>
+  </defs>
+
+  <text x="410" y="445" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#888">π0 的核心：DiT 第 i 层用 vl_embs_list[i] 做 cross-attention，等于让动作策略"逐层吸收"VLM 不同抽象层级的特征。</text>
+</svg>
+<div class="svg-caption">图 4-1　π0 的逐层 cross-attention 架构</div>
+</div>
+
+<h4>关键模块（<span class="file-ref">LayerwiseFM_ActionHeader.py:197</span>）</h4>
+<ul>
+  <li><b>主干</b>：Qwen3-VL，<code>output_hidden_states=True</code>，返回所有层 hidden state</li>
+  <li><b>DiT 深度 = VLM 层数</b>，每个 DiT block 通过 <code>encoder_hidden_states=vl_embs_list[layer_idx]</code> cross-attend 到对应 VLM 层（<b>这是和 GR00T 最大的差异</b>）</li>
+  <li><b>子模块</b>：
+    <ul>
+      <li><code>state_encoder</code>: <code>MLP(state_dim → input_embedding_dim)</code>，可选</li>
+      <li><code>action_encoder</code>: <code>Linear(D→w) ‖ SinusoidalPosEnc(t) → Linear(2w→w) → swish → Linear(w→w)</code></li>
+      <li><code>future_tokens</code>: <code>nn.Embedding(num_target_vision_tokens, w)</code> 可学习"规划"占位 token</li>
+      <li><code>position_embedding</code>: 对 action 序列做 PE</li>
+      <li><code>action_decoder</code>: <code>MLP(w → action_dim)</code></li>
+    </ul>
+  </li>
+  <li><b>训练效率</b>：<code>repeated_diffusion_steps=2</code>（<span class="file-ref">QwenPI.py</span>），同 batch 复制 2 份配不同噪声 → 免费 batch 扩增</li>
+</ul>
+
+<h3 id="pi0-io">4.2 输入与输出</h3>
+
+<div class="io-grid">
+  <div class="io-box">
+    <h5>forward 输入</h5>
+    <ul>
+      <li><code>vl_embs_list: List[Tensor]</code> 长度=DiT 层数</li>
+      <li>每个 <code>(B, L, D_vlm)</code></li>
+      <li><code>actions: (B, action_horizon=16, D)</code></li>
+      <li><code>state: (B, 1, state_dim)</code> 可选</li>
+      <li><code>encoder_attention_mask</code> 可选</li>
+    </ul>
+  </div>
+  <div class="io-box">
+    <h5>predict_action 输出</h5>
+    <ul>
+      <li><code>pred_actions: (B, 16, D)</code></li>
+      <li>4 步 Euler 积分（默认 <code>num_inference_timesteps=4</code>）</li>
+      <li>每步：embed → 逐层 DiT → decode → 更新</li>
+    </ul>
+  </div>
+</div>
+
+<h4>① 默认配置 — <span class="file-ref">QwenPI.py:43</span></h4>
+<pre><code>@dataclass
+class QwenPIDefaultConfig:
+    name: str = "QwenPI"
+
+    qwenvl: dict = field(default_factory=lambda: {
+        "base_vlm": "./playground/Pretrained_models/Qwen3-VL-4B-Instruct",
+        "attn_implementation": "flash_attention_2",
+        "vl_hidden_dim": 2048,        # 运行时从模型 config 读真实值覆盖
+        "num_vl_layers": 36,          # 同上
+    })
+
+    action_model: dict = field(default_factory=lambda: {
+        "action_model_type": "LayerwiseFM",
+        "action_dim": 7,
+        "state_dim":  7,
+        "action_horizon": 16,
+        "repeated_diffusion_steps": 2,    # 同 batch 复 N 份噪声
+        "num_inference_timesteps": 4,     # Euler 步数
+
+        "add_pos_embed": True,
+        "max_seq_len":   1024,
+        "num_target_vision_tokens": 32,   # future_tokens 个数
+
+        # 流匹配 t 调度
+        "noise_beta_alpha": 1.5,
+        "noise_beta_beta":  1.0,
+        "noise_s":          0.999,
+        "num_timestep_buckets": 1000,
+
+        # DiT 形状（其余字段由 populate_layerwise_dit_cfg 在运行时填充）
+        "diffusion_model_cfg": {
+            "dropout": 0.2,
+            "final_dropout": True,
+            "interleave_self_attention": True,
+            "norm_type": "ada_norm",
+            "positional_embeddings": None,
+            "attention_head_dim": 64,
+        },
+    })</code></pre>
+
+<h4>② 模型构造（关键：DiT 深度对齐 VLM）— <span class="file-ref">QwenPI.py:121</span></h4>
+<pre><code>def __init__(self, config=None, **kwargs):
+    super().__init__()
+
+    # ─── Step 1：合并配置 + 起 VLM ───────────────────────────────
+    self.config = merge_framework_config(QwenPIDefaultConfig, config)
+    self.qwen_vl_interface = get_vlm_model(config=self.config)
+
+    # ─── Step 2：从 HF 模型自动读出"真实 hidden_size / 层数" ────
+    # 为什么要自动读？因为 yaml 里的 vl_hidden_dim=2048 / num_vl_layers=36
+    # 只是默认值。真正部署的 ckpt 可能换成 Qwen2.5-VL 7B（hidden=3584, 层=28），
+    # 写死会让 DiT 形状对不上。
+    vlm_hf_cfg = self.qwen_vl_interface.model.config
+
+    # Qwen3-VL 把 LLM 配置嵌套进了 text_config，Qwen2.5-VL 仍放顶层。
+    # getattr(.., default=vlm_hf_cfg)：找不到 text_config 就回退到顶层。
+    text_cfg = getattr(vlm_hf_cfg, "text_config", vlm_hf_cfg)
+    num_vl_layers   = int(text_cfg.num_hidden_layers)        # 例如 36
+    llm_hidden_size = int(vlm_hf_cfg.hidden_size)            # 例如 2048
+
+    # 把真实值回写到 config，下游 head 构造再读
+    self.config.framework.qwenvl.vl_hidden_dim = llm_hidden_size
+    self.config.framework.qwenvl.num_vl_layers = num_vl_layers
+
+    # ─── Step 3：把 DiT 形状对齐到 VLM ──────────────────────────
+    # populate_layerwise_dit_cfg 会把
+    #   diffusion_model_cfg.input_embedding_dim     ← dit_hidden_dim
+    #   diffusion_model_cfg.cross_attention_dim     ← dit_hidden_dim
+    #   diffusion_model_cfg.num_layers              ← num_dit_layers
+    #   diffusion_model_cfg.num_attention_heads     ← input_dim // head_dim
+    # 全部按 VLM 的真实形状填好。
+    # QwenPI（π0 风格）DiT 不压缩：完全等同 VLM hidden / 层数；
+    # QwenPI_v3（π0.5 风格）才会用 project_layers 压缩。
+    populate_layerwise_dit_cfg(
+        self.config,
+        dit_hidden_dim=llm_hidden_size,
+        num_dit_layers=num_vl_layers,
+    )
+
+    # ─── Step 4：构造 LayerwiseFlowmatchingActionHead ───────────
+    # 这步会真正实例化 DiT、action_encoder、future_tokens 等模块。
+    self.action_model: LayerwiseFlowmatchingActionHead = get_action_model(config=self.config)
+
+    # ─── Step 5：chunk 长度 ──────────────────────────────────────
+    self.action_horizon = int(self.config.framework.action_model.action_horizon)</code></pre>
+
+<h4>③ 提取多层 hidden — <span class="file-ref">QwenPI.py:167</span></h4>
+<pre><code>def _encode_vl_hidden_states(self, batch_images, instructions):
+    """
+    π0 的关键预处理：跑 VLM 一次，把每一层的 hidden_state 都拎出来给 DiT 用。
+    返回 (List[Tensor], attention_mask)，列表长度 = DiT 层数。
+    """
+    # ─── Step 1：构造 VLM 输入 ───────────────────────────────────
+    qwen_inputs = self.qwen_vl_interface.build_qwenvl_inputs(
+        images=batch_images, instructions=instructions
+    )
+    # attention_mask: [B, L]，1 表示有效 token，0 表示 pad；下游 DiT cross-attn 也要它
+    attention_mask = qwen_inputs.get("attention_mask", None)
+
+    # ─── Step 2：bf16 跑 VLM forward ─────────────────────────────
+    with torch.autocast("cuda", dtype=torch.bfloat16):
+        qwenvl_outputs = self.qwen_vl_interface(
+            **qwen_inputs,
+            output_attentions=False,
+            output_hidden_states=True,         # ★ 关键：把每层 hidden 都返回
+            return_dict=True,
+        )
+
+        # HF 的约定：hidden_states 是 tuple，长度 = num_hidden_layers + 1
+        #   index 0  ：embedding 之后、第一层 transformer 之前
+        #   index 1..N：第 1..N 层 transformer block 的输出
+        # DiT 块数等于 VLM transformer 层数 N，所以取末尾 N 张正好对齐：
+        #   vl_embs_list[i] 喂给 DiT block i 做 cross-attention。
+        expected_layers = len(self.action_model.model.transformer_blocks)
+        vl_embs_list = list(qwenvl_outputs.hidden_states[-expected_layers:])
+
+    return vl_embs_list, attention_mask</code></pre>
+
+<h4>④ 训练前向（含 repeated_diffusion_steps）— <span class="file-ref">QwenPI.py:186</span></h4>
+<pre><code>def forward(self, examples, **kwargs):
+    # ─── Step 0：拆 batch ────────────────────────────────────────
+    batch_images = [e["image"]  for e in examples]
+    instructions = [e["lang"]   for e in examples]
+    actions      = [e["action"] for e in examples]
+    state        = [e["state"]  for e in examples] if "state" in examples[0] else None
+
+    # ─── Step 1：VLM 前向，拿到逐层 hidden_states ────────────────
+    # 这一步是 π0 最贵的开销（一次 36 层 VLM forward）。
+    # 后面 repeated_diffusion_steps 复用同一份输出，避免重复跑 VLM。
+    vl_embs_list, backbone_attention_mask = self._encode_vl_hidden_states(
+        batch_images, instructions
+    )
+    base_hidden = vl_embs_list[-1]              # 仅用来推断 device / dtype
+
+    # ─── Step 2：在 fp32 下做"拼装 + 训练" ───────────────────────
+    # 流匹配 loss 涉及 (1-t)*noise + t*action 的细微数值，bf16 会有抖动；
+    # head 参数量小，升 fp32 代价可忽略。
+    with torch.autocast("cuda", dtype=torch.float32):
+        # list[ndarray] → Tensor，对齐 device / dtype
+        actions = torch.tensor(np.array(actions),
+                               device=base_hidden.device, dtype=base_hidden.dtype)
+        actions_target = actions[:, -self.action_horizon:, :]    # [B, 16, D]
+
+        # ─── Step 3：repeated_diffusion_steps 配方 ──────────────
+        # 思想：每个样本在流匹配里采的 t、noise 都是随机的，"看一眼这个样本"
+        # 提供的信号有限。把同一份 vl_embs/action 复制 N 份，每份会在 head 里
+        # 采不同的 t 和 noise → 等价于"VLM 跑 1 次、DiT 训练 N 次"，
+        # 显存只多 N 倍 batch（DiT 比 VLM 小很多），却能极大丰富训练信号。
+        repeated_diffusion_steps = (
+            self.config.framework.action_model.get("repeated_diffusion_steps", 4)
+            if self.config and hasattr(self.config, "framework") else 4
+        )
+        repeated_diffusion_steps = 2          # π0 的 DiT 已经很大，2 份够用；GR00T 用 8
+
+        # repeat(N, 1, 1) 在 dim0 上重复 N 次，其它维度不变
+        actions_target_repeated = actions_target.repeat(repeated_diffusion_steps, 1, 1)
+        # 每层 vl_embs 都要同步重复，否则 cross-attn 维度对不上
+        vl_embs_list_repeated   = [h.repeat(repeated_diffusion_steps, 1, 1)
+                                   for h in vl_embs_list]
+        if backbone_attention_mask is not None:
+            # repeat(N,1) 对 [B,L] 在 dim0 上重复；DiT cross-attn 需要 bool 类型
+            backbone_attention_mask = backbone_attention_mask.repeat(
+                repeated_diffusion_steps, 1
+            ).to(dtype=torch.bool)
+
+        state_repeated = None
+        if state is not None:
+            state = torch.tensor(np.array(state),
+                                 device=base_hidden.device, dtype=base_hidden.dtype)
+            state_repeated = state.repeat(repeated_diffusion_steps, 1, 1)
+
+        # ─── Step 4：调 head forward → 直接拿到 loss ────────────
+        # head 内部会采 t、采 noise、做 (1-t)*noise + t*a → DiT → MSE。
+        # 注意 head 的 forward 直接 return loss，不返回 pred_actions（节省一次 reshape）。
+        action_loss = self.action_model(
+            vl_embs_list_repeated,
+            actions_target_repeated,
+            state_repeated,
+            encoder_attention_mask=backbone_attention_mask,
+        )
+
+    return {"action_loss": action_loss}</code></pre>
+
+<h4>⑤ 推理前向 — <span class="file-ref">QwenPI.py:247</span></h4>
+<pre><code>@torch.inference_mode()
+def predict_action(self, examples, **kwargs):
+    # 兼容单条/批量调用
+    if type(examples) is not list:
+        examples = [examples]
+    batch_images = [to_pil_preserve(e["image"]) for e in examples]
+    instructions = [e["lang"] for e in examples]
+    state        = [e["state"] for e in examples] if "state" in examples[0] else None
+
+    # 与训练保持一致的图像尺寸——避免 patch 数量错位导致 attention 偏移
+    train_obs_image_size = getattr(self.config.datasets.vla_data, "obs_image_size", None)
+    if train_obs_image_size:
+        batch_images = resize_images(batch_images, target_size=train_obs_image_size)
+
+    # ─── Step 1：和训练一样跑 VLM，拿到 vl_embs_list ───────────
+    # 推理不需要 repeated_diffusion_steps（那是给训练采样用的）。
+    vl_embs_list, backbone_attention_mask = self._encode_vl_hidden_states(
+        batch_images, instructions
+    )
+    base_hidden = vl_embs_list[-1]
+    if backbone_attention_mask is not None:
+        backbone_attention_mask = backbone_attention_mask.to(dtype=torch.bool)
+
+    # state（如果有）→ Tensor，对齐 device / dtype
+    state = (
+        torch.from_numpy(np.array(state)).to(base_hidden.device, dtype=base_hidden.dtype)
+        if state is not None else None
+    )
+
+    # ─── Step 2：head.predict_action 跑 N 步 Euler 积分 ──────────
+    # 内部循环：从纯噪声起步，每步 forward 一次 DiT 拿到速度场 v_pred，
+    # 用 actions ← actions + dt * v_pred 做欧拉法更新。N=4 是默认值。
+    with torch.autocast("cuda", dtype=torch.float32):
+        pred_actions = self.action_model.predict_action(
+            vl_embs_list, state, encoder_attention_mask=backbone_attention_mask,
+        )
+
+    return {"normalized_actions": pred_actions.detach().cpu().numpy()}</code></pre>
+
+<h4>⑥ Action Head：核心 forward — <span class="file-ref">LayerwiseFM_ActionHeader.py:288</span></h4>
+<pre><code>def forward(self, vl_embs_list, actions, state=None, encoder_attention_mask=None):
+    """
+    一次"采样 + DiT 前向 + 算 loss"的完整流程。
+
+    vl_embs_list: List[Tensor]，长度 = DiT 层数 N，每张 (B, L, D_vlm)
+    actions:      (B, action_horizon, D_action)
+    state:        (B, 1, state_dim) or None
+    encoder_attention_mask: (B, L) or None
+    """
+    device = actions.device
+    B, L, D = vl_embs_list[0].shape
+
+    # ─── ① 流匹配的随机采样 ─────────────────────────────────────
+    # 思路：把"从噪声 ε 走到真 action a"看成一条直线
+    #         x_t = (1-t) ε + t a，   t ∈ [0, 1]
+    # 训练时随机选一个 t 和 ε，让模型学会预测速度 v = a - ε。
+    noise = torch.randn(actions.shape, device=device, dtype=actions.dtype)   # ε
+    t = self.sample_time(B, device=device, dtype=actions.dtype)              # (B,)
+    t = t[:, None, None]                                                     # (B,1,1) 广播
+
+    noisy_trajectory = (1 - t) * noise + t * actions     # x_t，shape (B,T,D)
+    velocity         = actions - noise                   # v(x_t,t) = a − ε（解析目标）
+
+    # ─── ② 时间离散化 + action 编码 ─────────────────────────────
+    # DiT 的 timestep encoder 用整数 bucket 做 embedding lookup，
+    # 所以这里把 t ∈ [0, noise_s] 映射到 [0, num_timestep_buckets-1]。
+    t_discretized   = (t[:, 0, 0] * self.num_timestep_buckets).long()         # (B,)
+    # action_encoder：对 (x_t, t) 一起编码，输出 (B, T, hidden)
+    action_features = self.action_encoder(noisy_trajectory, t_discretized)
+
+    # ─── ③ proprioceptive state（机械臂关节角等，可选）─────────
+    state_features = self.state_encoder(state) if state is not None else None
+
+    # ─── ④ 为 action 序列加可学习 PE，让 DiT 知道时间顺序 ────────
+    if self.config.add_pos_embed:
+        pos_ids = torch.arange(action_features.shape[1], dtype=torch.long, device=device)
+        # nn.Embedding lookup → (T, hidden)，再 unsqueeze(0) 广播到 (1, T, hidden)
+        action_features = action_features + self.position_embedding(pos_ids).unsqueeze(0)
+
+    # ─── ⑤ 拼接成 DiT 的输入 sa_embs ────────────────────────────
+    # 顺序：[state(可选) | future_tokens | action_features]
+    # future_tokens 是 32 个可学习"规划占位"，给 DiT 提供"额外思考空间"。
+    future_tokens = self.future_tokens.weight.unsqueeze(0).expand(B, -1, -1)   # (B, 32, w)
+    sa_embs = (
+        torch.cat((state_features, future_tokens, action_features), dim=1)
+        if state_features is not None
+        else torch.cat((future_tokens, action_features), dim=1)
+    )
+
+    # ─── ⑥ 逐层 cross-attention（π0 vs GR00T 的核心差异）────────
+    # 把 t_discretized 编码成 AdaLN 用的 timestep embedding
+    temb = self.model.timestep_encoder(t_discretized)
+
+    # 关键循环：DiT 第 i 层 ←→ VLM 第 i 层 hidden state 做 cross-attention。
+    # 这样动作策略可以"逐层吸收"VLM 的不同抽象级别（早期视觉特征、中段语法、末层语义）。
+    model_output = sa_embs
+    for layer_idx, layer in enumerate(self.model.transformer_blocks):
+        model_output = layer(
+            hidden_states=model_output,                       # 自身（query）
+            encoder_hidden_states=vl_embs_list[layer_idx],    # 来自 VLM 第 i 层（key/value）
+            encoder_attention_mask=encoder_attention_mask,
+            temb=temb,
+        )
+
+    # ─── ⑦ 解码 → 流匹配 MSE ────────────────────────────────────
+    # MLP(input_embedding_dim → action_dim)
+    pred = self.action_decoder(model_output)
+    # 取"动作段"——前缀的 state/future_tokens 不参与 loss
+    pred_actions = pred[:, -actions.shape[1]:]
+    # 流匹配 loss = ||v_pred − v_target||²
+    loss = ((pred_actions - velocity) ** 2).mean()
+    return loss</code></pre>
+
+<h4>⑦ Action Head：predict_action（Euler 积分）— <span class="file-ref">LayerwiseFM_ActionHeader.py:353</span></h4>
+<pre><code>@torch.no_grad()
+def predict_action(self, vl_embs_list, state=None, encoder_attention_mask=None):
+    """
+    推理时的 N 步 Euler 积分。
+    思想：训练学到的速度场 v_θ(x, t) 把"噪声"沿 t 方向推到"真 action"，
+    所以推理只需要从纯噪声起步，按 dt 步长积分若干次就够。
+    """
+    B = vl_embs_list[0].shape[0]
+    device = vl_embs_list[0].device
+
+    # ─── Step 1：初始化为纯噪声 x_0 ~ N(0, I) ───────────────────
+    # 注意：这里随机初值会导致每次推理结果略有不同（"采样多样性"）。
+    # 想要复现可调用 torch.manual_seed()。
+    actions = torch.randn(
+        size=(B, self.action_horizon, self.action_dim),
+        dtype=vl_embs_list[0].dtype, device=device,
+    )
+
+    num_steps = self.num_inference_timesteps    # 默认 4
+    dt = 1.0 / num_steps                        # 每步前进 0.25
+    # state 在循环外只编码一次——它在 N 步里都不变
+    state_features = self.state_encoder(state) if state is not None else None
+
+    # ─── Step 2：N 步循环，每步做一次"DiT forward + 欧拉前进" ──
+    for t in range(num_steps):
+        # 当前位置 t_cont ∈ {0, 0.25, 0.5, 0.75}
+        t_cont = t / float(num_steps)
+        t_disc = int(t_cont * self.num_timestep_buckets)
+        # 整 batch 共享同一个 t（不像训练每条样本独立采）
+        timesteps_tensor = torch.full((B,), t_disc, device=device, dtype=torch.long)
+
+        # ─── Step 3：组装 sa_embs，与 forward 完全一致 ────────
+        action_features = self.action_encoder(actions, timesteps_tensor)
+        if self.config.add_pos_embed:
+            pos_ids = torch.arange(action_features.shape[1], device=device, dtype=torch.long)
+            action_features = action_features + self.position_embedding(pos_ids).unsqueeze(0)
+        future_tokens = self.future_tokens.weight.unsqueeze(0).expand(B, -1, -1)
+        sa_embs = (
+            torch.cat((state_features, future_tokens, action_features), dim=1)
+            if state_features is not None
+            else torch.cat((future_tokens, action_features), dim=1)
+        )
+
+        # ─── Step 4：逐层 cross-attn → 拿速度场预测 ────────────
+        temb = self.model.timestep_encoder(timesteps_tensor)
+        model_output = sa_embs
+        for layer_idx, layer in enumerate(self.model.transformer_blocks):
+            model_output = layer(
+                hidden_states=model_output,
+                encoder_hidden_states=vl_embs_list[layer_idx],
+                encoder_attention_mask=encoder_attention_mask,
+                temb=temb,
+            )
+        pred = self.action_decoder(model_output)
+        pred_velocity = pred[:, -self.action_horizon:]    # (B, T, D_action)
+
+        # ─── Step 5：欧拉法前进一步 ────────────────────────────
+        # 数学：x_{t+dt} = x_t + dt · v(x_t, t)
+        # 经过 num_steps 步后，x ≈ 真 action。
+        actions = actions + dt * pred_velocity
+
+    return actions</code></pre>
+
+<h4>⑧ 噪声调度 sample_time — <span class="file-ref">LayerwiseFM_ActionHeader.py:281</span></h4>
+<pre><code># 在 head __init__ 里，提前构造一个 Beta(α, β) 分布对象
+self.beta_dist = Beta(action_config.noise_beta_alpha,    # α=1.5
+                      action_config.noise_beta_beta)     # β=1.0
+# Beta(1.5, 1.0) 的形状：右偏，PDF 在 x=1 附近最大；x=0 处接近 0。
+
+def sample_time(self, batch_size, device, dtype):
+    """
+    流匹配的关键超参——决定训练时模型"经常看到 t 的哪个区域"。
+    """
+    # 1) 从 Beta(1.5, 1.0) 采 batch_size 个 ∈ (0, 1)；多数靠近 1.0。
+    sample = self.beta_dist.sample([batch_size]).to(device, dtype=dtype)
+
+    # 2) 1 - sample → 把分布"翻过来"，使值集中在 0 附近。
+    # 3) 再乘 noise_s=0.999 → 值落在 [0, 0.999]，避开 t=1 的奇点。
+    # 最终效果：训练采样的 t 分布偏向 0.0 端
+    #   ↘ 即"接近纯噪声"的区域被多看；
+    #   而推理（4 步 Euler）从 t=0 起步，恰好让模型最熟悉的就是这片区域。
+    return self.config.noise_s * (1 - sample)</code></pre>
+
+<h3 id="pi0-loss">4.3 Loss 函数</h3>
+
+<span class="code-label">流匹配 MSE — LayerwiseFM_ActionHeader.py:350</span>
+<pre><code>loss = ((pred_actions - velocity) ** 2).mean()
+# pred_actions: 网络对 noisy_trajectory 在条件 (vl_embs_list, t) 下预测的速度场
+# velocity    : actions - noise，rectified flow 的解析目标</code></pre>
+
+<p>$$
+x_t = (1-t)\cdot\epsilon + t\cdot a,\quad v(x_t,t) = a - \epsilon
+$$</p>
+<p>$$
+\mathcal{L}_{\text{FM}} = \mathbb{E}_{\substack{t\sim\,0.999(1-\text{Beta}(1.5,1)) \\ \epsilon\sim\mathcal{N}(0,I)}}
+\left[\,\big\|f_\theta(x_t,\,t,\,\{h_i\}_{i=0}^{N-1},\,s) - v(x_t,t)\big\|_2^2\,\right]
+$$</p>
+
+<div class="callout good">
+  <span class="label">细节</span>
+  <code>Beta(1.5, 1.0)</code> 后取 <code>0.999·(1−x)</code> → <b>t 偏向 0.999 附近</b>，意味着模型更经常看到"接近真实 action"的 noisy 输入，对 4 步 Euler 推理友好。<br>
+  <code>repeated_diffusion_steps</code> 把同一份 vl_embs 复用 N 份，每份采不同 t、不同 noise → 等价于"VLM 前向 1 次，DiT 训练 N 次"，对显存友好。
+</div>
+</section>
+
+<!-- ============================================================== -->
+<!-- ===================== GR00T ================================== -->
+<!-- ============================================================== -->
+<section id="groot">
+<h2><span class="num">§5</span><span class="tag gr00t">GR00T</span>GR00T N1 — 单 cross-attention DiT + 流匹配</h2>
+
+<h3 id="groot-arch">5.1 网络结构</h3>
+
+<div class="svg-block">
+<svg viewBox="0 0 820 380" xmlns="http://www.w3.org/2000/svg">
+  <rect width="820" height="380" fill="#fbf9f3"/>
+
+  <!-- VLM -->
+  <rect x="30" y="40" width="180" height="220" rx="6" fill="#fff" stroke="#4a6fa5" stroke-width="2"/>
+  <text x="120" y="62" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="700">Qwen2.5-VL</text>
+  <text x="120" y="80" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#888">(System 2)</text>
+
+  <rect x="50" y="100" width="140" height="28" rx="3" fill="#dee5f0"/>
+  <rect x="50" y="135" width="140" height="28" rx="3" fill="#dee5f0"/>
+  <text x="120" y="183" text-anchor="middle" font-family="sans-serif" font-size="14">⋮</text>
+  <rect x="50" y="200" width="140" height="28" rx="3" fill="#dee5f0" stroke="#c97064" stroke-width="2"/>
+  <text x="120" y="219" text-anchor="middle" font-family="sans-serif" font-size="11" font-weight="700" fill="#c97064">last layer</text>
+
+  <text x="120" y="280" text-anchor="middle" font-family="sans-serif" font-size="11" font-weight="700" fill="#4a6fa5">vl_embs (Tensor)</text>
+  <text x="120" y="298" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#888">单一 (B, L, D_vlm)</text>
+
+  <!-- DiT (smaller, single block) -->
+  <rect x="350" y="40" width="240" height="220" rx="6" fill="#fff" stroke="#3a5d2c" stroke-width="2"/>
+  <text x="470" y="62" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="700">DiT-B / DiT-L</text>
+  <text x="470" y="80" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#888">(System 1)</text>
+
+  <rect x="370" y="100" width="200" height="28" rx="3" fill="#dde8d4"/>
+  <text x="470" y="119" text-anchor="middle" font-family="sans-serif" font-size="11">DiT block 0  (cross→vl_embs)</text>
+  <rect x="370" y="135" width="200" height="28" rx="3" fill="#dde8d4"/>
+  <text x="470" y="154" text-anchor="middle" font-family="sans-serif" font-size="11">DiT block 1  (cross→vl_embs)</text>
+  <text x="470" y="183" text-anchor="middle" font-family="sans-serif" font-size="14">⋮</text>
+  <rect x="370" y="200" width="200" height="28" rx="3" fill="#dde8d4"/>
+  <text x="470" y="219" text-anchor="middle" font-family="sans-serif" font-size="11">DiT block 11  (cross→vl_embs)</text>
+
+  <!-- single arrow from VLM last to entire DiT stack -->
+  <line x1="210" y1="214" x2="350" y2="160" stroke="#c97064" stroke-dasharray="4 3" stroke-width="2" marker-end="url(#arrow4)"/>
+  <text x="280" y="195" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#c97064" font-style="italic">所有 DiT 层共享同一 vl_embs</text>
+
+  <!-- inputs/outputs -->
+  <rect x="630" y="60" width="160" height="80" rx="4" fill="#dde8d4" stroke="#3a5d2c"/>
+  <text x="710" y="85" text-anchor="middle" font-family="sans-serif" font-size="12" font-weight="700">输入</text>
+  <text x="710" y="103" text-anchor="middle" font-family="sans-serif" font-size="11">noisy_trajectory</text>
+  <text x="710" y="121" text-anchor="middle" font-family="sans-serif" font-size="11">+ state + future_tok</text>
+
+  <line x1="630" y1="100" x2="590" y2="160" stroke="#555" marker-end="url(#arrow4)"/>
+
+  <rect x="630" y="180" width="160" height="60" rx="4" fill="#dde8d4" stroke="#3a5d2c"/>
+  <text x="710" y="203" text-anchor="middle" font-family="sans-serif" font-size="12" font-weight="700">pred_actions</text>
+  <text x="710" y="221" text-anchor="middle" font-family="sans-serif" font-size="11">(B, 8, D)</text>
+
+  <line x1="590" y1="214" x2="630" y2="210" stroke="#555" marker-end="url(#arrow4)"/>
+
+  <rect x="630" y="270" width="160" height="60" rx="4" fill="#f3dcc9" stroke="#7a3812"/>
+  <text x="710" y="293" text-anchor="middle" font-family="sans-serif" font-size="12" font-weight="700">FM Loss</text>
+  <text x="710" y="311" text-anchor="middle" font-family="sans-serif" font-size="11">||pred − velocity||²</text>
+
+  <line x1="710" y1="240" x2="710" y2="270" stroke="#555" marker-end="url(#arrow4)"/>
+
+  <defs>
+    <marker id="arrow4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#555"/>
+    </marker>
+  </defs>
+
+  <text x="400" y="360" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#888">和 π0 同源 — 唯一关键差异：只取 VLM 最后一层 hidden，DiT 所有 block 共享这一份条件特征。</text>
+</svg>
+<div class="svg-caption">图 5-1　GR00T N1 的 System2 (VLM) + System1 (DiT) 架构</div>
+</div>
+
+<h4>关键模块（<span class="file-ref">GR00T_ActionHeader.py:196</span>）</h4>
+<ul>
+  <li><b>主干</b>：Qwen2.5-VL，<u>只取 <code>hidden_states[-1]</code></u> 一份特征
+    <pre style="margin-top:6px"><code>last_hidden = qwenvl_outputs.hidden_states[-1]   # (B, L, D_vlm)</code></pre>
+  </li>
+  <li><b>DiT 形状</b>预设：
+    <ul>
+      <li><code>DiT-B</code>: <code>input_embedding_dim=768, heads=12, head_dim=64</code></li>
+      <li><code>DiT-L</code>: <code>input_embedding_dim=1536, heads=32, head_dim=48</code></li>
+    </ul>
+  </li>
+  <li><b><code>cross_attention_dim</code></b> 由 framework 在外部对齐到 <code>vlm.hidden_size</code></li>
+  <li><b>训练策略</b>：<code>repeated_diffusion_steps=8</code>（比 π0 的 2 大得多 → DiT-B 较小，需要更多噪声样本来训练）</li>
+  <li><b>action_horizon=8</b>，比 π0 的 16 短</li>
+</ul>
+
+<h3 id="groot-io">5.2 输入与输出</h3>
+
+<div class="io-grid">
+  <div class="io-box">
+    <h5>forward 输入</h5>
+    <ul>
+      <li><code>vl_embs: Tensor (B, L, D_vlm)</code> ← <b>单个 tensor</b></li>
+      <li><code>actions: (B, 8, D)</code></li>
+      <li><code>state: (B, 1, state_dim)</code> 可选</li>
+      <li><code>encoder_attention_mask</code> 可选</li>
+    </ul>
+  </div>
+  <div class="io-box">
+    <h5>predict_action 输出</h5>
+    <ul>
+      <li><code>pred_actions: (B, 8, D)</code></li>
+      <li>4 步 Euler 积分</li>
+    </ul>
+  </div>
+</div>
+
+<h4>① 默认配置 — <span class="file-ref">QwenGR00T.py:48</span></h4>
+<pre><code>@dataclass
+class QwenGR00TDefaultConfig:
+    name: str = "QwenGR00T"
+
+    qwenvl: dict = field(default_factory=lambda: {
+        "base_vlm": "./playground/Pretrained_models/Qwen3-VL-4B-Instruct",
+        "attn_implementation": "flash_attention_2",
+        "vl_hidden_dim": 2048,
+    })
+
+    action_model: dict = field(default_factory=lambda: {
+        "action_model_type": "DiT-B",      # "DiT-B" | "DiT-L"
+        "action_hidden_dim": 1024,
+        "hidden_size":       1024,
+        "add_pos_embed":     True,
+        "max_seq_len":       1024,
+
+        "action_dim": 7,
+        "state_dim":  7,
+        "action_horizon": 8,               # ← 短，只 8
+        "repeated_diffusion_steps": 8,     # ← 大，是 π0 的 4 倍
+
+        "noise_beta_alpha": 1.5,
+        "noise_beta_beta":  1.0,
+        "noise_s":          0.999,
+        "num_timestep_buckets":   1000,
+        "num_inference_timesteps": 4,
+        "num_target_vision_tokens": 32,
+
+        "diffusion_model_cfg": {
+            "cross_attention_dim": 2048,    # 运行时对齐到 VLM hidden_size
+            "dropout":     0.2,
+            "final_dropout": True,
+            "interleave_self_attention": True,
+            "norm_type":   "ada_norm",
+            "num_layers":  16,              # 独立 DiT，深度 ≠ VLM
+            "output_dim":  1024,
+            "positional_embeddings": None,
+        },
+    })</code></pre>
+
+<h4>② 模型构造 — <span class="file-ref">QwenGR00T.py:138</span></h4>
+<pre><code>def __init__(self, config=None, **kwargs):
+    super().__init__()
+    # 合并默认配置和用户 yaml
+    self.config = merge_framework_config(QwenGR00TDefaultConfig, config)
+
+    # ─── Step 1：构造 VLM backbone ───────────────────────────────
+    # GR00T 默认用 Qwen3-VL/2.5-VL；和 π0 不同，它"不需要"DiT 与 VLM 同深度。
+    self.qwen_vl_interface = get_vlm_model(config=self.config)
+
+    # ─── Step 2：把 cross_attention_dim 对齐到 VLM 的 hidden_size ─
+    # GR00T 的 DiT 内部 hidden 是固定的（DiT-B 768 / DiT-L 1536），
+    # 但 cross-attn 要消化 VLM 输出（2048 / 2560 / 3584 都可能），
+    # 所以 cross_attention_dim 要等于 VLM hidden_size。
+    # DiT 内部会自动用 W_k/W_v 把 D_vlm 投影到 D_dit。
+    self.config.framework.action_model.diffusion_model_cfg.cross_attention_dim = (
+        self.qwen_vl_interface.model.config.hidden_size
+    )
+
+    # ─── Step 3：构造 FlowmatchingActionHead ────────────────────
+    # 注意类型：GR00T 用 FlowmatchingActionHead（单 cross-attn），
+    # 而 π0 用 LayerwiseFlowmatchingActionHead（逐层 cross-attn）。
+    self.action_model: FlowmatchingActionHead = get_action_model(config=self.config)
+
+    # GR00T 默认 action_horizon=8（比 π0 的 16 短）
+    self.action_horizon = int(self.config.framework.action_model.action_horizon)</code></pre>
+
+<h4>③ 训练前向 — <span class="file-ref">QwenGR00T.py:167</span></h4>
+<pre><code>def forward(self, examples, **kwargs):
+    # batch 字段拆分（同 π0/OFT/FAST）
+    batch_images = [e["image"]  for e in examples]
+    instructions = [e["lang"]   for e in examples]
+    actions      = [e["action"] for e in examples]
+    state        = [e["state"]  for e in examples] if "state" in examples[0] else None
+
+    # ─── Step 1：跑 VLM，但只要最后一层 hidden ──────────────────
+    # 这是 GR00T vs π0 的最大代码差异：
+    #   π0   ：vl_embs_list = hidden_states[-N:]          （长度=DiT 层数）
+    #   GR00T：last_hidden  = hidden_states[-1]           （单张 tensor）
+    # 含义：GR00T 把 VLM 当成一次性 encoder，DiT 所有层共享同一份特征。
+    qwen_inputs = self.qwen_vl_interface.build_qwenvl_inputs(
+        images=batch_images, instructions=instructions
+    )
+    backbone_attention_mask = qwen_inputs.get("attention_mask", None)
+    with torch.autocast("cuda", dtype=torch.bfloat16):
+        qwenvl_outputs = self.qwen_vl_interface(
+            **qwen_inputs,
+            output_attentions=False,
+            output_hidden_states=True,
+            return_dict=True,
+        )
+        # ★ 关键：[-1] 只取最末一层
+        last_hidden = qwenvl_outputs.hidden_states[-1]
+
+    # ─── Step 2：repeated_diffusion_steps=8 ───────────────────────
+    # GR00T 的 DiT 比 π0 小很多（DiT-B 768/12L vs π0 36L 全 VLM 同维），
+    # 单次训练吸收的信号有限，于是把同份 vl_embs 复用 8 次（π0 只 2 次）。
+    with torch.autocast("cuda", dtype=torch.float32):
+        actions = torch.tensor(np.array(actions),
+                               device=last_hidden.device, dtype=last_hidden.dtype)
+        actions_target = actions[:, -self.action_horizon:, :]    # [B, 8, D]
+
+        repeated_diffusion_steps = (
+            self.config.framework.action_model.get("repeated_diffusion_steps", 4)
+            if self.config and hasattr(self.config, "framework") else 4
+        )
+
+        # 在 dim=0 上重复——把 batch 撑大到 B*N
+        actions_target_repeated = actions_target.repeat(repeated_diffusion_steps, 1, 1)
+        last_hidden_repeated    = last_hidden.repeat(repeated_diffusion_steps, 1, 1)
+        if backbone_attention_mask is not None:
+            backbone_attention_mask = backbone_attention_mask.repeat(
+                repeated_diffusion_steps, 1
+            ).to(dtype=torch.bool)
+
+        state_repeated = None
+        if state is not None:
+            state = torch.tensor(np.array(state),
+                                 device=last_hidden.device, dtype=last_hidden.dtype)
+            state_repeated = state.repeat(repeated_diffusion_steps, 1, 1)
+
+        # ─── Step 3：head forward，注意第一参数是 "单 tensor" ────
+        # 与 π0 的 list[Tensor] 形成对比；GR00T 的 head 内部只调一次 DiT。
+        action_loss = self.action_model(
+            last_hidden_repeated, actions_target_repeated, state_repeated,
+            encoder_attention_mask=backbone_attention_mask,
+        )
+
+    return {"action_loss": action_loss}</code></pre>
+
+<h4>④ 推理前向 — <span class="file-ref">QwenGR00T.py:223</span></h4>
+<pre><code>@torch.inference_mode()
+def predict_action(self, examples, **kwargs):
+    # 单条/批量统一
+    if type(examples) is not list:
+        examples = [examples]
+    batch_images = [to_pil_preserve(e["image"]) for e in examples]
+    instructions = [e["lang"] for e in examples]
+    state        = [e["state"] for e in examples] if "state" in examples[0] else None
+
+    # 与训练保持一致的图像分辨率
+    train_obs_image_size = getattr(self.config.datasets.vla_data, "obs_image_size", None)
+    if train_obs_image_size:
+        batch_images = resize_images(batch_images, target_size=train_obs_image_size)
+
+    # ─── Step 1：拿 attention_mask ───────────────────────────────
+    qwen_inputs = self.qwen_vl_interface.build_qwenvl_inputs(
+        images=batch_images, instructions=instructions
+    )
+    backbone_attention_mask = qwen_inputs.get("attention_mask", None)
+    if backbone_attention_mask is not None:
+        # DiT cross-attn 要 bool 类型 mask
+        backbone_attention_mask = backbone_attention_mask.to(dtype=torch.bool)
+
+    # ─── Step 2：bf16 跑 VLM，只取最后一层 ────────────────────────
+    with torch.autocast("cuda", dtype=torch.bfloat16):
+        qwenvl_outputs = self.qwen_vl_interface(
+            **qwen_inputs, output_hidden_states=True, return_dict=True,
+        )
+        last_hidden = qwenvl_outputs.hidden_states[-1]      # (B, L, D_vlm)
+
+    # state（如有）→ Tensor，对齐 device / dtype
+    state = (
+        torch.from_numpy(np.array(state)).to(last_hidden.device, dtype=last_hidden.dtype)
+        if state is not None else None
+    )
+
+    # ─── Step 3：head 跑 4 步 Euler，得到 (B, 8, D) ────────────────
+    with torch.autocast("cuda", dtype=torch.float32):
+        pred_actions = self.action_model.predict_action(
+            last_hidden, state, encoder_attention_mask=backbone_attention_mask,
+        )
+
+    return {"normalized_actions": pred_actions.detach().cpu().numpy()}</code></pre>
+
+<h4>⑤ Action Head：DiT 大小预设 + 构造 — <span class="file-ref">GR00T_ActionHeader.py:189</span></h4>
+<pre><code># ─── 字典预设：选 DiT 多大 ──────────────────────────────────────
+# 注意 hidden_dim × num_heads = head_dim × num_heads × hidden 的关系：
+#   DiT-B: 768  = 64 × 12
+#   DiT-L: 1536 = 48 × 32
+# Heads 越多越能捕捉不同子空间的关系，但参数量也线性涨。
+DiTConfig = {
+    "DiT-B": {"input_embedding_dim": 768,  "attention_head_dim": 64, "num_attention_heads": 12},
+    "DiT-L": {"input_embedding_dim": 1536, "attention_head_dim": 48, "num_attention_heads": 32},
+}
+
+
+class FlowmatchingActionHead(nn.Module):
+    """GR00T 风格的 head：单 DiT，cross-attn → VLM 最后一层。"""
+
+    def __init__(self, full_config):
+        super().__init__()
+        # 子配置短别名，方便后面写
+        config = full_config.framework.action_model
+        self.full_config = full_config
+
+        # ─── Step 1：根据 yaml 选 DiT-B 还是 DiT-L ──────────────
+        # action_model_type: "DiT-B" | "DiT-L"
+        action_model_type = config.action_model_type
+        action_model_cfg  = DiTConfig[action_model_type]
+        self.input_embedding_dim = action_model_cfg["input_embedding_dim"]
+
+        # ─── Step 2：合并 yaml 里的 diffusion_model_cfg ─────────
+        # python 字典展开语法 {**a, **b}：后者覆盖前者的同名键。
+        # 即"用户 yaml 优先 > DiTConfig 预设"。
+        diffusion_model_cfg = config.diffusion_model_cfg
+        diffusion_model_cfg = {**action_model_cfg, **diffusion_model_cfg}
+
+        # ─── Step 3：实例化 DiT 主体 ─────────────────────────────
+        # DiT 是一个标准 transformer，里面每个 block 都做：
+        #   self-attention → cross-attention(encoder=vl_embs) → FFN
+        # GR00T 这里 cross-attn 的 encoder_hidden_states 永远是同一份。
+        self.model = DiT(**diffusion_model_cfg)
+
+        # ─── Step 4：常用超参缓存到 self ────────────────────────
+        self.action_horizon = int(config.action_horizon)        # 8
+        self.action_dim     = config.action_dim                  # 7
+        self.num_inference_timesteps = config.num_inference_timesteps  # 4
+        self.hidden_size    = config.hidden_size                 # MLP 宽度，可独立于 DiT
+
+        # ─── Step 5：state encoder（可选） ──────────────────────
+        # 如果 state_dim 是 0 / None，就跳过 state 分支（部分数据集没有 proprio）。
+        # MLP：(state_dim) → hidden_size → input_embedding_dim
+        self.state_encoder = (
+            MLP(input_dim=config.state_dim, hidden_dim=self.hidden_size,
+                output_dim=self.input_embedding_dim)
+            if config.state_dim else None
+        )
+
+        # ─── Step 6：action encoder ────────────────────────────
+        # 把 (noisy_action, t) 编码成 token：
+        #   Linear(D_action → w) ‖ SinusoidalPosEnc(t) → Linear(2w → w) → swish → Linear(w → w)
+        self.action_encoder = ActionEncoder(
+            action_dim=config.action_dim, hidden_size=self.input_embedding_dim,
+        )
+
+        # ─── Step 7：action decoder ────────────────────────────
+        # 最后把 DiT 输出投回 action_dim
+        self.action_decoder = MLP(
+            input_dim=self.model.config.output_dim,
+            hidden_dim=self.hidden_size,
+            output_dim=self.action_dim,
+        )
+
+        # ─── Step 8：future_tokens 与 position_embedding ────────
+        # nn.Embedding 是 lookup table：输入整数 id，输出向量。
+        # future_tokens：32 个可学习"占位 token"，给 DiT 提供"思考槽"。
+        self.future_tokens = nn.Embedding(config.num_target_vision_tokens,
+                                          self.input_embedding_dim)
+        # 用 0.02 标准差做小幅正态初始化，是 transformer 默认配方
+        nn.init.normal_(self.future_tokens.weight, mean=0.0, std=0.02)
+
+        if config.add_pos_embed:
+            # 序列 PE：第 i 步动作 + 第 i 行 embedding
+            self.position_embedding = nn.Embedding(config.max_seq_len,
+                                                    self.input_embedding_dim)
+            nn.init.normal_(self.position_embedding.weight, mean=0.0, std=0.02)
+
+        # ─── Step 9：流匹配 noise schedule ──────────────────────
+        # Beta(α, β) 用来采 t（同 π0）。num_timestep_buckets 用来离散化。
+        self.beta_dist = Beta(config.noise_beta_alpha, config.noise_beta_beta)
+        self.num_timestep_buckets = config.num_timestep_buckets
+        self.config = config</code></pre>
+
+<h4>⑥ Action Head：核心 forward — <span class="file-ref">GR00T_ActionHeader.py:312</span></h4>
+<pre><code>def forward(self, vl_embs, actions, state=None, encoder_attention_mask=None):
+    """
+    vl_embs: (B, L, D_vlm)              ← ★ 单个 tensor（注意：π0 是 list）
+    actions: (B, action_horizon, D)
+    """
+    # ─── ① 流匹配采样（与 π0 一字不差） ────────────────────────
+    # 训练目标：让模型学会"在条件 vl_embs 下，从噪声推回真 action"的速度场。
+    noise = torch.randn(actions.shape, device=actions.device, dtype=actions.dtype)
+    t = self.sample_time(actions.shape[0], device=actions.device, dtype=actions.dtype)
+    t = t[:, None, None]                                  # (B,1,1) 广播
+
+    # 直线插值轨迹：噪声起点 ε，终点 a，t∈[0, noise_s]
+    noisy_trajectory = (1 - t) * noise + t * actions      # x_t
+    velocity         = actions - noise                    # v_target = a - ε
+
+    # ─── ② 离散化 t + action / state 编码 ───────────────────────
+    # ActionEncoder 输出 (B, T, w)；state 通过 MLP → (B, 1, w)
+    t_discretized   = (t[:, 0, 0] * self.num_timestep_buckets).long()
+    action_features = self.action_encoder(noisy_trajectory, t_discretized)
+    state_features  = self.state_encoder(state) if state is not None else None
+
+    # ─── ③ 给 action 序列加 PE ─────────────────────────────────
+    # 让 DiT 知道"第 0 步 / 第 1 步 / ..."的顺序信息。
+    if self.config.add_pos_embed:
+        pos_ids = torch.arange(action_features.shape[1], device=actions.device, dtype=torch.long)
+        action_features = action_features + self.position_embedding(pos_ids).unsqueeze(0)
+
+    # ─── ④ 拼接 sa_embs ────────────────────────────────────────
+    # 顺序：[state(可选) | future_tokens | action_features]
+    # future_tokens：(1, 32, w) → expand 到 (B, 32, w) 不实际复制内存
+    future_tokens = self.future_tokens.weight.unsqueeze(0).expand(vl_embs.shape[0], -1, -1)
+    sa_embs = (
+        torch.cat((state_features, future_tokens, action_features), dim=1)
+        if state_features is not None
+        else torch.cat((future_tokens, action_features), dim=1)
+    )
+
+    # ─── ⑤ DiT 一次调用 ─────────────────────────────────────────
+    # 关键：encoder_hidden_states=vl_embs（单 tensor）。
+    # DiT 内部循环 self-attn / cross-attn / FFN，每一层都用"同一个 vl_embs"做 cross-attn。
+    # return_all_hidden_states=False：不需要中间层输出（FLARE 才用）。
+    model_output = self.model(
+        hidden_states=sa_embs,
+        encoder_hidden_states=vl_embs,                # ★ 单一来源（vs π0 的 list）
+        encoder_attention_mask=encoder_attention_mask,
+        timestep=t_discretized,
+        return_all_hidden_states=False,
+    )
+
+    # ─── ⑥ 解码 → 取 action 段 ─────────────────────────────────
+    # action_decoder：MLP 把 DiT hidden 投回 action_dim
+    pred = self.action_decoder(model_output)
+    # 序列里前面是 state/future_tokens，只取末尾 action 段才是真正的速度场预测
+    pred_actions = pred[:, -actions.shape[1]:]
+
+    # ─── ⑦ MSE 流匹配 loss（与 π0 完全相同公式） ──────────────
+    loss = ((pred_actions - velocity) ** 2).mean()
+    return loss</code></pre>
+
+<h4>⑦ Action Head：predict_action — <span class="file-ref">GR00T_ActionHeader.py:365</span></h4>
+<pre><code>@torch.no_grad()
+def predict_action(self, vl_embs, state=None, encoder_attention_mask=None):
+    """
+    GR00T 推理 = N 步 Euler 积分（默认 N=4）。
+    与 π0 predict_action 唯一差别：传给 DiT 的 encoder_hidden_states 是单 tensor。
+    """
+    B = vl_embs.shape[0]; device = vl_embs.device
+
+    # ─── Step 1：从纯噪声起步 ────────────────────────────────────
+    actions = torch.randn(
+        size=(B, self.action_horizon, self.action_dim),
+        dtype=vl_embs.dtype, device=device,
+    )
+    num_steps = self.num_inference_timesteps     # 默认 4
+    dt = 1.0 / num_steps                         # 每步前进 0.25
+    state_features = self.state_encoder(state) if state is not None else None
+
+    # ─── Step 2：循环 N 步 ───────────────────────────────────────
+    for t in range(num_steps):
+        # 当前 t_cont ∈ {0, 0.25, 0.5, 0.75}，离散化成 bucket 给 DiT 的 timestep_encoder
+        t_cont = t / float(num_steps)
+        t_disc = int(t_cont * self.num_timestep_buckets)
+        timesteps_tensor = torch.full((B,), t_disc, device=device)
+
+        # ─── 组装 sa_embs（与训练 forward 一致） ──────────────
+        action_features = self.action_encoder(actions, timesteps_tensor)
+        if self.config.add_pos_embed:
+            pos_ids = torch.arange(action_features.shape[1], device=device, dtype=torch.long)
+            action_features = action_features + self.position_embedding(pos_ids).unsqueeze(0)
+        future_tokens = self.future_tokens.weight.unsqueeze(0).expand(B, -1, -1)
+        sa_embs = (
+            torch.cat((state_features, future_tokens, action_features), dim=1)
+            if state_features is not None
+            else torch.cat((future_tokens, action_features), dim=1)
+        )
+
+        # ─── DiT forward 拿速度场 ───────────────────────────────
+        model_output = self.model(
+            hidden_states=sa_embs,
+            encoder_hidden_states=vl_embs,            # 整 N 步循环都用同一份 vl_embs
+            encoder_attention_mask=encoder_attention_mask,
+            timestep=timesteps_tensor,
+        )
+        pred = self.action_decoder(model_output)
+        pred_velocity = pred[:, -self.action_horizon:]   # 只要 action 段（去掉 state/future_tokens）
+
+        # ─── 欧拉积分一步：x ← x + dt · v ─────────────────────
+        actions = actions + dt * pred_velocity
+
+    return actions</code></pre>
+
+<h3 id="groot-loss">5.3 Loss 函数</h3>
+
+<span class="code-label">流匹配 MSE — GR00T_ActionHeader.py:362</span>
+<pre><code>loss = ((pred_actions - velocity) ** 2).mean()
+# 数学形式与 π0 完全一致</code></pre>
+
+<div class="callout">
+  <span class="label">π0 vs GR00T</span>
+  Loss 数学形式 <b>完全相同</b>，区别只在条件特征：
+  <ul style="margin-top:6px">
+    <li>π0：<code>encoder_hidden_states=vl_embs_list[layer_idx]</code>（DiT 第 i 层 ← VLM 第 i 层）</li>
+    <li>GR00T：<code>encoder_hidden_states=vl_embs</code>（所有 DiT 层 ← VLM 最后一层）</li>
+  </ul>
+  π0 的 DiT 必须和 VLM 同深度（≈36 层），代价更大；GR00T 把动作策略做成了独立的"小快灵" System 1（DiT-B 仅 12 层），只听 VLM 的"最终结论"。这也是为什么 GR00T 用 <code>repeated_diffusion_steps=8</code> 而 π0 只用 2 —— 小 DiT 训练样本利用率要更高。
+</div>
+</section>
+
+<!-- ============================================================== -->
+<!-- ===================== π0.5 =================================== -->
+<!-- ============================================================== -->
+<section id="pi05">
+<h2><span class="num">§6</span><span class="tag pi0">π0.5</span>π0.5 风格变体（QwenPI_v3.py）</h2>
+
+<p>不在原四篇 paper 中，但代码里它和 π0 共享 head，是 π 系演进路径的代码实现：</p>
+
+<ol>
+  <li><b>VLM hidden 投影压缩</b> —— <code>project_layers</code> 是每层独立的：
+    <pre><code>nn.Sequential(
+    nn.LayerNorm(D_vlm),
+    nn.Linear(D_vlm, D_dit),   # e.g. 2560 → 1024
+)</code></pre>
+    把 VLM 2560 维压到 DiT 1024 维。这让 DiT 参数量大幅下降 — docstring 标注的占比是 <b>VLM 87.5% / action_model 10.6% / project_layers 1.9%, total ≈ 5.07B</b>。
+  </li>
+  <li><b>离散化 state 注入到指令文本</b> —— 把 state 量化成 256 bin，作为字符串拼到 prompt：
+    <pre><code>prompt = f"{instr} [STATE] {state_str} [ACTION]"</code></pre>
+    等价于让 VLM 自己"读"机器人 proprioception，不再单独喂给 DiT 的 <code>state_encoder</code>。
+  </li>
+  <li><b>Loss</b> 与 π0 完全一致（共用 <code>LayerwiseFlowmatchingActionHead</code>）。</li>
+</ol>
+
+<div class="callout good">
+  <span class="label">演进逻辑</span>
+  π0 → π0.5 的本质是 <b>"把更多结构性信息推回 VLM 文本接口"</b>：state 不再是单独的特征通路，而是和 instruction 一起被语言模型理解。代价是文本变长，收益是模型行为更像 LLM 风格的"看-想-做"。
+</div>
+</section>
+
+<!-- ============================================================== -->
+<!-- ===================== Shared Modules ========================= -->
+<!-- ============================================================== -->
+<section id="modules">
+<h2><span class="num">§7</span>公共子模块：跨 head 复用的零件</h2>
+
+<p>π0 / GR00T 两个流匹配 head 共享了相当一部分子模块，理解这些"零件"之后，再回头看 head 主干就只剩流程组装。这一节集中列举它们在代码里的确切实现。</p>
+
+<h3 id="m-action-enc">7.1 ActionEncoder — 把 (noisy_action, t) 编码成 token 序列</h3>
+
+<p>用在 π0/GR00T 的 head 内部，把 <code>(B, T, action_dim)</code> 的连续动作和 <code>(B,)</code> 的 timestep 一起编码成 <code>(B, T, hidden_size)</code>。</p>
+
+<span class="code-label">LayerwiseFM_ActionHeader.py:61 / GR00T_ActionHeader.py:62（两份完全一致）</span>
+<pre><code>class ActionEncoder(nn.Module):
+    """
+    把"带噪动作 + 当前时间 t"编码成一串 token，送给 DiT 当 query。
+    直觉：DiT 要预测速度场 v(x_t, t)，所以输入必须同时包含 x_t 和 t 两件事。
+    这里采用"分别投影 + 拼接"的写法——比直接把 t append 在 action 维度更稳。
+    """
+    def __init__(self, action_dim, hidden_size=1024):
+        # ─── Step 0：父类必须先 super().__init__() ─────────────────────
+        # 不写这一句，self.layer1 = nn.Linear(...) 不会被注册成可训练参数。
+        super().__init__()
+        self.hidden_size = hidden_size      # w，DiT 的 token 维度（默认 1024）
+        self.action_dim  = action_dim       # 7 = 6 DoF + 1 gripper（典型值）
+
+        # ─── Step 1：三层投影 ─────────────────────────────────────────
+        # layer1：把动作维 d 投到 token 维 w（升维）
+        # layer2：把 [a‖τ] 这个 2w 维向量再压回 w 维（融合）
+        # layer3：再过一层非线性的"打磨"，输出 w 维 token
+        self.layer1 = nn.Linear(action_dim,      hidden_size)        # a:    d → w
+        self.layer2 = nn.Linear(2 * hidden_size, hidden_size)        # [a‖τ]: 2w → w
+        self.layer3 = nn.Linear(hidden_size,     hidden_size)        # 后处理: w → w
+
+        # ─── Step 2：时间 t 用经典 sin/cos PE ─────────────────────────
+        # 不用 nn.Embedding 是因为 t 是连续值（0~num_timestep_buckets），
+        # sin/cos 能自然外推、平滑表示，而 Embedding 表只能查整数索引。
+        self.pos_encoding = SinusoidalPositionalEncoding(hidden_size)
+
+    def forward(self, actions, timesteps):
+        """
+        actions:   (B, T, action_dim) —— 一段动作序列（带噪 x_t 或推理时的 actions）
+        timesteps: (B,)                —— 每个样本一个标量 τ，整段动作共享
+        returns:   (B, T, hidden_size) —— 给 DiT 当 query 的 token 序列
+        """
+        B, T, _ = actions.shape
+
+        # ─── Step 1：把 (B,) 的 t 沿时间轴广播成 (B, T) ──────────────
+        # 同一段动作里的所有时间步共享同一个 τ（流匹配里 t 是 trajectory-level 的）
+        # .expand(-1, T) 是 zero-copy 广播，不会真的复制内存
+        if timesteps.dim() == 1 and timesteps.shape[0] == B:
+            timesteps = timesteps.unsqueeze(1).expand(-1, T)        # (B,) → (B,1) → (B,T)
+        else:
+            raise ValueError("timesteps must be (B,)")
+
+        # ─── Step 2：动作分支 —— 升维 ──────────────────────────────
+        a_emb = self.layer1(actions)                                # (B, T, w)
+
+        # ─── Step 3：时间分支 —— 编码后转成与 a_emb 同 dtype ────────
+        # .to(dtype=...) 防止 bf16 训练时 PE 默认 fp32 导致 cat 报错
+        tau_emb = self.pos_encoding(timesteps).to(dtype=a_emb.dtype) # (B, T, w)
+
+        # ─── Step 4：拼接 → 投影 → swish 激活 ─────────────────────
+        # 这里用 swish (x·sigmoid(x)) 而非 ReLU，参考 PaLM/GLU 系列经验：
+        # 流匹配里 swish 比 ReLU 更平滑，对连续目标拟合更稳。
+        x = torch.cat([a_emb, tau_emb], dim=-1)                     # (B, T, 2w)
+        x = swish(self.layer2(x))                                   # (B, T, w)
+
+        # ─── Step 5：再过一层 Linear，输出最终 token ──────────────
+        x = self.layer3(x)                                          # (B, T, w)
+        return x</code></pre>
+
+<h3 id="m-multi-emb">7.2 MultiEmbodimentActionEncoder — 多机型版本</h3>
+
+<p>结构和 ActionEncoder 完全一致，但每个 Linear 都换成了"按 cat_id 选权重"的 <code>CategorySpecificLinear</code>（每个机型一份独立参数）。这是 GR00T N1.5 / 多本体训练时用的变体。</p>
+
+<span class="code-label">GR00T_ActionHeader.py:25</span>
+<pre><code>class CategorySpecificLinear(nn.Module):
+    """
+    "按机型选一份权重"的 Linear。
+    背景：多本体训练时（人形 / 双臂 / 单臂...）每个机器人 action_dim 不同、
+    动作分布也大相径庭，用同一份 nn.Linear 会被强行拉平。
+    解决方案：把权重多复制一份维度 C（机型数），forward 时按 cat_id 索引。
+    """
+    def __init__(self, num_categories, input_dim, hidden_dim):
+        super().__init__()
+        self.num_categories = num_categories
+
+        # ─── Step 1：注册成 nn.Parameter，自动加入 model.parameters() ──
+        # shape=(C, in, hidden)：第 0 维 C 是"机型轴"，按 cat_id 选一片。
+        # 0.02 标准差是 GPT-2/BERT 系列经验值，太大会发散，太小会饱和。
+        self.W = nn.Parameter(0.02 * torch.randn(num_categories, input_dim, hidden_dim))
+        # 偏置初始化为 0：常见做法，避免训练初期产生人为的输出偏移。
+        self.b = nn.Parameter(torch.zeros(num_categories, hidden_dim))
+
+    def forward(self, x, cat_ids):
+        """
+        x:       (B, T, in)   —— 这一 batch 的输入
+        cat_ids: (B,)         —— 每个样本属于哪个机型
+        return:  (B, T, hidden)
+        """
+        # ─── Step 1：按 cat_ids 把 W 第 0 维"花式索引"出来 ────────
+        # PyTorch 张量的 high-dim indexing：W[cat_ids] 等价于 W.index_select(0, cat_ids)
+        selected_W = self.W[cat_ids]                 # (C,in,h) → (B,in,h)
+        selected_b = self.b[cat_ids]                 # (C,h)    → (B,h)
+
+        # ─── Step 2：batch matmul：每个样本走自己的权重 ───────────
+        # bmm 输入要求 (B, n, m) × (B, m, p) → (B, n, p)，正好对应这里
+        # selected_b.unsqueeze(1)：(B,h) → (B,1,h)，沿 T 轴广播加上去
+        return torch.bmm(x, selected_W) + selected_b.unsqueeze(1)
+
+
+class MultiEmbodimentActionEncoder(nn.Module):
+    """
+    多机型版 ActionEncoder：把 W1/W2/W3 都替换成 CategorySpecificLinear。
+    forward 多接一个 cat_ids 参数，让 batch 里不同机型走各自权重。
+    用途：GR00T N1.5 或任何"一份模型同时训多种机器人"的场景。
+    """
+    def __init__(self, action_dim, hidden_size=1024, num_embodiments=8):
+        super().__init__()
+        # 三层都是 CategorySpecificLinear；总参数量 ≈ 普通版 × num_embodiments
+        self.W1 = CategorySpecificLinear(num_embodiments, action_dim,    hidden_size)  # d → w
+        self.W2 = CategorySpecificLinear(num_embodiments, 2*hidden_size, hidden_size)  # 2w → w
+        self.W3 = CategorySpecificLinear(num_embodiments, hidden_size,   hidden_size)  # w → w
+
+        # PE 是确定性函数，不需要 per-embodiment 权重，所有机型共享
+        self.pos_encoding = SinusoidalPositionalEncoding(hidden_size)
+
+    def forward(self, actions, timesteps, cat_ids):
+        """
+        actions:   (B, T, action_dim)
+        timesteps: (B,)
+        cat_ids:   (B,)
+        return:    (B, T, hidden_size)
+        """
+        B, T, _ = actions.shape
+
+        # 跟普通 ActionEncoder 一样：把 (B,) 的 t 广播成 (B, T)
+        timesteps = timesteps.unsqueeze(1).expand(-1, T)
+
+        # 关键差异：W1/W2/W3 调用都多传一个 cat_ids，让权重按机型选
+        a_emb   = self.W1(actions, cat_ids)                          # (B, T, w)
+        tau_emb = self.pos_encoding(timesteps).to(dtype=a_emb.dtype) # (B, T, w)
+        x = torch.cat([a_emb, tau_emb], dim=-1)                      # (B, T, 2w)
+        x = swish(self.W2(x, cat_ids))                               # (B, T, w)
+        x = self.W3(x, cat_ids)                                      # (B, T, w)
+        return x</code></pre>
+
+<h3 id="m-mlp">7.3 MLP — state_encoder / action_decoder 用</h3>
+
+<p>head 里所有"普通 MLP 投影"都用这个：state→hidden_emb（输入端）和 hidden_emb→action_dim（输出端）。</p>
+
+<span class="code-label">GR00T_ActionHeader.py:52 / LayerwiseFM_ActionHeader.py:51</span>
+<pre><code>class MLP(nn.Module):
+    """
+    教科书级两层 MLP：input → hidden → output。
+    在 head 里出现 N 次（state_encoder、action_decoder、project_layers...），
+    所以单独抽出来做一个最简实现。
+    GR00T 版必须传 hidden_dim；π0 版默认 hidden_dim=1024（见前面文件 LayerwiseFM_ActionHeader.py:51）。
+    """
+    def __init__(self, input_dim, hidden_dim, output_dim):
+        super().__init__()
+        # ─── Step 1：第一层 Linear —— 升维（或调维） ────────────
+        # nn.Linear 内部会自己初始化 weight（Kaiming 默认）和 bias=0
+        self.layer1 = nn.Linear(input_dim,  hidden_dim)
+
+        # ─── Step 2：第二层 Linear —— 投到目标维度 ──────────────
+        self.layer2 = nn.Linear(hidden_dim, output_dim)
+
+    def forward(self, x):
+        # ReLU 是最快、最稳的非线性；放在两层之间产生非线性变换。
+        # 写成单行只是为了简洁：layer2(relu(layer1(x))) ≡ layer2(F.relu(layer1(x)))
+        return self.layer2(F.relu(self.layer1(x)))</code></pre>
+
+<h3 id="m-future">7.4 future_tokens — 可学习"规划"占位</h3>
+
+<p>给 DiT 一组与具体动作无关的 query token，attention 时它们去 cross-attend 视觉特征，相当于"想一想再写动作"。</p>
+
+<pre><code># 在 head __init__ 里：
+# ─── Step 1：声明 32 个可学习的 query token ─────────────────────
+# 把 nn.Embedding 当成"一张可训练查找表"：32 行，每行 w 维。
+# 它本质就是 nn.Parameter(torch.empty(32, w))，只是 nn.Embedding 帮你做了
+# 索引语法 (table[i]) 和 .weight 访问的封装。
+self.future_tokens = nn.Embedding(
+    config.num_target_vision_tokens,    # 默认 32：DiT 多 32 个"思考槽"
+    self.input_embedding_dim,           # = w，DiT 的 token 维度
+)
+# ─── Step 2：用 N(0, 0.02²) 初始化（GPT-2 同款）──────────────
+# 默认 Embedding 初始化是 N(0, 1)，对 Transformer 来说太大；改成 0.02 更稳。
+nn.init.normal_(self.future_tokens.weight, mean=0.0, std=0.02)
+
+
+# 在 forward 里：
+# ─── Step 1：把同一份 future_tokens 复制到整个 batch ────────────
+# .weight 形状 (32, w)；先 unsqueeze(0) → (1, 32, w)，再 expand → (B, 32, w)
+# 注意：用 expand 而不是 repeat，前者是 zero-copy 视图，后者会真复制内存。
+# 全 batch 共享同一份参数 → 32 个 token 是"全局可学常量"，不依赖具体样本。
+future_tokens = self.future_tokens.weight.unsqueeze(0).expand(B, -1, -1)
+
+# 之后在 head forward 里会被拼到 sa_embs 中段：
+#   sa_embs = cat([state_features, future_tokens, action_features], dim=1)
+# DiT cross-attn 时这 32 个 token 也能 attend 到 vl_embs，
+# 相当于给模型"在写动作前先想 32 步"的额外计算预算。</code></pre>
+
+<h3 id="m-pos">7.5 SinusoidalPositionalEncoding — Transformer 标准 PE</h3>
+
+<p>头部公用的 timestep 编码（不是 nn.Embedding 而是固定 sin/cos）。<code>swish</code> 是 <code>x · sigmoid(x)</code>。两者都从 <span class="file-ref">flow_matching_head/action_encoder.py</span> 导入。</p>
+
+<pre><code># ─── 从 flow_matching_head 模块导入两个共享小工具 ─────────────
+# 这俩都不是可训练参数，是无状态函数 / 模块，π0 / GR00T 共用一份实现。
+from starVLA.model.modules.action_model.flow_matching_head.action_encoder import (
+    # SinusoidalPositionalEncoding —— Vaswani et al. 2017 的经典 sin/cos PE
+    #   - 给 timestep（0~num_timestep_buckets）一个连续、可外推的向量表示
+    #   - 不用 nn.Embedding：避免训练表 + 支持训练时未见过的 t 平滑插值
+    #   - 公式：PE(pos, 2i)=sin(pos/10000^{2i/d})，PE(pos, 2i+1)=cos(...)
+    SinusoidalPositionalEncoding,
+    # swish(x) = x * sigmoid(x)，又叫 SiLU
+    #   - 比 ReLU 更平滑（处处可导），训练流匹配速度场更稳
+    #   - 比 GELU 计算便宜一点点
+    #   - PaLM / LLaMA / GPT-NeoX 都在用
+    swish,
+)</code></pre>
+
+<h3 id="m-share-tools">7.6 share_tools.populate_layerwise_dit_cfg — DiT 形状对齐</h3>
+
+<p>π0 的关键预处理：把 VLM 的真实 hidden / 层数填到 DiT cfg，保证 <code>encoder_hidden_states=vl_embs_list[i]</code> 不会维度错配。</p>
+
+<pre><code># ─── 它解决什么问题？ ────────────────────────────────────────
+# π0 是"逐层"cross-attention：DiT 第 i 层 ← VLM 第 i 层。
+# 这要求两件事必须严格匹配：
+#   (a) DiT.num_layers == VLM.num_hidden_layers，否则 vl_embs_list[i] 会越界；
+#   (b) DiT 的 cross_attention_dim == VLM 的 hidden_size，否则 KV 投影维度错配。
+# 这个工具就是把这俩值"灌"进 diffusion_model_cfg，避免人工抄错。
+
+# ─── 由 framework 在 __init__ 里调用（伪码示意）─────────────
+populate_layerwise_dit_cfg(
+    config,
+    dit_hidden_dim=llm_hidden_size,    # DiT 内部 hidden 维度
+                                        # QwenPI（π0）：= VLM hidden（不压缩，参数最多）
+                                        # QwenPI_v3（π0.5）：< VLM hidden（用 project_layers 压缩）
+    num_dit_layers=num_vl_layers,      # DiT 层数 == VLM 层数 → 逐层 cross-attn 才能一一对应
+)
+
+# ─── 函数内部会修改 config 的这几项 ─────────────────────────
+#   diffusion_model_cfg.num_layers           = num_dit_layers
+#       └── 决定 DiT 有多少 transformer block
+#   diffusion_model_cfg.input_embedding_dim  = dit_hidden_dim
+#       └── DiT token 维度（也是 future_tokens / position_embedding 的维度）
+#   diffusion_model_cfg.cross_attention_dim  = vl_hidden_size
+#       └── DiT 内部 cross-attn 的 K/V 投影维度，必须 == VLM 输出维度
+#   diffusion_model_cfg.num_attention_heads  = dit_hidden_dim // attention_head_dim
+#       └── 头数自动算出来，保证 head_dim 是个整数（典型 head_dim=64 或 48）</code></pre>
+
+<h3 id="m-share-state">7.7 share_tools.add_discretized_state_to_instruction — π0.5 风格 state 注入</h3>
+
+<p>OFT / π0_v3 都会在指令文本前先拼一段离散化 state（伪 prompt）。</p>
+
+<pre><code># ─── 它解决什么问题？ ─────────────────────────────────────
+# 传统流匹配 head 单独喂 state（关节角/末端位姿）给 DiT 的 state_encoder，
+# 多了一条数据通路、对齐起来麻烦，而且 VLM 也"看不见"机器人当前姿态。
+# π0.5 的做法：把 state 量化成离散 token、当成 prompt 的一部分，
+# 让 VLM 自己读 proprioception，DiT 只负责生成动作 → 通路更简单。
+
+# ─── 调用方（QwenOFT.py:170 / QwenPI_v3.py:...）─────────
+instructions = (
+    self.add_discretized_state_to_instruction(instructions, state)
+    if state is not None else instructions   # state=None 时直接返回原指令
+)
+
+# ─── 函数内部逻辑（伪码）────────────────────────────────
+# 1) 把 state ∈ ℝ^{state_dim} 按 (data 统计的 min, max) 线性归一化到 [0, 1]
+# 2) 每维 ×255 后取整 → 256 个 bin (0..255)
+# 3) 每个 bin 映射到一个 special token，比如 &lt;b34&gt;
+# 4) 拼成 prompt：
+#       "[STATE] &lt;b34&gt;&lt;b127&gt;... &lt;b89&gt; [ACTION] {原始指令}"
+#
+# 效果：
+#   - VLM 走 tokenizer + embed 时把这些 &lt;bxx&gt; 当成普通词汇
+#   - 视觉、语言、本体感知三条信息共享同一个文本流 → 更"端到端"
+#   - 代价：text 长度变长，attention 算力 ↑
+# 这也是"π0 → π0.5"的核心演进点之一</code></pre>
+
+</section>
+
+<!-- ============================================================== -->
+<!-- ===================== Compare ================================ -->
+<!-- ============================================================== -->
+<section id="compare">
+<h2><span class="num">§8</span>横向对比：代码级对照表</h2>
+
+<table>
+<thead>
+<tr>
+  <th>维度</th>
+  <th><span class="tag oft">OFT</span></th>
+  <th><span class="tag fast">FAST</span></th>
+  <th><span class="tag pi0">π0</span></th>
+  <th><span class="tag gr00t">GR00T</span></th>
+</tr>
+</thead>
+<tbody>
+<tr><td><b>动作表示</b></td><td>连续向量</td><td>DCT+BPE 整数 token</td><td>连续向量</td><td>连续向量</td></tr>
+<tr><td><b>解码方式</b></td><td>单步并行回归</td><td>VLM 自回归</td><td>4 步 Euler 积分</td><td>4 步 Euler 积分</td></tr>
+<tr><td><b>Cross-attn 粒度</b></td><td>无（取占位 token hidden）</td><td>无（同一 self-attn 序列）</td><td><b>逐层</b> <code>vl_embs_list[i]</code></td><td>单层 <code>last_hidden</code></td></tr>
+<tr><td><b>条件特征来源</b></td><td>LM 最后层 + topk 占位位</td><td>LM 序列 + LM head</td><td>LM 全部层（list）</td><td>LM 最后一层</td></tr>
+<tr><td><b>Action head 架构</b></td><td>2 层 MLPResNet</td><td>无（共用 LM 词表）</td><td>36 层 DiT，深度=VLM</td><td>12/32 层独立 DiT</td></tr>
+<tr><td><b>训练 loss</b></td><td><code>nn.L1Loss</code></td><td><code>HF CE</code></td><td><code>MSE(pred, a−ε)</code></td><td><code>MSE(pred, a−ε)</code></td></tr>
+<tr><td><b>chunk 长度</b></td><td>chunk_len=8</td><td>future_window=15（变长 token）</td><td>horizon=16</td><td>horizon=8</td></tr>
+<tr><td><b>repeated_steps</b></td><td>—</td><td>—</td><td>2</td><td>8</td></tr>
+<tr><td><b>额外参数量</b></td><td>MLP head（小）</td><td>无</td><td>DiT 36 层（大）</td><td>DiT-B/L（中）</td></tr>
+<tr><td><b>Loss 行号</b></td><td><span class="file-ref">QwenOFT.py:209</span></td><td><span class="file-ref">QwenFast.py</span></td><td><span class="file-ref">LayerwiseFM:350</span></td><td><span class="file-ref">GR00T:362</span></td></tr>
+</tbody>
+</table>
+
+<h3>设计轴的代码体现</h3>
+
+<div class="flow-box">
+  <div class="step"><div class="n">1</div><div><b>动作表示是一条 if-else</b>：动作要么是连续 (<code>actions: float Tensor</code>)，要么是离散 (<code>action_token_ids: long Tensor</code>)。前者三种实现，后者一种 (FAST)。</div></div>
+  <div class="step"><div class="n">2</div><div><b>耦合方式 = forward 签名</b>：<br>- OFT 不需要单独 head 的 <code>vl_embs</code>，靠 <code>action_token</code> 占位<br>- FAST 同理，靠词表 ID<br>- π0 head 接 <code>vl_embs_list: List[Tensor]</code><br>- GR00T head 接 <code>vl_embs: Tensor</code></div></div>
+  <div class="step"><div class="n">3</div><div><b>Loss 选择 = 一行</b>：<code>L1Loss</code>、<code>CE</code>、<code>MSE(pred − velocity)</code>，三选一。</div></div>
+  <div class="step"><div class="n">4</div><div><b>chunk vs token-stream</b>：连续动作天然是定长 chunk，token 动作是变长流（FAST 唯一）。</div></div>
+</div>
+
+</section>
+
+<!-- ============================================================== -->
+<!-- ===================== Pitfalls =============================== -->
+<!-- ============================================================== -->
+<section id="pitfalls">
+<h2><span class="num">§9</span>容易踩的点</h2>
+
+<ol>
+  <li><b>OFT 的"action token"不是真生成</b>：它只是占位，借助 attention 把 VLM 上下文聚到这些位置；最后用 hidden state 走 MLP，<u>不经过 LM head，不算自回归</u>。</li>
+
+  <li><b>FAST 的 token 长度不固定</b>：因为 DCT 后用 BPE，所以 chunk 越简单 token 越少；训练/推理都要做 ID 区间过滤再 decode。</li>
+
+  <li><b>π0 的"逐层"必须 framework 配合</b>：<code>QwenPI.py</code> 里要求 <code>output_hidden_states=True</code>，并把 hidden_states 列表喂给 head；DiT 层数 = 提取的 VLM 层数。</li>
+
+  <li><b>π0 vs GR00T 的 <code>repeated_diffusion_steps</code></b>：同一份 vl_embs 配多份噪声训练，对深 DiT 收敛尤为关键 —— 这也是为什么 π0 用 2、GR00T 用 8。</li>
+
+  <li><b>Loss 的 t 调度</b>：<code>Beta(1.5, 1.0)</code> 后取 <code>0.999·(1−x)</code> → t 偏向 0.999 附近，意味着模型更经常看到"接近真实 action"的 noisy 输入，对在线推理 4 步 Euler 友好。</li>
+
+  <li><b>预测速度场而非噪声</b>：<code>velocity = actions − noise</code>，所以 Euler 步是 <code>x ← x + dt · v_pred</code>，对应 rectified flow 的直线插值，<u>不是 DDPM 的反向去噪</u>。<span class="file-ref">DiTActionHeader.py</span> 才是经典 Gaussian diffusion（预测 noise + MSE），目前不是四个 framework 的默认。</li>
+
+  <li><b>Qwen3-VL 的隐藏层数</b>：在 π0 配置里 <code>DiTConfig.num_layers=36</code> 是 qwen2.5-vl 的默认；如果换成 qwen3-vl-4b（28 层）或 qwen3-vl-8b（36 层），需要同步改 <code>diffusion_model_cfg.num_layers</code>，否则 <code>vl_embs_list[layer_idx]</code> 会 IndexError。</li>
+</ol>
+
+<div class="callout warn">
+  <span class="label">最后一句</span>
+  四种 policy 的差异本质上是 <b>"动作的语义被多大程度卷进 VLM 的注意力图"</b>。OFT 只让 VLM 给出特征，FAST 让 VLM 直接说出动作 token，π0 让 DiT 逐层吸收 VLM 的中间状态，GR00T 把 DiT 解耦成独立小模型。这个谱系也解释了 π 系往 π0.5 的演化方向 —— 把 state 推回 prompt，把更多结构信息收回到语言侧。
+</div>
+
+</section>
+
+<hr>
+<p style="font-size:13px;color:var(--muted);text-align:center;font-family:-apple-system,sans-serif;">
+本文配套阅读笔记 · <a href="vla-four-policies.html" style="color:var(--accent);">VLA 四种 Policy 阅读笔记</a> · 代码仓库 starVLA
+</p>
+
+</main>
+</div>
+
+<script>
+// TOC scrollspy
+document.addEventListener('DOMContentLoaded', () => {
+  const links = document.querySelectorAll('aside#toc a[href^="#"]');
+  const map = {};
+  links.forEach(a => {
+    const id = a.getAttribute('href').slice(1);
+    const target = document.getElementById(id);
+    if (target) map[id] = a;
+  });
+  const sections = Object.keys(map).map(id => document.getElementById(id));
+  const onScroll = () => {
+    let cur = sections[0]?.id;
+    const y = window.scrollY + 120;
+    for (const s of sections) {
+      if (s && s.offsetTop <= y) cur = s.id;
+    }
+    Object.values(map).forEach(a => a.classList.remove('active'));
+    if (cur && map[cur]) map[cur].classList.add('active');
+  };
+  window.addEventListener('scroll', onScroll, {passive:true});
+  onScroll();
+});
+</script>
+
+<!-- ─────────────────────────────────────────────────────────────────
+     轻量 Python 语法高亮（无外部依赖，纯前端运行一次）
+     - 把每个 <pre><code> 的源码用 token 切开，注释/字符串/关键字/数字/函数名
+       各自包成 <span class="tok-xxx">...</span>，配合上面的 CSS 着色。
+     - 设计目标：**只**做对人眼最有帮助的几类着色，不追求 100% 准确。
+     - 故意避开重写 textContent，先 escape，再用临时占位符避免相互嵌套吞噬。
+     ───────────────────────────────────────────────────────────────── -->
+<script>
+(function highlightPython(){
+  const KEYWORDS = new Set([
+    'def','class','return','if','elif','else','for','while','in','not','and','or',
+    'is','None','True','False','import','from','as','with','try','except','finally',
+    'raise','pass','break','continue','lambda','yield','global','nonlocal','assert','del'
+  ]);
+  const BUILTINS = new Set([
+    'self','cls','super','print','len','range','enumerate','zip','map','filter',
+    'isinstance','hasattr','getattr','setattr','torch','nn','F','np','torch.nn'
+  ]);
+
+  function escapeHtml(s){
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  function highlight(src){
+    // ─────────────────────────────────────────────────────────────
+    // 设计：**所有** token（包括数字/关键字/函数名）都先存进 slots[]，
+    //       原文里只放 ASCII 占位符 __TKN{i}NKT__，最后一步统一展开成
+    //       <span class="...">原文</span>。
+    // 这样做的关键收益：避免提前注入 <span class="..."> 之后，自己的
+    //       "class" 关键字规则把 attribute 里的 class 又包一次，生成坏 HTML。
+    // 占位符设计：用 ASCII 字母把索引数字夹住，保证 \b\d+\b 不会匹配内部数字
+    //       （字母两侧没有 \b 边界）。
+    // ─────────────────────────────────────────────────────────────
+    var slots = [];
+    var stash = function(cls, raw){
+      var i = slots.length;
+      slots.push({cls: cls, raw: raw});
+      return '__TKN' + i + 'NKT__';
+    };
+
+    var s = src;
+
+    // ─── Step 1：把"内容里可能包含奇怪字符"的 token 先抽干净 ───
+    // 1a. triple-quoted docstring（最先抽，避免被普通字符串规则吃掉）
+    s = s.replace(/("""[\s\S]*?"""|'''[\s\S]*?''')/g, function(m){return stash('tok-doc', m);});
+    // 1b. 行注释 # ...
+    s = s.replace(/(#[^\n]*)/g, function(m){return stash('tok-cmt', m);});
+    // 1c. 普通字符串："..." / '...'，允许 f/r/b 前缀
+    s = s.replace(/([fFrRbB]{0,2}"(?:\\.|[^"\\\n])*"|[fFrRbB]{0,2}'(?:\\.|[^'\\\n])*')/g, function(m){return stash('tok-str', m);});
+
+    // ─── Step 2：数字字面量 ───────────────────────────────
+    s = s.replace(/\b(\d+\.?\d*(?:[eE][+-]?\d+)?)\b/g, function(m){return stash('tok-num', m);});
+
+    // ─── Step 3：装饰器 @xxx ────────────────────────────
+    s = s.replace(/(^|\n)(@[\w.]+)/g, function(_, lead, name){return lead + stash('tok-dec', name);});
+
+    // ─── Step 4：def / class 后面紧跟的函数名/类名 ─────
+    // 关键字 def/class 也走 stash，保证后续 Step 5 不会再处理它们
+    s = s.replace(/\b(def|class)(\s+)([A-Za-z_]\w*)/g, function(_, kw, ws, name){
+      return stash('tok-kw', kw) + ws + stash('tok-fn', name);
+    });
+
+    // ─── Step 5：剩余的关键字 / 内置 ───────────────────
+    // 注意：占位符 __TKN0NKT__ 整体也会被这条正则匹配成一个 identifier
+    //       但 TKN/NKT 都不在 KEYWORDS/BUILTINS 里，原样返回，不影响。
+    s = s.replace(/\b([A-Za-z_]\w*)\b/g, function(m){
+      if (KEYWORDS.has(m))  return stash('tok-kw', m);
+      if (BUILTINS.has(m))  return stash('tok-bi', m);
+      return m;
+    });
+
+    // ─── Step 6：现在 s 里只剩下"未被着色的源码 + 占位符" ───
+    // 此时整体 escapeHtml 一次。占位符是纯 ASCII，&/</> 都不会被改动。
+    s = escapeHtml(s);
+
+    // ─── Step 7：把占位符展开成真正的 <span class="...">…</span> ─
+    // 注意 raw 也要 escapeHtml（比如字符串里可能有 < > &）
+    s = s.replace(/__TKN(\d+)NKT__/g, function(_, i){
+      var t = slots[+i];
+      return '<span class="' + t.cls + '">' + escapeHtml(t.raw) + '</span>';
+    });
+
+    return s;
+  }
+
+  document.querySelectorAll('pre > code').forEach(code => {
+    if (code.dataset.hl === 'done') return;     // 防止重复处理
+    const raw = code.textContent;               // 原始源码（浏览器已自动 unescape）
+    code.innerHTML = highlight(raw);
+    code.dataset.hl = 'done';
+  });
+})();
+</script>
+
+</body>
+</html>
