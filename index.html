@@ -13,8 +13,6 @@
     --text-muted: #8b949e;
     --accent: #58a6ff;
     --accent-hover: #79c0ff;
-    --tag-bg: #1f6feb22;
-    --tag-text: #58a6ff;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
@@ -25,163 +23,213 @@
     min-height: 100vh;
   }
   .container { max-width: 960px; margin: 0 auto; padding: 3rem 1.5rem; }
-  header { text-align: center; margin-bottom: 3rem; }
+
+  /* Header */
+  header { text-align: center; margin-bottom: 2.5rem; }
   header h1 {
-    font-size: 2.2rem;
-    font-weight: 700;
-    margin-bottom: 0.5rem;
+    font-size: 2.2rem; font-weight: 700; margin-bottom: 0.5rem;
     background: linear-gradient(135deg, var(--accent), #bc8cff);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
   }
-  header p { color: var(--text-muted); font-size: 1.05rem; max-width: 600px; margin: 0 auto; }
-  .stats {
-    display: flex; justify-content: center; gap: 2rem;
-    margin: 1.5rem 0 2.5rem; flex-wrap: wrap;
-  }
+  header p { color: var(--text-muted); font-size: 1.05rem; max-width: 620px; margin: 0 auto; }
+
+  /* Stats */
+  .stats { display: flex; justify-content: center; gap: 1.2rem; margin: 1.5rem 0 2.5rem; flex-wrap: wrap; }
   .stat {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 1rem 1.8rem;
-    text-align: center;
-    min-width: 130px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 0.8rem 1.5rem; text-align: center; min-width: 110px;
   }
-  .stat .num { font-size: 1.8rem; font-weight: 700; color: var(--accent); }
-  .stat .label { font-size: 0.85rem; color: var(--text-muted); margin-top: 0.2rem; }
-  .search-box {
-    display: flex; justify-content: center; margin-bottom: 2rem;
-  }
+  .stat .num { font-size: 1.6rem; font-weight: 700; color: var(--accent); }
+  .stat .label { font-size: 0.8rem; color: var(--text-muted); margin-top: 0.15rem; }
+
+  /* Search */
+  .search-box { display: flex; justify-content: center; margin-bottom: 2.5rem; }
   .search-box input {
-    width: 100%; max-width: 480px;
-    padding: 0.7rem 1rem;
-    border-radius: 8px;
-    border: 1px solid var(--border);
-    background: var(--surface);
-    color: var(--text);
-    font-size: 0.95rem;
-    outline: none;
-    transition: border-color 0.2s;
+    width: 100%; max-width: 480px; padding: 0.7rem 1rem;
+    border-radius: 8px; border: 1px solid var(--border);
+    background: var(--surface); color: var(--text); font-size: 0.95rem;
+    outline: none; transition: border-color 0.2s;
   }
   .search-box input:focus { border-color: var(--accent); }
   .search-box input::placeholder { color: var(--text-muted); }
+
+  /* Category */
+  .category { margin-bottom: 2.5rem; }
+  .category-header {
+    display: flex; align-items: center; gap: 0.7rem;
+    margin-bottom: 1rem; padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .category-icon {
+    width: 36px; height: 36px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem; flex-shrink: 0;
+  }
+  .category-header h2 { font-size: 1.2rem; font-weight: 600; }
+  .category-header .badge {
+    font-size: 0.75rem; color: var(--text-muted);
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 20px; padding: 0.1rem 0.6rem; margin-left: auto;
+  }
+  .category-desc { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem; }
+
+  /* Icon themes */
+  .icon-vlm  { background: #1f6feb22; color: #58a6ff; }
+  .icon-wam  { background: #23883522; color: #3fb950; }
+  .icon-vla  { background: #9e6a0322; color: #d29922; }
+  .icon-other { background: #8957e522; color: #bc8cff; }
+
+  /* Grid */
   .grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 1rem;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 0.85rem;
   }
   .card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 1.3rem 1.4rem;
-    text-decoration: none;
-    color: var(--text);
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 1.1rem 1.3rem;
+    text-decoration: none; color: var(--text);
     transition: border-color 0.2s, transform 0.15s, box-shadow 0.2s;
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+    display: flex; flex-direction: column; gap: 0.4rem;
   }
   .card:hover {
-    border-color: var(--accent);
-    transform: translateY(-2px);
+    border-color: var(--accent); transform: translateY(-2px);
     box-shadow: 0 4px 20px #0004;
   }
-  .card .title {
-    font-size: 1.05rem;
-    font-weight: 600;
-    color: var(--accent);
-  }
-  .card .desc {
-    font-size: 0.85rem;
-    color: var(--text-muted);
-    flex: 1;
-  }
-  .card .tag {
-    display: inline-block;
-    background: var(--tag-bg);
-    color: var(--tag-text);
-    font-size: 0.75rem;
-    padding: 0.15rem 0.55rem;
-    border-radius: 20px;
-    align-self: flex-start;
-  }
+  .card .title { font-size: 1rem; font-weight: 600; color: var(--accent); }
+  .card .desc  { font-size: 0.82rem; color: var(--text-muted); }
+
+  /* Footer */
   footer {
-    text-align: center;
-    margin-top: 3rem;
-    padding-top: 1.5rem;
-    border-top: 1px solid var(--border);
-    color: var(--text-muted);
-    font-size: 0.85rem;
+    text-align: center; margin-top: 3rem; padding-top: 1.5rem;
+    border-top: 1px solid var(--border); color: var(--text-muted); font-size: 0.85rem;
   }
   footer a { color: var(--accent); text-decoration: none; }
   footer a:hover { text-decoration: underline; }
+
   .hidden { display: none !important; }
 </style>
 </head>
 <body>
 <div class="container">
   <header>
-    <h1>📖 PaperReading</h1>
+    <h1>PaperReading</h1>
     <p>把研究论文读成"可长期保存的思想笔记" — 结构化 HTML 阅读笔记合集</p>
   </header>
 
   <div class="stats">
-    <div class="stat"><div class="num" id="count">0</div><div class="label">篇笔记</div></div>
-    <div class="stat"><div class="num">🧠</div><div class="label">深度解读</div></div>
-    <div class="stat"><div class="num">📊</div><div class="label">SVG 可视化</div></div>
+    <div class="stat"><div class="num" id="total">0</div><div class="label">篇笔记</div></div>
+    <div class="stat"><div class="num">4</div><div class="label">个分类</div></div>
+    <div class="stat"><div class="num">VLM</div><div class="label">视觉语言</div></div>
+    <div class="stat"><div class="num">WAM</div><div class="label">世界模型</div></div>
   </div>
 
   <div class="search-box">
-    <input type="text" id="search" placeholder="🔍 搜索论文笔记..." autocomplete="off">
+    <input type="text" id="search" placeholder="搜索论文笔记..." autocomplete="off">
   </div>
 
-  <div class="grid" id="grid"></div>
+  <div id="content"></div>
 
   <footer>
-    <p>Powered by <a href="https://github.com" target="_blank">GitHub Pages</a> · Generated by PaperReading Skill</p>
+    <p>Powered by <a href="https://pages.github.com" target="_blank">GitHub Pages</a> · Generated by PaperReading Skill</p>
   </footer>
 </div>
 
 <script>
-const papers = [
-  { file: "examples/Cola-DLM.html", title: "Cola-DLM", desc: "Cola-DLM 论文阅读笔记", tag: "Language Model" },
-  { file: "examples/Cosmos.html", title: "Cosmos", desc: "Cosmos 论文阅读笔记", tag: "World Model" },
-  { file: "examples/Cosmos3.html", title: "Cosmos3", desc: "Cosmos3 论文阅读笔记", tag: "World Model" },
-  { file: "examples/InternVL.html", title: "InternVL", desc: "InternVL 论文阅读笔记", tag: "Multimodal" },
-  { file: "examples/JEPA.html", title: "JEPA", desc: "JEPA 论文阅读笔记", tag: "Self-Supervised" },
-  { file: "examples/LLaDA2-Uni.html", title: "LLaDA2-Uni", desc: "LLaDA2-Uni 论文阅读笔记", tag: "Language Model" },
-  { file: "examples/LLaVA.html", title: "LLaVA", desc: "LLaVA 论文阅读笔记", tag: "Multimodal" },
-  { file: "examples/OCR.html", title: "OCR", desc: "OCR 论文阅读笔记", tag: "Vision" },
-  { file: "examples/QwenVL-series.html", title: "QwenVL Series", desc: "QwenVL 系列论文阅读笔记", tag: "Multimodal" },
-  { file: "examples/RL.html", title: "RL", desc: "强化学习论文阅读笔记", tag: "Reinforcement Learning" },
-  { file: "examples/WAM.html", title: "WAM", desc: "WAM 论文阅读笔记", tag: "World Model" },
-  { file: "examples/pi-series-evolution.html", title: "Pi Series Evolution", desc: "Pi 系列演化论文阅读笔记", tag: "Language Model" },
-  { file: "examples/vla-four-policies-code.html", title: "VLA Four Policies (Code)", desc: "VLA 四策略代码版论文阅读笔记", tag: "VLA" },
-  { file: "examples/vla-four-policies.html", title: "VLA Four Policies", desc: "VLA 四策略论文阅读笔记", tag: "VLA" },
-  { file: "examples/world-model-vla-synthesis.html", title: "World Model × VLA Synthesis", desc: "世界模型与 VLA 综合论文阅读笔记", tag: "World Model" },
+const categories = [
+  {
+    id: "vlm",
+    name: "VLM — Vision-Language Models",
+    desc: "视觉语言模型：多模态理解、OCR、视觉推理与对齐训练",
+    icon: "icon-vlm",
+    emoji: "👁",
+    papers: [
+      { file: "examples/VLM/InternVL.html",      title: "InternVL",       desc: "大规模视觉基础模型" },
+      { file: "examples/VLM/LLaVA.html",          title: "LLaVA",          desc: "视觉指令微调开创者" },
+      { file: "examples/VLM/OCR.html",            title: "OCR",            desc: "光学字符识别与文档理解" },
+      { file: "examples/VLM/QwenVL-series.html",  title: "QwenVL Series",  desc: "通义千问视觉语言系列" },
+      { file: "examples/VLM/RL.html",             title: "RL",             desc: "强化学习在 VLM 训练中的应用" },
+    ]
+  },
+  {
+    id: "wam",
+    name: "WAM — World & Action Models",
+    desc: "世界模型与动作模型：视频生成、环境建模与具身决策",
+    icon: "icon-wam",
+    emoji: "🌍",
+    papers: [
+      { file: "examples/WAM/Cosmos.html",                    title: "Cosmos",                desc: "NVIDIA 世界基础模型" },
+      { file: "examples/WAM/Cosmos3.html",                   title: "Cosmos3",               desc: "Cosmos 第三代世界模型" },
+      { file: "examples/WAM/JEPA.html",                      title: "JEPA",                  desc: "联合嵌入预测架构" },
+      { file: "examples/WAM/WAM.html",                       title: "WAM",                   desc: "世界与动作模型综合分析" },
+      { file: "examples/WAM/world-model-vla-synthesis.html", title: "World Model × VLA",     desc: "世界模型与 VLA 综合研究" },
+    ]
+  },
+  {
+    id: "vla",
+    name: "VLA — Vision-Language-Action",
+    desc: "视觉-语言-动作模型：具身智能、机器人策略与 Pi 系列演化",
+    icon: "icon-vla",
+    emoji: "🤖",
+    papers: [
+      { file: "examples/VLA/pi-series-evolution.html",   title: "Pi Series Evolution",       desc: "Pi 系列模型演化路径" },
+      { file: "examples/VLA/vla-four-policies.html",     title: "VLA Four Policies",         desc: "四种 VLA 策略对比分析" },
+      { file: "examples/VLA/vla-four-policies-code.html",title: "VLA Four Policies (Code)",  desc: "四种 VLA 策略代码实现" },
+    ]
+  },
+  {
+    id: "others",
+    name: "Others",
+    desc: "其他方向：语言模型架构探索与扩散模型",
+    icon: "icon-other",
+    emoji: "✨",
+    papers: [
+      { file: "examples/Others/Cola-DLM.html",    title: "Cola-DLM",    desc: "Cola 扩散语言模型" },
+      { file: "examples/Others/LLaDA2-Uni.html",  title: "LLaDA2-Uni",  desc: "LLaDA2 统一扩散自回归架构" },
+    ]
+  },
 ];
 
-const grid = document.getElementById("grid");
-const countEl = document.getElementById("count");
-countEl.textContent = papers.length;
+const contentEl = document.getElementById("content");
+const totalEl = document.getElementById("total");
+let totalCount = 0;
 
-papers.forEach(p => {
-  const a = document.createElement("a");
-  a.className = "card";
-  a.href = p.file;
-  a.setAttribute("data-title", p.title.toLowerCase());
-  a.setAttribute("data-desc", p.desc.toLowerCase());
-  a.setAttribute("data-tag", p.tag.toLowerCase());
-  a.innerHTML = `<span class="tag">${p.tag}</span><span class="title">${p.title}</span><span class="desc">${p.desc}</span>`;
-  grid.appendChild(a);
+categories.forEach(cat => {
+  totalCount += cat.papers.length;
+  const section = document.createElement("div");
+  section.className = "category";
+  section.id = cat.id;
+
+  section.innerHTML = `
+    <div class="category-header">
+      <div class="category-icon ${cat.icon}">${cat.emoji}</div>
+      <h2>${cat.name}</h2>
+      <span class="badge">${cat.papers.length} 篇</span>
+    </div>
+    <p class="category-desc">${cat.desc}</p>
+    <div class="grid">
+      ${cat.papers.map(p => `
+        <a class="card" href="${p.file}" data-search="${(p.title + ' ' + p.desc).toLowerCase()}">
+          <span class="title">${p.title}</span>
+          <span class="desc">${p.desc}</span>
+        </a>
+      `).join("")}
+    </div>
+  `;
+  contentEl.appendChild(section);
 });
+totalEl.textContent = totalCount;
 
 document.getElementById("search").addEventListener("input", function () {
   const q = this.value.toLowerCase().trim();
-  document.querySelectorAll(".card").forEach(card => {
-    const match = card.dataset.title.includes(q) || card.dataset.desc.includes(q) || card.dataset.tag.includes(q);
-    card.classList.toggle("hidden", !match);
+  document.querySelectorAll(".category").forEach(section => {
+    let visibleCount = 0;
+    section.querySelectorAll(".card").forEach(card => {
+      const match = !q || card.dataset.search.includes(q);
+      card.classList.toggle("hidden", !match);
+      if (match) visibleCount++;
+    });
+    section.classList.toggle("hidden", visibleCount === 0);
   });
 });
 </script>
