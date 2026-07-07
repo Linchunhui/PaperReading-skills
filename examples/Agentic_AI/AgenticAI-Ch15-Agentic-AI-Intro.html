@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第15章 阅读笔记：Introduction to Agentic AI</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]})"></script>
+<style>
+:root {
+  --primary: #2c3e50;
+  --accent: #3498db;
+  --bg: #fafbfc;
+  --card-bg: #ffffff;
+  --border: #e1e4e8;
+  --text: #24292e;
+  --text-secondary: #586069;
+  --code-bg: #f6f8fa;
+  --highlight: #fff3cd;
+  --success: #d4edda;
+  --info: #d1ecf1;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; line-height: 1.8; color: var(--text); background: var(--bg); padding: 2rem; max-width: 900px; margin: 0 auto; }
+h1 { font-size: 1.8rem; color: var(--primary); border-bottom: 3px solid var(--accent); padding-bottom: 0.5rem; margin-bottom: 1rem; }
+h2 { font-size: 1.4rem; color: var(--primary); margin-top: 2.5rem; margin-bottom: 1rem; padding-left: 0.8rem; border-left: 4px solid var(--accent); }
+h3 { font-size: 1.15rem; color: var(--primary); margin-top: 1.8rem; margin-bottom: 0.8rem; }
+p { margin-bottom: 1rem; text-align: justify; }
+ul, ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+li { margin-bottom: 0.5rem; }
+code { background: var(--code-bg); padding: 0.15rem 0.4rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: var(--code-bg); padding: 1rem; border-radius: 6px; overflow-x: auto; margin-bottom: 1.5rem; border: 1px solid var(--border); }
+pre code { background: none; padding: 0; }
+blockquote { border-left: 4px solid var(--accent); padding: 0.8rem 1.2rem; margin: 1.5rem 0; background: var(--info); border-radius: 0 6px 6px 0; }
+.card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+.formula-block { background: var(--code-bg); border: 1px solid var(--border); border-radius: 6px; padding: 1rem; margin: 1rem 0; overflow-x: auto; }
+.formula-explain { color: var(--text-secondary); font-size: 0.92em; margin-top: 0.5rem; padding-left: 1rem; border-left: 3px solid #ddd; }
+.highlight-box { background: var(--highlight); border: 1px solid #ffc107; border-radius: 6px; padding: 1rem; margin: 1rem 0; }
+.info-box { background: var(--info); border: 1px solid #bee5eb; border-radius: 6px; padding: 1rem; margin: 1rem 0; }
+.success-box { background: var(--success); border: 1px solid #c3e6cb; border-radius: 6px; padding: 1rem; margin: 1rem 0; }
+.subtitle { color: var(--text-secondary); font-size: 1rem; margin-bottom: 0.3rem; }
+.meta { color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 2rem; }
+table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; }
+th, td { border: 1px solid var(--border); padding: 0.6rem 0.8rem; text-align: left; }
+th { background: var(--code-bg); font-weight: 600; }
+details { margin-bottom: 1rem; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+summary { padding: 0.8rem 1.2rem; background: var(--code-bg); cursor: pointer; font-weight: 500; }
+details[open] summary { border-bottom: 1px solid var(--border); }
+details .answer { padding: 1rem 1.2rem; }
+svg { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; }
+.takeaway { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 8px; padding: 1.5rem; margin: 2rem 0; }
+.takeaway h2 { color: white; border-left-color: rgba(255,255,255,0.5); }
+.takeaway li { color: rgba(255,255,255,0.95); }
+</style>
+</head>
+<body>
+
+<h1>第15章：Introduction to Agentic AI</h1>
+<p class="subtitle">从对话式Chatbot到自主智能体——Agentic AI系统的全局视图</p>
+<p class="meta">来源：Agentic AI · 第15章（pp. 292–294） · 阅读笔记</p>
+
+<div class="card">
+<h3>章节摘要</h3>
+<p>本章是Part V"Agentic AI Systems"的引言章节，承上启下。前四部分分别覆盖了Transformer架构与GPU系统（Part I）、强化学习对齐方法（Part II）、RL训练中涌现的推理能力（Part III）、以及评估方法论（Part IV）。本章转向现代AI工程的核心问题：<strong>如何将这些模型部署为能够感知、规划、行动和学习的自主智能体？</strong></p>
+</div>
+
+<h2>Agentic AI 的定义</h2>
+
+<div class="highlight-box">
+<p><strong>核心定义</strong>：Agentic AI系统是指LLM在一个循环中运行的系统——它从环境中接收观察（用户消息、工具输出、传感器数据），推理下一步该做什么，执行动作（工具调用、代码执行、API请求），然后迭代直到目标达成或明确请求人类介入。</p>
+</div>
+
+<p>这与"单轮聊天机器人"范式形成鲜明对比——后者仅产生一个响应就等待。Agentic AI的核心区别在于<strong>循环执行（perceive–reason–act loop）</strong>而非单次应答。</p>
+
+<h2>从Chatbot到Agent的五大挑战</h2>
+
+<p>从chatbot到agent的转变引入了若干单次模型调用无法解决的根本性挑战：</p>
+
+<div class="card">
+<ol>
+<li><strong>持久性（Persistence）</strong>：Agent必须记住它做了什么、什么失败了、建立了什么上下文——跨越轮次、会话、甚至天数。</li>
+<li><strong>接地（Grounding）</strong>：Agent必须访问最新的、领域特定的知识——这些知识不存在于其训练数据中。</li>
+<li><strong>行动（Action）</strong>：Agent必须通过明确定义的接口与外部系统交互——数据库、API、文件系统、浏览器。</li>
+<li><strong>协调（Coordination）</strong>：复杂任务通常超出单个agent的能力；多个专门化的agent必须协作、委派和协商。</li>
+<li><strong>安全性（Safety）</strong>：自主行动需要护栏、人类监督、以及在agent不确定时的优雅降级。</li>
+</ol>
+</div>
+
+<h2>分层架构概览</h2>
+
+<p>为应对上述挑战，生产级agentic系统采用<strong>分层架构（Layered Architecture）</strong>构建。每一层解决一个特定问题，后续章节覆盖从底到顶的完整技术栈：</p>
+
+<table>
+<thead>
+<tr><th>章节</th><th>层次</th><th>核心功能</th></tr>
+</thead>
+<tbody>
+<tr><td>Ch.16 RAG</td><td>知识层</td><td>通过查询时检索为agent提供动态外部知识，解决接地问题。覆盖嵌入模型、向量数据库、分块策略、混合检索、Agentic RAG。</td></tr>
+<tr><td>Ch.17 Memory</td><td>持久层</td><td>使agent能跨交互回忆信息——从单任务内的短期工作记忆到跨月的长期情景记忆。覆盖记忆架构（buffer、summary、vector-indexed、知识图谱）、记忆整合。</td></tr>
+<tr><td>Ch.18 Harness &amp; Orchestration</td><td>运行时层</td><td>Agent的"操作系统"：管理agent循环、上下文窗口预算、工具分派、错误恢复、状态持久化和可观测性。</td></tr>
+<tr><td>Ch.19 Design Patterns</td><td>架构层</td><td>构建agent的规范模式：ReAct、plan-then-execute、反思循环、工具增强生成、多步工作流。</td></tr>
+<tr><td>Ch.20 Environments &amp; Benchmarks</td><td>评估层</td><td>评估agentic行为的场景和方法：网页导航、编码环境、工具使用评估套件。</td></tr>
+<tr><td>Ch.21 MCP</td><td>工具集成标准</td><td>标准化agent发现和调用工具的协议——类似硬件的USB标准。消除agent与工具间的N×M集成问题。</td></tr>
+<tr><td>Ch.22 Agent Skills</td><td>能力层</td><td>Agent如何获取和组合超越基本工具使用的专门化能力：技能库、技能选择、组合式任务求解。</td></tr>
+<tr><td>Ch.23 A2A</td><td>Agent间协议</td><td>多Agent任务委派、进度流式传输和结果聚合的标准化协议——使异构agent能够协作。</td></tr>
+<tr><td>Ch.24 Multi-Agent Systems</td><td>协调层</td><td>多Agent协作架构：分层委派、对等协商、辩论共识、群体智能。</td></tr>
+<tr><td>Ch.25 Frameworks</td><td>实现层</td><td>生产工具包：LangGraph、CrewAI、OpenAI Agents SDK、AutoGen等。</td></tr>
+<tr><td>Ch.26 Agentic UI</td><td>交互层</td><td>用户与agent的交互方式：流式界面、渐进式披露、审批工作流、状态仪表盘。</td></tr>
+</tbody>
+</table>
+
+<h2>层间协作关系</h2>
+
+<p>这些层并非孤立运行，而是形成一个紧密集成的系统，每个组件依赖并增强其他组件：</p>
+
+<div class="card">
+<ul>
+<li><strong>Agent Core</strong>（具备Part II–III推理能力的LLM）位于中心，执行 perceive–reason–act 循环。</li>
+<li><strong>RAG</strong> 在每个推理步骤前为agent提供相关知识；<strong>Memory</strong> 在步骤和会话之间提供连续性。</li>
+<li><strong>Orchestration Harness</strong> 协调一切：决定何时检索、何时调用工具、何时委派给sub-agent、何时请求人类指导。</li>
+<li><strong>MCP</strong> 提供agent访问所有外部工具的标准化接口；<strong>A2A</strong> 提供agent间通信的等价接口。</li>
+<li><strong>Design Patterns</strong> 定义高层策略（ReAct、plan-and-execute、reflection）；<strong>Frameworks</strong> 提供这些模式的具体实现。</li>
+<li><strong>UI层</strong> 闭合循环——将agent连接回人类，用于监督、纠正和协作式问题求解。</li>
+</ul>
+</div>
+
+<div class="info-box">
+<p><strong>系统视角</strong>：Agentic AI不仅仅是提示工程（prompting）——它需要在每一层精心设计上下文管理、错误处理、安全护栏和可观测性。这是一个完整的系统工程问题。</p>
+</div>
+
+<h2>Figure 15.1：Agentic AI 架构栈</h2>
+
+<div class="card">
+<p><strong>图示说明</strong>：Agentic AI架构栈展示了以下组织结构——</p>
+<ul>
+<li><strong>顶层</strong>：User（提供目标、反馈和监督）</li>
+<li><strong>中间核心</strong>：Agent Core 执行 perceive–reason–act 循环</li>
+<li><strong>协调层</strong>：Harness &amp; Orchestration 管理上下文、状态、护栏和可观测性</li>
+<li><strong>底层外部系统</strong>：RAG（知识检索）、Memory（持久化）、Tools via MCP、other Agents via A2A</li>
+<li><strong>环境</strong>：所有组件最终接地于 Environment</li>
+</ul>
+<p>箭头表示双向数据流；蓝色循环箭头表示迭代的agentic循环。</p>
+</div>
+
+<div class="takeaway">
+<h2>核心要点</h2>
+<ul>
+<li>Agentic AI = LLM + perceive–reason–act循环，与单轮chatbot根本不同</li>
+<li>五大挑战（持久性、接地、行动、协调、安全）驱动了分层架构设计</li>
+<li>11层架构栈（Ch.16–Ch.26）从知识层到交互层完整覆盖agent系统的每个维度</li>
+<li>各层紧密耦合：RAG提供知识，Memory提供连续性，Harness协调，MCP/A2A标准化接口</li>
+<li>Agentic AI是系统工程问题，不仅仅是提示工程——每层都需要上下文管理、错误处理和安全护栏</li>
+</ul>
+</div>
+
+<h2>Q&amp;A 自测</h2>
+
+<details>
+<summary>Q1：Agentic AI系统与传统chatbot的核心区别是什么？</summary>
+<div class="answer">
+<p>核心区别在于<strong>循环执行</strong>：Agentic AI系统在一个循环中运行（perceive–reason–act loop），持续接收观察、推理、执行动作并迭代，直到目标达成。而传统chatbot仅产生一个响应就等待下一个用户输入，没有自主的迭代能力。</p>
+</div>
+</details>
+
+<details>
+<summary>Q2：为什么生产级agent系统需要分层架构而非单一模型？</summary>
+<div class="answer">
+<p>因为从chatbot到agent的转变引入了五大挑战：持久性（跨轮次记忆）、接地（访问训练数据之外的知识）、行动（与外部系统交互）、协调（多agent协作）和安全性（护栏与监督）。这些挑战无法通过单次模型调用解决，必须通过专门的层（RAG、Memory、Orchestration等）来分别处理。</p>
+</div>
+</details>
+
+<details>
+<summary>Q3：MCP和A2A分别解决什么问题？</summary>
+<div class="answer">
+<p><strong>MCP（Model Context Protocol）</strong>解决agent与工具之间的集成标准化问题，类似于硬件的USB标准，消除N个agent × M个工具的集成复杂度。<strong>A2A（Agent-to-Agent Communication）</strong>解决异构agent之间的协作问题，提供任务委派、进度流式传输和结果聚合的标准化协议，使来自不同供应商/框架的agent能够互操作。</p>
+</div>
+</details>
+
+<details>
+<summary>Q4：Orchestration Harness在整个架构中扮演什么角色？</summary>
+<div class="answer">
+<p>Orchestration Harness是agent的"操作系统"——它管理agent循环、上下文窗口预算、工具分派、错误恢复、状态持久化和可观测性。它负责决定何时检索知识、何时调用工具、何时委派给sub-agent、何时请求人类指导，是整个系统的调度中枢。</p>
+</div>
+</details>
+
+</body>
+</html>

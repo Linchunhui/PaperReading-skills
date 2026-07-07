@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第26章 阅读笔记：Agentic UI Frameworks</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]})"></script>
+<style>
+:root {
+  --primary: #2c3e50;
+  --accent: #3498db;
+  --bg: #fafbfc;
+  --card-bg: #ffffff;
+  --border: #e1e4e8;
+  --text: #24292e;
+  --text-secondary: #586069;
+  --code-bg: #f6f8fa;
+  --highlight: #fff3cd;
+  --success: #d4edda;
+  --info: #d1ecf1;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; line-height: 1.8; color: var(--text); background: var(--bg); padding: 2rem; max-width: 900px; margin: 0 auto; }
+h1 { font-size: 1.8rem; color: var(--primary); border-bottom: 3px solid var(--accent); padding-bottom: 0.5rem; margin-bottom: 1rem; }
+h2 { font-size: 1.4rem; color: var(--primary); margin-top: 2.5rem; margin-bottom: 1rem; padding-left: 0.8rem; border-left: 4px solid var(--accent); }
+h3 { font-size: 1.15rem; color: var(--primary); margin-top: 1.8rem; margin-bottom: 0.8rem; }
+p { margin-bottom: 1rem; text-align: justify; }
+ul, ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+li { margin-bottom: 0.5rem; }
+code { background: var(--code-bg); padding: 0.15rem 0.4rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: var(--code-bg); padding: 1rem; border-radius: 6px; overflow-x: auto; margin-bottom: 1.5rem; border: 1px solid var(--border); }
+pre code { background: none; padding: 0; }
+blockquote { border-left: 4px solid var(--accent); padding: 0.8rem 1.2rem; margin: 1.5rem 0; background: var(--info); border-radius: 0 6px 6px 0; }
+.card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+.formula-block { background: var(--code-bg); border: 1px solid var(--border); border-radius: 6px; padding: 1rem; margin: 1rem 0; overflow-x: auto; }
+.formula-explain { color: var(--text-secondary); font-size: 0.92em; margin-top: 0.5rem; padding-left: 1rem; border-left: 3px solid #ddd; }
+.highlight-box { background: var(--highlight); border: 1px solid #ffc107; border-radius: 6px; padding: 1rem; margin: 1rem 0; }
+.info-box { background: var(--info); border: 1px solid #bee5eb; border-radius: 6px; padding: 1rem; margin: 1rem 0; }
+.success-box { background: var(--success); border: 1px solid #c3e6cb; border-radius: 6px; padding: 1rem; margin: 1rem 0; }
+.subtitle { color: var(--text-secondary); font-size: 1rem; margin-bottom: 0.3rem; }
+.meta { color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 2rem; }
+table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; }
+th, td { border: 1px solid var(--border); padding: 0.6rem 0.8rem; text-align: left; }
+th { background: var(--code-bg); font-weight: 600; }
+details { margin-bottom: 1rem; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+summary { padding: 0.8rem 1.2rem; background: var(--code-bg); cursor: pointer; font-weight: 500; }
+details[open] summary { border-bottom: 1px solid var(--border); }
+details .answer { padding: 1rem 1.2rem; }
+svg { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; }
+.takeaway { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 8px; padding: 1.5rem; margin: 2rem 0; }
+.takeaway h2 { color: white; border-left-color: rgba(255,255,255,0.5); }
+.takeaway li { color: rgba(255,255,255,0.95); }
+</style>
+</head>
+<body>
+
+<h1>第26章：Agentic UI Frameworks</h1>
+<p class="subtitle">智能体UI框架——从聊天框到透明协作者的界面设计革新</p>
+<p class="meta">来源：The Hitchhiker's Guide to Agentic AI · 第26章（pp. 490–511） · 阅读笔记</p>
+
+<div class="card">
+<h3>章节摘要</h3>
+<p>本章系统梳理了Agentic UI的设计范式、核心组件、框架生态与实现模式。随着LLM从被动文本生成器转变为具备规划、工具使用和多步推理能力的主动Agent，人机交互界面必须同步演进。传统聊天界面无法满足长时间运行任务、分支决策树、并行工具调用和人类监督的需求。本章从动机出发，覆盖六大UI范式、七类关键组件、主流框架对比、生成式UI、流式传输、人在环中设计到可信赖性设计，最终以完整的FastAPI+React全栈实现收尾。</p>
+</div>
+
+<h2>26.1 Motivation: Beyond the Chat Box</h2>
+
+<p>聊天气泡传达的是<strong>结果</strong>，而Agentic UI传达的是<strong>过程</strong>——推理路径、调用的工具、做出的决策、以及需要人类判断的节点。没有这种可见性，用户无法信任、纠正或从Agent中学习。</p>
+
+<p>聊天界面与Agentic界面之间的差距，如同自动贩卖机与熟练协作者之间的差距。当Agent执行20步研究任务时，用户需要回答以下问题：</p>
+
+<ul>
+<li><strong>Agent现在在做什么？</strong> 长时间运行的任务需要进度反馈；沉默滋生不信任</li>
+<li><strong>Agent为什么做这个决定？</strong> 推理透明性使用户能及早发现错误</li>
+<li><strong>使用了哪些工具，输入了什么？</strong> 工具溯源对验证事实和审计行为至关重要</li>
+<li><strong>我应该在哪里介入？</strong> Agent需要呈现需要人类判断的决策点</li>
+<li><strong>我能撤销吗？</strong> 不可逆操作需要明确确认和回滚路径</li>
+</ul>
+
+<div class="highlight-box">
+<p><strong>自动化偏见风险（Automation Bias）</strong>：研究一致表明，用户对自动化系统过度信任，尤其当系统自信且无不确定性信号时。Agentic UI必须主动对抗自动化偏见——呈现不确定性、展示推理过程、让用户容易质疑或覆盖Agent决策。</p>
+</div>
+
+<h3>核心设计目标</h3>
+<ol>
+<li><strong>透明性（Transparency）</strong>：使Agent内部状态对用户可读</li>
+<li><strong>控制（Control）</strong>：提供有意义的干预点，无需持续监督</li>
+<li><strong>信任校准（Trust Calibration）</strong>：帮助用户建立Agent能力与限制的准确心智模型</li>
+<li><strong>效率（Efficiency）</strong>：最小化认知负荷；在正确的时间呈现正确的信息</li>
+<li><strong>可恢复性（Recoverability）</strong>：使错误易于发现和逆转</li>
+</ol>
+
+<h2>26.2 UI Paradigms for Agents</h2>
+
+<p>没有单一UI范式适合所有Agentic场景。适当的界面取决于任务持续时间、所需人类参与度、输出类型和用户专业水平。</p>
+
+<h3>26.2.1 Chat-Based Interfaces（聊天界面）</h3>
+<p>聊天范式仍是LLM交互最熟悉的入口。针对Agentic使用进行增强：</p>
+<ul>
+<li><strong>Streaming响应</strong>：Token逐个出现，提供即时反馈（通过SSE或WebSocket）</li>
+<li><strong>内联工具指示器</strong>：消息流中的小徽章显示工具调用</li>
+<li><strong>状态消息</strong>："Agent正在思考…"、"正在运行Python代码…"</li>
+<li><strong>消息线程</strong>：多轮任务中可折叠子线程包含中间步骤</li>
+</ul>
+<div class="info-box">
+<p><strong>局限性</strong>：聊天界面将本质上并行的过程串行化。当Agent同时扇出到5个工具时，线性消息流歪曲了实际执行图。</p>
+</div>
+
+<h3>26.2.2 Canvas and Artifact-Based Interfaces（画布/工件界面）</h3>
+<p>画布范式（Claude Artifacts、ChatGPT Canvas）引入分窗布局：左窗对话，右窗显示生成内容。</p>
+<ul>
+<li><strong>持久化工件</strong>：生成内容跨轮次持续，可通过自然语言迭代精炼</li>
+<li><strong>原地编辑</strong>：用户可直接编辑工件，Agent能观察并响应</li>
+<li><strong>版本历史</strong>：支持回滚到任意先前状态</li>
+<li><strong>多工件工作空间</strong>：支持多个同时工件（代码+测试+文档）</li>
+</ul>
+<p>特别适合<strong>共创任务</strong>：写作、编程、数据分析和设计。</p>
+
+<h3>26.2.3 Workflow Visualization（工作流可视化）</h3>
+<p>对于执行结构化计划的Agent，工作流可视化UI使计划显性化且可追踪：</p>
+<ul>
+<li><strong>Agentic Pipeline</strong>（LangGraph, AutoGen, CrewAI）：执行图渲染为DAG</li>
+<li><strong>任务分解视图</strong>：高层计划显示为清单或甘特图，子任务可展开</li>
+<li><strong>实时进度追踪</strong>：节点变色/加载；完成显示输出；失败显示错误</li>
+</ul>
+
+<h3>26.2.4 Dashboard and Monitoring（仪表盘监控）</h3>
+<p>面向长时间运行或生产环境Agent的操作视图：</p>
+<ul>
+<li><strong>实时状态</strong>：Agent运行/空闲/失败状态</li>
+<li><strong>资源指标</strong>：Token消耗、API调用、延迟、成本</li>
+<li><strong>队列管理</strong>：待处理任务、优先级、速率限制</li>
+<li><strong>告警与异常检测</strong>：异常行为通知</li>
+<li><strong>历史分析</strong>：任务完成率、平均时长、错误频率</li>
+</ul>
+
+<h3>26.2.5 Collaborative Interfaces（协作界面）</h3>
+<p>Agent作为共享工作空间中的对等贡献者：</p>
+<ul>
+<li><strong>存在指示器</strong>：Agent作为命名光标或头像出现</li>
+<li><strong>变更归属</strong>：Agent编辑与人类编辑视觉区分</li>
+<li><strong>内联建议</strong>：Agent以跟踪编辑或评论提出更改</li>
+<li><strong>冲突解决</strong>：同时编辑时UI呈现冲突并促进解决</li>
+</ul>
+<p>代表：Cursor、Notion AI、Google Docs with Gemini。</p>
+
+<h3>26.2.6 Autonomous with Checkpoints（自主+检查点）</h3>
+<p>Agent大部分独立运行，仅在预定义检查点需要人类批准：</p>
+<ul>
+<li><strong>Computer-use agents</strong>（Anthropic Computer Use, OpenAI Operator）</li>
+<li><strong>带门的自动化管线</strong>：CI/CD风格，完成阶段后等待人类"merge"</li>
+<li><strong>定时Agent</strong>：按计划运行并异步报告结果</li>
+</ul>
+<div class="info-box">
+<p><strong>实践示例</strong>：Agent清理邮箱时自主归档500封邮件后暂停："我发现23封来自您6个月未打开的邮件列表。是否退订？"——<em>自主执行 + 人类决策点间断</em>平衡效率与控制。</p>
+</div>
+
+<h2>26.3 Key UI Components for Agents</h2>
+
+<h3>26.3.1 Thought and Reasoning Display</h3>
+<div class="info-box">
+<p>现代LLM（o1/o3、Claude extended thinking）在产生最终响应前生成大量内部推理。展示推理是双刃剑：增加透明度但可能淹没用户。</p>
+</div>
+<ul>
+<li><strong>可折叠推理块</strong>：摘要（"思考了12秒"）+ 展开切换</li>
+<li><strong>渐进式披露</strong>：默认仅显示最终结论</li>
+<li><strong>结构化推理</strong>：假设→证据→结论的视觉层级</li>
+<li><strong>推理vs响应区分</strong>：视觉区分内部推理与最终响应</li>
+</ul>
+
+<h3>26.3.2 Tool Use Visualization</h3>
+<ul>
+<li><strong>内联工具卡</strong>：工具名+输入摘要+状态，可展开详情</li>
+<li><strong>工具时间线</strong>：水平时间线显示所有调用及持续时间</li>
+<li><strong>输入/输出Diff</strong>：修改状态工具的前/后差异</li>
+<li><strong>工具图标</strong>：常见工具可识别图标</li>
+<li><strong>错误高亮</strong>：失败调用红色显示</li>
+</ul>
+
+<h3>26.3.3 Progress Indicators</h3>
+<ul>
+<li><strong>步骤级进度</strong>：编号步骤列表+复选标记</li>
+<li><strong>Token流式指示器</strong>：闪烁光标或token/秒计数器</li>
+<li><strong>预估完成时间</strong>：ETA（"大约2-5分钟"）</li>
+<li><strong>子任务嵌套</strong>：树形结构进度视图</li>
+<li><strong>取消按钮</strong>：优雅停止并汇总已完成工作</li>
+</ul>
+
+<h3>26.3.4 Approval Gates</h3>
+<div class="highlight-box">
+<p><strong>Alert Fatigue</strong>：频繁请求批准导致用户反射性不阅读就批准。分层审批策略至关重要。</p>
+</div>
+<ul>
+<li><strong>操作摘要</strong>：纯文字描述Agent想做什么</li>
+<li><strong>风险指示器</strong>：绿=易撤销、黄=难撤销、红=不可逆</li>
+<li><strong>批准/拒绝/修改</strong>：三选项界面</li>
+<li><strong>上下文面板</strong>：展示Agent为何要执行此操作</li>
+<li><strong>超时行为</strong>：不响应时的默认处理</li>
+</ul>
+
+<h3>26.3.5 Context Display</h3>
+<ul>
+<li><strong>记忆面板</strong>：Agent当前记住的内容，用户可编辑</li>
+<li><strong>活跃工具列表</strong>：可用工具附启用/禁用开关</li>
+<li><strong>检索上下文</strong>：上下文窗口中的文档附来源引用</li>
+<li><strong>Token预算指示器</strong>：上下文窗口消耗量</li>
+</ul>
+
+<h3>26.3.6 Error and Recovery UI</h3>
+<ul>
+<li><strong>错误卡片</strong>：内联显示错误类型+消息+Agent解释</li>
+<li><strong>重试控件</strong>：手动重试附可选参数调整</li>
+<li><strong>替代方案</strong>：主方案失败时提出可选替代</li>
+<li><strong>部分结果</strong>：中途失败显示已完成步骤</li>
+<li><strong>升级路径</strong>：通往人类支持的清晰路径</li>
+</ul>
+
+<h3>26.3.7 Confidence Indicators</h3>
+<ul>
+<li><strong>言语对冲</strong>：高亮"我不确定"等短语</li>
+<li><strong>来源质量</strong>：时效性、权威性、相关性分数</li>
+<li><strong>显式不确定性请求</strong>："你有多确定？"按钮</li>
+<li><strong>验证建议</strong>：主动建议验证步骤</li>
+</ul>
+
+<h2>26.4 Frameworks and Libraries</h2>
+
+<h3>26.4.1 Vercel AI SDK</h3>
+<div class="info-box">
+<p><strong>TypeScript/JavaScript库</strong>，支持React、Next.js、Svelte、Vue。最广泛使用的生产Web Agent UI框架。</p>
+</div>
+<p>核心抽象：</p>
+<ul>
+<li><code>useChat</code>：管理聊天对话的React Hook（流式+消息历史+加载状态）</li>
+<li><code>useCompletion</code>：单轮文本补全Hook</li>
+<li><code>useObject</code>：流式结构化JSON对象，渐进式渲染</li>
+<li><code>streamText / streamObject</code>：服务端HTTP流式</li>
+<li><strong>Generative UI（AI SDK RSC）</strong>：LLM工具结果渲染为React组件</li>
+</ul>
+
+<h3>26.4.2 Chainlit</h3>
+<p>Python框架，LangChain/LlamaIndex生态中流行。</p>
+<ul>
+<li><strong>Step可视化</strong>：原生渲染执行步骤为可折叠树</li>
+<li><strong>多模态支持</strong>：文件、图像、音频、PDF开箱即用</li>
+<li><strong>认证与会话</strong>：内置认证、持久化历史、多用户</li>
+<li><strong>自定义元素</strong>：Python中注册React组件</li>
+<li><strong>反馈收集</strong>：赞/踩+可选评论</li>
+</ul>
+
+<h3>26.4.3 Gradio</h3>
+<p>Python库，快速构建ML演示。<code>gr.ChatInterface</code> + <code>gr.Blocks</code>。</p>
+<ul>
+<li>零配置部署（Hugging Face Spaces一行分享）</li>
+<li>自定义组件系统（React集成Python后端）</li>
+<li>多模态输入（文件、图像、音频、视频、摄像头）</li>
+<li>原生generator流式支持</li>
+</ul>
+<p><em>局限</em>：布局不如React灵活，状态管理会话级别。</p>
+
+<h3>26.4.4 Streamlit</h3>
+<p>Python数据应用框架。响应式模型（每次交互整个脚本重新运行）。</p>
+<ul>
+<li><code>st.metric</code>/<code>st.dataframe</code>/<code>st.status</code>：实时指标</li>
+<li><code>st.session_state</code>：跨重运行持久化</li>
+<li><code>st.write_stream</code>：渐进式输出</li>
+<li><code>@st.fragment</code>：部分重运行提升性能</li>
+</ul>
+
+<h3>26.4.5 OpenAI Assistants Playground</h3>
+<p>Agentic UI设计的参考实现（非构建框架）：Thread对话管理、文件检索可视化、Code Interpreter执行、Function Call显示、Run Step可视化。</p>
+
+<h3>26.4.6 LangGraph Studio</h3>
+<p>桌面应用，LangGraph Agent的可视化IDE。最先进的工具使用和工作流可视化环境。</p>
+<ul>
+<li><strong>图可视化</strong>：Agent状态机交互式渲染</li>
+<li><strong>状态检查</strong>：任意执行点的完整状态JSON</li>
+<li><strong>时间旅行调试</strong>：重放+修改+重运行</li>
+<li><strong>HITL集成</strong>：任意节点设断点</li>
+<li><strong>多Agent支持</strong>：supervisor-subagent层级可视化</li>
+</ul>
+
+<h3>26.4.7 Framework Comparison</h3>
+<table>
+<caption><strong>Table 26.1: Agentic UI框架对比</strong></caption>
+<tr><th>Framework</th><th>Language</th><th>Stream</th><th>Tool Viz</th><th>Multi-Agent</th><th>Gen UI</th><th>Production</th></tr>
+<tr><td>Vercel AI SDK</td><td>TypeScript</td><td>✓</td><td>Partial</td><td>Partial</td><td>✓</td><td>✓</td></tr>
+<tr><td>Chainlit</td><td>Python</td><td>✓</td><td>✓</td><td>Partial</td><td>Partial</td><td>✓</td></tr>
+<tr><td>Gradio</td><td>Python</td><td>✓</td><td>◦</td><td>×</td><td>◦</td><td>✓</td></tr>
+<tr><td>Streamlit</td><td>Python</td><td>✓</td><td>◦</td><td>×</td><td>×</td><td>✓</td></tr>
+<tr><td>OAI Playground</td><td>N/A (hosted)</td><td>✓</td><td>✓</td><td>×</td><td>×</td><td>×</td></tr>
+<tr><td>LangGraph Studio</td><td>Python/TS</td><td>✓</td><td>✓</td><td>✓</td><td>×</td><td>Partial</td></tr>
+</table>
+
+<h2>26.5 Generative UI</h2>
+
+<p>传统LLM界面渲染文本/Markdown。<strong>Generative UI颠覆模式</strong>：模型工具调用生成UI组件。模型不仅决定说什么，还决定如何呈现——图表、表单、地图、日历等。</p>
+
+<div class="highlight-box">
+<p><strong>范式转换</strong>：不再由开发者预定义所有UI状态，而是模型动态选择并参数化适合当前上下文的UI组件。</p>
+</div>
+
+<h3>26.5.1 React Server Components for Dynamic Interfaces</h3>
+<p>Vercel AI SDK RSC架构流程：</p>
+<ol>
+<li>用户发消息到Next.js server action</li>
+<li>服务器调LLM，每个工具关联React组件</li>
+<li>LLM调工具时服务器渲染对应组件</li>
+<li>渲染组件作为RSC流式传输到客户端</li>
+</ol>
+
+<pre><code>// app/actions.tsx (Server Action)
+import { streamUI } from 'ai/rsc';
+import { openai } from '@ai-sdk/openai';
+import { WeatherCard } from '@/components/WeatherCard';
+import { StockChart } from '@/components/StockChart';
+
+export async function chat(userMessage: string) {
+  const result = await streamUI({
+    model: openai('gpt-4o'),
+    messages: [{ role: 'user', content: userMessage }],
+    tools: {
+      show_weather: {
+        description: 'Display current weather for a location',
+        parameters: z.object({
+          location: z.string(),
+          unit: z.enum(['celsius', 'fahrenheit']),
+        }),
+        generate: async ({ location, unit }) =&gt; {
+          const data = await fetchWeather(location, unit);
+          return &lt;WeatherCard data={data} /&gt;;
+        },
+      },
+      show_stock: {
+        description: 'Display stock price chart',
+        parameters: z.object({ ticker: z.string() }),
+        generate: async ({ ticker }) =&gt; {
+          const data = await fetchStockData(ticker);
+          return &lt;StockChart ticker={ticker} data={data} /&gt;;
+        },
+      },
+    },
+  });
+  return result.value;
+}</code></pre>
+<p class="formula-explain">Listing 26.2：Vercel AI SDK RSC Generative UI——LLM工具调用直接渲染为React组件流式传输到客户端。</p>
+
+<h3>26.5.2 Adaptive Interfaces Based on Content Type</h3>
+<ul>
+<li><strong>表格数据</strong> → 可排序可过滤数据表+导出</li>
+<li><strong>地理数据</strong> → 交互式地图+标记+图层</li>
+<li><strong>时间序列</strong> → 可缩放折线图+注释</li>
+<li><strong>代码</strong> → 语法高亮编辑器+运行按钮</li>
+<li><strong>文档</strong> → 格式化查看器+注释工具</li>
+<li><strong>表单</strong> → 动态生成表单字段</li>
+</ul>
+
+<div class="highlight-box">
+<p><strong>Generative UI的限制</strong>：完全模型驱动的UI存在不一致性、无障碍性失败和安全漏洞风险。最佳实践：模型从<em>预构建的安全组件库</em>中选择，而非生成任意HTML/JSX。</p>
+</div>
+
+<h2>26.6 Streaming and Real-Time Patterns</h2>
+
+<p>流式传输是Agentic UI的基础：将体验从"等待结果"转变为"<strong>观看Agent工作</strong>"。</p>
+
+<h3>26.6.1 Token Streaming</h3>
+<p>两种传输机制：</p>
+<ul>
+<li><strong>SSE</strong>：单向HTTP流，简单、标准HTTP/1.1、自动重连。LLM API的主导机制。</li>
+<li><strong>WebSocket</strong>：双向持久连接，支持中途发送数据（中断Agent、生成中反馈）。</li>
+</ul>
+
+<pre><code># SSE Token Streaming with FastAPI
+from fastapi import FastAPI
+from fastapi.responses import StreamingResponse
+from openai import AsyncOpenAI
+import json
+
+app = FastAPI()
+client = AsyncOpenAI()
+
+async def token_stream(prompt: str):
+    """Generator that yields SSE-formatted token chunks."""
+    stream = await client.chat.completions.create(
+        model="gpt-4o",
+        messages=[{"role": "user", "content": prompt}],
+        stream=True,
+    )
+    async for chunk in stream:
+        delta = chunk.choices[0].delta
+        if delta.content:
+            yield f"data: {json.dumps({'token': delta.content})}\n\n"
+        elif chunk.choices[0].finish_reason:
+            yield f"data: {json.dumps({'done': True})}\n\n"
+
+@app.get("/stream")
+async def stream_endpoint(prompt: str):
+    return StreamingResponse(
+        token_stream(prompt),
+        media_type="text/event-stream",
+        headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+    )</code></pre>
+<p class="formula-explain">Listing 26.3：FastAPI SSE token streaming——每个token作为JSON事件增量推送到客户端。</p>
+
+<h3>26.6.2 Tool Call Streaming</h3>
+<p>工具名和参数增量流式传输，UI可在调用前就显示进度。</p>
+<ul>
+<li><strong>渐进式参数显示</strong>：参数流入时即显示</li>
+<li><strong>并行工具调用指示器</strong>：同时调用多工具全显示pending</li>
+<li><strong>工具结果流式</strong>：代码执行/网页抓取本身可流式</li>
+</ul>
+
+<h3>26.6.3 Multi-Agent Streaming</h3>
+<ul>
+<li><strong>Agent标记流</strong>：每流标记Agent身份，单独车道渲染</li>
+<li><strong>流合并</strong>：supervisor与subagent流交错时维持连贯排序</li>
+<li><strong>Backpressure</strong>：UI跟不上时丢弃中间token、批量更新或暂停</li>
+</ul>
+
+<h3>26.6.4 Optimistic UI Updates</h3>
+<ul>
+<li>用户发消息立即出现在历史（乐观），请求在飞行中</li>
+<li>审批接受时UI立即显示"已批准"并开始下一步</li>
+<li>服务器返错时乐观更新被回滚</li>
+</ul>
+
+<h3>26.6.5 Backpressure Handling</h3>
+<ul>
+<li><strong>Token批处理</strong>：缓冲50-100ms批量渲染</li>
+<li><strong>虚拟滚动</strong>：仅渲染可见部分</li>
+<li><strong>节流更新</strong>：固定速率（10Hz）更新</li>
+<li><strong>渐进细节</strong>：高吞吐时摘要视图</li>
+</ul>
+
+<h2>26.7 Human-in-the-Loop UI Design</h2>
+
+<p>目标：维持有意义的人类监督而不创建瓶颈。</p>
+
+<h3>26.7.1 When to Interrupt the Agent</h3>
+<ul>
+<li><strong>可逆性</strong>：不可逆→始终批准；可逆→通常不需</li>
+<li><strong>范围</strong>：影响外部系统/他人→更多审视</li>
+<li><strong>置信度</strong>：低置信→请求澄清</li>
+<li><strong>成本</strong>：高成本→需批准</li>
+<li><strong>新颖性</strong>：未执行过→更多审视</li>
+</ul>
+
+<h3>26.7.2 Tiered Approval Workflows</h3>
+<div class="success-box">
+<p><strong>三层审批模型（Three-Tier Approval Model）</strong></p>
+<ul>
+<li><strong>Tier 1（Auto-approve）</strong>：低风险可逆常规操作（网页搜索、读文件、只读API）。无需中断，记录用于审计。</li>
+<li><strong>Tier 2（Notify）</strong>：中风险。非阻塞通知+30秒取消窗口。</li>
+<li><strong>Tier 3（Require approval）</strong>：高风险不可逆高成本。阻塞审批门，必须显式操作。</li>
+</ul>
+<p>阈值可由用户配置或从行为学习。</p>
+</div>
+
+<h3>26.7.3 Feedback Mechanisms</h3>
+<ul>
+<li><strong>Thumbs up/down</strong>：二元反馈→RLHF/偏好学习</li>
+<li><strong>内联修正</strong>：用户编辑Agent输出→delta作为训练信号</li>
+<li><strong>偏好选择</strong>：多选项中用户选择→偏好信号</li>
+<li><strong>显式指令</strong>："不要再这样做"→更新行为策略</li>
+<li><strong>附理由评分</strong>：可选文本解释</li>
+</ul>
+
+<h3>26.7.4 Teaching the Agent Through UI Interaction</h3>
+<ul>
+<li><strong>示范</strong>：用户手动执行→Agent观察学习</li>
+<li><strong>带泛化的修正</strong>："我是否应该始终这样做？"</li>
+<li><strong>偏好引出</strong>：定期比较两种行为</li>
+<li><strong>行为档案</strong>：可见"偏好"档案，用户可审查编辑</li>
+</ul>
+
+<h2>26.8 Accessibility and Trust</h2>
+
+<p><strong>信任不是一个功能——是涌现属性</strong>，来自系统持续按预期行为、清晰解释、优雅恢复。</p>
+
+<h3>26.8.1 Explaining Agent Decisions</h3>
+<ul>
+<li><strong>决策理由</strong>：不仅做了什么，还有为什么</li>
+<li><strong>来源归因</strong>：主张链接到来源</li>
+<li><strong>反事实解释</strong>："如果你说X而非Y，我会做Z"</li>
+<li><strong>不确定性量化</strong>：明确置信度+驱动因素</li>
+</ul>
+
+<h3>26.8.2 Showing Confidence Levels</h3>
+<ul>
+<li><strong>言语置信度</strong>：自然语言表达比数值概率更可解释</li>
+<li><strong>视觉置信度</strong>：颜色编码（绿/黄/红）、图标、字体粗细</li>
+<li><strong>按主张置信度</strong>：每个主张独立置信度指标</li>
+</ul>
+
+<h3>26.8.3 Undo and Rollback</h3>
+<ul>
+<li><strong>操作日志+撤销</strong>：时间顺序日志附"撤销"按钮</li>
+<li><strong>快照回滚</strong>：定期快照支持回滚</li>
+<li><strong>Dry-run模式</strong>：执行前模拟并显示预测变化</li>
+<li><strong>优雅降级</strong>：不可撤销时清晰沟通+最佳替代</li>
+</ul>
+
+<h3>26.8.4 Audit Trails</h3>
+<ul>
+<li><strong>不可变操作日志</strong>：时间戳+用户身份+完整参数</li>
+<li><strong>可导出历史</strong>：JSON/CSV/PDF合规报告</li>
+<li><strong>Diff视图</strong>：修改包含前/后diff</li>
+<li><strong>会话回放</strong>：逐步重放用于调试/合规</li>
+</ul>
+
+<h3>26.8.5 Managing User Expectations</h3>
+<ul>
+<li><strong>能力披露</strong>：能做/不能做的清晰文档</li>
+<li><strong>限制承认</strong>：超出能力时明确说明</li>
+<li><strong>不确定性沟通</strong>：主动沟通而非等用户发现</li>
+<li><strong>一致人格</strong>：一致身份和风格建立可预测性</li>
+</ul>
+
+<div class="info-box">
+<p><strong>信任建设案例（航班预订）</strong>：高信任UI呈现：(1)搜索参数，(2)替代方案及选择原因，(3)确切操作（API调用），(4)确认+链接，(5)24小时撤销选项，(6)Agent不能做什么的说明。</p>
+</div>
+
+<h2>26.9 Implementation Example: Full-Stack Agentic UI</h2>
+
+<p>后端FastAPI+LangGraph，前端React。结合流式传输、工具可视化和审批门。</p>
+
+<h3>26.9.1 Backend: FastAPI + Streaming + Approval Gates</h3>
+
+<pre><code># backend/main.py
+import asyncio, json
+from typing import AsyncGenerator
+from fastapi import FastAPI, HTTPException
+from fastapi.responses import StreamingResponse
+from pydantic import BaseModel
+from langchain_core.tools import tool
+
+app = FastAPI()
+
+@tool
+def web_search(query: str) -&gt; str:
+    """Search the web for information."""
+    return f"Search results for '{query}': [simulated results]"
+
+@tool
+def send_email(to: str, subject: str, body: str) -&gt; str:
+    """Send an email. REQUIRES HUMAN APPROVAL."""
+    return f"Email sent to {to} with subject '{subject}'"
+
+APPROVAL_REQUIRED_TOOLS = {"send_email"}
+approval_store: dict[str, asyncio.Event] = {}
+approval_results: dict[str, dict] = {}
+
+async def agent_stream(session_id: str, message: str) -&gt; AsyncGenerator:
+    def sse(event_type: str, data: dict) -&gt; str:
+        return f"data: {json.dumps({'type': event_type, **data})}\n\n"
+
+    yield sse("status", {"message": "Starting agent..."})
+    yield sse("thinking", {"content": "Analyzing the request..."})
+
+    # Tier 1: Auto-approved tool call
+    yield sse("tool_call", {"tool": "web_search",
+        "input": {"query": message}, "tier": 1})
+    await asyncio.sleep(0.5)
+    yield sse("tool_result", {"tool": "web_search",
+        "output": "Found relevant results...", "duration_ms": 245})
+
+    # Tier 3: Requires human approval
+    approval_id = f"approval_{session_id}_{id(message)}"
+    approval_event = asyncio.Event()
+    approval_store[approval_id] = approval_event
+
+    yield sse("approval_required", {
+        "approval_id": approval_id, "tool": "send_email", "tier": 3,
+        "risk": "irreversible",
+        "action_summary": "Send research summary to team@example.com",
+        "parameters": {"to": "team@example.com", "subject": "Research"},
+    })
+
+    # Block until human approves (5min timeout)
+    try:
+        await asyncio.wait_for(approval_event.wait(), timeout=300)
+        result = approval_results.get(approval_id, {})
+        if result.get("approved"):
+            yield sse("tool_call", {"tool": "send_email",
+                "input": result.get("parameters", {}),
+                "tier": 3, "approved_by": "human"})
+            yield sse("tool_result", {"tool": "send_email",
+                "output": "Email sent successfully", "duration_ms": 128})
+        else:
+            yield sse("action_rejected", {"tool": "send_email",
+                "reason": result.get("reason", "User rejected")})
+    except asyncio.TimeoutError:
+        yield sse("approval_timeout", {"approval_id": approval_id,
+            "message": "Approval timed out; action skipped"})
+
+    yield sse("token", {"content": "I've completed the research. "})
+    yield sse("done", {"total_tokens": 847, "duration_ms": 2341})
+
+@app.get("/chat/stream")
+async def chat_stream(session_id: str, message: str):
+    return StreamingResponse(agent_stream(session_id, message),
+        media_type="text/event-stream",
+        headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
+
+class ApprovalRequest(BaseModel):
+    approval_id: str
+    approved: bool
+    parameters: dict | None = None
+    reason: str | None = None
+
+@app.post("/chat/approve")
+async def handle_approval(req: ApprovalRequest):
+    if req.approval_id not in approval_store:
+        raise HTTPException(status_code=404, detail="Approval not found")
+    approval_results[req.approval_id] = {
+        "approved": req.approved,
+        "parameters": req.parameters, "reason": req.reason}
+    approval_store[req.approval_id].set()
+    return {"status": "ok"}</code></pre>
+<p class="formula-explain">Listing 26.4：FastAPI后端——SSE流式 + asyncio.Event实现阻塞审批门。前端POST /chat/approve解除阻塞。</p>
+
+<h3>26.9.2 Frontend: React with Streaming and Tool Visualization</h3>
+
+<pre><code>// frontend/AgentChat.tsx
+import { useState, useRef } from 'react';
+
+type AgentEvent =
+  | { type: 'status'; message: string }
+  | { type: 'thinking'; content: string }
+  | { type: 'token'; content: string }
+  | { type: 'tool_call'; tool: string; input: object; tier: number }
+  | { type: 'tool_result'; tool: string; output: string; duration_ms: number }
+  | { type: 'approval_required'; approval_id: string; tool: string;
+      tier: number; risk: string; action_summary: string; parameters: object }
+  | { type: 'action_rejected'; tool: string; reason: string }
+  | { type: 'done'; total_tokens: number; duration_ms: number };
+
+function ToolCard({ event }: { event: AgentEvent &amp; { type: 'tool_call' } }) {
+  const [expanded, setExpanded] = useState(false);
+  const tierColors = { 1: '#22c55e', 2: '#f59e0b', 3: '#ef4444' };
+  const color = tierColors[event.tier] || '#6b7280';
+  return (
+    &lt;div style={{ border: `1px solid ${color}`, borderRadius: 8,
+                  padding: 8, margin: '4px 0' }}&gt;
+      &lt;span style={{ color, fontWeight: 600 }}&gt;⚙ {event.tool}&lt;/span&gt;
+      &lt;span style={{ color: '#6b7280', fontSize: 11 }}&gt;
+        Tier {event.tier}&lt;/span&gt;
+      &lt;button onClick={() =&gt; setExpanded(!expanded)}&gt;
+        {expanded ? 'Hide' : 'Details'}&lt;/button&gt;
+      {expanded &amp;&amp; &lt;pre&gt;{JSON.stringify(event.input, null, 2)}&lt;/pre&gt;}
+    &lt;/div&gt;
+  );
+}
+
+function ApprovalGate({ event, onDecision }: {
+  event: AgentEvent &amp; { type: 'approval_required' };
+  onDecision: (approved: boolean, params?: object) =&gt; void;
+}) {
+  const riskColors = { reversible: '#22c55e',
+    'hard-to-undo': '#f59e0b', irreversible: '#ef4444' };
+  const riskColor = riskColors[event.risk] || '#6b7280';
+  return (
+    &lt;div style={{ border: `2px solid ${riskColor}`, borderRadius: 8,
+                  padding: 16, background: '#fef9f0' }}&gt;
+      &lt;div style={{ fontWeight: 700, color: riskColor }}&gt;
+        ⚠ Approval Required: {event.tool}&lt;/div&gt;
+      &lt;div&gt;{event.action_summary}&lt;/div&gt;
+      &lt;div&gt;Risk: &lt;span style={{color: riskColor}}&gt;{event.risk}&lt;/span&gt;&lt;/div&gt;
+      &lt;button onClick={() =&gt; onDecision(true, event.parameters)}
+        style={{background:'#22c55e',color:'white'}}&gt;✓ Approve&lt;/button&gt;
+      &lt;button onClick={() =&gt; onDecision(false)}
+        style={{background:'#ef4444',color:'white'}}&gt;✗ Reject&lt;/button&gt;
+    &lt;/div&gt;
+  );
+}
+
+export function AgentChat() {
+  const [events, setEvents] = useState&lt;AgentEvent[]&gt;([]);
+  const [response, setResponse] = useState('');
+  const [isStreaming, setIsStreaming] = useState(false);
+  const [input, setInput] = useState('');
+  const sessionId = useRef(`session_${Date.now()}`);
+
+  const sendMessage = async () =&gt; {
+    if (!input.trim() || isStreaming) return;
+    setEvents([]); setResponse(''); setIsStreaming(true);
+    const url = `/chat/stream?session_id=${sessionId.current}`
+      + `&amp;message=${encodeURIComponent(input)}`;
+    const es = new EventSource(url);
+    es.onmessage = (e) =&gt; {
+      const event: AgentEvent = JSON.parse(e.data);
+      if (event.type === 'token') setResponse(p =&gt; p + event.content);
+      else if (event.type === 'done') { setIsStreaming(false); es.close(); }
+      else setEvents(prev =&gt; [...prev, event]);
+    };
+    es.onerror = () =&gt; { setIsStreaming(false); es.close(); };
+    setInput('');
+  };
+
+  const handleApproval = async (approvalId: string, approved: boolean,
+      parameters?: object) =&gt; {
+    await fetch('/chat/approve', { method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({approval_id: approvalId, approved, parameters})});
+  };
+
+  return (
+    &lt;div style={{ maxWidth: 800, margin: '0 auto', padding: 16 }}&gt;
+      {events.map((event, i) =&gt; {
+        if (event.type === 'tool_call')
+          return &lt;ToolCard key={i} event={event} /&gt;;
+        if (event.type === 'approval_required')
+          return &lt;ApprovalGate key={i} event={event}
+            onDecision={(a, p) =&gt;
+              handleApproval(event.approval_id, a, p)} /&gt;;
+        return null;
+      })}
+      {response &amp;&amp; &lt;div&gt;{response}&lt;/div&gt;}
+      &lt;input value={input} onChange={e =&gt; setInput(e.target.value)}
+        onKeyDown={e =&gt; e.key==='Enter' &amp;&amp; sendMessage()}
+        placeholder="Ask the agent..." /&gt;
+      &lt;button onClick={sendMessage} disabled={isStreaming}&gt;
+        {isStreaming ? 'Running...' : 'Send'}&lt;/button&gt;
+    &lt;/div&gt;
+  );
+}</code></pre>
+<p class="formula-explain">Listing 26.5：React前端——SSE接收类型化事件，ToolCard渲染工具调用，ApprovalGate阻塞流等待人类输入。</p>
+
+<div class="success-box">
+<p><strong>实现展示的关键模式：</strong></p>
+<ul>
+<li><strong>SSE Streaming</strong>：后端通过单一HTTP连接流式传输不同类型事件</li>
+<li><strong>类型化事件协议</strong>：discriminated union使前端能适当渲染每个事件</li>
+<li><strong>工具可视化</strong>：ToolCard渲染工具调用附tier指示器</li>
+<li><strong>审批门</strong>：ApprovalGate阻塞流等待人类输入</li>
+<li><strong>异步审批</strong>：asyncio.Event暂停流等待前端POST，干净解耦</li>
+</ul>
+</div>
+
+<h2>26.10 Summary</h2>
+
+<div class="takeaway">
+<h2>核心洞见</h2>
+<ol>
+<li><strong>范式选择很重要</strong>：适当UI范式取决于任务结构、人类参与和输出类型。大多数生产系统组合多种范式。</li>
+<li><strong>透明性不可协商</strong>：用户无法信任看不到的东西。思维展示、工具可视化和上下文面板是可信赖系统的基础。</li>
+<li><strong>流式是基线</strong>：用户期望实时看到Agent工作。Token/tool call/multi-agent streaming是table-stakes。</li>
+<li><strong>审批门必须分层</strong>：扁平策略失败。自动批准安全操作+门控危险操作。</li>
+<li><strong>Generative UI是前沿</strong>：LLM生成UI组件使界面适应内容而非反过来。</li>
+<li><strong>信任通过一致性和可恢复性赢得</strong>：撤销、审计轨迹、校准置信度指标。</li>
+</ol>
+</div>
+
+<blockquote>
+<p><strong>设计北极星：Agent as a Transparent Collaborator</strong><br>
+行动始终可见、推理始终可访问、错误始终可恢复、能力与限制始终清晰。每个UI决策都应按此标准评估。</p>
+</blockquote>
+
+<h2>Q&amp;A 复习</h2>
+
+<details>
+<summary>Q1：为什么传统聊天界面不适合Agentic工作流？</summary>
+<div class="answer">
+<p>聊天界面将本质上并行的过程串行化。当Agent同时扇出到多个工具时，线性消息流歪曲了实际执行图。此外无法有效呈现进度、分支决策树、并行工具调用状态以及需要人类判断的决策点。</p>
+</div>
+</details>
+
+<details>
+<summary>Q2：什么是Generative UI？它与传统渲染有何不同？</summary>
+<div class="answer">
+<p>Generative UI颠覆传统模式：模型工具调用直接生成UI组件。模型决定不仅说什么还决定如何呈现。以Vercel AI SDK RSC为例，LLM调用工具后服务器渲染对应React组件流式传输。最佳实践是模型从预构建安全组件库中选择。</p>
+</div>
+</details>
+
+<details>
+<summary>Q3：三层审批模型各层是什么？为什么需要分层？</summary>
+<div class="answer">
+<p><strong>Tier 1</strong>：低风险可逆→自动批准。<strong>Tier 2</strong>：中风险→非阻塞通知+30秒取消窗口。<strong>Tier 3</strong>：高风险不可逆→阻塞审批门。分层避免Alert Fatigue——频繁请求导致用户反射性批准，违背监督目的。</p>
+</div>
+</details>
+
+<details>
+<summary>Q4：SSE与WebSocket各自适用什么场景？</summary>
+<div class="answer">
+<p><strong>SSE</strong>：单向HTTP流，简单、自动重连，适合大多数只需服务端推送token的场景（LLM API主导）。<strong>WebSocket</strong>：双向持久连接，适合需中途发送数据的交互场景（中断Agent、生成中反馈）。</p>
+</div>
+</details>
+
+<details>
+<summary>Q5：如何处理多Agent系统中的Backpressure？</summary>
+<div class="answer">
+<p>(1)Token批处理：缓冲50-100ms批量渲染；(2)虚拟滚动：仅渲染可见部分；(3)节流更新：10Hz固定速率；(4)渐进细节：高吞吐时摘要视图；(5)丢弃中间token或暂停较慢流。</p>
+</div>
+</details>
+
+<details>
+<summary>Q6：Automation Bias是什么？如何对抗？</summary>
+<div class="answer">
+<p>人类对自动化系统过度信任。对抗方式：(1)呈现不确定性和置信度；(2)展示推理过程；(3)使覆盖决策容易；(4)提供撤销回滚；(5)来源归因和反事实解释帮助独立验证。</p>
+</div>
+</details>
+
+<details>
+<summary>Q7：asyncio.Event如何协调前端审批与后端流式？</summary>
+<div class="answer">
+<p>后端需审批时创建asyncio.Event并await暂停流，同时发送approval_required事件到前端。前端渲染ApprovalGate，用户操作后POST到/chat/approve。后端收到POST后event.set()唤醒流。5分钟超时防无限等待。干净解耦审批UI与流式逻辑。</p>
+</div>
+</details>
+
+<details>
+<summary>Q8：六种UI范式分别最适合什么场景？</summary>
+<div class="answer">
+<p>(1)<strong>Chat</strong>：简单问答。(2)<strong>Canvas</strong>：共创（写作/编程/分析）。(3)<strong>Workflow</strong>：结构化Pipeline追踪。(4)<strong>Dashboard</strong>：生产Agent运营监控。(5)<strong>Collaborative</strong>：对等贡献共享工作空间。(6)<strong>Autonomous+Checkpoints</strong>：高度自主仅关键点暂停。多数生产系统组合多种。</p>
+</div>
+</details>
+
+</body>
+</html>

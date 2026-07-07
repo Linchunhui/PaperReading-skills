@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第22章 阅读笔记：Agent Skills</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]})"></script>
+<style>
+:root {
+  --primary: #2c3e50;
+  --accent: #3498db;
+  --bg: #fafbfc;
+  --card-bg: #ffffff;
+  --border: #e1e4e8;
+  --text: #24292e;
+  --text-secondary: #586069;
+  --code-bg: #f6f8fa;
+  --highlight: #fff3cd;
+  --success: #d4edda;
+  --info: #d1ecf1;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; line-height: 1.8; color: var(--text); background: var(--bg); padding: 2rem; max-width: 900px; margin: 0 auto; }
+h1 { font-size: 1.8rem; color: var(--primary); border-bottom: 3px solid var(--accent); padding-bottom: 0.5rem; margin-bottom: 1rem; }
+h2 { font-size: 1.4rem; color: var(--primary); margin-top: 2.5rem; margin-bottom: 1rem; padding-left: 0.8rem; border-left: 4px solid var(--accent); }
+h3 { font-size: 1.15rem; color: var(--primary); margin-top: 1.8rem; margin-bottom: 0.8rem; }
+p { margin-bottom: 1rem; text-align: justify; }
+ul, ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+li { margin-bottom: 0.5rem; }
+code { background: var(--code-bg); padding: 0.15rem 0.4rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: var(--code-bg); padding: 1rem; border-radius: 6px; overflow-x: auto; margin-bottom: 1.5rem; border: 1px solid var(--border); }
+pre code { background: none; padding: 0; }
+blockquote { border-left: 4px solid var(--accent); padding: 0.8rem 1.2rem; margin: 1.5rem 0; background: var(--info); border-radius: 0 6px 6px 0; }
+.card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+.formula-block { background: var(--code-bg); border: 1px solid var(--border); border-radius: 6px; padding: 1rem; margin: 1rem 0; overflow-x: auto; }
+.formula-explain { color: var(--text-secondary); font-size: 0.92em; margin-top: 0.5rem; padding-left: 1rem; border-left: 3px solid #ddd; }
+.highlight-box { background: var(--highlight); border: 1px solid #ffc107; border-radius: 6px; padding: 1rem; margin: 1rem 0; }
+.info-box { background: var(--info); border: 1px solid #bee5eb; border-radius: 6px; padding: 1rem; margin: 1rem 0; }
+.success-box { background: var(--success); border: 1px solid #c3e6cb; border-radius: 6px; padding: 1rem; margin: 1rem 0; }
+.subtitle { color: var(--text-secondary); font-size: 1rem; margin-bottom: 0.3rem; }
+.meta { color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 2rem; }
+table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; }
+th, td { border: 1px solid var(--border); padding: 0.6rem 0.8rem; text-align: left; }
+th { background: var(--code-bg); font-weight: 600; }
+details { margin-bottom: 1rem; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+summary { padding: 0.8rem 1.2rem; background: var(--code-bg); cursor: pointer; font-weight: 500; }
+details[open] summary { border-bottom: 1px solid var(--border); }
+details .answer { padding: 1rem 1.2rem; }
+svg { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; }
+.takeaway { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 8px; padding: 1.5rem; margin: 2rem 0; }
+.takeaway h2 { color: white; border-left-color: rgba(255,255,255,0.5); }
+.takeaway li { color: rgba(255,255,255,0.95); }
+</style>
+</head>
+<body>
+
+<h1>第22章：Agent Skills</h1>
+<p class="subtitle">智能体技能——从单体Prompt到模块化、可组合能力架构的演进</p>
+<p class="meta">来源：The Hitchhiker's Guide to Agentic AI · 第22章（pp. 412–416） · 阅读笔记</p>
+
+<div class="card">
+<h3>章节摘要</h3>
+<p>本章探讨了Agent能力的模块化组织方式——<strong>Skill（技能）</strong>。随着Agent从单体prompt-and-tool系统演进为模块化架构，如何组织、发现和组合Agent能力成为关键设计问题。Skill作为离散的、可复用的行为单元，可被加载、组合和替换而无需重新训练。本章从Skill的定义出发，介绍了三种架构模式（静态加载、动态发现、层级组合），深入分析Anthropic的Agent设计案例，并覆盖了Skill的生命周期管理、注册中心/市场，以及Skill与微调的对比。</p>
+</div>
+
+<h2>22.1 What Is a Skill?（什么是技能？）</h2>
+
+<p>Skill的概念最早由<strong>Voyager</strong>（Wang et al., 2023）推广——一个在Minecraft中运行的LLM Agent能够积累一个不断增长的可执行代码技能库，每个技能经过验证后存储以供后续复用。同样的原则适用于生产级Agent：<strong>Skill将领域专长封装为可组合的、可版本化的格式，其扩展能力超越了任何单一prompt所能承载的范围</strong>。</p>
+
+<h3>Skill的核心组成</h3>
+
+<p>与仅暴露单一函数的原始Tool不同，一个Skill包含以下五个维度的内容：</p>
+
+<div class="card">
+<ul>
+<li><strong>System Prompt Augmentation</strong>：注入Agent上下文的领域特定指令、约束条件和角色人设元素。</li>
+<li><strong>Tool Bindings</strong>：Skill所需的一个或多个工具（APIs、MCP servers、本地命令）。</li>
+<li><strong>Knowledge</strong>：Agent正确执行Skill所需的参考材料、示例或few-shot demonstrations。</li>
+<li><strong>Workflow Logic</strong>：引导Agent完成复杂任务的多步骤流程、决策树或条件流。</li>
+<li><strong>Guardrails</strong>：Skill特定的安全约束、输出格式要求和验证规则。</li>
+</ul>
+</div>
+
+<h3>Skill vs. Tool vs. Agent 三层概念辨析</h3>
+
+<table>
+<tr><th>概念</th><th>范围</th><th>示例</th></tr>
+<tr><td>Tool</td><td>单个函数调用</td><td><code>web_search(query)</code></td></tr>
+<tr><td>Skill</td><td>完整能力（prompts + tools + knowledge）</td><td>"Research Analyst" 技能</td></tr>
+<tr><td>Agent</td><td>具有多个Skills的自主实体</td><td>一个编码助手</td></tr>
+</table>
+
+<div class="highlight-box">
+<p><strong>核心隐喻</strong>：Tool是一把锤子（hammer）。Skill是知道如何搭建房屋框架（frame a house）。Agent是选择运用哪些技能的木匠（carpenter）。</p>
+</div>
+
+<p>Skill常常包装MCP Server（第21章）以实现工具访问，将Skill抽象连接到标准化的工具层。这意味着Skill = 上下文注入 + 工具绑定 + 知识增强 + 流程编排 + 安全护栏。</p>
+
+<h2>22.2 Skill Architecture Patterns（技能架构模式）</h2>
+
+<h3>22.2.1 Static Skill Loading（静态技能加载）</h3>
+
+<p>最简单的方式：Agent在启动时加载全部可用的Skills——所有Skill的system prompts、工具定义和知识在每次对话开始时都注入上下文。</p>
+
+<div class="card">
+<p><strong>优点</strong>：实现简单、无需路由逻辑、所有能力始终可用。</p>
+<p><strong>缺点</strong>：不可扩展——Skill数量增加时快速耗尽上下文窗口；无关信息稀释注意力。</p>
+<p><strong>适用场景</strong>：Skill数量有限（3-5个）的轻量级Agent。</p>
+</div>
+
+<h3>22.2.2 Dynamic Discovery（动态发现）</h3>
+
+<p>更可扩展的方式：根据用户请求<strong>按需匹配和加载</strong>相关Skills。一个路由器（router）在用户消息与Skill注册表之间做语义匹配：</p>
+
+<pre><code># Pseudocode -- framework-agnostic pattern
+relevant_skills = skill_router.match(
+    user_request=message,
+    available_skills=skill_registry,
+    max_skills=3
+)
+agent.activate(relevant_skills)</code></pre>
+
+<div class="card">
+<p><strong>优点</strong>：可扩展到大规模Skill库；上下文高效利用（仅加载相关Skill）。</p>
+<p><strong>缺点</strong>：路由错误可能遗漏相关Skill；增加额外延迟。</p>
+<p><strong>适用场景</strong>：企业级Agent系统，Skill库较大（10+）的场景。</p>
+</div>
+
+<div class="formula-block">
+$$\text{Skill Selection} = \arg\max_{S \subseteq \mathcal{S}, |S| \leq k} \sum_{s \in S} \text{sim}(q, \text{desc}(s))$$
+<p class="formula-explain">其中 $q$ 为用户请求，$\mathcal{S}$ 为所有可用技能集合，$k$ 为最大加载数量，$\text{sim}(\cdot,\cdot)$ 为语义相似度函数，$\text{desc}(s)$ 为技能 $s$ 的描述向量。路由器选择与请求最相关的至多 $k$ 个技能。</p>
+</div>
+
+<h3>22.2.3 Hierarchical Skill Composition（层级技能组合）</h3>
+
+<p>Skills可以<strong>依赖其他Skills</strong>，形成一个有向无环图（DAG）。一个高层技能（如"Deploy Application"）可以调用子技能（"Run Tests"→"Build Docker Image"→"Update DNS"）：</p>
+
+<div class="card">
+<ul>
+<li><strong>显式依赖声明</strong>：Skills显式声明其依赖关系。</li>
+<li><strong>依赖图解析</strong>：Orchestrator在执行前解析整个依赖图。</li>
+<li><strong>跨父技能共享</strong>：子技能可在多个父技能之间共享复用。</li>
+</ul>
+</div>
+
+<div class="info-box">
+<p><strong>设计洞察</strong>：层级组合使得复杂工作流得以从简单的、经过验证的原子技能自底向上构建，同时避免了在单个巨型Skill中硬编码所有逻辑。这与软件工程中的"组合优于继承"原则完全一致。</p>
+</div>
+
+<h2>22.3 Case Study: Anthropic's Agent Design（案例研究：Anthropic的Agent设计）</h2>
+
+<p>Anthropic在其Agent架构白皮书中提供了最清晰的Skill-based Agent设计实践说明。其核心哲学是：<strong>简单优于复杂（simplicity over complexity）、可组合构建块优于单体框架（composable building blocks over monolithic frameworks）</strong>。</p>
+
+<h3>22.3.1 Core Principles（核心原则）</h3>
+
+<div class="card">
+<ol>
+<li><strong>Start with the simplest solution</strong>：不要在简单方案（单个LLM调用、检索+生成）被证明不足之前就采用Agentic模式。"能用一个prompt解决的问题，不要用agent。"</li>
+<li><strong>Workflows vs. Agents 的区分</strong>：
+  <ul>
+    <li><strong>Workflows</strong>（工作流）：预定义的LLM调用编排——确定性控制流，LLM在特定节点执行。更可预测、更易调试。</li>
+    <li><strong>Agents</strong>（智能体）：由LLM动态决定下一步行动——工具选择、迭代次数、停止条件全部由模型驱动。更灵活、更难控制。</li>
+  </ul>
+</li>
+<li><strong>Augmented LLM as the atomic unit</strong>：原语永远不是裸模型——而是一个绑定了检索源（retrieval）、可调用工具（tools）和持久化记忆（memory）的复合单元。这个复合单元本质上就是一个装备了Skill的模型。</li>
+</ol>
+</div>
+
+<h3>22.3.2 Building Block Patterns（构建块模式）</h3>
+
+<p>Anthropic识别出<strong>五种可组合的工作流模式</strong>，作为Skill模板：</p>
+
+<table>
+<tr><th>模式</th><th>机制</th><th>适用场景</th></tr>
+<tr><td><strong>Prompt Chaining</strong><br>（提示链）</td><td>顺序LLM调用，每步输出馈入下一步；步间设置验证门控（gates）</td><td>具有清晰分解的多步转换任务</td></tr>
+<tr><td><strong>Routing</strong><br>（路由）</td><td>分类器或LLM根据任务类型将输入导向专业化处理器（Skill）</td><td>需要不同专长的不同任务类别</td></tr>
+<tr><td><strong>Parallelization</strong><br>（并行化）</td><td>多个LLM调用同时运行——任务拆分（sectioning）或投票（voting）</td><td>独立子任务；或通过共识获取置信度</td></tr>
+<tr><td><strong>Orchestrator–Workers</strong><br>（编排者–工作者）</td><td>中央LLM将任务分解为子任务，委派给工作LLM，然后综合结果</td><td>子任务不可提前预测的复杂任务</td></tr>
+<tr><td><strong>Evaluator–Optimizer</strong><br>（评估者–优化者）</td><td>一个LLM生成，另一个LLM评估；循环迭代直到质量达标</td><td>有明确质量标准的任务（代码、写作）</td></tr>
+</table>
+
+<h3>22.3.3 The Augmented LLM（增强型LLM）</h3>
+
+<p>在Anthropic的框架中，基本单元不是裸模型，而是<strong>增强型LLM</strong>：</p>
+
+<div class="formula-block">
+$$\text{Augmented LLM} = \text{Model} + \text{Retrieval} + \text{Tools} + \text{Memory}$$
+<p class="formula-explain">增强型LLM将模型与检索源、工具和记忆绑定为一个原子单元。这直接映射到Skill概念：每个Skill配置了模型对特定任务可以访问的检索源、工具和记忆存储。Skill的边界定义了模型在特定调用中能"看到"和"做到"的范围。</p>
+</div>
+
+<p>这一公式揭示了Skill的本质：<strong>Skill就是对Augmented LLM具体配置的一种封装</strong>。不同的Skill = 不同的(Retrieval, Tools, Memory)组合 + 不同的System Prompt。</p>
+
+<h3>22.3.4 Practical Implications（实践启示）</h3>
+
+<div class="highlight-box">
+<p><strong>Anthropic的核心洞察</strong>：最有效的Agent不是最复杂的Agent。它们是拥有优质工具的简单循环：</p>
+<pre><code>while not done:
+    action = llm.decide(context, tools)
+    result = execute(action)
+    context.append(result)
+    done = llm.should_stop(context)</code></pre>
+<p>智能来源于(1)模型能力、(2)工具描述的质量、(3)任务框架的清晰度——<strong>而非来自精巧的编排逻辑</strong>。Skills为(2)和(3)提供了结构化支撑。</p>
+</div>
+
+<p>Anthropic方法论的设计建议：</p>
+
+<div class="card">
+<ul>
+<li><strong>保持Agent循环简单</strong>：避免过度工程化控制流。让模型来决策。</li>
+<li><strong>投资工具质量</strong>：详细、无歧义的工具描述比复杂路由逻辑更有价值。</li>
+<li><strong>使用结构化输出</strong>：强制模型以可解析格式（JSON、函数调用）输出决策——减少Skill执行错误。</li>
+<li><strong>内建恢复能力</strong>：Skills应优雅地处理错误——用不同参数重试、请求澄清或升级给人类。</li>
+<li><strong>限制每个Skill的范围</strong>：试图做一切的Skill什么都做不好。窄而明确的Skills比宽泛的组合效果更好。</li>
+</ul>
+</div>
+
+<h2>22.4 Skill Lifecycle（技能生命周期）</h2>
+
+<p>一个Skill从被发现到执行完毕，经历<strong>六个阶段</strong>的完整生命周期：</p>
+
+<div class="card">
+<ol>
+<li><strong>Discovery（发现）</strong>：系统识别哪些Skills可用（注册表、市场、本地定义）。</li>
+<li><strong>Selection（选择）</strong>：基于用户请求，匹配并选出相关Skills。</li>
+<li><strong>Activation（激活）</strong>：Skill的prompts、tools和knowledge被注入Agent的上下文。</li>
+<li><strong>Execution（执行）</strong>：Agent使用Skill的能力来完成任务。</li>
+<li><strong>Deactivation（停用）</strong>：Skill上下文被移除，释放上下文窗口空间给后续任务。</li>
+<li><strong>Learning（学习）</strong>：执行结果可能更新Skill的few-shot examples或微调路由器。</li>
+</ol>
+</div>
+
+<div class="info-box">
+<p><strong>设计要点</strong>：生命周期管理的核心挑战在于Activation和Deactivation——如何高效地注入和清除上下文。这直接关系到上下文窗口的利用效率。一个优秀的Skill框架需要最小化激活开销、最大化有效信息密度。Learning阶段则使Skill系统具备自我进化能力，形成正反馈循环。</p>
+</div>
+
+<h2>22.5 Skill Registries and Marketplaces（技能注册中心与市场）</h2>
+
+<p>生产级Skill系统需要完善的基础设施支撑：</p>
+
+<div class="card">
+<ul>
+<li><strong>Skill Manifest（技能清单）</strong>：结构化描述（名称、能力、所需工具、输入/输出schema），支持自动发现和路由。</li>
+<li><strong>Version Control（版本控制）</strong>：Skills会演化；Agent需要锁定特定版本以确保可复现性。</li>
+<li><strong>Dependency Resolution（依赖解析）</strong>：Skills可能需要特定的MCP Server、API Keys或其他Skills。</li>
+<li><strong>Permission Model（权限模型）</strong>：不是所有Agent都能访问所有Skills（安全、成本、能力边界考量）。</li>
+<li><strong>Marketplace（市场）</strong>：组织可发布、共享和安装Skills——类似代码的包管理器。</li>
+</ul>
+</div>
+
+<h3>Skill Manifest 示例</h3>
+
+<p>一个Skill清单声明了Orchestrator加载和调用Skill所需的一切信息：</p>
+
+<pre><code>{
+  "name": "code-review",
+  "description": "Review code changes for bugs, style, and security issues",
+  "version": "2.1.0",
+  "requires": {
+    "tools": ["file_read", "grep", "git_diff"],
+    "mcp_servers": ["github"],
+    "models": ["claude-sonnet-4-20250514"]
+  },
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "repo": {"type": "string"},
+      "pr_number": {"type": "integer"}
+    }
+  },
+  "prompts": ["skills/code-review/system.md"],
+  "knowledge": ["skills/code-review/style-guide.md"]
+}</code></pre>
+
+<div class="info-box">
+<p><strong>生态启示</strong>：目前尚无行业标准的Skill Schema。但已有格式的共性清晰可见——Anthropic MCP、OpenAI Function Specs、LangChain Tool Definitions都在收敛向类似结构。未来很可能出现统一的Skill描述标准，类似于Docker Compose之于容器编排。</p>
+</div>
+
+<h2>22.6 Skills vs. Fine-Tuning（技能 vs. 微调）</h2>
+
+<p>一个自然的问题：为什么用运行时Skill注入而不是微调模型来添加能力？</p>
+
+<table>
+<tr><th>维度</th><th>Skills（上下文内）</th><th>Fine-Tuning（微调）</th></tr>
+<tr><td><strong>部署速度</strong></td><td>即时</td><td>数小时至数天</td></tr>
+<tr><td><strong>灵活性</strong></td><td>运行时替换/组合</td><td>训练后固定</td></tr>
+<tr><td><strong>上下文成本</strong></td><td>占用上下文窗口</td><td>零运行时成本</td></tr>
+<tr><td><strong>深度行为变更</strong></td><td>受限于上下文长度</td><td>深度参数级变更</td></tr>
+<tr><td><strong>多租户支持</strong></td><td>每用户不同Skills</td><td>所有用户同一模型</td></tr>
+<tr><td><strong>维护成本</strong></td><td>更新文本文件即可</td><td>需重新训练</td></tr>
+</table>
+
+<div class="formula-block">
+$$\text{Agent Capability} = \underbrace{f_\theta(\cdot)}_{\text{Fine-tuned base}} + \underbrace{\sum_{i=1}^{k} \text{Skill}_i(\text{prompt}_i, \text{tools}_i, \text{knowledge}_i)}_{\text{Runtime skill injection}}$$
+<p class="formula-explain">Agent的完整能力由两部分组成：经过微调的基础模型 $f_\theta$ 提供底层能力（指令遵循、工具使用格式、推理），运行时注入的 $k$ 个Skills提供具体任务专长。两者是互补关系，而非替代关系。</p>
+</div>
+
+<div class="success-box">
+<p><strong>最佳实践</strong>：微调提供基础能力（instruction following、tool use格式、推理能力），而Skills在运行时之上叠加任务特定的专长。类比：微调是"上学接受通用教育"，Skills是"工作中带着操作手册和工具箱"。</p>
+</div>
+
+<!-- Takeaway Section -->
+<div class="takeaway">
+<h2>本章核心要点</h2>
+<ul>
+<li><strong>Skill = Prompt + Tools + Knowledge + Workflow + Guardrails</strong>，是Agent能力的基本模块化单元。</li>
+<li>三种架构模式各有权衡：Static Loading简单但不可扩展，Dynamic Discovery灵活但有路由风险，Hierarchical Composition表达力强但复杂。</li>
+<li>Anthropic核心哲学：简单循环 + 优质工具 > 复杂编排逻辑。Augmented LLM = Model + Retrieval + Tools + Memory。</li>
+<li>Skill Lifecycle六阶段（发现→选择→激活→执行→停用→学习）形成闭环自我进化系统。</li>
+<li>Skills和Fine-Tuning互补：前者提供运行时灵活性，后者提供深层参数化能力——两者共同构成Agent的完整能力栈。</li>
+</ul>
+</div>
+
+<!-- Q&A Section -->
+<h2>复习 Q&amp;A</h2>
+
+<details>
+<summary>Q1：Skill与Tool的本质区别是什么？为什么不能简单用Tool替代Skill？</summary>
+<div class="answer">
+<p><strong>A</strong>：Tool是单一函数调用（如<code>web_search(query)</code>），而Skill是一个完整的能力模块，包含system prompt增强、工具绑定、领域知识、工作流逻辑和安全护栏五个维度。Tool只解决"怎么做某个操作"，Skill解决"怎么完成某类任务"。一个Skill可以编排多个Tools，加上上下文知识和决策流程，形成类似人类"专业技能"的完整能力包。用类比来说：Tool是锤子，Skill是"如何搭建房屋框架"的全部知识和技术。</p>
+</div>
+</details>
+
+<details>
+<summary>Q2：Dynamic Discovery模式的路由器是如何工作的？有什么潜在风险？</summary>
+<div class="answer">
+<p><strong>A</strong>：路由器接收用户请求，将其与Skill注册表中每个Skill的描述做语义相似度匹配，选出相关度最高的若干Skill（通常限制为max_skills=3）加载到Agent上下文中。潜在风险包括：(1)路由错误——遗漏真正需要的Skill，导致Agent能力不完整；(2)额外延迟——匹配过程需要时间，尤其在大规模Skill库中；(3)语义歧义——用户请求可能与多个Skill描述部分匹配，难以精确选择。解决方案包括使用更强的嵌入模型、添加fallback机制、支持用户显式指定Skill等。</p>
+</div>
+</details>
+
+<details>
+<summary>Q3：Anthropic的"Augmented LLM"概念如何映射到Skill设计？</summary>
+<div class="answer">
+<p><strong>A</strong>：Anthropic认为基本单元不是裸模型，而是 Augmented LLM = Model + Retrieval + Tools + Memory。这直接映射到Skill：每个Skill配置特定的检索源（文档、知识库）、工具集（APIs、MCP servers）和记忆存储（对话历史、学习到的经验）。Skill的边界定义了模型在该调用中"能看到什么"和"能做什么"。不同的Skill本质上是Augmented LLM的不同配置实例——切换Skill就是切换模型的增强配置，而非切换模型本身。</p>
+</div>
+</details>
+
+<details>
+<summary>Q4：为什么Anthropic建议"保持Agent循环简单"而非设计复杂编排？</summary>
+<div class="answer">
+<p><strong>A</strong>：Anthropic的核心发现是：Agent的智能主要来源于(1)模型本身的能力、(2)工具描述的质量、(3)任务框架的清晰度——而不是精巧的控制流逻辑。一个简单的while循环（decide→execute→append→check_stop）配合高质量的Skill定义，往往优于具有复杂状态机的系统。原因是：复杂编排会引入脆弱性（brittle failure modes）、增加调试难度、且限制模型发挥其固有推理能力。让模型自主决策何时使用哪个工具，比预定义复杂工作流更具鲁棒性和泛化能力。</p>
+</div>
+</details>
+
+<details>
+<summary>Q5：在什么场景下应优先选择Fine-Tuning而非Skills？反之呢？</summary>
+<div class="answer">
+<p><strong>A</strong>：<strong>优先Fine-Tuning</strong>：(1)需要深度行为变更（如改变模型的推理方式或输出风格）；(2)需要零额外推理时上下文成本；(3)所有用户共享相同能力增强；(4)行为模式稳定不变。<strong>优先Skills</strong>：(1)需要即时部署新能力；(2)不同用户/租户需要不同能力组合；(3)能力需要频繁更新迭代；(4)需要运行时灵活替换/组合能力。实践中两者互补：Fine-tuning提供底层格式遵循和基础推理（相当于"通用教育"），Skills在运行时叠加具体任务知识（相当于"操作手册+工具箱"）。</p>
+</div>
+</details>
+
+</body>
+</html>

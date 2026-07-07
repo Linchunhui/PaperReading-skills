@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第11章 阅读笔记：System Architecture & Infrastructure at Scale</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]})"></script>
+<style>
+:root { --primary: #2c3e50; --accent: #3498db; --bg: #fafbfc; --card-bg: #ffffff; --border: #e1e4e8; --text: #24292e; --text-secondary: #586069; --code-bg: #f6f8fa; --highlight: #fff3cd; --success: #d4edda; --info: #d1ecf1; }
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; line-height: 1.8; color: var(--text); background: var(--bg); padding: 2rem; max-width: 900px; margin: 0 auto; }
+h1 { font-size: 1.8rem; color: var(--primary); border-bottom: 3px solid var(--accent); padding-bottom: 0.5rem; margin-bottom: 1rem; }
+h2 { font-size: 1.4rem; color: var(--primary); margin-top: 2.5rem; margin-bottom: 1rem; padding-left: 0.8rem; border-left: 4px solid var(--accent); }
+h3 { font-size: 1.15rem; color: var(--primary); margin-top: 1.8rem; margin-bottom: 0.8rem; }
+p { margin-bottom: 1rem; text-align: justify; }
+ul, ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+li { margin-bottom: 0.5rem; }
+code { background: var(--code-bg); padding: 0.15rem 0.4rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: var(--code-bg); padding: 1rem; border-radius: 6px; overflow-x: auto; margin-bottom: 1.5rem; border: 1px solid var(--border); }
+pre code { background: none; padding: 0; }
+blockquote { border-left: 4px solid var(--accent); padding: 0.8rem 1.2rem; margin: 1.5rem 0; background: var(--info); border-radius: 0 6px 6px 0; }
+.card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+.formula-block { background: var(--code-bg); border: 1px solid var(--border); border-radius: 6px; padding: 1rem; margin: 1rem 0; overflow-x: auto; }
+.formula-explain { color: var(--text-secondary); font-size: 0.92em; margin-top: 0.5rem; padding-left: 1rem; border-left: 3px solid #ddd; }
+.highlight-box { background: var(--highlight); border: 1px solid #ffc107; border-radius: 6px; padding: 1rem; margin: 1rem 0; }
+.info-box { background: var(--info); border: 1px solid #bee5eb; border-radius: 6px; padding: 1rem; margin: 1rem 0; }
+.success-box { background: var(--success); border: 1px solid #c3e6cb; border-radius: 6px; padding: 1rem; margin: 1rem 0; }
+.subtitle { color: var(--text-secondary); font-size: 1rem; margin-bottom: 0.3rem; }
+.meta { color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 2rem; }
+table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; }
+th, td { border: 1px solid var(--border); padding: 0.6rem 0.8rem; text-align: left; }
+th { background: var(--code-bg); font-weight: 600; }
+details { margin-bottom: 1rem; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+summary { padding: 0.8rem 1.2rem; background: var(--code-bg); cursor: pointer; font-weight: 500; }
+details[open] summary { border-bottom: 1px solid var(--border); }
+details .answer { padding: 1rem 1.2rem; }
+svg { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; }
+.takeaway { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 8px; padding: 1.5rem; margin: 2rem 0; }
+.takeaway h2 { color: white; border-left-color: rgba(255,255,255,0.5); }
+.takeaway li { color: rgba(255,255,255,0.95); }
+</style>
+</head>
+<body>
+
+<h1>第11章 System Architecture &amp; Infrastructure at Scale</h1>
+<p class="subtitle">The Hitchhiker's Guide to Agentic AI · Chapter 11</p>
+<p class="meta">页码 199–221 · 22页 · 15小节 · 系统工程视角的大规模 RLHF 基础设施</p>
+
+<div class="card">
+<strong>章节概览</strong>：本章从系统工程角度全面剖析大规模 RLHF 训练的基础设施挑战。RLHF 需要同时加载 4 个模型（Policy、Reference、Reward、Value），70B 参数模型仅权重+优化器就需要 ~1.5TB 显存。章节系统讲解了并行策略（DP/TP/SP/PP/FSDP 及 3D Parallelism）、生成阶段的内存带宽瓶颈（GPU 利用率仅 0.6%）、解耦架构、权重同步、容错机制、网络拓扑、MFU 度量、成本估算、分布式 Checkpoint 以及 RL 专用优化器配置。
+</div>
+
+<!-- ====== 11.1 ====== -->
+<h2 id="sec1">11.1 The 4-Model Memory Challenge</h2>
+
+<p>RLHF 训练的核心系统挑战来源于需要<strong>同时维护 4 个模型</strong>在 GPU 内存中：</p>
+<ol>
+<li><strong>Policy Model（策略模型）</strong>：需要权重、梯度、优化器状态（FP32 master weights + Adam m/v），是内存消耗的主体</li>
+<li><strong>Reference Model（参考模型）</strong>：冻结的 SFT checkpoint 副本，用于计算 KL 散度 $D_{KL}(\pi_\theta \| \pi_{ref})$</li>
+<li><strong>Reward Model（奖励模型）</strong>：对生成的完整回复打分，通常与 Policy 同等规模</li>
+<li><strong>Value Head / Critic（值函数）</strong>：估计每个 token 位置的期望回报，用作 PPO 的 baseline</li>
+</ol>
+
+<p>这与标准 SFT 只需加载一个模型形成 <strong>10 倍以上的内存差距</strong>。以下是 70B BF16 模型的详细内存预算：</p>
+
+<table>
+<tr><th>组件</th><th>内存占用</th><th>计算方式</th></tr>
+<tr><td>Policy 权重 (BF16)</td><td>140 GB</td><td>$70 \times 10^9 \times 2$ bytes</td></tr>
+<tr><td>FP32 Master Weights</td><td>280 GB</td><td>$70 \times 10^9 \times 4$ bytes（精确梯度累积必需）</td></tr>
+<tr><td>Adam 优化器状态 (m + v)</td><td>560 GB</td><td>$70 \times 10^9 \times 4 \times 2$ bytes（一阶矩 + 二阶矩）</td></tr>
+<tr><td>梯度 (BF16)</td><td>140 GB</td><td>与权重同尺寸</td></tr>
+<tr><td>Reference 模型 (BF16/INT8)</td><td>140 GB / 70 GB</td><td>冻结，仅推理用</td></tr>
+<tr><td>Reward 模型 (BF16/INT8)</td><td>140 GB / 70 GB</td><td>冻结，仅推理用</td></tr>
+<tr><td>Activations</td><td>50–100 GB</td><td>取决于 batch size 和 sequence length</td></tr>
+<tr><td>KV Cache（生成阶段）</td><td>20–60 GB</td><td>自回归解码时的缓存</td></tr>
+<tr><td><strong>总计</strong></td><td><strong>1,470–1,500 GB</strong></td><td></td></tr>
+</table>
+
+<div class="formula-block">
+$$M_{total} = \underbrace{2P}_{weights} + \underbrace{4P}_{master} + \underbrace{8P}_{optimizer} + \underbrace{2P}_{gradients} + \underbrace{2P}_{ref} + \underbrace{2P}_{reward} + M_{act} + M_{kv}$$
+<p class="formula-explain">其中 $P$ 为参数量（bytes per param 已折入系数），$M_{act}$ 为激活内存，$M_{kv}$ 为 KV Cache。对于 70B 参数，仅 Policy 训练部分就需要 $16P = 16 \times 70\text{GB} = 1,120\text{GB}$。</p>
+</div>
+
+<div class="highlight-box">
+<strong>关键数字</strong>：1,500 GB ÷ 80 GB/GPU = 至少需要 <strong>19 张 A100-80GB</strong>（无任何并行优化）。实践中使用 FSDP/ZeRO-3 + 量化推理模型，可压缩到 <strong>8 节点 64 GPU</strong> 的标准配置。
+</div>
+
+<p><strong>与 SFT 的对比</strong>：SFT 只需 Policy 一个模型（$16P$ 含优化器），70B SFT 约需 1,120 GB（14 卡）。而 RLHF 额外增加了 Reference + Reward + Value + 生成阶段的 KV Cache，这是"4 模型挑战"的本质。</p>
+
+<!-- ====== 11.2 ====== -->
+<h2 id="sec2">11.2 Parallelism Strategies</h2>
+
+<p>为了将超出单卡容量的模型分散到多张 GPU 上训练，生产系统需要组合多种并行策略。理解每种策略"切什么"以及"通信代价"是做架构决策的基础。</p>
+
+<h3>11.2.1 数据并行 DP/DDP</h3>
+
+<p><strong>核心思想</strong>：每张 GPU 持有模型完整副本，各自处理不同的 mini-batch 数据，通过 AllReduce 同步梯度后统一更新。</p>
+
+<ul>
+<li><strong>DDP (Distributed Data Parallel)</strong>：多进程，每 GPU 一个进程，使用 Ring-AllReduce 后台同步。梯度按 25MB bucket 分组，实现<strong>计算与通信重叠</strong></li>
+<li><strong>旧版 DataParallel</strong>：单进程多线程，受 GIL 限制，比 DDP 慢 2–3 倍，永远不要使用</li>
+</ul>
+
+<div class="formula-block">
+$$\text{Ring-AllReduce 通信量} = 2 \cdot \frac{N-1}{N} \cdot M \text{ bytes}$$
+<p class="formula-explain">$N$ = GPU 数量，$M$ = 梯度张量总大小。当 $N$ 很大时趋近 $2M$，与 GPU 数量几乎无关——这是 Ring 算法的优势。70B BF16 梯度 = 140 GB，64 GPU 时每 GPU 实际传输约 $2 \times \frac{63}{64} \times 140 \approx 276$ GB。</p>
+</div>
+
+<p><strong>适用场景</strong>：模型能放入单张 GPU（≤13B BF16 = 26 GB 权重）。扩展性好，通信开销 5–10%。</p>
+
+<h3>11.2.2 张量并行 TP (Tensor Parallelism)</h3>
+
+<p><strong>核心思想</strong>：将单层的权重矩阵沿列或行维度切分到多张 GPU，Megatron-LM 风格实现：</p>
+
+<ul>
+<li><strong>列并行 (Column-Parallel)</strong>：$W = [W_0 | W_1 | \cdots | W_{T-1}]$，每张 GPU 独立计算 $Y_i = XW_i$，无需前向通信</li>
+<li><strong>行并行 (Row-Parallel)</strong>：$W$ 按行切分，各 GPU 计算部分和后做 AllReduce 聚合</li>
+<li>每个 Transformer 层需要 <strong>2 次 AllReduce</strong>：Self-Attention 输出一次 + MLP 输出一次</li>
+</ul>
+
+<div class="formula-block">
+$$\text{TP 单层通信} = 2 \times 2 \cdot \frac{T-1}{T} \cdot \frac{d_{model}^2}{T} \cdot b \cdot s \cdot 2 \text{ bytes}$$
+<p class="formula-explain">$T$ = TP degree，70B 模型 80 层则总共 160 次 AllReduce。NVLink 600 GB/s 下每次 < 0.5ms 可接受，但 InfiniBand 50 GB/s 下每次 ~4ms，80 层累计 640ms 已超过计算时间本身。<strong>因此 TP 必须限制在节点内（NVLink 互联）</strong>，通常 TP ≤ 8。</p>
+</div>
+
+<div class="info-box">
+<strong>TP 内存节省</strong>：每张 GPU 只存 $1/T$ 的权重和激活。TP=8 时每 GPU 只需 $140/8 = 17.5$ GB 权重。但优化器状态仍需完整（除非结合 FSDP）。
+</div>
+
+<h3>11.2.3 序列并行 SP (Sequence Parallelism)</h3>
+
+<p><strong>核心思想</strong>：TP 只能切分矩阵乘法层，而 LayerNorm、Dropout、残差连接等操作仍在每张 GPU 上保留完整激活。SP 将这些操作的激活沿序列维度切分。</p>
+
+<div class="formula-block">
+$$\text{SP 激活节省} = \frac{T-1}{T} \times b \times s \times d \times n_{layers} \times 2 \text{ bytes}$$
+<p class="formula-explain">70B, TP=8, batch=4, seq=2048, $d$=8192, 80 layers：节省约 $(7/8) \times 4 \times 2048 \times 8192 \times 80 \times 2 \approx 59$ GB/GPU。SP 只是将 AllReduce 拆分为 ReduceScatter + AllGather 的重排列，<strong>零额外通信开销</strong>。开启 TP 时必须同时开启 SP。</p>
+</div>
+
+<h3>11.2.4 流水线并行 PP (Pipeline Parallelism)</h3>
+
+<p><strong>核心思想</strong>：按层纵向切割模型，每组层分配到不同 GPU（称为 stage）。数据以 micro-batch 流水推进。</p>
+
+<div class="formula-block">
+$$\text{Pipeline Bubble} = \frac{P-1}{P + M - 1} \approx \frac{P-1}{M} \quad (\text{当 } M \gg P)$$
+<p class="formula-explain">$P$ = pipeline stages 数，$M$ = micro-batch 数。要控制 bubble < 10%，需要 $M \geq 10 \cdot (P-1)$。PP=4 时至少需要 30 个 micro-batch。</p>
+</div>
+
+<table>
+<tr><th>调度策略</th><th>Bubble 率</th><th>内存</th><th>特点</th></tr>
+<tr><td>GPipe</td><td>$(P-1)/(M+P-1)$</td><td>$M \times$ activations</td><td>先全 Forward 再全 Backward，内存随 M 线性增长</td></tr>
+<tr><td><strong>1F1B</strong></td><td>同上</td><td><strong>$P \times$ activations</strong></td><td>稳态时交替执行，内存有界（生产标准）</td></tr>
+<tr><td>Interleaved 1F1B</td><td>$(P-1)/(M \cdot V+P-1)$</td><td>$P \times$ activations</td><td>虚拟 stage 进一步减少 bubble</td></tr>
+<tr><td>Zero-Bubble (ZB-H1)</td><td>≈ 0</td><td>$P \times$ activations</td><td>拆分 Backward 为 B(梯度) 和 W(权重更新)</td></tr>
+</table>
+
+<p><strong>PP 通信量</strong>远小于 TP：每次仅传输 $b_{micro} \times s \times d_{model} \times 2$ bytes 的激活张量，点对点发送。70B 模型单次传输约 $4 \times 2048 \times 8192 \times 2 = 128$ MB。</p>
+
+<div class="highlight-box">
+<strong>PP 是最后手段</strong>：带来 15–30% 气泡开销 + 复杂调度 + 负载均衡困难 + 与 RLHF rollout 阶段冲突。70B 用 TP=8 + FSDP 即可，仅 100B+ 才需要 PP。
+</div>
+
+<h3>11.2.5 FSDP / ZeRO-3</h3>
+
+<p><strong>Fully Sharded Data Parallelism</strong>：每张 GPU 只持有 $1/N$ 的参数、梯度和优化器状态分片，需要时通过集合通信重建完整参数。</p>
+
+<table>
+<tr><th>策略</th><th>切分内容</th><th>70B / 8 GPU 内存</th><th>通信模式</th></tr>
+<tr><td>DDP（无切分）</td><td>无</td><td>1,120 GB（放不下）</td><td>AllReduce(梯度)</td></tr>
+<tr><td>ZeRO-1</td><td>优化器状态</td><td>385 GB</td><td>AllReduce(梯度)</td></tr>
+<tr><td>ZeRO-2</td><td>优化器 + 梯度</td><td>368 GB</td><td>AllReduce(梯度)</td></tr>
+<tr><td><strong>ZeRO-3 / FSDP</strong></td><td><strong>全部（参数+梯度+优化器）</strong></td><td><strong>140 GB（可行）</strong></td><td>AllGather + ReduceScatter（逐层）</td></tr>
+</table>
+
+<div class="formula-block">
+$$M_{per\_gpu}^{ZeRO\text{-}3} = \frac{16P}{N} + M_{act}$$
+<p class="formula-explain">70B / 64 GPU：$\frac{16 \times 70\text{GB}}{64} = 17.5$ GB 参数相关 + 激活内存。极大地降低了每 GPU 内存需求。</p>
+</div>
+
+<div class="highlight-box">
+<strong>FSDP 通信代价</strong>：前向 AllGather（重建参数）+ 反向 AllGather（重建参数）+ 反向 ReduceScatter（分发梯度），共 $3M$，是 DDP 的 <strong>1.5 倍</strong>。现代框架通过 prefetch 和 overlap 可隐藏 70–90% 通信延迟。
+</div>
+
+<h3>11.2.6 3D Parallelism 组合</h3>
+
+<p>生产 70B+ 模型通常组合多种策略，形成三维并行：</p>
+
+<div class="card">
+<strong>典型配置（64 GPU = 8 节点 × 8 GPU）</strong>：
+<ul>
+<li><strong>节点内</strong>（NVLink 600 GB/s）：TP=8 用于生成加速，训练时 FSDP 在节点内切分</li>
+<li><strong>跨节点</strong>（InfiniBand 50 GB/s）：FSDP 8-way 数据并行</li>
+<li><strong>PP</strong>：仅 100B+ 且 TP+FSDP 放不下时才启用</li>
+</ul>
+<p><strong>通信层次设计原则</strong>：高频细粒度通信（TP）放在高带宽低延迟链路（NVLink）上；低频大块通信（FSDP/DP）放在跨节点网络（InfiniBand）上。</p>
+</div>
+
+<div class="formula-block">
+$$N_{total} = TP \times PP \times DP \quad \text{(GPU 总数 = 三维度之积)}$$
+<p class="formula-explain">例如 TP=4, PP=2, DP=8 → 64 GPU。16 GPU 配置：TP=4 × PP=2 × DP=2。</p>
+</div>
+
+<!-- ====== 11.3 ====== -->
+<h2 id="sec3">11.3 The Generation Bottleneck</h2>
+
+<p>自回归生成是 RLHF 流水线的性能杀手。使用 <strong>Roofline 模型</strong>定量分析：</p>
+
+<div class="card">
+<strong>A100 Roofline 分析</strong>：
+<ul>
+<li>A100 峰值算力：312 TFLOPS (BF16)，HBM 带宽：2 TB/s</li>
+<li>Roofline 交叉点（算术强度阈值）：$312\text{T} / 2\text{T} = 156$ FLOP/byte</li>
+<li>自回归生成（batch=1）：每 token 需读取全部权重 140 GB，做 ~140 GFLOP 计算</li>
+<li>实际算术强度：$140\text{G} / 140\text{GB} = 1$ FLOP/byte</li>
+<li><strong>GPU 利用率</strong>：$1/156 = 0.64\%$，99.4% 时间等待 HBM 数据读取</li>
+</ul>
+</div>
+
+<div class="formula-block">
+$$\text{Token Rate}_{single} = \frac{BW_{HBM}}{M_{weights}} = \frac{2\text{ TB/s}}{140\text{ GB}} \approx 14.3 \text{ tok/s}$$
+$$\text{GPU Utilization} = \frac{\text{Arithmetic Intensity}}{\text{Roofline Point}} = \frac{1}{156} = 0.64\%$$
+<p class="formula-explain">这意味着 70B 模型在 batch=1 时，每秒只能生成约 14 个 token，312 TFLOPS 的强大算力几乎完全浪费。</p>
+</div>
+
+<table>
+<tr><th>配置</th><th>Batch</th><th>耗时(512 tok)</th><th>Tok/s/GPU</th><th>GPU 利用率</th></tr>
+<tr><td>TP=1, batch=1</td><td>1</td><td>36s</td><td>14</td><td>0.6%</td></tr>
+<tr><td>TP=4, batch=1</td><td>1</td><td>9s</td><td>57</td><td>2.5%</td></tr>
+<tr><td>TP=4, batch=32</td><td>32</td><td>15s</td><td>1,092</td><td>~40%</td></tr>
+<tr><td>TP=4, batch=128, vLLM</td><td>128</td><td>45s</td><td>1,456</td><td>~55%</td></tr>
+<tr><td>TP=4, batch=128, INT8</td><td>128</td><td>25s</td><td><strong>2,621</strong></td><td>~60%</td></tr>
+</table>
+
+<p><strong>优化手段叠加效果</strong>：</p>
+<ol>
+<li><strong>vLLM + PagedAttention</strong>（2–4×）：消除 KV Cache 内存碎片，支持更大 batch</li>
+<li><strong>Continuous Batching</strong>（1.5–2×）：序列完成即插入新请求，避免等待最长序列</li>
+<li><strong>Speculative Decoding</strong>（2–3×）：小模型（~1B）草拟 5 token，大模型一次验证，平均接受 3–4 个</li>
+<li><strong>INT8/FP8 权重量化</strong>（2×）：带宽需求减半，内存减半，可放更大 batch</li>
+<li><strong>CUDA Graphs</strong>（1.1–1.3×）：消除 kernel launch 开销（特别是小 batch 时显著）</li>
+<li><strong>Prefix Caching</strong>（1.5× for 共享 prefix）：系统 prompt 的 KV Cache 跨请求复用</li>
+</ol>
+
+<!-- ====== 11.4 ====== -->
+<h2 id="sec4">11.4 Decoupled Architecture</h2>
+
+<p>生产 RLHF 系统（DeepSpeed-Chat、OpenRLHF、veRL）将训练流程拆分为<strong>独立可扩展的集群</strong>，根本原因是生成和训练的计算特征完全不同：</p>
+
+<table>
+<tr><th>阶段</th><th>计算特征</th><th>瓶颈</th><th>最优硬件</th></tr>
+<tr><td>生成 (Generation)</td><td>内存带宽受限（memory-bound）</td><td>HBM 带宽</td><td>高带宽 GPU + INT8</td></tr>
+<tr><td>训练 (Training)</td><td>计算受限（compute-bound）</td><td>FLOPS</td><td>高算力 GPU + BF16</td></tr>
+</table>
+
+<p><strong>解耦架构的核心优势</strong>：</p>
+<ul>
+<li><strong>独立扩缩容</strong>：生成集群按 batch 需求扩展，训练集群按模型大小扩展</li>
+<li><strong>精度分离</strong>：生成集群用 INT8 量化（带宽减半），训练集群用 BF16 + FP32 master</li>
+<li><strong>容错隔离</strong>：生成集群无状态，故障直接重启；训练集群有状态，需 checkpoint</li>
+<li><strong>流水重叠</strong>：<code>gen(step N+1)</code> 与 <code>train(step N)</code> 并行执行 → <strong>30–40% 端到端加速</strong></li>
+<li><strong>资源利用率提升</strong>：生成时训练 GPU 不空闲（做上一步的训练），反之亦然</li>
+</ul>
+
+<div class="info-box">
+<strong>数据流</strong>：Generation Cluster 产出 (prompts, responses, log_probs, rewards) → 通过高速网络/共享存储传输 → Training Cluster 消费这些经验做 PPO/GRPO 更新 → 新权重同步回 Generation Cluster。
+</div>
+
+<!-- ====== 11.5 ====== -->
+<h2 id="sec5">11.5 Weight Synchronization</h2>
+
+<p>解耦架构下，训练集群更新的权重需要同步到生成集群。关键问题：是否需要每步同步？</p>
+
+<table>
+<tr><th>策略</th><th>Staleness（步数延迟）</th><th>带宽消耗</th><th>质量损失</th></tr>
+<tr><td>同步（每步）</td><td>0</td><td>140 GB/step</td><td>0%（理想但太慢）</td></tr>
+<tr><td>周期性（每 50 步）</td><td>平均 25 步</td><td>2.8 GB/step（均摊）</td><td>< 2%</td></tr>
+<tr><td>Delta 压缩 (INT8 diff)</td><td>平均 25 步</td><td>0.4 GB/step</td><td>< 3%</td></tr>
+<tr><td><strong>异步流式</strong></td><td>5–10 步</td><td>14 GB/step（后台传输）</td><td><strong>< 1%</strong></td></tr>
+</table>
+
+<div class="success-box">
+<strong>为什么"过期"权重在 PPO/GRPO 中可接受？</strong> PPO 的 importance sampling ratio $r(\theta) = \pi_\theta(a|s) / \pi_{\theta_{old}}(a|s)$ 配合 clip 机制 $[1-\epsilon, 1+\epsilon]$ 天生设计用于处理 off-policy 数据。50 步延迟的策略漂移约 ~5%，而 PPO clip（$\epsilon=0.2$）能容忍高达 20% 的漂移。因此周期性同步是安全的。
+</div>
+
+<!-- ====== 11.6 ====== -->
+<h2 id="sec6">11.6 Memory Optimization</h2>
+
+<table>
+<tr><th>技术</th><th>内存节省</th><th>代价</th><th>适用场景</th></tr>
+<tr><td>Gradient Checkpointing</td><td>~60% 激活内存</td><td>+33% 计算（反向时重算前向）</td><td>几乎所有大模型训练</td></tr>
+<tr><td>Mixed Precision (BF16)</td><td>权重/梯度 2 bytes</td><td>需 FP32 master weights</td><td>标配</td></tr>
+<tr><td>CPU Offloading (ZeRO-Infinity)</td><td>~50% 显存</td><td>2–3× 变慢（PCIe 64 GB/s 瓶颈）</td><td>内存极端紧张</td></tr>
+<tr><td>Activation Offloading</td><td>激活移至 CPU/NVMe</td><td>额外 PCIe 传输</td><td>最后手段</td></tr>
+<tr><td><strong>Flash Attention</strong></td><td><strong>O(n) 替代 O(n²)</strong></td><td>无（还更快 2–4×）</td><td><strong>必须开启</strong></td></tr>
+</table>
+
+<h3>Flash Attention 对 RLHF 的关键作用</h3>
+
+<p>Flash Attention 对 RLHF 格外重要，原因在于：</p>
+<ul>
+<li>RLHF 生成长 rollout（512–4096 tokens）后需要在<strong>同一 GPU 上做训练</strong></li>
+<li>标准 Attention 内存：$O(n^2)$，4096 seq × 32 heads → 注意力矩阵 ~4 GB</li>
+<li>Flash Attention 内存：$O(n)$，通过 tiling 技术在 SRAM 中逐块计算，永不存储完整 $n \times n$ 矩阵</li>
+<li>反向传播时从 Q/K/V 重算 attention tile（<strong>本身就是一种 activation recomputation</strong>）</li>
+<li>使 8K–32K token 长 rollout 训练成为可能</li>
+</ul>
+
+<div class="formula-block">
+$$M_{attention}^{standard} = O(b \cdot h \cdot s^2) \quad \text{vs} \quad M_{attention}^{flash} = O(b \cdot h \cdot s)$$
+<p class="formula-explain">$b$ = batch, $h$ = heads, $s$ = seq_len。seq=4096, heads=32, batch=4：标准需 $4 \times 32 \times 4096^2 \times 2 = 4$ GB；Flash 仅需数十 MB。</p>
+</div>
+
+<!-- ====== 11.7 ====== -->
+<h2 id="sec7">11.7 Fault Tolerance</h2>
+
+<p>大规模 GPU 集群的硬件故障是<strong>确定性事件</strong>，不是"如果"而是"何时"：</p>
+
+<div class="card">
+<strong>故障频率计算</strong>：
+<ul>
+<li>单 GPU MTBF（平均无故障时间）：~10,000 小时</li>
+<li>512-GPU 集群 MTBF：$10,000 / 512 \approx 20$ 小时</li>
+<li>实际（含软件错误、网络故障、ECC 错误）：<strong>4–8 小时</strong>一次</li>
+<li>多天训练（70B RLHF ~125 小时）：预期遭遇 <strong>15–30 次故障</strong></li>
+</ul>
+</div>
+
+<p><strong>五层容错栈</strong>：</p>
+<ol>
+<li><strong>检测层</strong>：NCCL watchdog 超时（60s）、GPU 心跳监控（10s）、NVML 健康 API、ECC 错误计数阈值</li>
+<li><strong>Checkpoint 层</strong>：异步非阻塞保存，每 50–100 步（约 5 分钟），保留最近 3 份。70B 并行写 NVMe 约 30s</li>
+<li><strong>恢复层</strong>：生成集群无状态直接重启；训练集群加载 checkpoint → 重建 NCCL 通信组 → 重分配 FSDP 分片</li>
+<li><strong>弹性训练层</strong>：Torch Elastic / Kubernetes 自动扩缩，数分钟内替换故障节点，FSDP resharding</li>
+<li><strong>预防层</strong>：GEMM 压力测试预筛有隐患 GPU、热备用节点池、双轨 InfiniBand 冗余网络</li>
+</ol>
+
+<div class="info-box">
+<strong>实际恢复时间</strong>：检测（10–60s）+ 替换节点（1–3 min）+ 加载 checkpoint（30–60s）+ NCCL 重建（10–30s）= <strong>总计 2–5 分钟</strong>。每次故障仅损失上次 checkpoint 以来的训练进度（最多 5 分钟）。
+</div>
+
+<!-- ====== 11.8 ====== -->
+<h2 id="sec8">11.8 End-to-End Latency</h2>
+
+<p>RLHF 单步（从 prompt 到完成一次策略更新）的延迟分解：</p>
+
+<table>
+<tr><th>阶段</th><th>耗时 (70B)</th><th>瓶颈类型</th><th>优化手段</th></tr>
+<tr><td>生成 128 prompts × 512 tokens</td><td>30–45s</td><td>内存带宽</td><td>vLLM, speculative decoding, INT8</td></tr>
+<tr><td>Reward Model 打分</td><td>5–8s</td><td>计算（batch forward）</td><td>INT8 RM, large batch</td></tr>
+<tr><td>Reference log-prob 计算</td><td>4–6s</td><td>计算（batch forward）</td><td>INT8 ref, LoRA（免 ref 模型）</td></tr>
+<tr><td>PPO/GRPO 更新 (4 epochs)</td><td>8–12s</td><td>计算（backprop）</td><td>FSDP, Flash Attention, grad accum</td></tr>
+<tr><td>权重同步</td><td>0–3s</td><td>网络</td><td>Delta 压缩, 异步传输</td></tr>
+<tr><td><strong>单体架构总计</strong></td><td><strong>50–75s/step</strong></td><td></td><td></td></tr>
+<tr><td><strong>解耦+重叠架构</strong></td><td><strong>35–50s/step</strong></td><td></td><td>gen(N+1) || train(N)</td></tr>
+</table>
+
+<div class="formula-block">
+$$T_{decoupled} \approx \max(T_{gen}, T_{train}) + T_{sync}$$
+<p class="formula-explain">解耦后总时间由较慢的阶段决定（通常是生成），而非所有阶段之和。相比单体架构节省 30–40%。</p>
+</div>
+
+<!-- ====== 11.9 ====== -->
+<h2 id="sec9">11.9 Monitoring</h2>
+
+<p>RLHF 训练的可观测性需要同时覆盖<strong>模型质量指标</strong>和<strong>系统健康指标</strong>：</p>
+
+<h3>质量指标（每 10 步记录）</h3>
+<ul>
+<li><strong>Mean Reward</strong>：应先快速上升后进入平台期。持续下降 = 训练崩溃</li>
+<li><strong>KL Divergence</strong>：应稳定在 3–10 nats 范围。> 15 = 策略漂移过远；趋近 0 = 没在学习</li>
+<li><strong>Response Length 分布</strong>：监控 "length hacking"（模型通过变长获得虚假 reward）</li>
+<li><strong>Policy Entropy</strong>：应缓慢下降。急剧下降 = mode collapse（多样性丧失）</li>
+<li><strong>Advantage 分布</strong>：应近似零均值。大偏移 = value function 估计不准</li>
+</ul>
+
+<h3>系统指标（每步记录）</h3>
+<ul>
+<li><strong>GPU 利用率</strong>：训练 > 80%，生成 > 60%。低于阈值需排查</li>
+<li><strong>GPU 内存水位</strong>：设置 OOM 预警（如 95% 阈值）</li>
+<li><strong>生成吞吐</strong>（tok/s）：应保持稳定，突然下降 = 网络问题或 KV Cache 碎片</li>
+<li><strong>Gradient Norm</strong>：尖峰 = 训练不稳定前兆。持续在 clip 阈值 = LR 过高</li>
+<li><strong>NCCL 通信时间</strong>：检测网络退化、链路故障</li>
+<li><strong>Step Time</strong>：应恒定。逐渐增加 = 内存泄漏或数据加载瓶颈</li>
+</ul>
+
+<!-- ====== 11.10 ====== -->
+<h2 id="sec10">11.10 Network Topology</h2>
+
+<h3>11.10.1 节点内：NVLink &amp; NVSwitch</h3>
+
+<table>
+<tr><th>代际</th><th>单链带宽</th><th>Links/GPU</th><th>总双向带宽</th><th>平台</th></tr>
+<tr><td>NVLink 3.0</td><td>50 GB/s</td><td>12</td><td>600 GB/s</td><td>A100 (DGX A100)</td></tr>
+<tr><td>NVLink 4.0</td><td>50 GB/s</td><td>18</td><td>900 GB/s</td><td>H100 (DGX H100)</td></tr>
+<tr><td>NVLink 5.0</td><td>100 GB/s</td><td>18</td><td>1,800 GB/s</td><td>B200 (DGX B200)</td></tr>
+</table>
+
+<p>NVSwitch 提供<strong>全互联全等分带宽</strong>（full-bisection bandwidth），8 GPU 间任意两两通信无争用。没有 NVSwitch 的 PCIe-only 机器做 TP 会慢 10–30 倍，<strong>PCIe 系统 TP 不要超过 2</strong>。</p>
+
+<h3>11.10.2 跨节点：InfiniBand vs RoCE</h3>
+
+<table>
+<tr><th>技术</th><th>带宽</th><th>延迟</th><th>特点</th></tr>
+<tr><td>InfiniBand NDR</td><td>400 Gb/s (50 GB/s)</td><td>1–2 µs</td><td>RDMA 无损传输，金标准</td></tr>
+<tr><td>IB NDR 双轨</td><td>800 Gb/s (100 GB/s)</td><td>1–2 µs</td><td>H100 集群标配</td></tr>
+<tr><td>RoCE v2</td><td>100–400 Gb/s</td><td>2–5 µs</td><td>成本低，需 PFC/ECN 精细调优</td></tr>
+<tr><td>Ethernet (TCP)</td><td>100–400 Gb/s</td><td>10–50 µs</td><td>不适合 >16 GPU 的分布式训练</td></tr>
+</table>
+
+<h3>11.10.3 通信原语及开销</h3>
+
+<table>
+<tr><th>原语</th><th>数据量（每 GPU）</th><th>典型使用者</th><th>场景</th></tr>
+<tr><td>AllReduce</td><td>$2 \cdot \frac{N-1}{N} \cdot M$</td><td>TP, DDP</td><td>求和梯度 / 激活聚合</td></tr>
+<tr><td>AllGather</td><td>$\frac{N-1}{N} \cdot M$</td><td>FSDP (前向)</td><td>重建完整参数</td></tr>
+<tr><td>ReduceScatter</td><td>$\frac{N-1}{N} \cdot M$</td><td>FSDP (反向)</td><td>求和并分发梯度分片</td></tr>
+<tr><td>Send/Recv (P2P)</td><td>$M$</td><td>PP</td><td>流水线 stage 间传递激活</td></tr>
+</table>
+
+<div class="success-box">
+<strong>通信-计算重叠（关键优化）</strong>：前向时 layer $i$ 计算的同时 AllGather layer $i+1$ 的参数；反向时 layer $i$ 梯度 ReduceScatter 与 layer $i-1$ 梯度计算重叠。关键参数：<code>prefetch_factor</code>、<code>reduce_bucket_size</code>、<code>backward_prefetch</code>。可隐藏 <strong>70–90%</strong> 的通信延迟。
+</div>
+
+<h3>11.10.4 网络拓扑选择</h3>
+<ul>
+<li><strong>Fat-tree</strong>：全等分带宽，任意节点对间通信等速。灵活但交换机成本高</li>
+<li><strong>Rail-optimized</strong>：每节点的 GPU $i$ 连接到同一台交换机（rail $i$）。通信模式规则时效率高，Meta RSC / Google TPU pod 使用此拓扑</li>
+<li><strong>Job Placement</strong>：512-GPU 集群随机分配任务可导致 2–3× 慢化。必须请求<strong>连续节点块</strong>（topology-aware scheduling）</li>
+</ul>
+
+<!-- ====== 11.11 ====== -->
+<h2 id="sec11">11.11 Training Throughput and MFU</h2>
+
+<p><strong>Model FLOPS Utilization (MFU)</strong> 是衡量训练系统效率的黄金指标，定义为实际吞吐量使用的 FLOPS 占硬件峰值的比例：</p>
+
+<div class="formula-block">
+$$\text{MFU} = \frac{\text{Observed Throughput (tok/s)} \times F_{per\_token}}{N_{GPUs} \times \text{Peak FLOPS}_{per\_GPU}}$$
+<p class="formula-explain">其中 $F_{per\_token}$ 为每个 token 的浮点运算量。</p>
+</div>
+
+<div class="formula-block">
+$$F_{per\_token} \approx 6P + 12 \cdot n_{layers} \cdot d_{model} \cdot s$$
+<p class="formula-explain">第一项 $6P$：2（乘加）× 3（前向 + 反向 ≈ 2×前向）× $P$ 参数。第二项为 Self-Attention 的 $O(s^2)$ 贡献。对于 70B, seq=2048：$6 \times 70\text{B} + 12 \times 80 \times 8192 \times 2048 \approx 420\text{B} + 16\text{B} = 436\text{B}$ FLOPs/token。</p>
+</div>
+
+<table>
+<tr><th>模型</th><th>硬件</th><th>MFU</th><th>Tok/s/GPU</th><th>配置</th></tr>
+<tr><td>LLaMA-7B</td><td>8×A100</td><td>57%</td><td>3,200</td><td>FSDP + Flash Attention</td></tr>
+<tr><td>LLaMA-13B</td><td>16×A100</td><td>52%</td><td>1,750</td><td>FSDP + Flash Attention</td></tr>
+<tr><td>LLaMA-70B</td><td>64×A100</td><td>45%</td><td>380</td><td>FSDP + TP=8</td></tr>
+<tr><td>GPT-4 (估)</td><td>10,000+ H100</td><td>40–50%</td><td>—</td><td>3D Parallelism</td></tr>
+<tr><td>PaLM-540B</td><td>6144 TPUv4</td><td>46%</td><td>—</td><td>DP + TP + PP</td></tr>
+</table>
+
+<div class="highlight-box">
+<strong>MFU 诊断指南</strong>：目标 > 40%。若 < 30% 排查：(1) GPU 利用率低 → 数据加载瓶颈；(2) Kernel 间隙大 → Python overhead/CUDA launch；(3) 通信占比 > 20% → 降低 TP 或加大 batch；(4) 内存 99% → checkpointing 导致重计算过多。
+</div>
+
+<div class="formula-block">
+$$\text{Effective Batch Size (tokens)} = \text{micro\_batch} \times \text{grad\_accum\_steps} \times \text{DP\_degree} \times \text{seq\_len}$$
+<p class="formula-explain">LLM 的 critical batch size $B_{crit} \approx 1\text{–}4\text{M}$ tokens。RLHF 典型：$128 \times 1\text{–}4 \times 256\text{–}512 = 32\text{K–}256\text{K}$ tok/step。</p>
+</div>
+
+<!-- ====== 11.12 ====== -->
+<h2 id="sec12">11.12 Cost Analysis</h2>
+
+<h3>GPU 云价格参考（2024–2025）</h3>
+<table>
+<tr><th>GPU</th><th>按需价格/h</th><th>Spot 价格/h</th><th>显存</th><th>定位</th></tr>
+<tr><td>A100 80GB</td><td>$2.50–3.50</td><td>$1.00–1.50</td><td>80 GB HBM2e</td><td>性价比训练 / 生成集群</td></tr>
+<tr><td>H100 80GB</td><td>$4.00–6.00</td><td>$2.00–3.00</td><td>80 GB HBM3</td><td>生产训练标配</td></tr>
+<tr><td>H200 141GB</td><td>$6.00–8.00</td><td>—</td><td>141 GB HBM3e</td><td>长上下文 / 减少卡数方案</td></tr>
+<tr><td>MI300X 192GB</td><td>$3.50–5.00</td><td>$1.50–2.50</td><td>192 GB HBM3</td><td>AMD 性价比替代</td></tr>
+</table>
+
+<h3>RLHF 训练成本估算</h3>
+
+<div class="formula-block">
+$$\text{Cost} = \frac{N_{steps} \times T_{step}}{3600} \times N_{GPUs} \times C_{GPU/hr}$$
+<p class="formula-explain">总费用 = 总 GPU·时 × 单价。</p>
+</div>
+
+<div class="card">
+<strong>案例：70B 模型 RLHF（10K 步）</strong>
+<table>
+<tr><td>训练步数</td><td>10,000</td></tr>
+<tr><td>每步耗时（解耦架构）</td><td>45 秒</td></tr>
+<tr><td>总训练时间</td><td>$10000 \times 45 / 3600 = 125$ 小时</td></tr>
+<tr><td>GPU 数量</td><td>64× A100-80GB</td></tr>
+<tr><td>Spot 单价</td><td>$1.20/GPU·h</td></tr>
+<tr><td><strong>总费用</strong></td><td>$125 \times 64 \times 1.20 = $ <strong>$9,600</strong></td></tr>
+<tr><td><strong>含重叠优化 (35s/step)</strong></td><td><strong>≈ $7,500</strong></td></tr>
+</table>
+</div>
+
+<h3>成本优化策略</h3>
+<ul>
+<li><strong>Spot 实例</strong>：节省 50–70%，需频繁 checkpoint（每 5 分钟）+ 自动恢复</li>
+<li><strong>Right-sizing</strong>：生成集群用 A100（带宽受限场景 H100 优势小），训练集群用 H100</li>
+<li><strong>量化推理</strong>：INT8/FP8 让生成/打分所需 GPU 数减半</li>
+<li><strong>渐进训练</strong>：先用 8B 代理模型调试 pipeline（~$200），验证通过再上 70B</li>
+<li><strong>LoRA + Reference-free</strong>：去掉 Reference 模型独立权重（用 base + adapter 差值替代），节省 ~50% 显存</li>
+<li><strong>序列长度课程</strong>：从 256 → 512 → 1024 逐步增长，节省前期 40% 计算</li>
+</ul>
+
+<!-- ====== 11.13 ====== -->
+<h2 id="sec13">11.13 Distributed Checkpointing</h2>
+
+<p>70B 模型完整 checkpoint（权重 + 优化器状态）约 <strong>840 GB</strong>。朴素同步保存会阻塞训练数十秒。</p>
+
+<table>
+<tr><th>策略</th><th>保存耗时 (70B)</th><th>存储/checkpoint</th><th>特点</th></tr>
+<tr><td>同步全量保存</td><td>30–60s（阻塞训练）</td><td>420 GB</td><td>简单但严重影响吞吐</td></tr>
+<tr><td><strong>异步后台拷贝</strong></td><td><strong>< 1s（非阻塞）</strong></td><td>420 GB</td><td>pinned memory → 后台 DMA 写盘</td></tr>
+<tr><td>增量 (Delta)</td><td>< 1s</td><td>5–20 GB</td><td>只存与上次 checkpoint 的差值</td></tr>
+<tr><td>Sharded (FSDP 原生)</td><td>5–10s</td><td>420 GB（每 rank 一个分片文件）</td><td>每 GPU 并行写自己的分片</td></tr>
+</table>
+
+<div class="info-box">
+<strong>RLHF Checkpoint 额外需保存的状态</strong>：
+<ul>
+<li>KL 系数 $\beta$ 及其自适应调度器状态</li>
+<li>Replay Buffer 内容（如使用 experience replay）</li>
+<li>全 GPU 的 RNG 状态（保证 reproducibility）</li>
+<li>Prompt 数据迭代器位置</li>
+<li>Reward Model 版本标签</li>
+<li>Wandb/TensorBoard Run ID（恢复后续写同一实验）</li>
+</ul>
+</div>
+
+<!-- ====== 11.14 ====== -->
+<h2 id="sec14">11.14 Hardware Selection Guide</h2>
+
+<table>
+<tr><th>模型规模</th><th>训练类型</th><th>推荐硬件</th><th>并行配置</th></tr>
+<tr><td>≤ 7B</td><td>SFT + RLHF</td><td>1–2× A100/H100</td><td>无需并行或简单 DDP</td></tr>
+<tr><td>7–13B</td><td>SFT + RLHF</td><td>4–8× A100/H100</td><td>FSDP，可选 TP=2</td></tr>
+<tr><td>13–34B</td><td>SFT + RLHF</td><td>8–16× A100/H100</td><td>FSDP + TP=4</td></tr>
+<tr><td>70B</td><td>RLHF（全量微调）</td><td>32–64× A100/H100</td><td>解耦架构, FSDP + TP=8</td></tr>
+<tr><td>70B</td><td>RLHF（LoRA）</td><td>8–16× A100/H100</td><td>无独立 ref 模型, LoRA adapters</td></tr>
+<tr><td>> 100B</td><td>RLHF</td><td>128+× H100</td><td>3D Parallelism (TP+PP+DP)</td></tr>
+</table>
+
+<div class="card">
+<strong>H100 vs A100 对比决策</strong>：
+<ul>
+<li><strong>算力</strong>：H100 ~1.6× (989 vs 624 TFLOPS BF16 with sparsity; 495 vs 312 without)</li>
+<li><strong>HBM 带宽</strong>：H100 ~1.7× (3.35 vs 2.0 TB/s)</li>
+<li><strong>训练加速</strong>：端到端 1.8–2.2×</li>
+<li><strong>生成加速</strong>：~1.7×（带宽受限场景）</li>
+<li><strong>价格比</strong>：H100 约 1.5× A100</li>
+<li><strong>结论</strong>：训练集群几乎总是选 H100（性价比更优）；纯推理/生成集群 A100 Spot 更划算（价格低 + 带宽瓶颈下 H100 优势有限）</li>
+</ul>
+</div>
+
+<!-- ====== 11.15 ====== -->
+<h2 id="sec15">11.15 Optimizer Configuration for RL</h2>
+
+<p>RL 训练（PPO/GRPO/DPO）的优化器配置与预训练/SFT <strong>有本质区别</strong>，根源在于数据分布的非平稳性和梯度的高方差：</p>
+
+<table>
+<tr><th>维度</th><th>SFT</th><th>RL 训练</th><th>原因</th></tr>
+<tr><td>数据分布</td><td>固定离线数据集</td><td>非平稳（策略变 → 数据分布变）</td><td>On-policy sampling</td></tr>
+<tr><td>梯度方差</td><td>低（CE loss + 精选数据）</td><td>高（reward 稀疏且带噪）</td><td>REINFORCE 估计器方差</td></tr>
+<tr><td>学习率</td><td>1e-5 ~ 3e-5</td><td><strong>1e-7 ~ 1e-6</strong></td><td>防止策略崩溃</td></tr>
+<tr><td>Weight Decay</td><td>0.01 – 0.1</td><td><strong>0.0</strong></td><td>KL penalty 已充当正则化</td></tr>
+<tr><td>Schedule</td><td>Cosine decay</td><td><strong>Constant</strong></td><td>Loss 不单调下降</td></tr>
+<tr><td>Warmup</td><td>数百~数千步</td><td><strong>20–50 步</strong></td><td>从 SFT checkpoint 出发，已有好的初始化</td></tr>
+<tr><td>$\beta_2$ (Adam)</td><td>0.999（默认）</td><td><strong>0.95</strong></td><td>缩短二阶矩窗口，适应快速变化</td></tr>
+</table>
+
+<h3>推荐超参配置</h3>
+<table>
+<tr><th>方法</th><th>LR</th><th>WD</th><th>Warmup</th><th>Schedule</th><th>$\beta_1$/$\beta_2$</th><th>Grad Clip</th></tr>
+<tr><td>DPO</td><td>5e-7</td><td>0.0</td><td>50 步</td><td>Constant/Linear</td><td>0.9/0.95</td><td>1.0</td></tr>
+<tr><td>PPO (policy)</td><td>1e-6</td><td>0.0</td><td>20 步</td><td>Constant</td><td>0.9/0.95</td><td>1.0</td></tr>
+<tr><td>PPO (critic)</td><td>1e-6</td><td>0.0</td><td>20 步</td><td>Constant</td><td>0.9/0.95</td><td>1.0</td></tr>
+<tr><td>GRPO</td><td>1e-6</td><td>0.0</td><td>20 步</td><td>Constant</td><td>0.9/0.95</td><td>1.0</td></tr>
+</table>
+
+<h3>关键配置解释</h3>
+
+<div class="highlight-box">
+<strong>为什么 $\beta_2 = 0.95$ 而非默认 0.999？</strong>
+<p>Adam 的二阶矩 $v_t = \beta_2 v_{t-1} + (1-\beta_2)g_t^2$ 的有效窗口为 $1/(1-\beta_2)$ 步。$\beta_2=0.999$ 的窗口 = 1000 步，在 RL 中策略快速变化，1000 步前的梯度方差信息已完全过时。$\beta_2=0.95$ 将窗口缩短到 ~20 步，使自适应学习率能及时响应当前梯度统计。</p>
+</div>
+
+<div class="highlight-box">
+<strong>FP32 Master Weights 绝不可省略</strong>
+<p>BF16 尾数仅 7 bit（相对精度 ~0.8%）。当 LR=1e-6、权重量级 ~1e0 时，更新量 $\Delta w \sim 1\text{e-6}$ 相对于权重 $w \sim 1$ 远小于 BF16 精度阈值 $2^{-7} \approx 0.008$，<strong>更新完全被截断</strong>。纯 BF16 训练在 100–500 步后必然出现 reward collapse。</p>
+</div>
+
+<div class="highlight-box">
+<strong>Gradient Clipping = 1.0 不可关闭</strong>
+<p>RL 梯度具有"尖峰性"（heavy-tailed）：来自 reward 方差传播、罕见高奖励轨迹、KL 惩罚项漂移。一次 $\|\nabla\| > 50$ 的未裁剪更新可以摧毁数百步的训练成果。Grad clip = 1.0 是保护策略稳定的最后防线。</p>
+</div>
+
+<h3>RL 训练不稳定诊断表</h3>
+<table>
+<tr><th>症状</th><th>诊断</th><th>修复</th></tr>
+<tr><td>Reward 先升后崩</td><td>LR 过高 / KL 系数太低</td><td>降 LR 2–5×，增加 $\beta_{KL}$</td></tr>
+<tr><td>Grad norm 持续卡在 clip 阈值</td><td>每步都被截断 = 丢失方向信息</td><td>降 LR（使原始梯度变小）</td></tr>
+<tr><td>KL divergence 爆炸 (> 15)</td><td>策略更新步长过大</td><td>降 LR 10× 或启用 adaptive KL</td></tr>
+<tr><td>Reward 完全不动</td><td>LR 太低 / RM 信号太弱</td><td>升 LR 2–5×，检查 RM 质量</td></tr>
+<tr><td>100+ 步后 Loss = NaN</td><td>缺 FP32 master / grad overflow</td><td>启用 FP32 master weights</td></tr>
+<tr><td>Entropy 急剧下降</td><td>Mode collapse</td><td>增加 entropy bonus 或 KL 系数</td></tr>
+</table>
+
+<!-- ====== Takeaway ====== -->
+<div class="takeaway">
+<h2>关键要点总结</h2>
+<ol>
+<li><strong>4 模型 = 1.5 TB</strong>：70B RLHF 内存需求是 SFT 的 ~10 倍，必须用 ZeRO-3/FSDP</li>
+<li><strong>FSDP 是默认选择</strong>：>13B 模型用 FSDP；TP 限制在节点内（NVLink）；PP 是最后手段</li>
+<li><strong>生成是最大瓶颈</strong>：batch=1 时 GPU 利用率仅 0.6%，必须 batching + vLLM + INT8 + speculative</li>
+<li><strong>解耦架构是生产标准</strong>：生成/训练分离，各自最优配置，重叠执行 30–40% 加速</li>
+<li><strong>权重同步可以延迟</strong>：PPO clip 容忍 off-policy，50 步延迟仅 < 2% 质量损失</li>
+<li><strong>Flash Attention 是 RLHF 关键使能技术</strong>：O(n) 内存使长 rollout 训练可行</li>
+<li><strong>容错是必须不是可选</strong>：512-GPU 集群每 4–8 小时故障一次</li>
+<li><strong>70B 全量 RLHF ≈ $7,500–$9,600</strong>（64 A100 Spot，10K 步，125 小时）</li>
+<li><strong>RL 优化器三要素</strong>：小 LR (1e-6)、无 WD、FP32 master weights</li>
+<li><strong>MFU > 40% 为健康指标</strong>；< 30% 需诊断瓶颈</li>
+</ol>
+</div>
+
+<!-- ====== Q&A ====== -->
+<h2 id="qa">Q&amp;A 深度问答</h2>
+
+<details>
+<summary>Q1: 为什么 RLHF 需要 4 个模型同时在内存中？能否时序复用？</summary>
+<div class="answer">
+<p>PPO 训练循环需要：(1) Policy 生成 rollout，(2) Reference 计算 per-token log-prob（KL 散度），(3) Reward Model 打分，(4) Value Head 估计 baseline。Reference log-prob 和 Policy log-prob 必须在同一 batch 上计算以得到 importance ratio $r(\theta)$。</p>
+<p><strong>可以部分复用</strong>：生产系统中 Reference 和 Reward 在生成集群上算完后释放（解耦架构）；或用 LoRA 使 Reference 隐式存在（adapter 之差代替独立模型）。但 Policy + 优化器的 ~1,120 GB 无法避免。</p>
+</div>
+</details>
+
+<details>
+<summary>Q2: TP 和 FSDP 的本质区别是什么？何时用哪个？</summary>
+<div class="answer">
+<p><strong>TP</strong> 切的是单层内的权重矩阵，通信发生在每一层的前向/反向（细粒度、高频），需要 NVLink 低延迟。<strong>FSDP</strong> 切的是参数/优化器/梯度的分片，通信在层级别发生（AllGather/ReduceScatter），频率较低且可重叠。</p>
+<p><strong>经验法则</strong>：TP 用于节点内加速（尤其推理/生成），FSDP 用于跨节点扩展训练。两者常组合：TP=8 节点内 + FSDP 跨节点。</p>
+</div>
+</details>
+
+<details>
+<summary>Q3: 自回归生成为什么 GPU 利用率只有 0.6%？根本性解法？</summary>
+<div class="answer">
+<p>每生成一个 token 需读取全部权重（140 GB），只做一次 matmul（140 GFLOP）。算术强度 = 1 FLOP/byte，远低于 A100 roofline 156 FLOP/byte。Tensor Core 绝大部分时间等 HBM。</p>
+<p><strong>根本解法</strong>：(1) 加大 batch 是最根本的——读一次权重算多序列；(2) 量化减少读取量；(3) Speculative Decoding 用小模型草拟+大模型并行验证。但自回归的 sequential 本质无法完全消除。</p>
+</div>
+</details>
+
+<details>
+<summary>Q4: 解耦架构中不同精度不会导致问题吗？</summary>
+<div class="answer">
+<p>不会。生成集群 INT8 只需采样（sampling），量化误差对采样分布影响极小。训练集群 BF16+FP32 做精确更新。两者交互的只是<strong>离散 token 序列 + log-prob</strong>，这些是精确值（在各自精度下的真值）。</p>
+</div>
+</details>
+
+<details>
+<summary>Q5: 为什么 RL 不用 Weight Decay？</summary>
+<div class="answer">
+<p>SFT 用 WD 防过拟合，但 RL 已有 KL 惩罚 $\beta \cdot D_{KL}(\pi_\theta \| \pi_{ref})$ 充当正则化。WD 把权重拉向零，KL 把策略拉向 reference——两个正则力方向冲突可能导致 KL 控制不稳定。实验表明 WD=0 是最佳选择。</p>
+</div>
+</details>
+
+<details>
+<summary>Q6: 512-GPU 集群如何保证多天训练的可靠性？</summary>
+<div class="answer">
+<p>五层防护：(1) 异步 Checkpoint 每 5 分钟，非阻塞；(2) 弹性训练自动摘除故障节点；(3) 热备节点数分钟补充；(4) 无状态生成集群直接重启；(5) 预防性 GPU 压力测试。每次故障仅损失 ~5 分钟训练时间。</p>
+</div>
+</details>
+
+<details>
+<summary>Q7: 何时需要 Pipeline Parallelism？</summary>
+<div class="answer">
+<p>决策流程：① 模型 + FSDP 能放一个节点？→ 不需要 PP；② TP=8 + FSDP 跨节点能放下？→ 不需要 PP；③ 仍放不下（>100B）→ 用 PP。70B 用 TP=8 + FSDP 完全足够，PP 的 15–30% 气泡开销不值得。</p>
+</div>
+</details>
+
+<details>
+<summary>Q8: Spot 实例如何应对被抢占？</summary>
+<div class="answer">
+<p>核心：频繁异步 checkpoint（每 5 分钟，< 1s 非阻塞）+ 分布式存储（S3/GCS）+ K8s 自动申请新实例并恢复。生成集群无状态完美适配 Spot。每次抢占损失 ~5 分钟，换来 50–70% 成本节省。</p>
+</div>
+</details>
+
+<hr style="margin-top:3rem;">
+<p style="text-align:center;color:var(--text-secondary);font-size:0.85rem;">
+笔记整理自 <em>The Hitchhiker's Guide to Agentic AI</em> (H. Roitman) · Chapter 11 · Pages 199–221
+</p>
+
+</body>
+</html>

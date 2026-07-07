@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第14章 阅读笔记：LLM Evaluation</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]})"></script>
+<style>
+:root {
+  --primary: #2c3e50;
+  --accent: #3498db;
+  --bg: #fafbfc;
+  --card-bg: #ffffff;
+  --border: #e1e4e8;
+  --text: #24292e;
+  --text-secondary: #586069;
+  --code-bg: #f6f8fa;
+  --highlight: #fff3cd;
+  --success: #d4edda;
+  --info: #d1ecf1;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; line-height: 1.8; color: var(--text); background: var(--bg); padding: 2rem; max-width: 900px; margin: 0 auto; }
+h1 { font-size: 1.8rem; color: var(--primary); border-bottom: 3px solid var(--accent); padding-bottom: 0.5rem; margin-bottom: 1rem; }
+h2 { font-size: 1.4rem; color: var(--primary); margin-top: 2.5rem; margin-bottom: 1rem; padding-left: 0.8rem; border-left: 4px solid var(--accent); }
+h3 { font-size: 1.15rem; color: var(--primary); margin-top: 1.8rem; margin-bottom: 0.8rem; }
+p { margin-bottom: 1rem; text-align: justify; }
+ul, ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+li { margin-bottom: 0.5rem; }
+code { background: var(--code-bg); padding: 0.15rem 0.4rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: var(--code-bg); padding: 1rem; border-radius: 6px; overflow-x: auto; margin-bottom: 1.5rem; border: 1px solid var(--border); }
+pre code { background: none; padding: 0; }
+blockquote { border-left: 4px solid var(--accent); padding: 0.8rem 1.2rem; margin: 1.5rem 0; background: var(--info); border-radius: 0 6px 6px 0; }
+.card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+.formula-block { background: var(--code-bg); border: 1px solid var(--border); border-radius: 6px; padding: 1rem; margin: 1rem 0; overflow-x: auto; }
+.formula-explain { color: var(--text-secondary); font-size: 0.92em; margin-top: 0.5rem; padding-left: 1rem; border-left: 3px solid #ddd; }
+.highlight-box { background: var(--highlight); border: 1px solid #ffc107; border-radius: 6px; padding: 1rem; margin: 1rem 0; }
+.info-box { background: var(--info); border: 1px solid #bee5eb; border-radius: 6px; padding: 1rem; margin: 1rem 0; }
+.success-box { background: var(--success); border: 1px solid #c3e6cb; border-radius: 6px; padding: 1rem; margin: 1rem 0; }
+.subtitle { color: var(--text-secondary); font-size: 1rem; margin-bottom: 0.3rem; }
+.meta { color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 2rem; }
+table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; }
+th, td { border: 1px solid var(--border); padding: 0.6rem 0.8rem; text-align: left; }
+th { background: var(--code-bg); font-weight: 600; }
+details { margin-bottom: 1rem; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+summary { padding: 0.8rem 1.2rem; background: var(--code-bg); cursor: pointer; font-weight: 500; }
+details[open] summary { border-bottom: 1px solid var(--border); }
+details .answer { padding: 1rem 1.2rem; }
+svg { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; }
+.takeaway { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 8px; padding: 1.5rem; margin: 2rem 0; }
+.takeaway h2 { color: white; border-left-color: rgba(255,255,255,0.5); }
+.takeaway li { color: rgba(255,255,255,0.95); }
+</style>
+</head>
+<body>
+
+<h1>第14章：LLM Evaluation</h1>
+<p class="subtitle">大语言模型评估——从方案设计、数据收集到指标体系的完整方法论</p>
+<p class="meta">来源：Agentic AI · 第14章（pp. 274–289） · 阅读笔记</p>
+
+<div class="card">
+<h3>章节摘要</h3>
+<p>本章系统性地介绍了LLM评估的完整技术栈。从评估方案设计（内在vs外在、自动vs人工）出发，覆盖数据收集方法论（人工标注管线、标注者一致性度量）、合成数据生成范式（Self-Instruct、Evol-Instruct、Constitutional AI），到三大类评估指标体系：排名指标（ELO、Bradley-Terry、TrueSkill）、生成指标（BLEU、ROUGE、BERTScore、Perplexity、Pass@k）、智能体指标（TSR、轨迹效率、SWE-bench、WebArena），最后深入LLM-as-Judge方法论和评估陷阱（基准泄露、Goodhart定律）。本章为构建可靠的LLM评估管线提供了从理论到实践的完整指导。</p>
+</div>
+
+<!-- ==================== 14.1 ==================== -->
+<h2>14.1 Evaluation Scheme Design</h2>
+
+<p>在采集任何数据之前，必须先决定<strong>测什么</strong>和<strong>怎么测</strong>。一个有原则的分类法可以避免"按方便程度选指标"这一常见错误。</p>
+
+<h3>14.1.1 评估类型分类（Taxonomy）</h3>
+
+<div class="card">
+<h3>内在评估 vs 外在评估</h3>
+<p><strong>内在评估（Intrinsic）</strong>：在不参考下游应用的情况下，度量模型输出本身的属性。例如困惑度（Perplexity）、BLEU分数、Pass@k。优点是便宜、可复现，缺点是与真实效用相关性往往较弱。</p>
+<p><strong>外在评估（Extrinsic）</strong>：度量模型对真实任务或系统的影响。例如"集成LLM后工单升级率降低了多少？""编码助手是否提高了开发速度？"优点是直接度量关注点，缺点是昂贵且慢。</p>
+</div>
+
+<div class="info-box">
+<p><strong>内在-外在差距</strong>：内在指标便宜可复现，但常与真实效用弱相关——困惑度更低的模型不一定更有用。成熟的评估策略是：<strong>用内在指标做快速迭代，用外在指标做最终验证</strong>。</p>
+</div>
+
+<div class="card">
+<h3>自动评估 vs 人工评估</h3>
+<p><strong>自动评估</strong>使用确定性函数（BLEU、精确匹配）或学习模型（BERTScore、LLM-as-Judge）打分。<strong>人工评估</strong>由标注者对输出评分或排序。</p>
+
+<table>
+<tr><th>类型</th><th>成本</th><th>速度</th><th>可复现性</th><th>有效性</th></tr>
+<tr><td>自动（规则型）</td><td>极低</td><td>极快</td><td>完美</td><td>低–中</td></tr>
+<tr><td>自动（模型型）</td><td>低</td><td>快</td><td>高</td><td>中–高</td></tr>
+<tr><td>众包人工</td><td>中</td><td>天级</td><td>中</td><td>中</td></tr>
+<tr><td>专家人工</td><td>高</td><td>周级</td><td>低–中</td><td>高</td></tr>
+<tr><td>外在/A/B测试</td><td>极高</td><td>月级</td><td>低</td><td>极高</td></tr>
+</table>
+</div>
+
+<div class="card">
+<h3>基于参考 vs 无参考评估</h3>
+<p><strong>Reference-Based</strong>（BLEU、ROUGE、BERTScore）：将模型输出与一个或多个金标准参考进行比较。</p>
+<p><strong>Reference-Free</strong>（困惑度、LLM-as-Judge、人类偏好）：无需参考即可评估质量。当输出空间太大（如开放对话），无参考方法不可或缺。</p>
+</div>
+
+<h3>14.1.2 When to Use What</h3>
+
+<div class="highlight-box">
+<p><strong>决策框架</strong>：</p>
+<ul>
+<li>任务有明确正确答案（数学、代码、事实QA）→ 使用<strong>精确匹配</strong>或执行型指标</li>
+<li>任务开放但有参考输出 → 使用 Reference-Based 指标作为下界 + LLM-as-Judge 补充</li>
+<li>任务主观（有用性、语气、创意）→ 使用<strong>人工评估</strong>或校准过的LLM Judge</li>
+<li>任务涉及多步Agent行为 → 使用<strong>任务成功率 + 轨迹效率</strong>（见14.6节）</li>
+</ul>
+</div>
+
+<div class="info-box">
+<p><strong>对话助手评估策略示例</strong>：</p>
+<ul>
+<li><strong>开发阶段</strong>：自动指标（PPL、ROUGE、Pass@k），每夜运行标准Benchmark（MMLU、HellaSwag、HumanEval）</li>
+<li><strong>发布前阶段</strong>：人类偏好研究 + LLM-as-Judge 在多样prompt集上做可扩展的pairwise比较</li>
+<li><strong>发布后阶段</strong>：监控外在指标（用户满意度、任务完成率），关注分布漂移</li>
+</ul>
+</div>
+
+<!-- ==================== 14.2 ==================== -->
+<h2>14.2 Data Collection for Evaluation</h2>
+
+<p>高质量评估数据是可信基准测试的基础。本节覆盖人工标注管线设计、标注质量统计度量，以及众包与专家标注的选择。</p>
+
+<h3>14.2.1 人工标注管线（Human Annotation Pipeline）</h3>
+
+<div class="card">
+<p>一个稳健的标注管线包含<strong>五个阶段</strong>：</p>
+<ol>
+<li><strong>任务定义</strong>：精确指定标注任务——评什么、用什么尺度、用什么标准。此阶段的模糊性会传播为噪声标签。</li>
+<li><strong>指南开发</strong>：编写含边界案例的标注指南，先用小型试点组迭代改进。</li>
+<li><strong>标注者招募与培训</strong>：选择有相关背景知识的标注者，进行校准会议（标注相同样本并讨论分歧）。</li>
+<li><strong>质量控制</strong>：在标注队列中嵌入已知标签的金标准样本，标记准确率低于阈值的标注者。</li>
+<li><strong>聚合</strong>：用多数投票、取平均或概率模型（如Dawid-Skene）合并多个标注。</li>
+</ol>
+</div>
+
+<h3>14.2.2 标注者一致性（Inter-Annotator Agreement）</h3>
+
+<p>原始一致率（所有标注者均同意的项目比例）不够好，因为它没有扣除<strong>随机一致</strong>。两种标准的校正度量：</p>
+
+<div class="formula-block">
+<p><strong>Cohen's Kappa</strong>（两个标注者）：</p>
+$$\kappa = \frac{p_o - p_e}{1 - p_e}$$
+<p class="formula-explain">$p_o$ 为观测一致率，$p_e$ 为独立假设下的期望一致率。$\kappa$ 范围 $[-1, 1]$：0 表示随机一致，>0.6 通常可接受，>0.8 为强一致。</p>
+</div>
+
+<div class="formula-block">
+<p>其中：</p>
+$$p_o = \frac{1}{N}\sum_{i=1}^{N}\mathbf{1}[\text{annotator 1 agrees with annotator 2 on item } i]$$
+$$p_e = \sum_{c=1}^{k} p_{1c} \cdot p_{2c}$$
+<p class="formula-explain">$p_{jc}$ 为标注者 $j$ 将项目分配到类别 $c$ 的比例。</p>
+</div>
+
+<div class="formula-block">
+<p><strong>Fleiss' Kappa</strong>（多个标注者）：对 $n$ 个标注者标注 $N$ 项到 $k$ 类，设 $n_{ij}$ 为将第 $i$ 项分到第 $j$ 类的标注者数：</p>
+$$\bar{P}_i = \frac{1}{n(n-1)}\sum_{j=1}^{k}n_{ij}(n_{ij}-1), \quad \bar{P} = \frac{1}{N}\sum_{i=1}^{N}\bar{P}_i$$
+$$P_e = \sum_{j=1}^{k}\left(\frac{1}{Nn}\sum_{i=1}^{N}n_{ij}\right)^2$$
+$$\kappa_F = \frac{\bar{P} - P_e}{1 - P_e}$$
+<p class="formula-explain">Fleiss' Kappa 推广到多标注者场景，衡量超出随机水平的一致程度。</p>
+</div>
+
+<div class="highlight-box">
+<p><strong>Kappa局限性</strong>：当某一类别占绝对优势时，即使原始一致率高，kappa 也可能很低（"kappa悖论"）。对于序数量表（如1-5 Likert），应使用<strong>加权kappa</strong>（按分歧距离加权惩罚）。LLM评估中应始终报告加权kappa。</p>
+</div>
+
+<h3>14.2.3 标注指南设计</h3>
+
+<div class="card">
+<p>有效标注指南的特性：</p>
+<ul>
+<li><strong>操作化标准</strong>：用具体行为替代模糊用语，如将"有帮助"改为"回答直接解决用户问题并提供完成任务所需的全部信息"。</li>
+<li><strong>实例</strong>：每个评分等级至少提供两个示例，包括边界案例。</li>
+<li><strong>决策树</strong>：对复杂任务提供流程图，引导标注者通过二元决策序列减少认知负担。</li>
+<li><strong>明确范围</strong>：声明不应考虑什么（如"不要因文体偏好扣分，仅关注事实准确性"）。</li>
+</ul>
+</div>
+
+<h3>14.2.4 众包 vs 专家标注</h3>
+
+<table>
+<tr><th>维度</th><th>众包</th><th>专家标注</th></tr>
+<tr><td>单项成本</td><td>低（$0.01–$0.10）</td><td>高（$1–$50）</td></tr>
+<tr><td>吞吐量</td><td>极高</td><td>低</td></tr>
+<tr><td>领域知识</td><td>低</td><td>高</td></tr>
+<tr><td>一致性</td><td>不稳定</td><td>高</td></tr>
+<tr><td>适用任务</td><td>简单偏好、流畅度</td><td>技术准确性、安全性</td></tr>
+<tr><td>质量控制</td><td>金标样本、注意力检查</td><td>校准会议、同行评审</td></tr>
+</table>
+
+<div class="info-box">
+<p>对于<strong>安全关键评估</strong>（检测有害输出、评估医疗建议），专家标注不可替代。对于<strong>大规模偏好收集</strong>（构建奖励模型训练集），严格质控的众包往往是唯一可行选项。</p>
+</div>
+
+<!-- ==================== 14.3 ==================== -->
+<h2>14.3 Synthetic Data Generation for Evaluation</h2>
+
+<p>人工标注昂贵且慢。合成数据生成利用LLM自身大规模生产评估数据。</p>
+
+<h3>14.3.1 LLM-as-Judge 校准</h3>
+
+<div class="card">
+<p>当使用LLM生成评估标签时，<strong>校准</strong>至关重要：Judge 的分数必须与人类判断对齐。</p>
+<div class="formula-block">
+<p><strong>期望校准误差（ECE）</strong>：</p>
+$$\text{ECE} = \sum_{b=1}^{B}\frac{|B_b|}{n}\left|\text{acc}(B_b) - \text{conf}(B_b)\right|$$
+<p class="formula-explain">$B_b$ 为第 $b$ 个置信度桶，$\text{acc}(B_b)$ 为桶内judge与人类一致的比例，$\text{conf}(B_b)$ 为桶内judge平均置信度。良好校准意味着 $E[\hat{h}_i | \hat{h}_i = p] = p$。</p>
+</div>
+<p>校准可通过<strong>温度缩放（Temperature Scaling）</strong>改善：将judge的原始logit $z$ 替换为 $z/T$，其中 $T$ 在校准集上调优以最小化负对数似然。</p>
+</div>
+
+<h3>14.3.2 Self-Instruct</h3>
+
+<div class="card">
+<p>Self-Instruct 从少量人工种子任务引导生成大量指令遵循数据：</p>
+<ol>
+<li>维护一个用 175 个种子任务初始化的任务池</li>
+<li>从池中采样 8 个任务作为 few-shot 示例，提示LLM生成新任务</li>
+<li>过滤：去除近似重复（ROUGE-L > 0.7）、分类任务/非分类任务分类、生成输入-输出实例</li>
+<li>将通过的任务加入池</li>
+<li>重复直到池达到目标规模</li>
+</ol>
+</div>
+
+<h3>14.3.3 Evol-Instruct</h3>
+
+<div class="card">
+<p>Evol-Instruct 通过迭代重写使指令变得更复杂或更多样：</p>
+<ul>
+<li><strong>深度进化（In-depth）</strong>：添加约束、增加推理步骤、具象化抽象、加深领域知识要求</li>
+<li><strong>广度进化（In-breadth）</strong>：在相关但不同的话题上生成新指令，增加话题多样性</li>
+</ul>
+<p>通过淘汰过滤器：进化后的指令不能是简单复制，不能包含拒绝语句（如"I'm sorry"），不能比原始更短。</p>
+</div>
+
+<h3>14.3.4 Constitutional AI 数据生成</h3>
+
+<div class="card">
+<p>Constitutional AI（CAI）让模型根据一组原则（"宪法"）批评并修正自己的输出：</p>
+<ol>
+<li><strong>监督学习阶段</strong>：采样有害prompt → 生成初始回复 → 提示模型按宪法原则批评并修正 → 修正后的回复作为SFT目标</li>
+<li><strong>RL阶段</strong>：生成回复对（原始 vs 修正）→ 模型标注哪个更合宪 → 训练偏好模型 → 用偏好模型作RLHF奖励信号</li>
+</ol>
+<p>这种方法<strong>无需人类标注有害内容</strong>，减少了标注者接触令人不安材料的暴露。</p>
+</div>
+
+<h3>14.3.5 蒸馏生成评估数据</h3>
+
+<div class="card">
+<p>使用强大的教师模型（如GPT-4）生成高质量评估数据来训练小型judge：</p>
+<ol>
+<li>收集多样的prompt和模型回复</li>
+<li>教师生成详细判断（分数 + 理由）</li>
+<li>在（prompt, response, judgment）三元组上微调小模型</li>
+<li>在独立人工标注集上验证学生judge</li>
+</ol>
+</div>
+
+<div class="highlight-box">
+<p><strong>蒸馏偏差</strong>：学生judge继承教师的偏见——冗长偏好、自我增强偏差（如果教师同时是被评估模型）、位置偏差。始终需要用独立人工标注进行验证。</p>
+</div>
+
+<h3>14.3.6 Arena-Style 对战生成</h3>
+
+<div class="card">
+<p>Chatbot Arena 通过众包对战平台生成评估数据：用户提交prompt，对两个匿名模型回复投票。关键设计：</p>
+<ul>
+<li><strong>匿名化</strong>：隐藏模型身份，防止品牌偏好</li>
+<li><strong>用户提交prompt</strong>：确保多样性和真实世界相关性</li>
+<li><strong>平局处理</strong>：用户可声明平局或"两个都差"</li>
+<li><strong>去重</strong>：过滤近似重复prompt防止过度代表常见查询</li>
+</ul>
+</div>
+
+<!-- ==================== 14.4 ==================== -->
+<h2>14.4 Metrics for Ranking Tasks</h2>
+
+<p>当目标是对模型排名时，成对比较数据比绝对分数更可靠。本节推导LLM评估中主要的排名系统。</p>
+
+<h3>14.4.1 ELO Rating System</h3>
+
+<div class="card">
+<p>ELO系统最初为国际象棋开发，为每个模型分配标量评分 $R$：</p>
+<div class="formula-block">
+<p><strong>期望得分</strong>：</p>
+$$E_A = \frac{1}{1 + 10^{(R_B - R_A)/400}}$$
+<p class="formula-explain">模型A对阵模型B的期望得分。400分差对应 10:1 胜率。</p>
+</div>
+
+<div class="formula-block">
+<p><strong>ELO概率模型</strong>（基于logistic分布）：</p>
+$$P(A \succ B) = \sigma\left(\frac{R_A - R_B}{s}\right) = \frac{1}{1 + e^{-(R_A - R_B)/s}}$$
+<p class="formula-explain">$s = 400/\ln(10) \approx 173.7$ 为缩放参数。</p>
+</div>
+
+<div class="formula-block">
+<p><strong>评分更新</strong>：每场比赛结果 $S_A \in \{0, 0.5, 1\}$（负/平/胜）后：</p>
+$$R_A \leftarrow R_A + K(S_A - E_A), \quad R_B \leftarrow R_B + K(S_B - E_B)$$
+<p class="formula-explain">$K$ 为K因子，控制学习率。Chatbot Arena中使用 $K=4$。ELO本质上是logistic模型观测结果对数似然的<strong>随机梯度下降更新</strong>。</p>
+</div>
+
+<p><strong>置信区间</strong>：因ELO取决于比赛处理顺序，通过Bootstrap重采样（$B=1000$次）计算95%置信区间。</p>
+</div>
+
+<h3>14.4.2 Bradley-Terry 模型</h3>
+
+<div class="card">
+<div class="formula-block">
+<p>给定 $n$ 个模型，强度参数 $\beta_1, \ldots, \beta_n > 0$，模型 $i$ 胜过模型 $j$ 的概率：</p>
+$$P(i \succ j) = \frac{\beta_i}{\beta_i + \beta_j}$$
+<p class="formula-explain">Bradley-Terry（BT）模型是ELO的最大似然替代方案。</p>
+</div>
+
+<div class="formula-block">
+<p><strong>对数似然</strong>：给定成对结果 $\{(i_k, j_k, y_k)\}_{k=1}^M$，$y_k = 1$ 表示 $i_k$ 胜：</p>
+$$\ell(\beta) = \sum_{k=1}^{M}\left[y_k \log\frac{\beta_{i_k}}{\beta_{i_k}+\beta_{j_k}} + (1-y_k)\log\frac{\beta_{j_k}}{\beta_{i_k}+\beta_{j_k}}\right]$$
+<p class="formula-explain">通过迭代缩放或梯度上升求MLE。BT模型只在乘法常数下可辨，通常归一化为 $\sum_i \log\beta_i = 0$。</p>
+</div>
+
+<div class="formula-block">
+<p>取对数空间 $\theta_i = \log\beta_i$：</p>
+$$P(i \succ j) = \sigma(\theta_i - \theta_j)$$
+<p class="formula-explain">等价于以item为截距的逻辑回归。BT模型在完整比赛历史可用时优于ELO，因为它同时使用所有数据而非顺序处理。</p>
+</div>
+</div>
+
+<h3>14.4.3 TrueSkill</h3>
+
+<div class="card">
+<p>TrueSkill 是贝叶斯技能评分系统，将每个玩家的技能建模为高斯随机变量：</p>
+<div class="formula-block">
+$$s_i \sim \mathcal{N}(\mu_i, \sigma_i^2), \quad p_i = s_i + \epsilon_i, \quad \epsilon_i \sim \mathcal{N}(0, \beta^2)$$
+<p class="formula-explain">$s_i$ 为技能，$p_i$ 为比赛中的表现（技能 + 比赛噪声）。$i$ 胜 $j$ 当且仅当 $p_i > p_j$。</p>
+</div>
+
+<div class="formula-block">
+<p><strong>后验更新</strong>（观测到 $i \succ j$ 后，通过期望传播）：</p>
+$$\mu_i \leftarrow \mu_i + \frac{\sigma_i^2}{c} \cdot v\left(\frac{\mu_i - \mu_j}{c}\right)$$
+$$\sigma_i^2 \leftarrow \sigma_i^2\left[1 - \frac{\sigma_i^2}{c^2} \cdot w\left(\frac{\mu_i - \mu_j}{c}\right)\right]$$
+<p class="formula-explain">其中 $c = \sqrt{2\beta^2 + \sigma_i^2 + \sigma_j^2}$，$v(t) = \phi(t)/\Phi(t)$ 和 $w(t) = v(t)(v(t)+t)$ 为截断高斯校正因子（$\phi, \Phi$ 为标准正态PDF和CDF）。</p>
+</div>
+
+<p><strong>优势</strong>：TrueSkill 的不确定度估计 $\sigma_i$ 特别适合识别<strong>需要更多评估数据</strong>的模型。</p>
+</div>
+
+<h3>14.4.4 Win Rate 与置信区间</h3>
+
+<div class="formula-block">
+<p>最简排名指标：胜率 $\hat{p} = w/n$。<strong>Wilson Score置信区间</strong>（优于Wald区间，在$p$接近0或1时覆盖率更好）：</p>
+$$\text{CI} = \frac{\hat{p} + \frac{z^2}{2n} \pm z\sqrt{\frac{\hat{p}(1-\hat{p})}{n} + \frac{z^2}{4n^2}}}{1 + \frac{z^2}{n}}$$
+<p class="formula-explain">$z = 1.96$ 对应95%区间。多方比较时，应对固定基线模型计算胜率以确保可比性。</p>
+</div>
+
+<h3>14.4.5 Chatbot Arena 方法论</h3>
+
+<div class="success-box">
+<p><strong>Chatbot Arena</strong> 整合以上要素为生产级评估系统：</p>
+<ol>
+<li>用户提交prompt，收到两个匿名模型的回复</li>
+<li>用户投票选择偏好（或平局）</li>
+<li>使用BT模型聚合投票生成排行榜</li>
+<li>报告每个模型分数的Bootstrap置信区间</li>
+<li>置信区间重叠的模型视为统计上不可区分</li>
+</ol>
+<p>截至2024年，Chatbot Arena已收集超过<strong>100万</strong>人类偏好投票，是最大的公开LLM偏好数据集。</p>
+</div>
+
+<!-- ==================== 14.5 ==================== -->
+<h2>14.5 Metrics for Generation Tasks</h2>
+
+<p>生成指标量化有参考答案或明确正确性标准的任务中模型输出的质量。</p>
+
+<h3>14.5.1 BLEU</h3>
+
+<div class="formula-block">
+<p><strong>BLEU</strong>（Bilingual Evaluation Understudy）度量假设 $h$ 与参考 $R$ 之间的n-gram精确率：</p>
+$$\text{BLEU} = \text{BP} \cdot \exp\left(\sum_{n=1}^{N} w_n \log p_n\right)$$
+<p class="formula-explain">$p_n$ 为修正n-gram精确率，$w_n = 1/N$ 为均匀权重，BP为简短惩罚。</p>
+</div>
+
+<div class="formula-block">
+<p><strong>简短惩罚（Brevity Penalty）</strong>：</p>
+$$\text{BP} = \begin{cases} 1 & \text{if } |h| > |r| \\ e^{1 - |r|/|h|} & \text{if } |h| \le |r| \end{cases}$$
+<p class="formula-explain">$|r|$ 为最接近参考的长度。防止过短的翻译获得虚高精确率。</p>
+</div>
+
+<div class="formula-block">
+<p><strong>修正n-gram精确率</strong>（每个n-gram计数裁剪到参考中最大出现次数）：</p>
+$$p_n = \frac{\sum_{\text{ngram} \in h} \min(\text{count}(\text{ngram}, h), \max_{r \in R}\text{count}(\text{ngram}, r))}{\sum_{\text{ngram} \in h} \text{count}(\text{ngram}, h)}$$
+<p class="formula-explain">裁剪避免单个n-gram重复匹配多次，提高精确率估计的准确性。</p>
+</div>
+
+<div class="highlight-box">
+<p><strong>BLEU局限性</strong>：设计用于有多个参考的机器翻译。对于单参考的开放式生成，BLEU常接近零。不能捕获语义相似性，惩罚合理改写，对分词敏感。仅在有多个多样参考且任务输出多样性低时使用。</p>
+</div>
+
+<h3>14.5.2 ROUGE</h3>
+
+<div class="formula-block">
+<p><strong>ROUGE-N</strong>（面向召回的n-gram度量，为摘要设计）：</p>
+$$\text{ROUGE-N} = \frac{\sum_{r \in R}\sum_{\text{ngram} \in r}\min(\text{count}(\text{ngram}, h), \text{count}(\text{ngram}, r))}{\sum_{r \in R}\sum_{\text{ngram} \in r}\text{count}(\text{ngram}, r)}$$
+<p class="formula-explain">ROUGE-1 和 ROUGE-2 分别度量unigram和bigram召回率。</p>
+</div>
+
+<div class="formula-block">
+<p><strong>ROUGE-L</strong>（基于最长公共子序列）：</p>
+$$\text{ROUGE-L} = \frac{\text{LCS}(h, r)}{|r|}$$
+<p class="formula-explain">LCS捕获句子级结构。F-measure变体平衡精确率和召回率：$\text{ROUGE-N}_F = \frac{(1+\beta^2) \cdot P \cdot R}{\beta^2 P + R}$，$\beta=1$ 为等权。</p>
+</div>
+
+<h3>14.5.3 BERTScore</h3>
+
+<div class="formula-block">
+<p>BERTScore 使用预训练BERT的上下文嵌入计算token级相似度：</p>
+$$R_{\text{BERT}} = \frac{1}{|x|}\sum_{x_j \in x}\max_{\hat{x}_i \in \hat{x}}\frac{\hat{e}_i^\top e_j}{\|\hat{e}_i\|\|e_j\|}$$
+$$P_{\text{BERT}} = \frac{1}{|\hat{x}|}\sum_{\hat{x}_i \in \hat{x}}\max_{x_j \in x}\frac{\hat{e}_i^\top e_j}{\|\hat{e}_i\|\|e_j\|}$$
+$$F_{\text{BERT}} = 2 \cdot \frac{P_{\text{BERT}} \cdot R_{\text{BERT}}}{P_{\text{BERT}} + R_{\text{BERT}}}$$
+<p class="formula-explain">$\hat{x}$ 为假设tokens，$x$ 为参考tokens，$\hat{e}_i, e_j$ 为对应嵌入。BERTScore对同义改写比BLEU/ROUGE更鲁棒。IDF加权版进一步提升相关性：$R_{\text{BERT}}^{\text{idf}} = \frac{\sum_{x_j} \text{idf}(x_j) \max_{\hat{x}_i} \cos(\hat{e}_i, e_j)}{\sum_{x_j}\text{idf}(x_j)}$</p>
+</div>
+
+<h3>14.5.4 METEOR</h3>
+
+<div class="formula-block">
+<p>METEOR 通过 F-score + 碎片化惩罚解决 BLEU 的召回盲区：</p>
+$$\text{METEOR} = F_{\text{mean}} \cdot (1 - \text{Pen})$$
+<p class="formula-explain">$F_{\text{mean}} = \frac{10PR}{R+9P}$（召回加权调和均值）。碎片化惩罚 $\text{Pen} = 0.5 \cdot (c/u_m)^3$，$c$=块数，$u_m$=匹配的unigram数。额外支持词干还原和同义词匹配。</p>
+</div>
+
+<h3>14.5.5 Perplexity（困惑度）</h3>
+
+<div class="formula-block">
+$$\text{PPL}(w_{1:T}) = \exp\left(-\frac{1}{T}\sum_{t=1}^{T}\log P_\theta(w_t | w_{1:t-1})\right)$$
+<p class="formula-explain">越低越好——表示模型对测试文本的预测能力越强。注意：不同分词器/词表的模型不能直接比较PPL。主要用途：健全性检查和检测分布漂移。</p>
+</div>
+
+<h3>14.5.6 Pass@k（代码生成）</h3>
+
+<div class="formula-block">
+<p>通过执行测试用例验证功能正确性：</p>
+$$\text{pass@}k = \mathbb{E}_{\text{problems}}\left[1 - \frac{\binom{n-c}{k}}{\binom{n}{k}}\right]$$
+<p class="formula-explain">$n$=每个问题生成的总样本数，$c$=通过所有测试的样本数。这是一个无偏估计量，避免了朴素方法（恰好采样$k$个解）的高方差。实践中生成 $n=200$ 样本，报告 pass@1、pass@10、pass@100。</p>
+</div>
+
+<pre><code>import numpy as np
+from scipy.special import comb
+
+def pass_at_k(n: int, c: int, k: int) -> float:
+    """Pass@k的无偏估计量"""
+    if n - c < k:
+        return 1.0
+    return 1.0 - comb(n - c, k, exact=True) / comb(n, k, exact=True)
+
+# 示例：200样本中15个通过
+for k in [1, 10, 100]:
+    print(f"pass@{k}: {pass_at_k(200, 15, k):.4f}")
+# pass@1: 0.0750, pass@10: 0.5391, pass@100: 0.9999</code></pre>
+
+<h3>14.5.7 Exact Match 与 F1</h3>
+
+<div class="formula-block">
+<p>用于抽取式问答（如SQuAD）：</p>
+<ul>
+<li><strong>Exact Match (EM)</strong>：归一化后（小写化、去除冠词和标点），预测与任一金标答案完全匹配的二值指标。</li>
+</ul>
+$$F1 = \frac{2 \cdot |\text{pred} \cap \text{gold}|}{|\text{pred}| + |\text{gold}|}$$
+<p class="formula-explain">将预测和金标答案视为token袋，计算token级F1。多答案设置中，报告所有金标答案上的最大F1。</p>
+</div>
+
+<div class="card">
+<h3>生成指标汇总</h3>
+<table>
+<tr><th>指标</th><th>适用任务</th><th>无参考？</th><th>人类相关性</th></tr>
+<tr><td>BLEU</td><td>翻译</td><td>否</td><td>低–中</td></tr>
+<tr><td>ROUGE</td><td>摘要</td><td>否</td><td>中</td></tr>
+<tr><td>BERTScore</td><td>通用NLG</td><td>否</td><td>高</td></tr>
+<tr><td>METEOR</td><td>翻译</td><td>否</td><td>中–高</td></tr>
+<tr><td>Perplexity</td><td>LM质量</td><td>是</td><td>低</td></tr>
+<tr><td>Pass@k</td><td>代码生成</td><td>否（需测试）</td><td>极高</td></tr>
+<tr><td>Exact Match</td><td>抽取式QA</td><td>否</td><td>极高</td></tr>
+<tr><td>Token F1</td><td>抽取式QA</td><td>否</td><td>高</td></tr>
+</table>
+</div>
+
+<!-- ==================== 14.6 ==================== -->
+<h2>14.6 Metrics for Agentic Tasks</h2>
+
+<p>智能体LLM在环境中操作、执行动作序列、完成多步任务。标准生成指标不够用——需要捕获任务完成度、效率和中间步骤质量。</p>
+
+<h3>14.6.1 Task Success Rate（任务成功率）</h3>
+
+<div class="formula-block">
+$$\text{TSR} = \frac{1}{|\mathcal{T}|}\sum_{\tau \in \mathcal{T}}\mathbf{1}[\text{goal}(\tau) \text{ achieved}]$$
+<p class="formula-explain">Agent任务的首要指标。目标达成通常由确定性oracle验证（数据库状态、文件系统状态、测试执行）。</p>
+</div>
+
+<div class="formula-block">
+<p><strong>带部分分的分级成功率</strong>：</p>
+$$\text{TSR}_{\text{graded}} = \frac{1}{|\mathcal{T}|}\sum_{\tau \in \mathcal{T}}\text{score}(\tau) \in [0, 1]$$
+<p class="formula-explain">对可部分完成的任务，用连续分数替代二值指标。</p>
+</div>
+
+<h3>14.6.2 Trajectory Efficiency（轨迹效率）</h3>
+
+<div class="formula-block">
+$$\eta = \frac{L^*}{L_{\text{agent}}}$$
+<p class="formula-explain">$L^*$ 为最短成功轨迹长度（由oracle或人工专家计算），$L_{\text{agent}}$ 为agent实际动作数。$\eta \in (0, 1]$，$\eta=1$ 表示最优。失败轨迹 $\eta=0$。互补指标：冗余率=agent动作中不出现在任何最优轨迹中的比例。</p>
+</div>
+
+<h3>14.6.3 Tool-Use Accuracy（工具使用准确率）</h3>
+
+<div class="formula-block">
+$$\text{TUA} = \frac{\#\text{ correct tool calls}}{\#\text{ total tool calls}}$$
+<p class="formula-explain">正确工具调用 = (a) 选对工具 + (b) 参数有效 + (c) 在轨迹适当位置调用。可为正确选择但参数错误的情况给部分分。</p>
+</div>
+
+<h3>14.6.4 Multi-Step Reasoning Accuracy</h3>
+
+<div class="formula-block">
+$$\text{SRA} = \frac{1}{|\mathcal{T}|}\sum_{\tau \in \mathcal{T}}\frac{1}{|S_\tau|}\sum_{s \in S_\tau}\mathbf{1}[s \text{ is correct}]$$
+<p class="formula-explain">$S_\tau$ 为轨迹 $\tau$ 中的推理步骤集。步骤正确性可由<strong>过程奖励模型（PRM）</strong>或人工标注验证。</p>
+</div>
+
+<h3>14.6.5 SWE-bench</h3>
+
+<div class="card">
+<p>SWE-bench 在真实软件工程任务上评估LLM：给定GitHub issue描述和代码库，模型生成修复补丁。</p>
+<ol>
+<li>模型获得issue描述和相关代码上下文</li>
+<li>模型生成补丁（unified diff格式）</li>
+<li>补丁应用到仓库</li>
+<li>执行测试套件——所有测试通过则成功</li>
+</ol>
+<p><strong>主要指标</strong>：% Resolved（补丁通过所有测试的issue比例）</p>
+<ul>
+<li>完整基准：2,294 任务，12个流行Python仓库</li>
+<li>最佳开源Agent：~43%（SWE-bench Verified）</li>
+<li>人类表现：~87%（每任务15分钟）</li>
+<li>评估成本：~$0.25/任务（API模型）</li>
+</ul>
+</div>
+
+<h3>14.6.6 WebArena</h3>
+
+<div class="card">
+<p>WebArena 在沙箱化浏览器环境中评估Agent的真实Web导航任务（812任务，5个Web应用）。评估方式：</p>
+<ul>
+<li><strong>功能评估</strong>：检查应用状态（"物品是否加入购物车？"）</li>
+<li><strong>URL评估</strong>：导航任务中最终URL与期望URL比较</li>
+<li><strong>程序评估</strong>：自定义评估脚本检查复杂条件</li>
+</ul>
+<p>人类表现 ~78%；SOTA Agent ~35–45%。</p>
+</div>
+
+<div class="card">
+<h3>智能体评估基准汇总</h3>
+<table>
+<tr><th>基准</th><th>领域</th><th>任务数</th><th>评估方法</th><th>SOTA(%)</th></tr>
+<tr><td>SWE-bench</td><td>软件工程</td><td>2,294</td><td>测试执行</td><td>~43</td></tr>
+<tr><td>SWE-bench Lite</td><td>软件工程</td><td>300</td><td>测试执行</td><td>~50</td></tr>
+<tr><td>WebArena</td><td>Web导航</td><td>812</td><td>状态/URL/程序</td><td>~40</td></tr>
+<tr><td>ALFWorld</td><td>家庭任务</td><td>3,553</td><td>模拟器状态</td><td>~90</td></tr>
+<tr><td>AgentBench</td><td>多领域</td><td>1,091</td><td>任务特定</td><td>~45</td></tr>
+</table>
+</div>
+
+<!-- ==================== 14.7 ==================== -->
+<h2>14.7 LLM-as-Judge</h2>
+
+<p>LLM-as-Judge 使用有能力的LLM评估其他（或同一）LLM的输出，无需人工标注即可扩展到大规模评估集，并能提供详细理由。</p>
+
+<h3>14.7.1 Setup 与 Prompt Templates</h3>
+
+<div class="card">
+<p><strong>三种常见格式</strong>：</p>
+
+<p><strong>1. Pointwise Scoring</strong>（绝对打分）：</p>
+<pre><code>POINTWISE_PROMPT = """
+You are an expert evaluator. Rate the following response 
+on a scale of 1-10 for helpfulness, accuracy, and clarity.
+[Question] {question}
+[Response] {response}
+Reasoning: &lt;step-by-step analysis&gt;
+Score: &lt;integer from 1 to 10&gt;
+"""</code></pre>
+
+<p><strong>2. Pairwise Comparison</strong>（成对比较）：</p>
+<pre><code>PAIRWISE_PROMPT = """
+You are an expert evaluator. Compare the two responses 
+and determine which is better.
+[Question] {question}
+[Response A] {response_a}
+[Response B] {response_b}
+Output exactly one of: [[A]], [[B]], or [[C]] (tie).
+Reasoning: &lt;your analysis&gt;
+Verdict: &lt;[[A]], [[B]], or [[C]]&gt;
+"""</code></pre>
+
+<p><strong>3. Reference-Guided Scoring</strong>（参考引导打分）：为judge提供参考答案，相对于参考评分。对事实性任务特别有用。</p>
+</div>
+
+<h3>14.7.2 Position Bias Mitigation</h3>
+
+<div class="card">
+<p>LLM judge展现<strong>位置偏差</strong>——系统性偏好出现在特定位置的回复，偏差可达<strong>10-15个百分点</strong>。缓解策略：</p>
+<ol>
+<li><strong>交换增强</strong>：每对在两种顺序下评估（A vs B 和 B vs A）。一致判断接受；不一致记为平局。</li>
+<li><strong>校准提示</strong>：显式指示judge"评估不应受回复呈现顺序影响"。</li>
+<li><strong>集成判断</strong>：使用多个judge，不同位置顺序，聚合判决。</li>
+<li><strong>强制思维链</strong>：要求judge在判决前产生详细理由，减少对表面位置线索的依赖。</li>
+</ol>
+</div>
+
+<div class="highlight-box">
+<p><strong>冗长偏差（Verbosity Bias）</strong>：LLM judge 系统性偏好更长回复，即使额外内容无关或重复。缓解：指示judge惩罚不必要长度、关注信息质量而非数量；或在评判前将回复截断到固定长度。</p>
+</div>
+
+<h3>14.7.3 Multi-Judge Panels</h3>
+
+<div class="formula-block">
+<p>单个judge可能有系统偏差。来自不同模型族的judge面板提供更鲁棒的评估。$J$ 个judge的判决 $v_1, \ldots, v_J \in \{A, B, \text{tie}\}$，面板判决由<strong>多数投票</strong>决定。面板一致率：</p>
+$$\text{Agreement} = \frac{1}{\binom{J}{2}}\sum_{i < j}\mathbf{1}[v_i = v_j]$$
+<p class="formula-explain">三judge面板中：全票一致=高置信；2-1 分裂=中置信；三方平局=低置信。</p>
+</div>
+
+<h3>14.7.4 Agreement Metrics for LLM Judges</h3>
+
+<div class="card">
+<p>验证LLM judge时，将其判决与保留集上的人类标注比较。关键指标：</p>
+<ul>
+<li><strong>Agreement rate</strong>：judge与人类一致的项目比例</li>
+<li><strong>Cohen's κ</strong>：机会校正一致率（公式14.1）</li>
+<li><strong>Spearman's ρ</strong>：judge分数与人类分数的秩相关，适用于序数评分</li>
+<li><strong>Kendall's τ</strong>：更鲁棒的秩相关（对平局更稳健）</li>
+</ul>
+<p><strong>可靠性门槛</strong>：$\kappa > 0.6$ 且 agreement rate > 80%。</p>
+</div>
+
+<h3>14.7.5 G-Eval Framework</h3>
+
+<div class="card">
+<p>G-Eval 是使用<strong>思维链提示 + token概率加权</strong>的结构化LLM评估框架：</p>
+<ol>
+<li><strong>生成评估步骤</strong>：提示LLM为评估任务生成详细rubric</li>
+<li><strong>概率加权打分</strong>：对每个分数值 $s \in \{1,2,3,4,5\}$，获取对数概率</li>
+<li><strong>归一化</strong>：映射到 $[0,1]$</li>
+</ol>
+
+<div class="formula-block">
+$$\text{G-Eval score} = \sum_{s=1}^{5} s \cdot \frac{e^{\log P_\theta(s)}}{\sum_{s'=1}^{5} e^{\log P_\theta(s')}}$$
+<p class="formula-explain">概率加权平均而非强制离散选择。这等价于在judge信念下计算<strong>期望分数</strong>（后验均值而非众数），捕获了judge的不确定性。G-Eval在连贯性和一致性等细微维度上与人类判断的相关性显著高于直接提示。</p>
+</div>
+</div>
+
+<div class="info-box">
+<p><strong>为什么G-Eval有效</strong>：标准提示要求judge输出单个token（如"4"），丢弃了模型不确定性。G-Eval读取所有分数token上的概率分布，有效计算judge信念下的期望分数——类比于使用后验分布的<strong>均值</strong>而非<strong>众数</strong>。</p>
+</div>
+
+<!-- ==================== 14.8 ==================== -->
+<h2>14.8 Evaluation Pitfalls</h2>
+
+<p>即使精心设计的评估管线也可能产生误导性结果。本节分类最常见的失败模式。</p>
+
+<h3>14.8.1 Benchmark Contamination（基准泄露）</h3>
+
+<div class="card">
+<p>当评估数据出现在模型训练集中——直接（逐字包含）或间接（改写或语义相似），导致虚高分数不反映真正泛化能力。</p>
+
+<p><strong>检测方法</strong>：</p>
+<ul>
+<li><strong>n-gram重叠</strong>：计算评估样本与训练语料的高n-gram重叠比例（如 ROUGE-L > 0.8）</li>
+<li><strong>成员推断攻击</strong>：估计每个评估样本在训练集中的概率</li>
+<li><strong>金丝雀字符串</strong>：在评估样本中嵌入唯一随机字符串，检查模型能否补全</li>
+<li><strong>时间保留</strong>：使用模型训练截止日期之后创建的评估数据</li>
+</ul>
+
+<p><strong>缓解</strong>：</p>
+<ul>
+<li>维护从不公开的私有测试集</li>
+<li>定期用新样本刷新基准</li>
+<li>报告训练数据截止日期和去污染流程</li>
+</ul>
+</div>
+
+<h3>14.8.2 Overfitting to Benchmarks</h3>
+
+<div class="card">
+<p>即使没有直接泄露，模型也可能通过<strong>反复评估和超参调优</strong>被隐式优化到特定基准——一种<strong>适应性过拟合</strong>：基准通过模型开发决策泄露信息。</p>
+
+<div class="highlight-box">
+<p><strong>基准生命周期</strong>：基准的效用随时间退化。MMLU曾是世界知识的挑战性测试，现在模型接近人类表现，但仍在新颖知识任务上失败。新基准应被视为<strong>临时信号源</strong>，而非永久地面真值。</p>
+</div>
+</div>
+
+<h3>14.8.3 Goodhart's Law in Evaluation</h3>
+
+<div class="card">
+<p><strong>Goodhart定律</strong>："当一个度量变成目标时，它就不再是好的度量。"在LLM评估中的体现：</p>
+<ul>
+<li><strong>奖励攻击</strong>：RLHF训练的模型学会利用奖励模型而非真正改善——产生冗长、自信但事实错误的回复</li>
+<li><strong>指标博弈</strong>：针对BLEU/ROUGE微调的模型可能分数高但对人类用处小</li>
+<li><strong>Judge博弈</strong>：用LLM-as-Judge反馈训练的模型可能学会judge的偏见（如冗长偏好）</li>
+</ul>
+
+<p><strong>防御策略</strong>：</p>
+<ol>
+<li><strong>指标多样性</strong>：使用不同族的多个指标——博弈一个不太可能同时博弈全部</li>
+<li><strong>保留评估</strong>：维护不用于训练或模型选择的评估指标</li>
+<li><strong>人工抽检</strong>：定期抽样人工审查，独立于自动指标</li>
+<li><strong>对抗评估</strong>：主动探测自动指标遗漏的失败模式</li>
+<li><strong>外在验证</strong>：定期用外在结果验证内在指标</li>
+</ol>
+</div>
+
+<h3>14.8.4 Additional Pitfalls</h3>
+
+<div class="card">
+<ul>
+<li><strong>Prompt敏感性</strong>：LLM性能可因评估prompt的微小变化剧烈波动（如添加"Think step by step"或改变答案格式）。应报告确切prompt并考虑跨多个prompt变体评估。</li>
+<li><strong>聚合伪影</strong>：跨不同难度/分数分布的任务取平均可能误导——擅长简单任务但失败于难题的模型可能与均匀表现的模型有相同平均分。</li>
+<li><strong>人工评估的选择偏差</strong>：标注者不是终端用户的随机样本——众包平台标注者可能有不同偏好、文化背景和领域知识。</li>
+<li><strong>评估-部署不匹配</strong>：评估prompt通常更短、更干净、更规范；模型可能在基准上表现好但在生产中的嘈杂、模糊、多轮对话中显著退化。</li>
+</ul>
+</div>
+
+<!-- ==================== Takeaway ==================== -->
+<div class="takeaway">
+<h2>核心要点总结</h2>
+<ul>
+<li>评估方案设计应先明确内在/外在、自动/人工、有参考/无参考的维度，再选指标</li>
+<li>Cohen's κ和Fleiss' κ是度量标注者一致性的黄金标准，必须扣除随机一致</li>
+<li>合成数据生成（Self-Instruct、Evol-Instruct、CAI、蒸馏）可规模化替代人工标注</li>
+<li>排名任务用Bradley-Terry模型（全数据MLE）优于ELO（顺序处理），TrueSkill提供不确定度</li>
+<li>生成指标中BERTScore与人类判断相关性最高，Pass@k是代码评估的标准</li>
+<li>Agent评估需要TSR + 轨迹效率 + 工具使用准确率的组合</li>
+<li>LLM-as-Judge必须处理位置偏差和冗长偏差，G-Eval通过概率加权显著提升可靠性</li>
+<li>Goodhart定律警告：指标一旦成为优化目标就会失效——用多指标+人工抽检+对抗评估防御</li>
+</ul>
+</div>
+
+<!-- ==================== Q&A ==================== -->
+<h2>复习问答</h2>
+
+<details>
+<summary>Q1：为什么内在指标（如Perplexity）往往不能反映模型的真实有用性？</summary>
+<div class="answer">
+<p>内在指标度量模型输出本身的属性（如预测下一个token的能力），不参考下游应用。困惑度更低的模型不一定更有帮助——它可能在生成流畅但不相关的文本上表现很好。内在-外在差距意味着需要用外在指标（如用户满意度、任务完成率）做最终验证。</p>
+</div>
+</details>
+
+<details>
+<summary>Q2：Cohen's Kappa 相比原始一致率有什么优势？什么时候应该用加权Kappa？</summary>
+<div class="answer">
+<p>原始一致率没有扣除随机一致——即使两个标注者随机标注，也有一定概率恰好一致。Cohen's κ 通过 $(p_o - p_e)/(1 - p_e)$ 扣除了随机期望一致率。当评分量表是序数的（如1-5 Likert），应使用加权kappa，因为"4 vs 5"的分歧应比"1 vs 5"的分歧惩罚更轻。</p>
+</div>
+</details>
+
+<details>
+<summary>Q3：Bradley-Terry 模型相比ELO有什么优势？</summary>
+<div class="answer">
+<p>BT模型是最大似然估计，<strong>同时使用所有比赛数据</strong>而非像ELO那样顺序处理。ELO的评分取决于比赛处理顺序，引入不必要的变异性。当完整对战历史可用时（如Chatbot Arena），BT模型是更优的选择。在对数空间中，BT等价于以模型为截距的逻辑回归。</p>
+</div>
+</details>
+
+<details>
+<summary>Q4：Pass@k使用无偏估计量有什么好处？</summary>
+<div class="answer">
+<p>朴素方法是恰好生成$k$个解并检查是否有通过的——这方差很高。无偏估计量先生成 $n=200$ 个样本，统计通过数 $c$，再用组合公式 $1 - \binom{n-c}{k}/\binom{n}{k}$ 计算。这利用了所有200个样本的信息，大幅降低方差，且结果对$k$的各种值都可用。</p>
+</div>
+</details>
+
+<details>
+<summary>Q5：LLM-as-Judge的位置偏差有多严重？有哪些缓解策略？</summary>
+<div class="answer">
+<p>位置偏差可达<strong>10-15个百分点</strong>。缓解：(1) 交换增强——每对两种顺序评估，不一致记为平局；(2) 校准提示——显式指示不受顺序影响；(3) 集成判断——多个judge不同顺序取聚合；(4) 强制思维链——先产生详细理由再判决。</p>
+</div>
+</details>
+
+<details>
+<summary>Q6：G-Eval为什么比直接提示judge输出分数更可靠？</summary>
+<div class="answer">
+<p>直接提示要求judge输出单个token（如"4"），丢弃了不确定性。G-Eval读取所有分数token的概率分布，计算概率加权期望分数——这是后验均值而非众数。均值利用了judge的完整信念分布，在连贯性和一致性等细微维度上与人类判断相关性显著更高。</p>
+</div>
+</details>
+
+<details>
+<summary>Q7：如何检测基准泄露（Benchmark Contamination）？</summary>
+<div class="answer">
+<p>四种方法：(1) n-gram重叠——计算评估样本与训练语料的ROUGE-L >0.8的比例；(2) 成员推断攻击——估计样本在训练集中的概率；(3) 金丝雀字符串——嵌入唯一随机串检查模型能否补全；(4) 时间保留——使用训练截止日期后创建的数据。</p>
+</div>
+</details>
+
+<details>
+<summary>Q8：Goodhart定律在LLM评估中如何体现？</summary>
+<div class="answer">
+<p>三种体现：(1) 奖励攻击——RLHF模型学会利用奖励模型的弱点产生冗长自信但错误的回复；(2) 指标博弈——针对BLEU/ROUGE微调的模型分数高但实用性低；(3) Judge博弈——学会LLM judge的偏见（如偏好长回复）。防御：指标多样性 + 保留评估 + 人工抽检 + 对抗评估 + 外在验证。</p>
+</div>
+</details>
+
+<details>
+<summary>Q9：TrueSkill相比ELO和BT模型的独特优势是什么？</summary>
+<div class="answer">
+<p>TrueSkill是贝叶斯方法，不仅估计技能均值 $\mu$，还维护不确定度 $\sigma$。这允许：(1) 识别需要更多评估数据的模型（$\sigma$ 大的模型）；(2) 区分高置信和低置信的排名差异；(3) 在少量比赛后就给出有意义的不确定度区间。ELO和BT不提供这种原生的不确定度估计。</p>
+</div>
+</details>
+
+<details>
+<summary>Q10：评估-部署不匹配的风险是什么？如何缓解？</summary>
+<div class="answer">
+<p>评估prompt通常更短、干净、规范，而生产中的用户查询嘈杂、模糊、多轮。模型可能在基准上表现良好但在真实场景中退化。缓解：(1) 使用真实用户query构建评估集；(2) 包含多轮、模糊、噪声prompt；(3) 监控生产中的外在指标检测退化；(4) 定期用A/B测试验证基准分数与真实效果的相关性。</p>
+</div>
+</details>
+
+</body>
+</html>

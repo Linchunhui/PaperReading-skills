@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第18章 阅读笔记：Agent Harness – Context Management and Orchestration</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]})"></script>
+<style>
+:root {
+  --primary: #2c3e50;
+  --accent: #3498db;
+  --bg: #fafbfc;
+  --card-bg: #ffffff;
+  --border: #e1e4e8;
+  --text: #24292e;
+  --text-secondary: #586069;
+  --code-bg: #f6f8fa;
+  --highlight: #fff3cd;
+  --success: #d4edda;
+  --info: #d1ecf1;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; line-height: 1.8; color: var(--text); background: var(--bg); padding: 2rem; max-width: 900px; margin: 0 auto; }
+h1 { font-size: 1.8rem; color: var(--primary); border-bottom: 3px solid var(--accent); padding-bottom: 0.5rem; margin-bottom: 1rem; }
+h2 { font-size: 1.4rem; color: var(--primary); margin-top: 2.5rem; margin-bottom: 1rem; padding-left: 0.8rem; border-left: 4px solid var(--accent); }
+h3 { font-size: 1.15rem; color: var(--primary); margin-top: 1.8rem; margin-bottom: 0.8rem; }
+p { margin-bottom: 1rem; text-align: justify; }
+ul, ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+li { margin-bottom: 0.5rem; }
+code { background: var(--code-bg); padding: 0.15rem 0.4rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: var(--code-bg); padding: 1rem; border-radius: 6px; overflow-x: auto; margin-bottom: 1.5rem; border: 1px solid var(--border); }
+pre code { background: none; padding: 0; }
+blockquote { border-left: 4px solid var(--accent); padding: 0.8rem 1.2rem; margin: 1.5rem 0; background: var(--info); border-radius: 0 6px 6px 0; }
+.card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+.formula-block { background: var(--code-bg); border: 1px solid var(--border); border-radius: 6px; padding: 1rem; margin: 1rem 0; overflow-x: auto; }
+.formula-explain { color: var(--text-secondary); font-size: 0.92em; margin-top: 0.5rem; padding-left: 1rem; border-left: 3px solid #ddd; }
+.highlight-box { background: var(--highlight); border: 1px solid #ffc107; border-radius: 6px; padding: 1rem; margin: 1rem 0; }
+.info-box { background: var(--info); border: 1px solid #bee5eb; border-radius: 6px; padding: 1rem; margin: 1rem 0; }
+.success-box { background: var(--success); border: 1px solid #c3e6cb; border-radius: 6px; padding: 1rem; margin: 1rem 0; }
+.subtitle { color: var(--text-secondary); font-size: 1rem; margin-bottom: 0.3rem; }
+.meta { color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 2rem; }
+table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; }
+th, td { border: 1px solid var(--border); padding: 0.6rem 0.8rem; text-align: left; }
+th { background: var(--code-bg); font-weight: 600; }
+details { margin-bottom: 1rem; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+summary { padding: 0.8rem 1.2rem; background: var(--code-bg); cursor: pointer; font-weight: 500; }
+details[open] summary { border-bottom: 1px solid var(--border); }
+details .answer { padding: 1rem 1.2rem; }
+svg { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; }
+.takeaway { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 8px; padding: 1.5rem; margin: 2rem 0; }
+.takeaway h2 { color: white; border-left-color: rgba(255,255,255,0.5); }
+.takeaway li { color: rgba(255,255,255,0.95); }
+</style>
+</head>
+<body>
+
+<h1>第18章：Agent Harness – Context Management and Orchestration</h1>
+<p class="subtitle">Agent骨架系统——上下文管理、提示工程、工具集成与编排模式的完整工程体系</p>
+<p class="meta">来源：Agentic AI · 第18章（pp. 343–359） · 阅读笔记</p>
+
+<div class="card">
+<h3>章节摘要</h3>
+<p>Agent Harness（智能体骨架/外壳）是连接LLM核心推理能力与外部世界的工程层。本章系统性地解剖了构建生产级Agent系统所需的六大支柱：上下文窗口管理（如何在有限token预算内塞入最大信息）、提示架构（如何动态组装高效prompt）、工具集成（如何安全地接入外部能力）、编排模式（ReAct、Plan-and-Execute、Multi-Agent等控制流）、状态管理（会话/任务/持久化三层状态）、以及错误处理与生产化（重试、循环检测、可观测性、成本优化）。这些构成了从"能用的demo"到"可靠的产品"之间的关键工程鸿沟。</p>
+</div>
+
+<h2>18.1 What Is an Agent Harness?</h2>
+
+<p>Agent Harness是围绕LLM构建的<strong>运行时基础设施层</strong>，负责管理模型与外部环境之间的所有交互。如果把LLM比作大脑，那么Harness就是神经系统、感觉器官和运动系统的总和——它决定了大脑接收什么信息、如何处理反馈、以及如何执行动作。</p>
+
+<h3>Harness的核心职责</h3>
+<ul>
+<li><strong>Context Management</strong>：在有限的上下文窗口中，决定放入什么内容、以什么顺序、用多少token</li>
+<li><strong>Prompt Construction</strong>：将系统指令、用户输入、工具定义、历史记录等动态组装为结构化prompt</li>
+<li><strong>Tool Orchestration</strong>：管理工具注册、调用、结果解析和错误处理</li>
+<li><strong>Flow Control</strong>：实现思考-行动循环，决定何时调用工具、何时回复用户、何时终止</li>
+<li><strong>State Persistence</strong>：跨轮次、跨会话维护Agent的记忆与工作状态</li>
+<li><strong>Safety & Reliability</strong>：防止无限循环、管理失败恢复、确保可观测性</li>
+</ul>
+
+<div class="info-box">
+<p><strong>关键洞察</strong>：LLM本身是无状态的函数调用（input tokens → output tokens）。Agent的所有"智能行为"——记忆、规划、工具使用、错误恢复——都是由Harness在LLM之外实现的。Harness的工程质量直接决定了Agent系统的可靠性上限。</p>
+</div>
+
+<svg viewBox="0 0 700 320" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#3498db"/></marker>
+  </defs>
+  <rect x="250" y="120" width="200" height="70" rx="10" fill="#2c3e50" stroke="#3498db" stroke-width="2"/>
+  <text x="350" y="160" text-anchor="middle" fill="white" font-size="16" font-weight="bold">LLM Core</text>
+  <rect x="50" y="20" width="600" height="280" rx="15" fill="none" stroke="#3498db" stroke-width="2" stroke-dasharray="8,4"/>
+  <text x="350" y="15" text-anchor="middle" fill="#3498db" font-size="13" font-weight="bold">Agent Harness</text>
+  <rect x="80" y="50" width="130" height="45" rx="6" fill="#d1ecf1" stroke="#bee5eb"/>
+  <text x="145" y="78" text-anchor="middle" fill="#2c3e50" font-size="11">Context Manager</text>
+  <rect x="80" y="120" width="130" height="45" rx="6" fill="#d4edda" stroke="#c3e6cb"/>
+  <text x="145" y="148" text-anchor="middle" fill="#2c3e50" font-size="11">Prompt Assembler</text>
+  <rect x="80" y="190" width="130" height="45" rx="6" fill="#fff3cd" stroke="#ffc107"/>
+  <text x="145" y="218" text-anchor="middle" fill="#2c3e50" font-size="11">Tool Router</text>
+  <rect x="490" y="50" width="130" height="45" rx="6" fill="#d1ecf1" stroke="#bee5eb"/>
+  <text x="555" y="78" text-anchor="middle" fill="#2c3e50" font-size="11">State Manager</text>
+  <rect x="490" y="120" width="130" height="45" rx="6" fill="#d4edda" stroke="#c3e6cb"/>
+  <text x="555" y="148" text-anchor="middle" fill="#2c3e50" font-size="11">Orchestrator</text>
+  <rect x="490" y="190" width="130" height="45" rx="6" fill="#fff3cd" stroke="#ffc107"/>
+  <text x="555" y="218" text-anchor="middle" fill="#2c3e50" font-size="11">Error Handler</text>
+  <rect x="200" y="255" width="300" height="35" rx="6" fill="#e8daef" stroke="#8e44ad"/>
+  <text x="350" y="277" text-anchor="middle" fill="#2c3e50" font-size="11">Observability &amp; Evaluation Layer</text>
+  <line x1="210" y1="142" x2="248" y2="148" stroke="#3498db" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="452" y1="148" x2="488" y2="142" stroke="#3498db" stroke-width="1.5" marker-end="url(#arrow)"/>
+</svg>
+
+<h2>18.2 Context Window Management</h2>
+
+<p>上下文窗口是Agent系统中最稀缺的资源。即使现代LLM已支持128K甚至1M+的上下文长度，实际可用的"有效注意力"仍然有限——研究表明模型对中间位置的信息关注度显著下降（"Lost in the Middle"现象）。因此，高效的上下文管理本质上是一个<strong>信息论优化问题</strong>。</p>
+
+<h3>Budget Problem（预算问题）</h3>
+
+<p>给定总上下文长度 $C_{\max}$，Agent需要在多个竞争性的信息源之间分配token预算：</p>
+
+<div class="formula-block">
+$$C_{\text{system}} + C_{\text{history}} + C_{\text{tools}} + C_{\text{user}} + C_{\text{output}} \leq C_{\max}$$
+<p class="formula-explain">其中 $C_{\text{system}}$ 是系统提示占用的token数，$C_{\text{history}}$ 是对话历史，$C_{\text{tools}}$ 是工具定义和调用结果，$C_{\text{user}}$ 是当前用户输入，$C_{\text{output}}$ 是为模型生成预留的空间。这是一个在约束条件下最大化信息效用的优化问题。</p>
+</div>
+
+<h3>Token Budget Allocation（预算分配策略）</h3>
+
+<table>
+<tr><th>组件</th><th>典型占比</th><th>优先级</th><th>压缩策略</th></tr>
+<tr><td>System Prompt</td><td>5-15%</td><td>最高（不可压缩）</td><td>版本精简，按需加载</td></tr>
+<tr><td>Tool Definitions</td><td>10-20%</td><td>高</td><td>动态选择相关工具</td></tr>
+<tr><td>Current User Input</td><td>5-30%</td><td>高（不可压缩）</td><td>—</td></tr>
+<tr><td>Conversation History</td><td>20-40%</td><td>中</td><td>摘要压缩、滑动窗口</td></tr>
+<tr><td>Tool Call Results</td><td>10-30%</td><td>中</td><td>截断、摘要化</td></tr>
+<tr><td>Reserved for Output</td><td>10-20%</td><td>最高（必须保留）</td><td>—</td></tr>
+</table>
+
+<h3>Context Compression（上下文压缩）</h3>
+
+<p>当历史信息超出预算时，需要应用压缩策略：</p>
+
+<ul>
+<li><strong>摘要压缩（Summarization）</strong>：使用LLM将长对话历史压缩为简洁摘要。代价是丢失细节，但保留语义核心。</li>
+<li><strong>选择性保留（Selective Retention）</strong>：基于相关性评分保留最重要的消息。可使用embedding相似度或recency加权。</li>
+<li><strong>工具结果裁剪（Tool Output Truncation）</strong>：对冗长的工具返回结果进行截断或提取关键字段。</li>
+<li><strong>消息合并（Message Merging）</strong>：将多轮短消息合并为单条结构化消息。</li>
+</ul>
+
+<div class="card">
+<h3>压缩率与信息损失的权衡</h3>
+<div class="formula-block">
+$$\text{InfoRetention}(S) = \frac{H(X) - H(X|S)}{H(X)}$$
+<p class="formula-explain">$S$ 是压缩后的摘要，$X$ 是原始对话。$H(X|S)$ 是给定摘要后原始信息的条件熵。理想压缩应最大化信息保持率——即摘要应让我们对原始内容的不确定性尽可能小。实践中通常以任务成功率作为代理指标。</p>
+</div>
+</div>
+
+<h3>Sliding Window（滑动窗口）</h3>
+
+<p>最简单的上下文管理策略：只保留最近的 $k$ 轮对话。实现简单但存在"遗忘悬崖"——第 $k+1$ 轮之前的信息完全丢失。改进方案：</p>
+
+<ul>
+<li><strong>Weighted Sliding Window</strong>：保留最近 $k$ 轮完整内容 + 更早轮次的摘要</li>
+<li><strong>Landmark Messages</strong>：标记关键消息（如用户目标定义、重要决策）永不被滑出</li>
+<li><strong>Adaptive Window</strong>：根据当前任务复杂度动态调整窗口大小</li>
+</ul>
+
+<h3>Recursive Decomposition（递归分解）</h3>
+
+<p>对于超长任务（如代码库分析、长文档处理），采用分治策略：</p>
+
+<ol>
+<li>将大任务分解为子任务，每个子任务在独立的上下文中执行</li>
+<li>子任务结果汇总为结构化摘要</li>
+<li>父任务基于摘要做出高层决策</li>
+<li>必要时深入特定子任务获取更多细节</li>
+</ol>
+
+<pre><code class="language-python">class RecursiveContextManager:
+    """递归分解上下文管理器"""
+    
+    def __init__(self, max_tokens: int, summary_ratio: float = 0.2):
+        self.max_tokens = max_tokens
+        self.summary_ratio = summary_ratio
+    
+    def decompose_task(self, task: str, context: list[dict]) -> list[dict]:
+        """将大任务递归分解为可在单次上下文内完成的子任务"""
+        token_count = self.count_tokens(context)
+        if token_count <= self.max_tokens:
+            return [{"task": task, "context": context}]
+        
+        # 分解为子任务
+        subtasks = self.split_by_semantic_boundary(task, context)
+        results = []
+        for subtask in subtasks:
+            sub_results = self.decompose_task(subtask["task"], subtask["context"])
+            results.extend(sub_results)
+        return results
+    
+    def aggregate_results(self, sub_results: list[str]) -> str:
+        """将子任务结果压缩聚合为父任务可用的摘要"""
+        combined = "\n".join(sub_results)
+        if self.count_tokens(combined) > self.max_tokens * self.summary_ratio:
+            return self.summarize(combined)
+        return combined</code></pre>
+
+<h3>Token Counting（精确token计数）</h3>
+
+<p>精确的token计数是预算管理的基础。不同模型使用不同的tokenizer，必须使用对应的计数器：</p>
+
+<pre><code class="language-python">import tiktoken
+
+class TokenCounter:
+    """多模型token计数器"""
+    
+    ENCODINGS = {
+        "gpt-4": "cl100k_base",
+        "gpt-4o": "o200k_base",
+        "gpt-3.5-turbo": "cl100k_base",
+    }
+    
+    def __init__(self, model: str = "gpt-4o"):
+        encoding_name = self.ENCODINGS.get(model, "cl100k_base")
+        self.encoding = tiktoken.get_encoding(encoding_name)
+    
+    def count(self, text: str) -> int:
+        return len(self.encoding.encode(text))
+    
+    def count_messages(self, messages: list[dict]) -> int:
+        """计算OpenAI Chat格式的消息token数（含格式开销）"""
+        total = 3  # 每条消息的固定开销 <|start|>role<|end|>
+        for msg in messages:
+            total += 4  # role + content标记
+            total += self.count(msg.get("content", ""))
+            if "name" in msg:
+                total += self.count(msg["name"]) + 1
+        return total
+    
+    def fits_budget(self, messages: list[dict], budget: int) -> bool:
+        return self.count_messages(messages) <= budget</code></pre>
+
+<h2>18.3 Prompt Architecture</h2>
+
+<p>Prompt Architecture是将Agent的"认知框架"编码为结构化文本的工程学科。一个精心设计的prompt架构应具备<strong>模块化</strong>（各部分可独立更新）、<strong>可测试性</strong>（修改prompt后可量化效果变化）和<strong>上下文感知</strong>（根据当前状态动态调整）。</p>
+
+<h3>System Prompt Design（系统提示设计）</h3>
+
+<p>System prompt定义了Agent的"宪法"——核心身份、行为边界和基本操作规范：</p>
+
+<pre><code class="language-python">class SystemPromptBuilder:
+    """分层系统提示构建器"""
+    
+    def __init__(self):
+        self.sections = {
+            "identity": "",      # 角色定义
+            "capabilities": "",  # 能力边界
+            "constraints": "",   # 行为约束
+            "output_format": "", # 输出格式规范
+            "examples": "",      # 行为示例
+        }
+    
+    def build(self, context: dict) -> str:
+        """根据上下文动态组装系统提示"""
+        prompt_parts = []
+        
+        # 核心身份（始终包含）
+        prompt_parts.append(self.sections["identity"])
+        
+        # 能力描述（根据可用工具动态调整）
+        if context.get("available_tools"):
+            prompt_parts.append(self._format_capabilities(context["available_tools"]))
+        
+        # 约束条件（根据安全级别调整）
+        prompt_parts.append(self._format_constraints(context.get("safety_level", "standard")))
+        
+        # 输出格式（根据任务类型选择）
+        prompt_parts.append(self._format_output(context.get("task_type")))
+        
+        return "\n\n".join(filter(None, prompt_parts))</code></pre>
+
+<h3>Dynamic Assembly（动态组装）</h3>
+
+<p>动态组装是将多个信息源在运行时拼接为完整prompt的过程。关键设计原则：</p>
+
+<ul>
+<li><strong>优先级排序</strong>：当总token超出预算时，按优先级依次裁剪低优先级组件</li>
+<li><strong>位置敏感</strong>：重要信息放在prompt首尾（Primacy/Recency效应），避免"Lost in the Middle"</li>
+<li><strong>格式一致性</strong>：使用XML标签或Markdown结构化分隔不同组件，帮助模型理解信息层次</li>
+<li><strong>版本控制</strong>：每个prompt组件独立版本化，支持A/B测试和回滚</li>
+</ul>
+
+<div class="highlight-box">
+<p><strong>最佳实践</strong>：将System Prompt视为"代码"而非"文本"——它应该有版本控制、单元测试（通过评估用例验证行为）、Code Review流程，以及明确的变更日志。Prompt的微小修改可能导致Agent行为的巨大变化。</p>
+</div>
+
+<h3>Few-Shot Examples（少样本示例）</h3>
+
+<p>Few-shot示例用于向模型展示期望的行为模式，尤其在以下场景有效：</p>
+
+<ul>
+<li>定义复杂的输出格式（如JSON schema遵循）</li>
+<li>展示工具调用的正确使用方式和链式推理</li>
+<li>明确边界条件的处理方式</li>
+<li>示范错误恢复策略</li>
+</ul>
+
+<p>Few-shot的token效率问题：每个示例消耗大量token。解决方案包括<strong>动态选择</strong>（根据当前query的相似度从示例库中检索最相关的k个）和<strong>压缩表示</strong>（用简洁的伪代码代替完整对话）。</p>
+
+<h3>Tool Descriptions（工具描述优化）</h3>
+
+<p>工具描述是prompt中的重要组成部分，直接影响模型调用工具的准确率：</p>
+
+<pre><code class="language-python">TOOL_DESCRIPTION_TEMPLATE = {
+    "name": "search_database",
+    "description": "Search the product database by keyword or filters. "
+                   "Use when the user asks about product availability, pricing, or specifications. "
+                   "Do NOT use for general knowledge questions.",
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "query": {
+                "type": "string",
+                "description": "Search keyword. Keep concise (2-5 words)."
+            },
+            "category": {
+                "type": "string",
+                "enum": ["electronics", "clothing", "food", "other"],
+                "description": "Product category filter. Use 'other' if unsure."
+            },
+            "max_results": {
+                "type": "integer",
+                "default": 5,
+                "description": "Maximum number of results (1-20)."
+            }
+        },
+        "required": ["query"]
+    }
+}</code></pre>
+
+<div class="info-box">
+<p><strong>工具描述的关键原则</strong>：(1) 说明<em>何时</em>使用（正向触发条件）；(2) 说明<em>何时不</em>使用（负向约束）；(3) 参数描述包含格式示例和边界值；(4) 简洁但无歧义——每多一个多余token都在消耗宝贵的上下文空间。</p>
+</div>
+
+<h2>18.4 Tool Integration</h2>
+
+<p>Tool Integration是Agent从"对话AI"进化为"行动AI"的关键一步。它涵盖工具的定义、发现、调用、结果处理和安全沙箱的完整生命周期。</p>
+
+<h3>Tool Definition Schemas（工具定义规范）</h3>
+
+<p>标准化的工具定义schema是互操作性的基础。当前主流方案包括：</p>
+
+<table>
+<tr><th>规范</th><th>格式</th><th>特点</th><th>代表平台</th></tr>
+<tr><td>OpenAI Function Calling</td><td>JSON Schema</td><td>原生支持、生态最广</td><td>GPT-4, Claude</td></tr>
+<tr><td>OpenAPI/Swagger</td><td>YAML/JSON</td><td>REST API标准，可自动生成</td><td>LangChain, AutoGPT</td></tr>
+<tr><td>MCP (Model Context Protocol)</td><td>JSON-RPC</td><td>标准化工具服务器协议</td><td>Anthropic生态</td></tr>
+<tr><td>Custom Schema</td><td>任意</td><td>灵活但需自行实现解析</td><td>内部系统</td></tr>
+</table>
+
+<h3>Tool Selection and Routing（工具选择与路由）</h3>
+
+<p>当Agent拥有大量工具时（10+），将所有工具描述塞入上下文既浪费token又降低选择准确率。工具路由策略：</p>
+
+<ul>
+<li><strong>静态分组</strong>：将工具按功能域分组，根据任务类型加载对应分组</li>
+<li><strong>语义检索</strong>：将工具描述embed为向量，根据用户query检索最相关的top-k工具</li>
+<li><strong>两阶段选择</strong>：先用轻量模型（或规则）粗筛候选集，再在prompt中包含筛选后的工具</li>
+<li><strong>层级路由</strong>：先选择工具类别，再在类别内选择具体工具</li>
+</ul>
+
+<pre><code class="language-python">class ToolRouter:
+    """基于语义相似度的工具路由器"""
+    
+    def __init__(self, tools: list[dict], embedding_model):
+        self.tools = tools
+        self.embedder = embedding_model
+        # 预计算工具描述的embedding
+        self.tool_embeddings = self._embed_tools()
+    
+    def _embed_tools(self):
+        descriptions = [t["name"] + ": " + t["description"] for t in self.tools]
+        return self.embedder.encode(descriptions)
+    
+    def select_tools(self, query: str, top_k: int = 5) -> list[dict]:
+        """根据用户query选择最相关的k个工具"""
+        query_emb = self.embedder.encode([query])
+        similarities = cosine_similarity(query_emb, self.tool_embeddings)[0]
+        top_indices = similarities.argsort()[-top_k:][::-1]
+        return [self.tools[i] for i in top_indices if similarities[i] > 0.3]</code></pre>
+
+<h3>Tool Output Processing（工具输出处理）</h3>
+
+<p>工具返回的原始结果通常需要后处理才能有效利用：</p>
+
+<ul>
+<li><strong>Schema Validation</strong>：验证返回结果符合预期格式</li>
+<li><strong>Truncation</strong>：对超长结果进行智能截断（保留前N行 + 统计摘要）</li>
+<li><strong>Extraction</strong>：从结构化返回中提取关键字段</li>
+<li><strong>Error Normalization</strong>：将各种错误格式统一为Agent可理解的错误描述</li>
+</ul>
+
+<h3>Sandboxing（安全沙箱）</h3>
+
+<p>工具执行必须在受控环境中进行，防止Agent通过工具造成不可逆损害：</p>
+
+<ul>
+<li><strong>文件系统隔离</strong>：限制读写范围，禁止访问敏感路径</li>
+<li><strong>网络限制</strong>：白名单制的网络访问，禁止访问内网资源</li>
+<li><strong>执行超时</strong>：为每个工具调用设置时间上限</li>
+<li><strong>资源配额</strong>：限制CPU、内存、磁盘使用量</li>
+<li><strong>审计日志</strong>：记录所有工具调用的输入输出，支持事后审查</li>
+<li><strong>权限分级</strong>：只读操作自动执行，写操作需人工确认</li>
+</ul>
+
+<h3>Model Context Protocol (MCP)</h3>
+
+<p>MCP是Anthropic提出的开放标准，旨在统一AI应用与外部数据源/工具之间的通信协议：</p>
+
+<div class="card">
+<h3>MCP架构</h3>
+<ul>
+<li><strong>MCP Host</strong>：AI应用程序（如IDE、聊天客户端），发起连接</li>
+<li><strong>MCP Client</strong>：维护与Server的1:1连接，处理协议层</li>
+<li><strong>MCP Server</strong>：提供Resources（数据）、Tools（可执行操作）、Prompts（模板）</li>
+<li><strong>传输层</strong>：支持stdio（本地）和HTTP+SSE（远程）两种传输方式</li>
+</ul>
+<p>MCP的核心价值：将N个应用×M个工具的O(N×M)集成问题，简化为N+M的标准化接口问题。</p>
+</div>
+
+<h2>18.5 Orchestration Patterns</h2>
+
+<p>编排模式（Orchestration Pattern）定义了Agent的"控制流"——如何协调思考、行动和反馈循环。不同模式适用于不同的任务复杂度和可靠性要求。</p>
+
+<h3>ReAct Loop（推理-行动循环）</h3>
+
+<p>ReAct (Reasoning + Acting) 是最基础也最常用的Agent编排模式。模型在每一步交替进行推理（Thought）和行动（Action），直到得出最终答案：</p>
+
+<pre><code class="language-python">class ReActAgent:
+    """ReAct循环实现"""
+    
+    def __init__(self, llm, tools: list, max_steps: int = 10):
+        self.llm = llm
+        self.tools = {t.name: t for t in tools}
+        self.max_steps = max_steps
+    
+    def run(self, query: str) -> str:
+        messages = [{"role": "system", "content": self.system_prompt}]
+        messages.append({"role": "user", "content": query})
+        
+        for step in range(self.max_steps):
+            # LLM生成thought + action（或final answer）
+            response = self.llm.chat(messages)
+            messages.append({"role": "assistant", "content": response})
+            
+            # 解析是否有工具调用
+            tool_call = self.parse_tool_call(response)
+            if tool_call is None:
+                return self.extract_answer(response)  # 最终答案
+            
+            # 执行工具并将结果加入上下文
+            result = self.execute_tool(tool_call)
+            messages.append({"role": "tool", "content": result})
+        
+        return "Reached maximum steps without conclusion."
+    
+    def execute_tool(self, tool_call: dict) -> str:
+        tool = self.tools.get(tool_call["name"])
+        if not tool:
+            return f"Error: Unknown tool '{tool_call['name']}'"
+        try:
+            return tool.execute(**tool_call["arguments"])
+        except Exception as e:
+            return f"Error executing {tool_call['name']}: {str(e)}"</code></pre>
+
+<svg viewBox="0 0 650 200" xmlns="http://www.w3.org/2000/svg">
+  <defs><marker id="arr2" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#3498db"/></marker></defs>
+  <rect x="40" y="70" width="100" height="50" rx="8" fill="#d1ecf1" stroke="#3498db" stroke-width="2"/>
+  <text x="90" y="100" text-anchor="middle" font-size="13" font-weight="bold">Thought</text>
+  <rect x="200" y="70" width="100" height="50" rx="8" fill="#d4edda" stroke="#27ae60" stroke-width="2"/>
+  <text x="250" y="100" text-anchor="middle" font-size="13" font-weight="bold">Action</text>
+  <rect x="360" y="70" width="110" height="50" rx="8" fill="#fff3cd" stroke="#f39c12" stroke-width="2"/>
+  <text x="415" y="100" text-anchor="middle" font-size="13" font-weight="bold">Observation</text>
+  <rect x="530" y="70" width="90" height="50" rx="8" fill="#e8daef" stroke="#8e44ad" stroke-width="2"/>
+  <text x="575" y="100" text-anchor="middle" font-size="13" font-weight="bold">Answer</text>
+  <line x1="140" y1="95" x2="198" y2="95" stroke="#3498db" stroke-width="2" marker-end="url(#arr2)"/>
+  <line x1="300" y1="95" x2="358" y2="95" stroke="#3498db" stroke-width="2" marker-end="url(#arr2)"/>
+  <line x1="470" y1="95" x2="528" y2="95" stroke="#3498db" stroke-width="2" marker-end="url(#arr2)"/>
+  <path d="M 415 120 Q 415 160 250 160 Q 90 160 90 122" fill="none" stroke="#e74c3c" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arr2)"/>
+  <text x="250" y="178" text-anchor="middle" font-size="11" fill="#e74c3c">Loop until done</text>
+</svg>
+
+<h3>Plan-and-Execute（规划-执行模式）</h3>
+
+<p>将Agent分为两个阶段：先制定完整计划，再逐步执行。适用于复杂多步骤任务：</p>
+
+<ul>
+<li><strong>Planner</strong>：接收用户目标，生成有序步骤列表（可能带条件分支）</li>
+<li><strong>Executor</strong>：按顺序执行每个步骤，调用所需工具</li>
+<li><strong>Re-planner</strong>：当执行过程中发现计划不可行时，触发重新规划</li>
+</ul>
+
+<div class="formula-block">
+$$\text{Plan} = f_{\text{plan}}(\text{Goal}, \text{Context}) \rightarrow [(s_1, \text{deps}_1), (s_2, \text{deps}_2), \ldots, (s_n, \text{deps}_n)]$$
+<p class="formula-explain">规划函数将目标映射为带依赖关系的步骤序列。$\text{deps}_i$ 表示步骤 $s_i$ 依赖的前序步骤集合。没有依赖关系的步骤可以并行执行。</p>
+</div>
+
+<h3>Multi-Agent Orchestration（多Agent编排）</h3>
+
+<p>将复杂任务分配给多个专业化Agent协同完成。常见拓扑：</p>
+
+<table>
+<tr><th>模式</th><th>结构</th><th>适用场景</th><th>优缺点</th></tr>
+<tr><td>Supervisor</td><td>一个Leader分配任务给Workers</td><td>任务可清晰分解</td><td>中心化控制，单点瓶颈</td></tr>
+<tr><td>Peer-to-Peer</td><td>Agent间直接通信协作</td><td>需要频繁信息交换</td><td>灵活但难以调试</td></tr>
+<tr><td>Pipeline</td><td>线性传递，每个Agent处理后传给下一个</td><td>有明确处理流程的任务</td><td>简单可控，延迟高</td></tr>
+<tr><td>Debate/Critique</td><td>多个Agent提出方案，互相评审</td><td>需要高质量推理</td><td>质量高但成本翻倍</td></tr>
+</table>
+
+<h3>Human-in-the-Loop（人机协同）</h3>
+
+<p>在关键决策点引入人类审批，平衡自主性与安全性：</p>
+
+<ul>
+<li><strong>Approval Gate</strong>：高风险操作（如删除、支付、发送）执行前需人工确认</li>
+<li><strong>Escalation</strong>：Agent置信度低于阈值时主动请求人类协助</li>
+<li><strong>Feedback Loop</strong>：人类修正Agent的错误，修正信号反馈到后续决策</li>
+<li><strong>Progressive Autonomy</strong>：根据Agent历史表现逐步提升自主权限</li>
+</ul>
+
+<h3>Workflow Graphs（工作流图）</h3>
+
+<p>将Agent逻辑表达为有向图（DAG或含环图），节点是处理步骤，边是控制流：</p>
+
+<pre><code class="language-python">from langgraph.graph import StateGraph, END
+
+# 定义状态
+class AgentState(TypedDict):
+    messages: list
+    plan: list[str]
+    current_step: int
+    results: dict
+
+# 构建工作流图
+workflow = StateGraph(AgentState)
+
+# 添加节点
+workflow.add_node("planner", plan_step)
+workflow.add_node("executor", execute_step)
+workflow.add_node("evaluator", evaluate_results)
+workflow.add_node("reporter", generate_report)
+
+# 添加边（含条件路由）
+workflow.set_entry_point("planner")
+workflow.add_edge("planner", "executor")
+workflow.add_conditional_edges(
+    "executor",
+    should_continue,  # 条件函数
+    {"continue": "executor", "evaluate": "evaluator", "replan": "planner"}
+)
+workflow.add_conditional_edges(
+    "evaluator",
+    is_satisfactory,
+    {"yes": "reporter", "no": "planner"}
+)
+workflow.add_edge("reporter", END)
+
+agent = workflow.compile()</code></pre>
+
+<h2>18.6 State Management</h2>
+
+<p>状态管理是让Agent跨越LLM无状态限制的关键机制。一个完整的状态管理系统需要处理四个层次的状态：</p>
+
+<h3>Conversation State（会话状态）</h3>
+
+<p>记录当前对话的完整上下文，包括所有消息、工具调用历史和中间结果：</p>
+
+<ul>
+<li><strong>Message History</strong>：完整的消息列表（user/assistant/tool/system）</li>
+<li><strong>Turn Metadata</strong>：每轮的时间戳、token用量、工具调用次数</li>
+<li><strong>Active Context</strong>：当前上下文窗口中实际包含的内容（经过压缩/裁剪后）</li>
+</ul>
+
+<h3>Task State（任务状态）</h3>
+
+<p>跟踪Agent当前正在执行的任务进度：</p>
+
+<pre><code class="language-python">@dataclass
+class TaskState:
+    task_id: str
+    goal: str                      # 用户目标
+    plan: list[str]                # 当前执行计划
+    current_step: int              # 执行到第几步
+    step_results: dict[int, str]   # 每步的执行结果
+    status: str                    # pending/running/completed/failed
+    created_at: datetime
+    updated_at: datetime
+    
+    def is_complete(self) -> bool:
+        return self.current_step >= len(self.plan)
+    
+    def get_progress(self) -> float:
+        if not self.plan:
+            return 0.0
+        return self.current_step / len(self.plan)</code></pre>
+
+<h3>Agent State（Agent内部状态）</h3>
+
+<p>Agent的"工作记忆"——在执行过程中积累的临时知识和决策上下文：</p>
+
+<ul>
+<li><strong>Scratchpad</strong>：中间推理结果、临时笔记</li>
+<li><strong>Tool Call History</strong>：已调用的工具及其结果摘要（用于避免重复调用）</li>
+<li><strong>Decision Log</strong>：关键决策及其理由（支持回溯和解释）</li>
+<li><strong>Error Memory</strong>：已遇到的错误和已尝试的修复方案</li>
+</ul>
+
+<h3>Persistent State（持久化状态）</h3>
+
+<p>跨会话保持的长期记忆，通常存储在外部数据库中：</p>
+
+<ul>
+<li><strong>User Preferences</strong>：用户偏好、习惯模式</li>
+<li><strong>Knowledge Base</strong>：Agent学到的事实和经验</li>
+<li><strong>Checkpoint/Resume</strong>：长任务的中断恢复点</li>
+<li><strong>Performance Metrics</strong>：历史成功率、常见失败模式</li>
+</ul>
+
+<div class="highlight-box">
+<p><strong>状态分层设计原则</strong>：会话状态存内存（快但易失）、任务状态存Redis（快且持久）、Agent记忆存向量数据库（语义检索）、用户配置存关系数据库（强一致性）。每层的读写频率、一致性要求和容量差异巨大，不应混用存储方案。</p>
+</div>
+
+<h2>18.7 Error Handling</h2>
+
+<p>生产级Agent系统必须优雅地处理各种失败场景。错误处理不是可选项，而是系统可靠性的核心保障。</p>
+
+<h3>Retry Strategies（重试策略）</h3>
+
+<div class="formula-block">
+$$t_{\text{wait}}(n) = \min(t_{\text{base}} \cdot 2^n + \text{jitter}(n), \; t_{\text{max}})$$
+<p class="formula-explain">指数退避（Exponential Backoff）公式：第 $n$ 次重试等待时间为 $t_{\text{base}} \cdot 2^n$ 加上随机抖动，但不超过 $t_{\text{max}}$。Jitter防止多个客户端同步重试（thundering herd问题）。</p>
+</div>
+
+<pre><code class="language-python">class RetryPolicy:
+    """可配置的重试策略"""
+    
+    def __init__(self, max_retries=3, base_delay=1.0, max_delay=60.0,
+                 retryable_errors=(RateLimitError, TimeoutError, ServerError)):
+        self.max_retries = max_retries
+        self.base_delay = base_delay
+        self.max_delay = max_delay
+        self.retryable_errors = retryable_errors
+    
+    async def execute_with_retry(self, func, *args, **kwargs):
+        last_error = None
+        for attempt in range(self.max_retries + 1):
+            try:
+                return await func(*args, **kwargs)
+            except self.retryable_errors as e:
+                last_error = e
+                if attempt < self.max_retries:
+                    delay = min(self.base_delay * (2 ** attempt), self.max_delay)
+                    jitter = random.uniform(0, delay * 0.1)
+                    await asyncio.sleep(delay + jitter)
+        raise MaxRetriesExceeded(f"Failed after {self.max_retries} retries: {last_error}")</code></pre>
+
+<h3>Loop Detection（循环检测）</h3>
+
+<p>Agent可能陷入无限循环——重复相同的工具调用或在两个状态之间振荡。检测方法：</p>
+
+<ul>
+<li><strong>重复动作检测</strong>：如果连续N次调用同一工具且参数相同，触发中断</li>
+<li><strong>状态哈希</strong>：计算Agent状态的哈希值，检测是否回到之前的状态</li>
+<li><strong>步骤上限</strong>：设置硬性最大步骤数，超出后强制终止并报告</li>
+<li><strong>Token消耗监控</strong>：设置单次任务的总token预算上限</li>
+</ul>
+
+<pre><code class="language-python">class LoopDetector:
+    """Agent循环检测器"""
+    
+    def __init__(self, window_size: int = 5, similarity_threshold: float = 0.95):
+        self.recent_actions = deque(maxlen=window_size * 2)
+        self.threshold = similarity_threshold
+    
+    def check(self, action: dict) -> bool:
+        """返回True表示检测到循环"""
+        action_hash = self._hash_action(action)
+        self.recent_actions.append(action_hash)
+        
+        if len(self.recent_actions) < 4:
+            return False
+        
+        # 检测精确重复
+        recent = list(self.recent_actions)
+        for period in range(1, len(recent) // 2 + 1):
+            if recent[-period:] == recent[-2*period:-period]:
+                return True  # 检测到周期为period的循环
+        
+        return False
+    
+    def _hash_action(self, action: dict) -> str:
+        return hashlib.md5(json.dumps(action, sort_keys=True).encode()).hexdigest()</code></pre>
+
+<h3>Graceful Failure（优雅降级）</h3>
+
+<p>当Agent确实无法完成任务时，应提供有意义的失败响应：</p>
+
+<ul>
+<li><strong>Partial Results</strong>：返回已完成的部分结果，而非完全空白</li>
+<li><strong>Error Explanation</strong>：向用户解释失败原因和已尝试的方案</li>
+<li><strong>Fallback Strategy</strong>：退回到更简单但更可靠的方法</li>
+<li><strong>Escalation Path</strong>：自动通知人类操作员或转交更强的Agent</li>
+</ul>
+
+<h3>Observability（可观测性）</h3>
+
+<p>可观测性三支柱在Agent系统中的应用：</p>
+
+<table>
+<tr><th>维度</th><th>Agent应用</th><th>工具/方案</th></tr>
+<tr><td>Logs</td><td>每一步的thought/action/observation记录</td><td>结构化日志 + ELK</td></tr>
+<tr><td>Metrics</td><td>延迟、token用量、成功率、步骤数分布</td><td>Prometheus + Grafana</td></tr>
+<tr><td>Traces</td><td>完整调用链：用户输入→各步骤→最终输出</td><td>LangSmith, Arize, W&B</td></tr>
+</table>
+
+<div class="info-box">
+<p><strong>追踪（Tracing）的核心价值</strong>：当Agent产生错误输出时，trace允许你精确定位"哪一步出了问题"。没有trace的Agent调试就像没有stack trace的代码调试——几乎不可能。每次LLM调用都应记录：输入prompt、输出文本、token数、延迟、模型版本。</p>
+</div>
+
+<h2>18.8 Scaling and Production</h2>
+
+<p>将Agent从原型推向生产面临四大工程挑战：延迟、成本、限流和质量评估。</p>
+
+<h3>Latency Optimization（延迟优化）</h3>
+
+<p>Agent的端到端延迟是多次LLM调用延迟的累加。优化方向：</p>
+
+<ul>
+<li><strong>并行工具调用</strong>：当多个工具调用之间无依赖时，并行执行</li>
+<li><strong>Streaming输出</strong>：在生成完成前开始返回部分结果</li>
+<li><strong>KV Cache预热</strong>：对不变的System Prompt部分做prefix caching</li>
+<li><strong>模型选择级联</strong>：简单查询用小模型，复杂推理用大模型</li>
+<li><strong>异步工具执行</strong>：工具执行与下一步规划并行</li>
+</ul>
+
+<div class="formula-block">
+$$T_{\text{total}} = \sum_{i=1}^{N} (T_{\text{LLM},i} + T_{\text{tool},i}) + T_{\text{overhead}}$$
+<p class="formula-explain">Agent的总延迟是 $N$ 步中每步LLM推理时间与工具执行时间之和，加上系统开销。优化目标是减小 $N$（更少步骤完成任务）和并行化 $T_{\text{tool}}$。对于多步Agent，典型延迟在5-30秒，远超单次LLM调用的1-3秒。</p>
+</div>
+
+<h3>Cost Management（成本管理）</h3>
+
+<p>Agent的token消耗远高于单次对话——每个工具调用都会将结果注入上下文，导致后续调用的输入token数不断增长：</p>
+
+<div class="formula-block">
+$$C_{\text{agent}} = \sum_{i=1}^{N} (c_{\text{input}} \cdot T_{\text{in},i} + c_{\text{output}} \cdot T_{\text{out},i})$$
+<p class="formula-explain">Agent总成本是所有步骤的输入和输出token费用之和。由于上下文累积效应，$T_{\text{in},i}$ 随步骤增长而线性增大（每步新增工具结果token），导致总成本呈 $O(N^2)$ 增长。</p>
+</div>
+
+<p>成本控制策略：</p>
+<ul>
+<li><strong>Token Budget</strong>：为每次任务设置总token上限</li>
+<li><strong>Model Routing</strong>：按任务复杂度选择不同价格的模型</li>
+<li><strong>Context Pruning</strong>：积极修剪不再需要的历史上下文</li>
+<li><strong>Caching</strong>：缓存常见工具调用结果和LLM响应</li>
+<li><strong>Batch Processing</strong>：非实时任务使用batch API（通常50%折扣）</li>
+</ul>
+
+<h3>Rate Limiting（限流管理）</h3>
+
+<p>Agent的高频API调用容易触发限流。应对策略：</p>
+
+<ul>
+<li><strong>Token Bucket</strong>：在客户端维护令牌桶，预防性限制请求速率</li>
+<li><strong>请求队列</strong>：将请求排队，按配额均匀发送</li>
+<li><strong>多Provider故障转移</strong>：配置备用模型/endpoint，主endpoint限流时自动切换</li>
+<li><strong>优先级调度</strong>：区分实时请求和后台任务，优先保障用户体验</li>
+</ul>
+
+<h3>Evaluation（评估体系）</h3>
+
+<p>Agent系统的评估比传统ML更复杂——需要评估多步决策的整体质量：</p>
+
+<table>
+<tr><th>评估维度</th><th>指标</th><th>方法</th></tr>
+<tr><td>任务完成率</td><td>Success Rate, Partial Credit</td><td>标准测试集 + 人工评审</td></tr>
+<tr><td>效率</td><td>Steps to Completion, Token Usage</td><td>自动统计</td></tr>
+<tr><td>可靠性</td><td>Failure Rate, Recovery Rate</td><td>故障注入测试</td></tr>
+<tr><td>安全性</td><td>Boundary Violation Rate</td><td>红队攻击测试</td></tr>
+<tr><td>用户满意度</td><td>NPS, Thumbs Up/Down</td><td>在线反馈收集</td></tr>
+</table>
+
+<h2>18.9 Framework Comparison</h2>
+
+<p>主流Agent开发框架的全面对比：</p>
+
+<table>
+<tr><th>框架</th><th>核心抽象</th><th>状态管理</th><th>多Agent</th><th>可观测性</th><th>学习曲线</th></tr>
+<tr><td><strong>LangChain/LangGraph</strong></td><td>Chain, Graph</td><td>Checkpointer</td><td>原生支持</td><td>LangSmith</td><td>中等</td></tr>
+<tr><td><strong>CrewAI</strong></td><td>Agent, Task, Crew</td><td>内置</td><td>核心特性</td><td>有限</td><td>低</td></tr>
+<tr><td><strong>AutoGen</strong></td><td>ConversableAgent</td><td>自定义</td><td>核心特性</td><td>有限</td><td>中等</td></tr>
+<tr><td><strong>OpenAI Assistants</strong></td><td>Thread, Run</td><td>托管</td><td>需自建</td><td>Dashboard</td><td>低</td></tr>
+<tr><td><strong>Semantic Kernel</strong></td><td>Plugin, Planner</td><td>自定义</td><td>有限</td><td>OpenTelemetry</td><td>中等</td></tr>
+<tr><td><strong>DSPy</strong></td><td>Module, Optimizer</td><td>无内置</td><td>组合实现</td><td>有限</td><td>高</td></tr>
+<tr><td><strong>自建（From Scratch）</strong></td><td>完全自定义</td><td>完全控制</td><td>完全控制</td><td>需自建</td><td>最高</td></tr>
+</table>
+
+<div class="card">
+<h3>框架选择决策树</h3>
+<ul>
+<li><strong>快速原型验证</strong> → OpenAI Assistants 或 CrewAI（最少代码量）</li>
+<li><strong>复杂工作流</strong> → LangGraph（图结构天然适合复杂控制流）</li>
+<li><strong>多Agent协作</strong> → AutoGen 或 CrewAI（专为多Agent设计）</li>
+<li><strong>生产级可控性</strong> → 自建 或 LangGraph + 自定义扩展（最大灵活度）</li>
+<li><strong>企业.NET生态</strong> → Semantic Kernel（微软生态集成最佳）</li>
+<li><strong>Prompt优化驱动</strong> → DSPy（自动化prompt/few-shot优化）</li>
+</ul>
+</div>
+
+<h2>18.10 Implementation: Production Agent Harness</h2>
+
+<p>综合前述所有模块，实现一个生产级Agent Harness的完整骨架：</p>
+
+<pre><code class="language-python">import asyncio
+import hashlib
+import json
+import time
+from dataclasses import dataclass, field
+from typing import Any, Callable, Optional
+from collections import deque
+
+@dataclass
+class HarnessConfig:
+    """Agent Harness配置"""
+    max_context_tokens: int = 128000
+    max_output_tokens: int = 4096
+    max_steps: int = 20
+    retry_max_attempts: int = 3
+    retry_base_delay: float = 1.0
+    loop_detection_window: int = 5
+    tool_timeout: float = 30.0
+    token_budget_per_task: int = 500000
+
+class ProductionAgentHarness:
+    """生产级Agent骨架实现"""
+    
+    def __init__(self, config: HarnessConfig, llm_client, tools: list):
+        self.config = config
+        self.llm = llm_client
+        self.tools = {t.name: t for t in tools}
+        self.token_counter = TokenCounter()
+        self.loop_detector = LoopDetector(window_size=config.loop_detection_window)
+        self.context_manager = ContextManager(max_tokens=config.max_context_tokens)
+        self.state = AgentState()
+        self.metrics = MetricsCollector()
+    
+    async def run(self, user_input: str, session_id: str) -> AgentResponse:
+        """主执行循环"""
+        self.state.start_task(user_input, session_id)
+        self.metrics.start_trace(session_id)
+        
+        try:
+            for step in range(self.config.max_steps):
+                # 1. 组装上下文
+                messages = self.context_manager.build_messages(
+                    system_prompt=self._get_system_prompt(),
+                    history=self.state.get_history(),
+                    tool_definitions=self._get_relevant_tools(user_input),
+                    budget=self.config.max_context_tokens - self.config.max_output_tokens
+                )
+                
+                # 2. 调用LLM
+                response = await self._call_llm_with_retry(messages)
+                self.state.add_assistant_message(response)
+                self.metrics.record_llm_call(step, messages, response)
+                
+                # 3. 检查是否完成
+                if not response.tool_calls:
+                    return AgentResponse(
+                        content=response.content,
+                        steps=step + 1,
+                        total_tokens=self.metrics.total_tokens
+                    )
+                
+                # 4. 执行工具调用
+                for tool_call in response.tool_calls:
+                    # 循环检测
+                    if self.loop_detector.check(tool_call):
+                        return self._handle_loop_detected(step)
+                    
+                    # 沙箱执行
+                    result = await self._execute_tool_sandboxed(tool_call)
+                    self.state.add_tool_result(tool_call, result)
+                
+                # 5. 检查token预算
+                if self.metrics.total_tokens > self.config.token_budget_per_task:
+                    return self._handle_budget_exceeded(step)
+            
+            return self._handle_max_steps_reached()
+        
+        except Exception as e:
+            self.metrics.record_error(e)
+            return self._handle_fatal_error(e)
+        finally:
+            self.metrics.end_trace()
+    
+    async def _call_llm_with_retry(self, messages):
+        """带重试的LLM调用"""
+        for attempt in range(self.config.retry_max_attempts):
+            try:
+                return await self.llm.chat(messages)
+            except (RateLimitError, TimeoutError) as e:
+                if attempt == self.config.retry_max_attempts - 1:
+                    raise
+                delay = self.config.retry_base_delay * (2 ** attempt)
+                await asyncio.sleep(delay)
+    
+    async def _execute_tool_sandboxed(self, tool_call) -> str:
+        """在沙箱中执行工具"""
+        tool = self.tools.get(tool_call.name)
+        if not tool:
+            return f"Error: Unknown tool '{tool_call.name}'"
+        
+        try:
+            result = await asyncio.wait_for(
+                tool.execute(**tool_call.arguments),
+                timeout=self.config.tool_timeout
+            )
+            # 结果截断
+            return self.context_manager.truncate_tool_output(result)
+        except asyncio.TimeoutError:
+            return f"Error: Tool '{tool_call.name}' timed out after {self.config.tool_timeout}s"
+        except Exception as e:
+            return f"Error: {type(e).__name__}: {str(e)}"
+    
+    def _handle_loop_detected(self, step: int) -> AgentResponse:
+        """处理循环检测"""
+        return AgentResponse(
+            content="I detected a repeated pattern in my actions. "
+                    "Let me summarize what I've found so far and try a different approach.",
+            steps=step + 1,
+            status="loop_detected"
+        )</code></pre>
+
+<div class="takeaway">
+<h2>核心要点总结</h2>
+<ul>
+<li>Agent Harness是连接LLM推理能力与真实世界的工程层，其质量决定了Agent可靠性的上限</li>
+<li>上下文管理是核心优化问题：在有限token预算内最大化信息效用，综合运用压缩、裁剪和优先级分配</li>
+<li>Prompt架构应模块化、可测试、可版本化——将prompt视为代码而非文本</li>
+<li>工具集成需要全生命周期管理：定义→路由→执行→沙箱→结果处理</li>
+<li>编排模式按复杂度递进：ReAct（基础）→ Plan-and-Execute（中等）→ Multi-Agent（高级）→ Workflow Graph（最灵活）</li>
+<li>状态分四层管理：会话（内存）、任务（Redis）、Agent（向量DB）、持久化（关系DB）</li>
+<li>错误处理不是可选项：指数退避重试、循环检测、优雅降级、完整Tracing缺一不可</li>
+<li>生产化核心挑战：延迟 O(N×T_LLM)、成本 O(N²×token_price)、限流管理、持续评估</li>
+<li>框架选择取决于场景：快速原型→托管方案，复杂控制流→LangGraph，最大可控性→自建</li>
+<li>MCP标准化了工具集成，将N×M的集成问题简化为N+M的接口标准化问题</li>
+</ul>
+</div>
+
+<h2>自测问答</h2>
+
+<details>
+<summary>Q1: Agent Harness中"Context Budget Problem"的本质是什么？如何形式化为优化问题？</summary>
+<div class="answer">
+<p>本质是在固定上下文长度约束 $C_{\max}$ 下，将有限的token空间分配给多个竞争性信息源（系统提示、对话历史、工具定义、工具结果、用户输入、输出预留），使Agent任务完成率最大化。形式上：$\max \text{TaskSuccess}(C_{\text{sys}}, C_{\text{hist}}, C_{\text{tools}}, \ldots)$ s.t. $\sum C_i \leq C_{\max}$。实践中通过启发式优先级分配、动态调整（先保证必需项，再用剩余空间填充可压缩项）和效果评估反馈来近似求解。关键洞察：并非"越多越好"——信息过载（Lost in the Middle）可能比适度裁剪更糟。</p>
+</div>
+</details>
+
+<details>
+<summary>Q2: ReAct与Plan-and-Execute模式各自适合什么场景？能否结合使用？</summary>
+<div class="answer">
+<p><strong>ReAct</strong>适合：交互式、探索性任务（如问答、信息检索），每步决策依赖上一步观察结果，不确定性高。<strong>Plan-and-Execute</strong>适合：目标明确的多步骤任务（如数据处理pipeline、代码重构），步骤间有清晰逻辑依赖。两者可以结合：高层用Plan-and-Execute做宏观规划，每个子步骤内部用ReAct处理具体执行中的不确定性。LangGraph等框架天然支持这种嵌套结构——外层是Plan图节点，每个节点内部运行ReAct循环。</p>
+</div>
+</details>
+
+<details>
+<summary>Q3: 为什么Agent的token成本呈O(N²)增长？有哪些实用的缓解措施？</summary>
+<div class="answer">
+<p>因为每步产生的工具结果都注入上下文，第 $i$ 步的输入token数约为 $C_{\text{base}} + i \cdot C_{\text{avg\_result}}$。总成本 $\sum_{i=1}^{N} (C_{\text{base}} + i \cdot C_{\text{avg}}) = N \cdot C_{\text{base}} + C_{\text{avg}} \cdot N(N+1)/2 \approx O(N^2)$。缓解措施：(1) <strong>积极的上下文修剪</strong>：已完成步骤的工具结果替换为简短摘要；(2) <strong>Prefix Caching</strong>：不变的系统提示部分缓存KV，避免重复计算；(3) <strong>减少步骤N</strong>：提高单步效率（更好的工具设计，允许单步多工具调用）；(4) <strong>批量化</strong>：将可并行的工具调用合并为单次。</p>
+</div>
+</details>
+
+<details>
+<summary>Q4: MCP（Model Context Protocol）解决了什么核心问题？与传统REST API集成有何本质区别？</summary>
+<div class="answer">
+<p>MCP解决的核心问题是<strong>N×M集成爆炸</strong>：N个AI应用需要集成M个工具/数据源，传统方式需要N×M个定制化适配器。MCP提供统一的协议层，每个应用实现一次MCP Client，每个工具实现一次MCP Server，总集成工作量降为N+M。与REST API的本质区别：(1) REST是通用HTTP API标准，MCP专为AI交互设计（包含tool/resource/prompt三种语义）；(2) MCP支持有状态连接和实时通知（非请求-响应模式）；(3) MCP工具描述天然面向LLM理解优化，包含使用时机和约束说明；(4) MCP提供权限协商和安全边界的标准化机制。</p>
+</div>
+</details>
+
+<details>
+<summary>Q5: 如何设计有效的Agent循环检测机制？仅靠步骤上限够吗？</summary>
+<div class="answer">
+<p>仅靠步骤上限<strong>不够</strong>——它能防止无限运行，但无法区分"正常的长任务"和"陷入循环的短任务"（5步循环检测远优于20步超时后中断）。有效的循环检测需要多层机制：(1) <strong>精确重复检测</strong>：对action序列做哈希，检测周期性重复模式（哈希序列 [A,B,A,B] 即为周期2循环）；(2) <strong>语义相似度</strong>：检测"参数略有不同但本质相同"的变体循环；(3) <strong>进展评估</strong>：检测是否在向目标推进（如文件修改、测试通过数变化）；(4) <strong>Token消耗速率异常</strong>：正常执行的token/步比值应相对稳定，循环时比值恒定。检测到循环后应注入"你似乎在重复操作，请尝试不同方法"的提示，而非直接终止。</p>
+</div>
+</details>
+
+<details>
+<summary>Q6: Prompt Architecture中"Lost in the Middle"问题是什么？如何在Agent系统中应对？</summary>
+<div class="answer">
+<p>"Lost in the Middle"指LLM对长上下文中间部分的关注度显著低于首尾部分——即使信息明确存在于中间位置，模型也可能"视而不见"。在Agent系统中的应对策略：(1) <strong>关键信息置于首尾</strong>：系统指令放最前，当前任务和最新工具结果放最后；(2) <strong>结构化标记</strong>：使用XML标签或Markdown标题划分段落，帮助模型定位；(3) <strong>主动提取</strong>：不直接传入长文本，而是先让LLM提取关键信息为简洁摘要再使用；(4) <strong>分段处理</strong>：超长内容分段处理，每段独立分析后聚合；(5) <strong>重要性标记</strong>：对关键信息加★或[IMPORTANT]前缀，利用注意力机制的显著性偏好。</p>
+</div>
+</details>
+
+<details>
+<summary>Q7: 多Agent系统中的Supervisor模式与Peer-to-Peer模式如何取舍？</summary>
+<div class="answer">
+<p><strong>Supervisor模式</strong>：有一个Leader Agent负责任务分解和分配，Worker Agent只执行不决策。优点：控制流清晰、易于调试和限制权限、全局视角优化资源分配。缺点：Leader是单点瓶颈、每次通信都经过Leader增加延迟、Leader的能力限制整个系统上限。<strong>Peer-to-Peer模式</strong>：Agent间直接通信，无中心节点。优点：低延迟直接协作、无单点故障、适合需要频繁交互的创意任务。缺点：难以追踪全局状态、可能出现冲突和死锁、安全边界模糊。<strong>选择准则</strong>：任务可清晰分解→Supervisor；需要频繁交互和协商→P2P；生产环境优先Supervisor（可控可审计）；研究探索可用P2P（更灵活）。</p>
+</div>
+</details>
+
+<details>
+<summary>Q8: 生产Agent的可观测性系统应包含哪些核心指标？如何利用这些指标做优化？</summary>
+<div class="answer">
+<p>核心指标矩阵：<strong>质量指标</strong>：任务成功率、部分完成率、用户满意度（thumbs up/down）。<strong>效率指标</strong>：平均步骤数、每步token消耗、端到端延迟P50/P95/P99。<strong>成本指标</strong>：每任务token成本、模型调用次数、工具调用频率。<strong>可靠性指标</strong>：错误率（按类型）、重试率、循环触发率、超时率。<strong>安全指标</strong>：权限越界尝试次数、敏感信息泄露事件。优化路径：(1) 高重试率→模型或网络不稳定→切换provider或增加缓存；(2) 高步骤数但低成功率→prompt需优化或工具设计不佳；(3) 特定工具调用失败率高→修复工具实现或改进描述；(4) 成本异常→分析是否存在token浪费的环节（如未压缩的大型工具结果）。</p>
+</div>
+</details>
+
+</body>
+</html>

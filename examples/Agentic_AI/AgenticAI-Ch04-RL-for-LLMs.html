@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第4章 阅读笔记：RL Foundations for Language Models</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]})"></script>
+<style>
+:root { --primary: #2c3e50; --accent: #3498db; --bg: #fafbfc; --card-bg: #ffffff; --border: #e1e4e8; --text: #24292e; --text-secondary: #586069; --code-bg: #f6f8fa; --highlight: #fff3cd; --success: #d4edda; --info: #d1ecf1; }
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; line-height: 1.8; color: var(--text); background: var(--bg); padding: 2rem; max-width: 900px; margin: 0 auto; }
+h1 { font-size: 1.8rem; color: var(--primary); border-bottom: 3px solid var(--accent); padding-bottom: 0.5rem; margin-bottom: 1rem; }
+h2 { font-size: 1.4rem; color: var(--primary); margin-top: 2.5rem; margin-bottom: 1rem; padding-left: 0.8rem; border-left: 4px solid var(--accent); }
+h3 { font-size: 1.15rem; color: var(--primary); margin-top: 1.8rem; margin-bottom: 0.8rem; }
+p { margin-bottom: 1rem; text-align: justify; }
+ul, ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+li { margin-bottom: 0.5rem; }
+code { background: var(--code-bg); padding: 0.15rem 0.4rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: var(--code-bg); padding: 1rem; border-radius: 6px; overflow-x: auto; margin-bottom: 1.5rem; border: 1px solid var(--border); }
+pre code { background: none; padding: 0; }
+blockquote { border-left: 4px solid var(--accent); padding: 0.8rem 1.2rem; margin: 1.5rem 0; background: var(--info); border-radius: 0 6px 6px 0; }
+.card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+.formula-block { background: var(--code-bg); border: 1px solid var(--border); border-radius: 6px; padding: 1rem; margin: 1rem 0; overflow-x: auto; }
+.formula-explain { color: var(--text-secondary); font-size: 0.92em; margin-top: 0.5rem; padding-left: 1rem; border-left: 3px solid #ddd; }
+.highlight-box { background: var(--highlight); border: 1px solid #ffc107; border-radius: 6px; padding: 1rem; margin: 1rem 0; }
+.info-box { background: var(--info); border: 1px solid #bee5eb; border-radius: 6px; padding: 1rem; margin: 1rem 0; }
+.success-box { background: var(--success); border: 1px solid #c3e6cb; border-radius: 6px; padding: 1rem; margin: 1rem 0; }
+.subtitle { color: var(--text-secondary); font-size: 1rem; margin-bottom: 0.3rem; }
+.meta { color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 2rem; }
+table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; }
+th, td { border: 1px solid var(--border); padding: 0.6rem 0.8rem; text-align: left; }
+th { background: var(--code-bg); font-weight: 600; }
+details { margin-bottom: 1rem; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+summary { padding: 0.8rem 1.2rem; background: var(--code-bg); cursor: pointer; font-weight: 500; }
+details[open] summary { border-bottom: 1px solid var(--border); }
+details .answer { padding: 1rem 1.2rem; }
+svg { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; }
+.takeaway { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 8px; padding: 1.5rem; margin: 2rem 0; }
+.takeaway h2 { color: white; border-left-color: rgba(255,255,255,0.5); }
+.takeaway li { color: rgba(255,255,255,0.95); }
+</style>
+</head>
+<body>
+
+<h1>第4章 阅读笔记：RL Foundations for Language Models</h1>
+<p class="subtitle">《The Hitchhiker's Guide to Agentic AI》— H. Roitman</p>
+<p class="meta">页码 133–135 · 桥梁章节：连接基础RL理论与LLM RL方法论 · 本章虽仅3页，却奠定了理解PPO/DPO/GRPO所有后续方法的概念基础</p>
+
+<!-- 章节摘要 -->
+<div class="info-box">
+<strong>章节定位：</strong>本章是全书第二部分（Part II: RL Methods for Language Models）的序章。它回答一个关键问题：<strong>如何将"让LLM生成更好的文本"转化为一个可用RL工具求解的优化问题？</strong>作者首先指出SFT的天花板效应，然后介绍RL打破天花板的两种范式（RLHF对齐 vs RLVR能力增强），接着将自回归文本生成精确映射为MDP六元组，最后梳理经典RLHF四阶段Pipeline并勾勒后续路线图。
+</div>
+
+<!-- 4.1 -->
+<h2>4.1 Two Paradigms for RL in LLMs</h2>
+
+<h3>SFT的天花板问题</h3>
+
+<p>监督微调（Supervised Fine-Tuning, SFT）的本质是<strong>模仿学习</strong>：模型学的是训练数据中人类写的回答。但人类数据质量参差不齐，模型最多学到数据中最好水平的"平均"，永远无法超越。用一个直觉类比：SFT像是让学生背诵标准答案——答案写得再好，学生也只能复述，无法创造性地给出更优解。</p>
+
+<p>强化学习打破这个天花板的关键机制是：<strong>生成 → 评判 → 更新</strong>的循环。模型自己生成大量候选回答，由奖励函数评判哪些好哪些差，然后朝高分方向更新参数。通过足够多的采样和优化，模型可以发现训练数据中从未出现过的更优策略。</p>
+
+<h3>范式一：RLHF — 基于人类偏好的对齐</h3>
+
+<div class="card">
+<p><strong>目标</strong>：让模型变得 Helpful（有帮助）、Harmless（无害）、Honest（诚实）—— 即所谓的"3H对齐"。</p>
+<ul>
+<li><strong>RLHF</strong>（Reinforcement Learning from Human Feedback）：先从人类"A比B好"的成对比较判断中训练一个奖励模型（Reward Model, RM），再用RL（PPO）让策略最大化这个奖励模型的打分。</li>
+<li><strong>DPO</strong>（Direct Preference Optimization）：跳过奖励模型的显式训练，利用数学恒等式直接将人类偏好转化为一个对比监督损失函数。实现更简单、训练更稳定，但灵活性不如在线RL（无法利用策略自己生成的新数据）。</li>
+</ul>
+<p><strong>适用场景</strong>：通用对话助手（ChatGPT、Claude）、内容安全过滤、减少幻觉等。奖励信号来源于<strong>人类主观判断</strong>。</p>
+</div>
+
+<h3>范式二：RLVR — 基于可验证奖励的能力增强</h3>
+
+<div class="card">
+<p><strong>目标</strong>：教会模型新的认知能力——复杂推理、数学证明、代码生成、工具调用。</p>
+<ul>
+<li>奖励不来自人类主观判断，而来自<strong>可程序化验证的结果</strong>：数学答案对不对（与ground truth比对）？代码能通过单测吗？工具调用格式是否合法？</li>
+<li>代表工作：<strong>DeepSeek-R1</strong> 使用 GRPO + 规则奖励（格式正确性 + 答案正确性），无需任何人类偏好数据就训出了复杂的思维链（Chain-of-Thought）推理能力。</li>
+<li>RLVR 已成为训练推理模型（o1, DeepSeek-R1）和智能体系统（Agentic AI）的<strong>主流方法</strong>，因为它避免了奖励模型的训练成本和偏差问题。</li>
+</ul>
+<p><strong>适用场景</strong>：数学竞赛题解、代码生成、逻辑推理、科学计算、机器人规划等一切可客观验证的任务。</p>
+</div>
+
+<h3>两种范式的共享基础</h3>
+
+<div class="highlight-box">
+<strong>核心洞察</strong>：RLHF和RLVR虽然目标和奖励来源不同，但底层的优化框架完全一致。它们都需要四个核心组件：
+<ol>
+<li><strong>策略 $\pi_\theta$</strong> — 即LLM本身，其softmax输出定义了token级别的动作分布</li>
+<li><strong>奖励信号 $r(x, y)$</strong> — RLHF用训练好的奖励模型；RLVR用规则验证器</li>
+<li><strong>KL约束 $D_{\text{KL}}(\pi_\theta \| \pi_{\text{ref}})$</strong> — 防止策略偏离参考模型太远（防止reward hacking）</li>
+<li><strong>策略梯度优化</strong> — PPO（带Critic）或GRPO（无Critic，用组内归一化替代）</li>
+</ol>
+</div>
+
+<table>
+<tr><th>对比维度</th><th>RLHF（对齐）</th><th>RLVR（能力增强）</th></tr>
+<tr><td>目标</td><td>3H对齐：有帮助、无害、诚实</td><td>增强推理/编码/工具使用能力</td></tr>
+<tr><td>奖励来源</td><td>人类偏好训练的奖励模型 $R_\phi(x,y)$</td><td>规则验证器（答案正确性、格式合规性）</td></tr>
+<tr><td>数据需求</td><td>大量人类标注的偏好对比数据</td><td>带正确答案的题库（无需人类偏好）</td></tr>
+<tr><td>典型算法</td><td>PPO + RM, DPO</td><td>GRPO + 规则奖励</td></tr>
+<tr><td>代表系统</td><td>InstructGPT, ChatGPT, Claude</td><td>DeepSeek-R1, OpenAI o1</td></tr>
+<tr><td>局限性</td><td>奖励模型可能有偏差/过时</td><td>仅适用于可客观验证的任务</td></tr>
+</table>
+
+<!-- 4.2 -->
+<h2>4.2 Text Generation as an MDP（核心映射）</h2>
+
+<p>这是本章最关键的智识贡献：<strong>把自回归文本生成（autoregressive text generation）重新表述为马尔可夫决策过程（MDP）</strong>。一旦这个映射建立，第3章介绍的所有RL工具（策略梯度、优势函数、PPO等）就可以直接应用于LLM训练。</p>
+
+<h3>直觉类比：LLM = 逐字写作的智能体</h3>
+
+<div class="info-box">
+把LLM想象成一位作家。每一步，它审视已经写下的文字（<strong>状态</strong>），从脑海中选择下一个词（<strong>动作</strong>），纸面上多出一个词（<strong>状态转移</strong>）。全文写完后，一位编辑打分（<strong>奖励</strong>）。作家的目标：学一种写作<strong>策略</strong>，让编辑一直打高分。
+</div>
+
+<h3>MDP六元组的精确映射</h3>
+
+<p>经典MDP定义为六元组 $\mathcal{M} = (S, A, P, R, \gamma, \rho_0)$。下面逐一建立与文本生成的对应关系：</p>
+
+<div class="formula-block">
+$$\mathcal{M}_{\text{LLM}} = (S, A, P, R, \gamma, \rho_0) \quad \text{其中各元素定义如下：}$$
+</div>
+
+<table>
+<tr><th>MDP 元素</th><th>符号</th><th>文本生成中的对应</th><th>关键特性</th></tr>
+<tr><td><strong>状态空间</strong> $S$</td><td>$s_t$</td><td>Prompt拼接已生成的所有token：$s_t = (x, y_1, y_2, \ldots, y_{t-1})$</td><td>状态随生成不断增长，维度可变</td></tr>
+<tr><td><strong>动作空间</strong> $A$</td><td>$a_t$</td><td>从词表 $\mathcal{V}$ 中选择下一个token：$a_t \in \{1, 2, \ldots, |\mathcal{V}|\}$</td><td>动作空间巨大（32K–150K），但离散</td></tr>
+<tr><td><strong>状态转移</strong> $P$</td><td>$P(s_{t+1}|s_t, a_t)$</td><td>确定性拼接：$s_{t+1} = s_t \oplus a_t$（追加token）</td><td><strong>确定性</strong>（无环境随机性），$P=1$</td></tr>
+<tr><td><strong>奖励函数</strong> $R$</td><td>$r_t$</td><td>RLHF：$R_\phi(x, y)$；RLVR：规则验证结果</td><td><strong>稀疏</strong>：中间步 $r_t=0$，仅终态给奖励</td></tr>
+<tr><td><strong>折扣因子</strong> $\gamma$</td><td>$\gamma$</td><td>$\gamma = 1.0$（无折扣）</td><td>有限长episode，所有token同等重要</td></tr>
+<tr><td><strong>初始分布</strong> $\rho_0$</td><td>$s_0 \sim \rho_0$</td><td>从prompt数据集中采样初始状态 $s_0 = x$</td><td>由训练数据集决定</td></tr>
+</table>
+
+<h3>策略即LLM：最关键的洞察</h3>
+
+<div class="formula-block">
+$$\pi_\theta(a_t | s_t) = \text{softmax}\big(f_\theta(s_t)\big)_{a_t} = \frac{\exp\big(z_{a_t}\big)}{\sum_{v=1}^{|\mathcal{V}|} \exp(z_v)}$$
+</div>
+<div class="formula-explain">
+其中 $f_\theta(s_t) \in \mathbb{R}^{|\mathcal{V}|}$ 是LLM在给定上下文 $s_t$ 下输出的logits向量，$z_{a_t}$ 是对应token $a_t$ 的logit值。LLM的softmax输出<strong>天然就是RL中的策略函数</strong>——在每个状态（上下文）下定义了动作（下一个token）的概率分布。
+</div>
+
+<div class="highlight-box">
+<strong>核心洞察</strong>：我们不需要"给LLM外挂一个策略网络"——LLM本身就是策略网络。RL训练要做的唯一一件事是<strong>调整权重 $\theta$</strong>，让模型对高奖励的token序列分配更高概率，对低奖励序列分配更低概率。整个Transformer架构本身就是"策略参数化"。
+</div>
+
+<h3>一条完整轨迹的展开</h3>
+
+<p>一个生成过程对应RL中的一条<strong>轨迹（trajectory）</strong>：</p>
+
+<div class="formula-block">
+$$\tau = (s_0, a_0, r_0, s_1, a_1, r_1, \ldots, s_T, a_T, r_T)$$
+</div>
+<div class="formula-explain">
+其中 $s_0 = x$（prompt），$a_t \sim \pi_\theta(\cdot|s_t)$（采样下一个token），$s_{t+1} = s_t \oplus a_t$（确定性拼接），$r_t = 0$ 对于 $t < T$（中间步无奖励），$r_T = R(x, y)$（终态奖励）。整条轨迹的回报为 $G = \sum_{t=0}^T \gamma^t r_t = r_T$（因为 $\gamma=1$ 且仅终态有奖励）。
+</div>
+
+<h3>LLM-MDP的三大独特性</h3>
+
+<div class="card">
+<ol>
+<li><strong>确定性转移（Deterministic Transition）</strong>：选了token "猫"，下一个状态<em>一定</em>是"之前的文本+猫"，没有任何环境随机性。所有的随机性只来自策略本身的采样（温度参数）。这意味着不需要建模环境动力学（Model-Free足够），也不需要重要性采样修正转移概率。</li>
+<li><strong>稀疏奖励（Sparse Reward）</strong>：只有在完整回答生成结束后才给出一个总评分。中间每个token没有即时反馈。这导致信用分配（credit assignment）困难——某个坏回答里的哪个token导致了低分？PPO通过GAE部分缓解此问题；过程奖励模型（PRM）是另一个研究方向。</li>
+<li><strong>巨大动作空间（Massive Action Space）</strong>：词表大小为32K–150K，远超经典RL中几个到几十个的动作空间。这就是为什么Q-Learning（需要对每个动作计算Q值）对LLM不可行，而策略梯度方法（直接输出概率分布）是自然选择。</li>
+</ol>
+</div>
+
+<h3>MDP视角下的完整生成概率</h3>
+
+<div class="formula-block">
+$$P_{\pi_\theta}(\tau) = \rho_0(s_0) \prod_{t=0}^{T} \pi_\theta(a_t | s_t) \cdot \underbrace{P(s_{t+1}|s_t, a_t)}_{=1\text{（确定性转移）}}= \rho_0(x) \prod_{t=0}^{T} \pi_\theta(y_t | x, y_{<t})$$
+</div>
+<div class="formula-explain">
+由于转移是确定性的，轨迹概率完全由策略决定。这正好等于LLM在自回归生成时计算的<strong>序列条件概率</strong>：$P(y|x) = \prod_{t=1}^{T} P(y_t | x, y_1, \ldots, y_{t-1})$。因此，LLM预训练（最大化似然）可以看作是最大化在"正确文本"这条轨迹上的策略概率。
+</div>
+
+<!-- 4.3 -->
+<h2>4.3 The RLHF Pipeline（经典四阶段）</h2>
+
+<p>RLHF（Reinforcement Learning from Human Feedback）的标准训练管线由四个依次进行的阶段组成。这个管线最早由InstructGPT（2022）确立，至今仍是大部分对齐训练的骨架。</p>
+
+<!-- SVG: Pipeline Flow -->
+<svg viewBox="0 0 750 160" xmlns="http://www.w3.org/2000/svg" style="max-width:720px;">
+  <defs>
+    <marker id="arr" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6" fill="#586069"/>
+    </marker>
+  </defs>
+  <rect x="10" y="40" width="155" height="80" rx="8" fill="#d1ecf1" stroke="#3498db" stroke-width="1.5"/>
+  <text x="87" y="65" text-anchor="middle" font-size="12" fill="#2c3e50" font-weight="700">Stage 1: SFT</text>
+  <text x="87" y="82" text-anchor="middle" font-size="9.5" fill="#586069">高质量指令数据</text>
+  <text x="87" y="97" text-anchor="middle" font-size="9.5" fill="#586069">→ 基础策略 π_SFT</text>
+  <text x="87" y="112" text-anchor="middle" font-size="9.5" fill="#586069">学会遵循指令格式</text>
+  <path d="M165 80 L195 80" fill="none" stroke="#586069" stroke-width="1.5" marker-end="url(#arr)"/>
+  <rect x="200" y="40" width="155" height="80" rx="8" fill="#fff3cd" stroke="#ffc107" stroke-width="1.5"/>
+  <text x="277" y="65" text-anchor="middle" font-size="12" fill="#2c3e50" font-weight="700">Stage 2: RM训练</text>
+  <text x="277" y="82" text-anchor="middle" font-size="9.5" fill="#586069">人类偏好对比标注</text>
+  <text x="277" y="97" text-anchor="middle" font-size="9.5" fill="#586069">Bradley-Terry模型</text>
+  <text x="277" y="112" text-anchor="middle" font-size="9.5" fill="#586069">→ 奖励模型 R_ϕ</text>
+  <path d="M355 80 L385 80" fill="none" stroke="#586069" stroke-width="1.5" marker-end="url(#arr)"/>
+  <rect x="390" y="40" width="155" height="80" rx="8" fill="#d4edda" stroke="#28a745" stroke-width="1.5"/>
+  <text x="467" y="65" text-anchor="middle" font-size="12" fill="#2c3e50" font-weight="700">Stage 3: RL优化</text>
+  <text x="467" y="82" text-anchor="middle" font-size="9.5" fill="#586069">PPO/GRPO最大化奖励</text>
+  <text x="467" y="97" text-anchor="middle" font-size="9.5" fill="#586069">+ KL约束防偏移</text>
+  <text x="467" y="112" text-anchor="middle" font-size="9.5" fill="#586069">→ 对齐策略 π_θ</text>
+  <path d="M545 80 L575 80" fill="none" stroke="#586069" stroke-width="1.5" marker-end="url(#arr)"/>
+  <rect x="580" y="40" width="155" height="80" rx="8" fill="#e2e3e5" stroke="#6c757d" stroke-width="1.5"/>
+  <text x="657" y="65" text-anchor="middle" font-size="12" fill="#2c3e50" font-weight="700">Stage 4: 评估迭代</text>
+  <text x="657" y="82" text-anchor="middle" font-size="9.5" fill="#586069">人类评测 + 自动基准</text>
+  <text x="657" y="97" text-anchor="middle" font-size="9.5" fill="#586069">发现新失败模式</text>
+  <text x="657" y="112" text-anchor="middle" font-size="9.5" fill="#586069">→ 回到Stage 1/2</text>
+</svg>
+
+<h3>Stage 1：监督微调（SFT）</h3>
+
+<div class="card">
+<p>在高质量的指令-回复对 $(x_i, y_i)$ 上进行标准的下一词预测训练：</p>
+<div class="formula-block">
+$$\mathcal{L}_{\text{SFT}} = -\sum_{i} \sum_{t=1}^{|y_i|} \log \pi_\theta(y_{i,t} | x_i, y_{i,<t})$$
+</div>
+<div class="formula-explain">
+这就是标准的交叉熵损失/负对数似然（NLL）。通过最大化高质量人类回复的似然概率，模型学会：(1) 遵循指令格式；(2) 生成流畅、相关的回答。SFT模型 $\pi_{\text{SFT}}$ 将作为后续RL阶段的<strong>起点</strong>和<strong>锚点</strong>（KL约束的参考策略）。
+</div>
+<p><strong>关键注意</strong>：SFT的质量决定了RL的上限。如果SFT模型连基本的指令遵循都做不好，后续RL优化的起点就太差，很难通过奖励信号"救回来"。第10章将详细讨论SFT的最佳实践。</p>
+</div>
+
+<h3>Stage 2：奖励模型训练（Reward Modeling）</h3>
+
+<div class="card">
+<p>收集人类偏好数据：对同一prompt $x$，用SFT模型生成两个不同的回复 $(y_w, y_l)$，让人类标注哪个更好。$y_w \succ y_l$ 表示"$y_w$ 被偏好于 $y_l$"。</p>
+<p>使用 <strong>Bradley-Terry 模型</strong>将偏好关系转化为可学习的概率形式：</p>
+<div class="formula-block">
+$$P(y_w \succ y_l | x) = \sigma\big(R_\phi(x, y_w) - R_\phi(x, y_l)\big)$$
+</div>
+<div class="formula-explain">
+$\sigma$ 是sigmoid函数，$R_\phi(x, y)$ 是参数化的奖励模型（通常是将LLM最后一层换成一个标量输出头）。直觉：被偏好回复的奖励分数应该高于被拒绝的回复，两者差值越大，偏好概率越接近1。
+</div>
+<p>训练损失（最大化偏好对的似然）：</p>
+<div class="formula-block">
+$$\mathcal{L}_{\text{RM}} = -\mathbb{E}_{(x, y_w, y_l) \sim \mathcal{D}} \left[\log \sigma\big(R_\phi(x, y_w) - R_\phi(x, y_l)\big)\right]$$
+</div>
+<div class="formula-explain">
+最小化这个损失等价于让奖励模型给偏好回复打更高分。训练好的 $R_\phi$ 将在Stage 3中充当RL的奖励信号——策略生成回复，奖励模型打分，PPO根据分数更新策略。
+</div>
+</div>
+
+<h3>Stage 3：RL优化（核心目标函数）</h3>
+
+<div class="card">
+<p>这是整个RLHF Pipeline的核心。优化目标是：</p>
+<div class="formula-block">
+$$\max_\theta \; \mathbb{E}_{x \sim \mathcal{D},\; y \sim \pi_\theta(\cdot|x)}\big[R_\phi(x, y)\big] - \beta \cdot D_{\text{KL}}\big(\pi_\theta(\cdot|x) \,\|\, \pi_{\text{ref}}(\cdot|x)\big)$$
+</div>
+<div class="formula-explain">
+<strong>第一项</strong>：最大化策略生成回复的奖励模型打分——让模型生成人类更偏好的回复。<br>
+<strong>第二项</strong>：KL散度惩罚，约束新策略 $\pi_\theta$ 不能偏离参考策略 $\pi_{\text{ref}}$（通常就是 $\pi_{\text{SFT}}$）太远。<br>
+<strong>$\beta$</strong>：平衡系数（KL penalty coefficient），控制探索-保守的权衡。
+</div>
+
+<p>展开KL散度的token级别定义：</p>
+<div class="formula-block">
+$$D_{\text{KL}}\big(\pi_\theta \| \pi_{\text{ref}}\big) = \mathbb{E}_{y \sim \pi_\theta}\left[\sum_{t=1}^{|y|} \log \frac{\pi_\theta(y_t|x, y_{<t})}{\pi_{\text{ref}}(y_t|x, y_{<t})}\right]$$
+</div>
+<div class="formula-explain">
+KL散度衡量新策略与参考策略在每个token位置上的概率分布差异之和。如果某个token的新策略概率远高于参考策略，该项就会很大，被惩罚压制。这防止了模型"走极端"——发现一些让奖励模型给高分但实际质量很差的pattern（reward hacking）。
+</div>
+
+<p><strong>$\beta$ 的选择至关重要</strong>：</p>
+<ul>
+<li>$\beta$ 太大 → 策略被死死锚定在SFT附近，RL几乎不起作用，模型学不到新东西</li>
+<li>$\beta$ 太小 → 策略大幅偏离SFT，出现reward hacking（生成无意义但高分的文本）</li>
+<li>实践中：$\beta \in [0.01, 0.2]$ 是常见范围，需要通过观察KL曲线和生成质量来微调</li>
+</ul>
+</div>
+
+<h3>Stage 4：评估与迭代</h3>
+
+<div class="card">
+<ul>
+<li><strong>人类评测</strong>：让标注员对比RL前后模型的回复质量，计算win rate</li>
+<li><strong>自动基准</strong>：使用MT-Bench、AlpacaEval等标准化评测，观察各维度得分变化</li>
+<li><strong>失败模式挖掘</strong>：发现新的安全漏洞、事实性错误、拒绝过多等问题</li>
+<li><strong>迭代优化</strong>：根据发现的问题，回到Stage 1补充数据、或回到Stage 2扩展偏好标注、或调整Stage 3的超参数</li>
+</ul>
+<p>整个Pipeline不是一次性执行的，而是<strong>反复迭代</strong>的——每轮迭代都让模型更好地对齐人类期望。</p>
+</div>
+
+<h3>RLVR变体：简化的Pipeline</h3>
+
+<div class="success-box">
+<strong>RLVR对标准Pipeline的简化</strong>：
+<ul>
+<li>Stage 1（SFT）：改为在推理轨迹（含思维链）上训练，让模型学会"先思考再回答"的格式</li>
+<li>Stage 2（奖励模型）：<strong>完全跳过</strong>——用规则验证器（答案是否正确、格式是否合法）替代学习的奖励模型</li>
+<li>Stage 3（RL优化）：不变——仍然是PPO/GRPO优化，只是奖励信号来源从RM变成了验证器</li>
+<li>优势：无需昂贵的人类标注，奖励信号完全准确（无RM偏差），可以大规模扩展</li>
+</ul>
+</div>
+
+<h3>LLM RL 与经典 RL 的五大差异</h3>
+
+<table>
+<tr><th>维度</th><th>经典 RL（Atari/机器人）</th><th>LLM RL</th></tr>
+<tr><td>状态转移</td><td>随机环境（物理模拟、对手行为）</td><td>确定性拼接（追加token）</td></tr>
+<tr><td>奖励</td><td>密集（每步反馈）或稀疏</td><td>极度稀疏（仅终态一个分数）</td></tr>
+<tr><td>动作空间</td><td>连续（力矩）或小离散（几十个）</td><td>超大离散（32K–150K个token）</td></tr>
+<tr><td>探索策略</td><td>ε-greedy, 噪声注入, entropy bonus</td><td>温度采样 + KL锚定（隐式限制探索范围）</td></tr>
+<tr><td>价值函数</td><td>必须（DQN/A3C/PPO都需要Critic）</td><td>可选（GRPO用组内归一化替代Critic）</td></tr>
+</table>
+
+<!-- 4.4 -->
+<h2>4.4 Roadmap of This Part</h2>
+
+<p>本章作为桥梁，连接了第3章的RL基础理论和后续各章的具体方法。后续章节构建了完整的"RL for LLMs"工具箱：</p>
+
+<table>
+<tr><th>章节</th><th>核心内容</th><th>在LLM训练中的角色</th></tr>
+<tr><td>Ch5: PPO</td><td>Clipped Surrogate目标、GAE优势估计、Critic网络、完整训练循环</td><td>GPT-4/Claude背后的核心RL算法</td></tr>
+<tr><td>Ch6: DPO</td><td>绕过RL，将偏好直接转化为对比损失；数学等价性推导</td><td>更简单但灵活性不如在线RL</td></tr>
+<tr><td>Ch7: GRPO</td><td>去掉Critic、群体奖励归一化、组内相对排名</td><td>DeepSeek-R1/推理模型训练的主流方案</td></tr>
+<tr><td>Ch8: 偏好优化变体</td><td>Online DPO、KTO、SimPO、Best-of-N采样</td><td>方法选择指南和最新进展</td></tr>
+<tr><td>Ch9: 奖励建模</td><td>Bradley-Terry、过程奖励(PRM) vs 结果奖励(ORM)、规则奖励设计</td><td>RLVR的核心组件设计</td></tr>
+<tr><td>Ch10: SFT最佳实践</td><td>数据配比、Packing、Chat模板、质量过滤</td><td>SFT质量直接决定RL训练的天花板</td></tr>
+<tr><td>Ch11: 系统工程</td><td>分布式训练、生成-训练解耦、Ray/vLLM架构</td><td>百GPU规模RL训练的基础设施</td></tr>
+</table>
+
+<div class="info-box">
+<strong>阅读建议</strong>：如果你的目标是理解当前最主流的训练方案，推荐阅读顺序为 Ch4（本章）→ Ch7（GRPO）→ Ch9（奖励建模）→ Ch5（PPO，作为对照参考）。如果你要从头搭建RLHF系统，则按顺序阅读所有章节。
+</div>
+
+<!-- 关键要点总结 -->
+<div class="takeaway">
+<h2>关键要点总结</h2>
+<ul>
+<li><strong>SFT有天花板</strong>：模仿学习只能复制数据质量，RL通过"生成→评判→更新"循环打破这个上限，使模型超越训练数据。</li>
+<li><strong>两种范式同一基础</strong>：RLHF（对齐）和RLVR（能力增强）目标不同，但共享策略+奖励+KL约束+策略梯度的核心优化框架。</li>
+<li><strong>LLM天然就是策略网络</strong>：$\pi_\theta(a_t|s_t) = \text{softmax}(f_\theta(s_t))$——不需要额外构建策略架构，Transformer本身就是策略参数化。</li>
+<li><strong>文本生成MDP的独特性</strong>：确定性转移 + 稀疏奖励 + 巨大动作空间——解释了为何PPO/GRPO优于Q-Learning类方法。</li>
+<li><strong>KL约束是安全网</strong>：$\beta \cdot D_{\text{KL}}(\pi_\theta \| \pi_{\text{ref}})$ 防止reward hacking，但代价是限制探索能力，$\beta$的选择需要精细调优。</li>
+<li><strong>RLHF Pipeline的四阶段可以灵活替换</strong>：RLVR跳过奖励模型、GRPO去掉Critic——趋势是让Pipeline更简洁高效。</li>
+</ul>
+</div>
+
+<!-- Q&A -->
+<h2>Q&amp;A 深度理解（点击展开）</h2>
+
+<details>
+<summary>Q1：为什么说"SFT有天花板"而RL能打破它？能给一个具体例子吗？</summary>
+<div class="answer">
+<p>SFT本质是模仿——模型学的是训练数据中人类写的回答。假设训练数据中最好的数学题解答正确率为80%，那SFT模型最多达到80%的水平（实际上更低，因为它学的是所有水平的平均）。</p>
+<p>RL打破天花板的具体例子：DeepSeek-R1训练过程中，模型在AIME数学竞赛题上的正确率从SFT的约30%提升到RL后的79%——远超训练数据中任何一条回答的质量。原因是RL允许模型<strong>自己探索</strong>新的解题策略（如更长的思维链、自我验证），然后通过"答案正确"的奖励信号强化这些策略。</p>
+</div>
+</details>
+
+<details>
+<summary>Q2：文本生成MDP的"确定性转移"有什么深层含义？对算法设计有何影响？</summary>
+<div class="answer">
+<p>确定性转移意味着：一旦策略选了token "猫"，下一状态一定是"之前文本+猫"——没有环境噪声。这有三个重要推论：</p>
+<ol>
+<li><strong>所有随机性来自策略本身</strong>：通过温度参数控制。温度=0时整个生成过程变成确定性的。</li>
+<li><strong>不需要重要性采样修正转移概率</strong>：在off-policy方法中，只需修正动作概率 $\pi_{new}/\pi_{old}$，不需要修正环境转移。</li>
+<li><strong>轨迹概率 = 策略概率之积</strong>：$P(\tau) = \prod_t \pi_\theta(a_t|s_t)$，这恰好就是LLM的序列生成概率。</li>
+</ol>
+<p>对算法设计的影响：让PPO的实现更简单（不需要Model-Based组件），也让DPO的数学推导能够成立（Bradley-Terry可以直接用序列概率表达）。</p>
+</div>
+</details>
+
+<details>
+<summary>Q3：KL约束中的参考策略 $\pi_{\text{ref}}$ 一定是SFT模型吗？能用别的吗？</summary>
+<div class="answer">
+<p>不一定。虽然最常见的选择是 $\pi_{\text{ref}} = \pi_{\text{SFT}}$，但也有其他选择：</p>
+<ul>
+<li><strong>上一轮RL的策略</strong>：迭代式RLHF中，每轮用上一轮的结果作为锚点，允许策略逐步"漂移"但每步不能太远。</li>
+<li><strong>多模型混合</strong>：某些工作用多个模型的平均作为参考。</li>
+<li><strong>动态更新的EMA模型</strong>：用指数移动平均版本作为参考，让"安全区"随训练逐渐扩大。</li>
+</ul>
+<p>关键原则：参考策略应该是一个"已知安全/合理"的模型——KL约束确保新策略不会偏离"已验证的安全区域"太远。</p>
+</div>
+</details>
+
+<details>
+<summary>Q4：RLHF和RLVR能不能同时使用？如果冲突怎么办？</summary>
+<div class="answer">
+<p>可以，实践中很多前沿模型就是这么做的。常见做法：</p>
+<ol>
+<li><strong>串行组合</strong>：先用RLVR增强推理能力，再用RLHF做安全对齐。</li>
+<li><strong>多目标奖励组合</strong>：$R_{\text{total}} = \alpha R_{\text{correctness}} + (1-\alpha) R_{\text{preference}}$</li>
+<li><strong>分阶段训练</strong>：不同阶段侧重不同目标。</li>
+</ol>
+<p>冲突处理：当安全性和能力冲突时（如模型为了答对数学题而生成有毒的中间推理），通常<strong>安全性优先</strong>——通过在RLVR奖励中加入安全过滤，或在最后阶段做RLHF安全对齐覆盖。第9章详细讨论多目标奖励的设计。</p>
+</div>
+</details>
+
+<details>
+<summary>Q5：为什么GRPO能去掉Critic网络？这不会损失信息吗？</summary>
+<div class="answer">
+<p>传统PPO需要Critic网络 $V_\phi(s)$ 来估计"当前状态的期望回报"，用于计算优势函数 $\hat{A}_t = G_t - V_\phi(s_t)$。但Critic网络参数量和LLM一样大，显存翻倍。</p>
+<p>GRPO的替代思路：对同一prompt采样一组（group，通常8-64个）回答 $\{y^1, y^2, \ldots, y^G\}$，每个回答都有奖励 $r^i$。然后用组内统计量归一化：</p>
+<p>$$\hat{A}^i = \frac{r^i - \text{mean}(\{r^j\})}{\text{std}(\{r^j\})}$$</p>
+<p>高于组均值的就是"好的"（正优势），低于的就是"差的"（负优势）。这用"组内相对排名"替代了绝对价值估计。信息损失：可能没有逐token级别的信用分配那么精细，但实践证明对可验证奖励任务效果极好，而且省掉了整个Critic网络，大幅降低显存和计算成本。</p>
+</div>
+</details>
+
+<details>
+<summary>Q6：稀疏奖励问题如何缓解？有没有给中间token也加奖励的方法？</summary>
+<div class="answer">
+<p>稀疏奖励是LLM RL的核心挑战之一。目前有几种缓解方案：</p>
+<ul>
+<li><strong>过程奖励模型（PRM）</strong>：对推理的每一步打分，而非只看最终答案。Math-Shepherd、PRM800K等工作在数学推理中取得了显著效果。</li>
+<li><strong>GAE回传</strong>：PPO的GAE机制可以将终态奖励"回传"到前面的token——离终态越近的token获得越大的信用。</li>
+<li><strong>格式奖励</strong>：对中间步骤给予小的格式正确性奖励（如"思维链格式正确+0.1"）。</li>
+<li><strong>Token级KL惩罚</strong>：虽然不是正面奖励，但每个token的KL惩罚 $-\beta \log(\pi_\theta/\pi_{\text{ref}})$ 在某种程度上提供了逐步的信号。</li>
+</ul>
+<p>第9章将详细讨论过程奖励vs结果奖励的设计哲学。</p>
+</div>
+</details>
+
+<details>
+<summary>Q7：DPO如何绕过显式的RL优化？它和RLHF在数学上是什么关系？</summary>
+<div class="answer">
+<p>DPO的核心发现：RLHF的KL约束目标函数存在<strong>闭式解</strong>。对于最优策略：</p>
+<p>$$\pi^*(y|x) = \frac{1}{Z(x)} \pi_{\text{ref}}(y|x) \exp\left(\frac{1}{\beta} R(x,y)\right)$$</p>
+<p>反解出奖励模型：$R(x,y) = \beta \log \frac{\pi^*(y|x)}{\pi_{\text{ref}}(y|x)} + \beta \log Z(x)$。将这个表达式代入Bradley-Terry偏好模型，配分函数 $Z(x)$ 恰好消掉，得到DPO的直接损失函数，只依赖策略的对数概率比。</p>
+<p>本质上：RLHF先学 $R_\phi$再用PPO优化是"两步走"；DPO把两步合成一步，直接从偏好数据优化策略。数学上在无限数据和完美优化的理想条件下，两者等价。实践中各有优劣：DPO更简单稳定，RLHF（Online）更灵活且能利用策略自己生成的新数据。详见第6章。</p>
+</div>
+</details>
+
+<footer style="text-align:center; padding-top:2rem; margin-top:3rem; border-top:1px solid var(--border); color:var(--text-secondary); font-size:0.85rem;">
+笔记来源：《The Hitchhiker's Guide to Agentic AI》Chapter 4: RL Foundations for Language Models, pp.133–135
+</footer>
+
+</body>
+</html>

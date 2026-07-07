@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第10章 阅读笔记：SFT Best Practices and Techniques</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]})"></script>
+<style>
+:root { --primary: #2c3e50; --accent: #3498db; --bg: #fafbfc; --card-bg: #ffffff; --border: #e1e4e8; --text: #24292e; --text-secondary: #586069; --code-bg: #f6f8fa; --highlight: #fff3cd; --success: #d4edda; --info: #d1ecf1; }
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; line-height: 1.8; color: var(--text); background: var(--bg); padding: 2rem; max-width: 900px; margin: 0 auto; }
+h1 { font-size: 1.8rem; color: var(--primary); border-bottom: 3px solid var(--accent); padding-bottom: 0.5rem; margin-bottom: 1rem; }
+h2 { font-size: 1.4rem; color: var(--primary); margin-top: 2.5rem; margin-bottom: 1rem; padding-left: 0.8rem; border-left: 4px solid var(--accent); }
+h3 { font-size: 1.15rem; color: var(--primary); margin-top: 1.8rem; margin-bottom: 0.8rem; }
+p { margin-bottom: 1rem; text-align: justify; }
+ul, ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+li { margin-bottom: 0.5rem; }
+code { background: var(--code-bg); padding: 0.15rem 0.4rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: var(--code-bg); padding: 1rem; border-radius: 6px; overflow-x: auto; margin-bottom: 1.5rem; border: 1px solid var(--border); }
+pre code { background: none; padding: 0; }
+blockquote { border-left: 4px solid var(--accent); padding: 0.8rem 1.2rem; margin: 1.5rem 0; background: var(--info); border-radius: 0 6px 6px 0; }
+.card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+.formula-block { background: var(--code-bg); border: 1px solid var(--border); border-radius: 6px; padding: 1rem; margin: 1rem 0; overflow-x: auto; }
+.formula-explain { color: var(--text-secondary); font-size: 0.92em; margin-top: 0.5rem; padding-left: 1rem; border-left: 3px solid #ddd; }
+.highlight-box { background: var(--highlight); border: 1px solid #ffc107; border-radius: 6px; padding: 1rem; margin: 1rem 0; }
+.info-box { background: var(--info); border: 1px solid #bee5eb; border-radius: 6px; padding: 1rem; margin: 1rem 0; }
+.success-box { background: var(--success); border: 1px solid #c3e6cb; border-radius: 6px; padding: 1rem; margin: 1rem 0; }
+.subtitle { color: var(--text-secondary); font-size: 1rem; margin-bottom: 0.3rem; }
+.meta { color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 2rem; }
+table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; }
+th, td { border: 1px solid var(--border); padding: 0.6rem 0.8rem; text-align: left; }
+th { background: var(--code-bg); font-weight: 600; }
+details { margin-bottom: 1rem; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+summary { padding: 0.8rem 1.2rem; background: var(--code-bg); cursor: pointer; font-weight: 500; }
+details[open] summary { border-bottom: 1px solid var(--border); }
+details .answer { padding: 1rem 1.2rem; }
+svg { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; }
+.takeaway { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 8px; padding: 1.5rem; margin: 2rem 0; }
+.takeaway h2 { color: white; border-left-color: rgba(255,255,255,0.5); }
+.takeaway li { color: rgba(255,255,255,0.95); }
+</style>
+</head>
+<body>
+
+<h1>第10章 阅读笔记：SFT Best Practices and Techniques</h1>
+<p class="subtitle">监督微调的工程最佳实践——从训练效率到数据策略</p>
+<p class="meta">来源：<em>The Hitchhiker's Guide to Agentic AI</em> — H. Roitman &nbsp;|&nbsp; 页码 190–198</p>
+
+<blockquote>
+<strong>核心论点：</strong>SFT（监督微调）的质量决定了后续RL训练的天花板。RL只能放大SFT模型中已经存在的行为模式，无法凭空创造新能力。因此，SFT阶段的工程实践——包括训练效率、数据格式、loss设计、数据配比——直接决定了整个RLHF流水线的最终效果。
+</blockquote>
+
+<!-- ==================== 10.1 ==================== -->
+<h2>10.1 Sequence Packing for Efficiency</h2>
+
+<div class="card">
+<h3>问题：Padding造成的巨大算力浪费</h3>
+<p>标准的SFT训练流程中，同一个batch里所有样本会被pad到<strong>该batch中最长序列的长度</strong>。由于指令微调数据集的长度分布通常非常不均匀——短指令可能只有50个token，而长文档可能有4000个token——这导致了严重的GPU利用率问题。</p>
+
+<p>具体来说，如果一个batch中最长样本有4096个token，但平均长度只有800个token，那么：</p>
+
+<div class="formula-block">
+$$\text{GPU利用率} = \frac{\text{平均序列长度}}{\text{最大序列长度}} = \frac{800}{4096} \approx 19.5\%$$
+<div class="formula-explain">即超过80%的计算都花在了padding token上——这些token不贡献任何梯度信号，纯粹是浪费。</div>
+</div>
+
+<h3>解决方案：Sequence Packing（序列打包）</h3>
+<p>核心思想：将多个短样本<strong>拼接</strong>（concatenate）成一条长度恰好为 <code>max_seq_length</code> 的序列，从而消除padding。这本质上是一个<strong>装箱问题（Bin Packing Problem）</strong>。</p>
+
+<p>关键技术细节：</p>
+<ol>
+<li><strong>EOS分隔</strong>：不同样本之间用 <code>&lt;EOS&gt;</code> token分隔，明确样本边界</li>
+<li><strong>Block-Diagonal Attention Mask</strong>：最重要的技术保证——构造一个分块对角矩阵作为attention mask，确保不同样本的token之间<strong>完全不可见</strong></li>
+<li><strong>Position ID重置</strong>：每个样本内部position从0开始计数，避免位置编码跨样本干扰</li>
+</ol>
+
+<svg viewBox="0 0 700 260" xmlns="http://www.w3.org/2000/svg" style="max-width:680px">
+  <text x="350" y="20" text-anchor="middle" font-size="13" font-weight="bold" fill="#2c3e50">Padding vs Sequence Packing</text>
+  <text x="15" y="50" font-size="11" font-weight="bold" fill="#e74c3c">传统Padding方式:</text>
+  <rect x="15" y="60" width="130" height="28" rx="4" fill="#3498db" opacity="0.85"/>
+  <text x="80" y="78" text-anchor="middle" font-size="9" fill="white">Sample A (130 tok)</text>
+  <rect x="145" y="60" width="370" height="28" rx="4" fill="#ecf0f1" stroke="#bdc3c7"/>
+  <text x="330" y="78" text-anchor="middle" font-size="9" fill="#95a5a6">Padding — 浪费 72%</text>
+  <rect x="15" y="95" width="300" height="28" rx="4" fill="#9b59b6" opacity="0.85"/>
+  <text x="165" y="113" text-anchor="middle" font-size="9" fill="white">Sample B (300 tok)</text>
+  <rect x="315" y="95" width="200" height="28" rx="4" fill="#ecf0f1" stroke="#bdc3c7"/>
+  <text x="415" y="113" text-anchor="middle" font-size="9" fill="#95a5a6">Padding — 浪费 39%</text>
+  <rect x="15" y="130" width="500" height="28" rx="4" fill="#27ae60" opacity="0.85"/>
+  <text x="265" y="148" text-anchor="middle" font-size="9" fill="white">Sample C (500 tok) — 决定batch长度</text>
+  <text x="540" y="110" font-size="11" fill="#e74c3c" font-weight="bold">平均利用率 ~62%</text>
+
+  <text x="15" y="190" font-size="11" font-weight="bold" fill="#27ae60">Sequence Packing方式:</text>
+  <rect x="15" y="200" width="130" height="28" rx="4" fill="#3498db" opacity="0.85"/>
+  <text x="80" y="218" text-anchor="middle" font-size="9" fill="white">A</text>
+  <rect x="147" y="200" width="8" height="28" rx="2" fill="#f39c12"/>
+  <rect x="157" y="200" width="300" height="28" rx="4" fill="#9b59b6" opacity="0.85"/>
+  <text x="307" y="218" text-anchor="middle" font-size="9" fill="white">B</text>
+  <rect x="459" y="200" width="8" height="28" rx="2" fill="#f39c12"/>
+  <rect x="469" y="200" width="40" height="28" rx="4" fill="#1abc9c" opacity="0.85"/>
+  <text x="489" y="218" text-anchor="middle" font-size="9" fill="white">D</text>
+  <text x="540" y="218" font-size="11" fill="#27ae60" font-weight="bold">利用率 ~96%</text>
+  <text x="151" y="248" font-size="8" fill="#f39c12">EOS</text>
+  <text x="463" y="248" font-size="8" fill="#f39c12">EOS</text>
+</svg>
+
+<h3>装箱算法</h3>
+<p>常用策略包括：</p>
+<ul>
+<li><strong>First-Fit Decreasing</strong>：先按长度降序排列，再用贪心策略逐个放入第一个能容纳的bin</li>
+<li><strong>长度分组排序</strong>：预先将相似长度的样本分组，减少bin内的碎片</li>
+<li><strong>随机打乱+贪心</strong>：兼顾packing效率和数据随机性</li>
+</ul>
+
+<h3>效率数据</h3>
+<table>
+<tr><th>指标</th><th>传统Padding</th><th>Sequence Packing</th></tr>
+<tr><td>Token利用率</td><td>20–50%</td><td><strong>85–95%</strong></td></tr>
+<tr><td>训练吞吐量</td><td>基线</td><td><strong>2–4× 加速</strong></td></tr>
+<tr><td>显存消耗</td><td>与max_seq_len成正比</td><td>相当（总token数一致）</td></tr>
+<tr><td>实现复杂度</td><td>低（默认行为）</td><td>中（需定制attention mask）</td></tr>
+</table>
+
+<h3>代码示例（TRL框架）</h3>
+<pre><code>from trl import SFTConfig, SFTTrainer
+
+config = SFTConfig(
+    max_seq_length=4096,
+    packing=True,                    # 一行开启sequence packing
+    dataset_kwargs={"skip_prepare_dataset": True},
+    output_dir="sft_model",
+    per_device_train_batch_size=4,
+    gradient_accumulation_steps=4,
+    learning_rate=2e-5,
+    num_train_epochs=2,
+)
+trainer = SFTTrainer(
+    model=model, args=config, 
+    train_dataset=dataset,
+    tokenizer=tokenizer,
+)
+trainer.train()</code></pre>
+
+<div class="highlight-box">
+<strong>注意事项：</strong>packing后必须确保attention mask正确实现。如果使用Flash Attention，需要传入 <code>cu_seqlens</code>（cumulative sequence lengths）来标识每个样本的边界，而非传统的2D mask矩阵。TRL的 <code>packing=True</code> 已经自动处理了这些细节。
+</div>
+</div>
+
+<!-- ==================== 10.2 ==================== -->
+<h2>10.2 Chat Templates and Formatting</h2>
+
+<div class="card">
+<h3>为什么Chat Template至关重要？</h3>
+<p>语言模型处理的是纯token序列，但指令微调需要区分多种角色（system / user / assistant）。Chat Template是将<strong>结构化对话</strong>编码为<strong>flat token序列</strong>的规范协议。如果训练时使用格式A，推理时使用格式B，模型会严重失调——因为它学到的"何时开始生成"的信号完全对不上。</p>
+
+<h3>ChatML格式详解</h3>
+<p>ChatML是目前最广泛使用的模板格式之一（Qwen、Yi、多数开源模型采用）：</p>
+
+<pre><code>&lt;|im_start|&gt;system
+You are a helpful assistant.&lt;|im_end|&gt;
+&lt;|im_start|&gt;user
+What is sequence packing?&lt;|im_end|&gt;
+&lt;|im_start|&gt;assistant
+Sequence packing concatenates multiple training examples...&lt;|im_end|&gt;</code></pre>
+
+<h3>主流模板对比</h3>
+<table>
+<tr><th>模板格式</th><th>代表模型</th><th>边界标记</th><th>特点</th></tr>
+<tr><td>ChatML</td><td>Qwen-2/3、Yi</td><td><code>&lt;|im_start|&gt;</code> / <code>&lt;|im_end|&gt;</code></td><td>清晰直观，社区支持广泛</td></tr>
+<tr><td>Llama 3 格式</td><td>Llama 3.x系列</td><td><code>&lt;|start_header_id|&gt;</code> / <code>&lt;|eot_id|&gt;</code></td><td>Meta官方格式，支持tool_use</td></tr>
+<tr><td>Gemma格式</td><td>Gemma系列</td><td><code>&lt;start_of_turn&gt;</code> / <code>&lt;end_of_turn&gt;</code></td><td>Google风格，简洁</td></tr>
+</table>
+
+<h3>训练-推理一致性原则</h3>
+<div class="info-box">
+<strong>核心原则：</strong>训练时用什么模板格式，推理时就<strong>必须</strong>用完全相同的格式。差一个换行符、一个空格都可能导致token序列对不上，进而影响模型行为。
+</div>
+
+<p>最佳实践：始终使用 <code>tokenizer.apply_chat_template(messages, tokenize=True)</code> 来生成token序列，<strong>绝不手动拼接字符串</strong>。原因：</p>
+<ul>
+<li>不同tokenizer对特殊token的处理方式不同（有些加BOS，有些不加）</li>
+<li>换行符的编码方式可能因tokenizer而异</li>
+<li>手动拼接极易引入难以调试的隐蔽错误</li>
+</ul>
+</div>
+
+<!-- ==================== 10.3 ==================== -->
+<h2>10.3 Completion-Only Masking</h2>
+
+<div class="card">
+<h3>动机：梯度应该学什么？</h3>
+<p>一条SFT训练样本包含 <strong>prompt</strong>（system + user）和 <strong>completion</strong>（assistant回答）两部分。标准语言模型训练的next-token prediction loss会对<strong>所有token</strong>计算loss，但这在SFT中是不合理的：</p>
+
+<ul>
+<li>模型不需要"学会预测用户的问题"——那是已知的输入</li>
+<li>对prompt计算loss会稀释有效梯度信号</li>
+<li>会导致模型倾向于<strong>记忆</strong>（memorize）训练集的prompt分布，损害泛化</li>
+</ul>
+
+<h3>数学公式对比</h3>
+
+<p><strong>不加Masking的标准Loss：</strong></p>
+<div class="formula-block">
+$$\mathcal{L}_{\text{naive}} = -\frac{1}{T} \sum_{t=1}^{T} \log \pi_\theta(x_t | x_{<t})$$
+<div class="formula-explain">对序列中所有 $T$ 个token都计算交叉熵loss，包括system tokens、user tokens和assistant tokens。</div>
+</div>
+
+<p><strong>Completion-Only Masking Loss：</strong></p>
+<div class="formula-block">
+$$\mathcal{L}_{\text{completion}} = -\frac{1}{|C|} \sum_{t \in C} \log \pi_\theta(x_t | x_{<t})$$
+<div class="formula-explain">只对 completion 集合 $C$（即assistant回答部分的token索引集合）计算loss。$|C|$ 是completion token的数量。Prompt token的loss被设为0（即label设为-100）。</div>
+</div>
+
+<p><strong>有效梯度信号对比：</strong></p>
+<div class="formula-block">
+$$\text{有效梯度比例} = \frac{|C|}{|P| + |C|}$$
+<div class="formula-explain">其中 $|P|$ 是prompt长度，$|C|$ 是completion长度。如果prompt占序列的80%（如长system prompt + 长用户输入），不做masking时仅20%的梯度是有效的。做了masking后，100%的计算梯度都在教模型"如何生成好的回答"。</div>
+</div>
+
+<svg viewBox="0 0 680 100" xmlns="http://www.w3.org/2000/svg" style="max-width:650px">
+  <text x="340" y="15" text-anchor="middle" font-size="11" font-weight="bold" fill="#2c3e50">Completion-Only Masking 可视化</text>
+  <rect x="10" y="30" width="200" height="30" rx="4" fill="#fadbd8" stroke="#e74c3c" stroke-opacity="0.5"/>
+  <text x="110" y="49" text-anchor="middle" font-size="9" fill="#922b21">System + User tokens (prompt)</text>
+  <rect x="215" y="30" width="60" height="30" rx="4" fill="#f5f5f5" stroke="#bdc3c7"/>
+  <text x="245" y="49" text-anchor="middle" font-size="8" fill="#7f8c8d">header</text>
+  <rect x="280" y="30" width="320" height="30" rx="4" fill="#d5f5e3" stroke="#27ae60" stroke-opacity="0.5"/>
+  <text x="440" y="49" text-anchor="middle" font-size="9" fill="#1e8449">Assistant completion tokens</text>
+  <rect x="605" y="30" width="40" height="30" rx="4" fill="#f5f5f5" stroke="#bdc3c7"/>
+  <text x="625" y="49" text-anchor="middle" font-size="8" fill="#7f8c8d">EOS</text>
+  <text x="140" y="80" text-anchor="middle" font-size="10" fill="#e74c3c" font-weight="bold">label = -100 (masked)</text>
+  <text x="440" y="80" text-anchor="middle" font-size="10" fill="#27ae60" font-weight="bold">label = token_id (计算loss)</text>
+</svg>
+
+<h3>实现方式</h3>
+<pre><code>from trl import DataCollatorForCompletionOnlyLM
+
+# 定义"从哪里开始计算loss"的标记
+response_template = "&lt;|start_header_id|&gt;assistant&lt;|end_header_id|&gt;"
+collator = DataCollatorForCompletionOnlyLM(
+    response_template=response_template,
+    tokenizer=tokenizer,
+)
+trainer = SFTTrainer(
+    model=model, tokenizer=tokenizer,
+    args=config, train_dataset=dataset,
+    data_collator=collator,
+)</code></pre>
+
+<div class="highlight-box">
+<strong>常见陷阱：</strong>
+<ul>
+<li><code>response_template</code> 必须<strong>精确匹配tokenize后的token序列</strong>。差一个字符就会导致mask位置偏移，模型可能学到错误的起始/结束行为</li>
+<li>多轮对话中，需要mask掉<strong>所有非assistant轮次</strong>，而非只mask第一轮的prompt</li>
+<li>如果对话数据中assistant回答极短（如仅"好的"两个字），有效loss token可能过少，建议设置最小回答长度阈值进行数据过滤</li>
+</ul>
+</div>
+</div>
+
+<!-- ==================== 10.4 ==================== -->
+<h2>10.4 Data Mixing Strategies for Multi-Task SFT</h2>
+
+<div class="card">
+<h3>多任务SFT的挑战</h3>
+<p>实际SFT训练通常混合多种任务数据：代码生成、数学推理、对话、摘要、翻译等。每种任务的数据量差异可能很大（代码数据可能有100万条，数学仅5万条）。如果简单合并所有数据，<strong>小数据集的任务会被"淹没"</strong>，模型在这些任务上表现很差。</p>
+
+<p>数据配比策略的目标是：控制每个任务/数据集对训练信号的贡献权重。</p>
+
+<h3>策略一：比例混合（Proportional Mixing）</h3>
+<div class="formula-block">
+$$p_k = \frac{N_k}{\sum_{j=1}^{K} N_j}$$
+<div class="formula-explain">$p_k$ 是数据集 $k$ 被采样的概率，$N_k$ 是该数据集的样本数量，$K$ 是总数据集数。每个样本被采样的概率相等——大数据集天然贡献更多样本。适用于各数据集质量相当且任务重要性与数据量正相关的场景。</div>
+</div>
+
+<h3>策略二：温度混合（Temperature Mixing）</h3>
+<div class="formula-block">
+$$p_k = \frac{N_k^{1/T}}{\sum_{j=1}^{K} N_j^{1/T}}$$
+<div class="formula-explain">通过温度参数 $T$ 控制采样分布的"平坦程度"。这是目前最常用的策略。</div>
+</div>
+
+<p>温度 $T$ 的效果：</p>
+<table>
+<tr><th>$T$ 值</th><th>行为</th><th>适用场景</th></tr>
+<tr><td>$T = 1$</td><td>退化为比例混合</td><td>各数据集大小适中、质量均衡</td></tr>
+<tr><td>$T = 2$（推荐）</td><td>适度上采样小数据集</td><td>通用多任务SFT</td></tr>
+<tr><td>$T = 5$</td><td>强烈上采样小数据集</td><td>极不平衡场景</td></tr>
+<tr><td>$T \to \infty$</td><td>完全均匀采样</td><td>各任务同等重要，无论数据量</td></tr>
+<tr><td>$T < 1$</td><td>更偏向大数据集</td><td>大数据集质量更高时</td></tr>
+</table>
+
+<p><strong>具体例子：</strong>假设有3个数据集——代码100K、数学10K、对话50K：</p>
+<div class="formula-block">
+$$T=1: \quad p_{\text{code}}=62.5\%, \; p_{\text{math}}=6.25\%, \; p_{\text{chat}}=31.25\%$$
+$$T=2: \quad p_{\text{code}}=44.7\%, \; p_{\text{math}}=14.1\%, \; p_{\text{chat}}=31.6\%$$
+$$T \to \infty: \quad p_{\text{code}}=33.3\%, \; p_{\text{math}}=33.3\%, \; p_{\text{chat}}=33.3\%$$
+<div class="formula-explain">可以看到 $T=2$ 时数学数据的采样概率从6.25%提升到14.1%（约2.3倍上采样），而代码数据从62.5%下降到44.7%。这种平衡通常能改善小任务表现而不严重损害大任务。</div>
+</div>
+
+<h3>策略三：质量加权混合（Quality-Weighted Mixing）</h3>
+<div class="formula-block">
+$$p_k = \frac{N_k \cdot q_k}{\sum_{j=1}^{K} N_j \cdot q_j}$$
+<div class="formula-explain">$q_k$ 是数据集 $k$ 的质量评分。高质量数据集获得更多采样权重。质量评分可来自：参考模型的perplexity、人工标注质量评级、下游任务验证集表现等。</div>
+</div>
+
+<h3>策略四：结合温度与质量的混合</h3>
+<div class="formula-block">
+$$p_k = \frac{(N_k \cdot q_k)^{1/T}}{\sum_{j=1}^{K} (N_j \cdot q_j)^{1/T}}$$
+<div class="formula-explain">将温度缩放与质量加权结合，先用 $q_k$ 调整有效数据量，再用温度 $T$ 控制分布平坦度。这是最灵活的方案。</div>
+</div>
+
+<div class="info-box">
+<strong>实践建议：</strong>从 $T=2$ 开始实验，在验证集上观察各任务表现。如果小任务仍然欠拟合，增大 $T$；如果大任务退化明显，降低 $T$。没有放之四海而皆准的最优值，需要根据具体数据分布调节。
+</div>
+</div>
+
+<!-- ==================== 10.5 ==================== -->
+<h2>10.5 When SFT Hurts：灾难性遗忘 vs 对齐税</h2>
+
+<div class="card">
+<h3>两种性能退化，本质完全不同</h3>
+<p>LLM经历多阶段训练（预训练 → SFT → RLHF）后，benchmark上经常出现性能回退。但原因有两种，<strong>搞混了会用错缓解方案</strong>：</p>
+
+<table>
+<tr><th>维度</th><th>灾难性遗忘 (Catastrophic Forgetting)</th><th>对齐税 (Alignment Tax)</th></tr>
+<tr><td><strong>本质</strong></td><td>知识被<strong>物理覆盖</strong>（权重已变）</td><td>知识被<strong>行为约束</strong>（权重仍在）</td></tr>
+<tr><td><strong>意图</strong></td><td>无意的优化副产物</td><td>有意的安全-能力权衡</td></tr>
+<tr><td><strong>发生阶段</strong></td><td>SFT、领域继续预训练</td><td>PPO/DPO/KTO偏好优化</td></tr>
+<tr><td><strong>典型表现</strong></td><td>能力<strong>完全崩溃</strong>（如突然不会做数学）</td><td>过度拒绝、风格僵化、benchmark轻微下降</td></tr>
+<tr><td><strong>可逆性</strong></td><td><strong>不可逆</strong>，需从checkpoint重新训练</td><td>部分可逆（调参数、改prompt）</td></tr>
+<tr><td><strong>检测方式</strong></td><td>预训练验证集PPL飙升</td><td>PPL正常但capability benchmark下降</td></tr>
+</table>
+
+<h3>灾难性遗忘的数学解释</h3>
+<div class="formula-block">
+$$\theta_{t+1} = \theta_t - \eta \nabla_\theta \mathcal{L}_B(\theta_t)$$
+$$\Rightarrow \quad \mathcal{L}_A(\theta_{t+1}) \gg \mathcal{L}_A(\theta_t)$$
+<div class="formula-explain">在任务B上做梯度下降时，优化器完全无视任务A的loss landscape。如果任务B的最优解方向恰好破坏了编码任务A知识的参数区域，任务A的能力就被永久覆盖。</div>
+</div>
+
+<p><strong>Fisher信息矩阵视角：</strong></p>
+<div class="formula-block">
+$$F = \mathbb{E}_{x \sim \mathcal{D}_A}\left[\nabla_\theta \log \pi_\theta(x) \cdot \nabla_\theta \log \pi_\theta(x)^\top\right]$$
+<div class="formula-explain">Fisher矩阵 $F$ 的对角元素 $F_{ii}$ 表示参数 $\theta_i$ 对任务A的"重要程度"。如果SFT在任务B上的梯度大幅修改了 $F_{ii}$ 值高的参数，任务A的能力就会被破坏。这是EWC（Elastic Weight Consolidation）正则化的理论基础。</div>
+</div>
+
+<p><strong>EWC正则化的做法：</strong></p>
+<div class="formula-block">
+$$\mathcal{L}_{\text{EWC}} = \mathcal{L}_B(\theta) + \frac{\lambda}{2} \sum_i F_{ii} (\theta_i - \theta_i^*)^2$$
+<div class="formula-explain">在任务B的loss基础上加入正则项：对于Fisher值大的参数（对旧任务A重要的参数），惩罚其偏离旧值 $\theta_i^*$ 的程度。$\lambda$ 控制正则化强度。</div>
+</div>
+
+<h3>对齐税的机制</h3>
+<div class="formula-block">
+$$r_{\text{implicit}}(x, y) = \beta \log \frac{\pi_\theta(y|x)}{\pi_{\text{ref}}(y|x)}$$
+<div class="formula-explain">DPO等方法中，KL散度惩罚像一根"缰绳"——策略不能偏离参考模型太远。$\beta$ 越大，约束越紧。结果：模型"知道"正确答案，但输出分布被压平，倾向于产生安全、模糊的回答（如"我不确定"、"这个问题很复杂"）。</div>
+</div>
+
+<h3>四步诊断法</h3>
+<ol>
+<li><strong>Base model对比</strong>：Base model能完成、微调后完全不能 → 遗忘</li>
+<li><strong>Prompt工程测试</strong>：通过精心设计prompt能恢复能力 → 对齐税</li>
+<li><strong>PPL检查</strong>：预训练验证集perplexity飙升 → 遗忘；PPL稳定 → 对齐税</li>
+<li><strong>Few-shot恢复</strong>：给几个示例可恢复 → 对齐税；给再多示例仍不行 → 遗忘</li>
+</ol>
+
+<h3>缓解策略</h3>
+
+<div class="highlight-box">
+<strong>对抗灾难性遗忘：</strong>
+<ol>
+<li><strong>Data Replay</strong>：SFT数据中混入5–10%的预训练数据（如C4/Wikipedia样本），持续提醒模型旧知识</li>
+<li><strong>LoRA / QLoRA</strong>：只训练低秩适配器（rank=8–64），冻结全部基座权重，物理上保护原始知识</li>
+<li><strong>EWC正则化</strong>：惩罚对旧任务重要参数的改动（理论优雅但实际常被LoRA替代）</li>
+<li><strong>保守训练</strong>：学习率 $\eta \in [1 \times 10^{-6}, 5 \times 10^{-6}]$，仅训练1–3 epochs</li>
+<li><strong>渐进式训练</strong>：先少量SFT数据，逐步增加比例，给模型适应时间</li>
+</ol>
+</div>
+
+<div class="success-box">
+<strong>降低对齐税：</strong>
+<ol>
+<li>减小KL约束强度：$\beta \in [0.05, 0.3]$，给模型更大的偏离空间</li>
+<li>提高SFT数据多样性：输出分布越丰富，RL阶段收窄的空间越小</li>
+<li>Conditional Alignment：仅在检测到安全风险时启用约束</li>
+<li>Constitutional AI / RLAIF：用AI反馈替代人工偏好，生成更细粒度的偏好信号</li>
+<li>设置capability benchmark阈值：退化超过2–5%时停止RL训练</li>
+</ol>
+</div>
+</div>
+
+<!-- ==================== 10.6 ==================== -->
+<h2>10.6 Connection to RL：SFT质量决定RL上限</h2>
+
+<div class="card">
+<h3>核心论点：RL是放大器，不是创造器</h3>
+<p>本章最重要的观点可以总结为一句话：</p>
+
+<blockquote>
+<strong>RL can only amplify behaviors that already exist in the SFT model — it cannot create capabilities from scratch.</strong><br>
+RL只能放大SFT模型中已经存在的行为模式，无法凭空创造新能力。
+</blockquote>
+
+<p>直觉解释：RL（如GRPO、PPO）的训练循环是：采样 → 评估奖励 → 更新策略。如果SFT模型对某类问题的正确率是<strong>0%</strong>，那么所有采样结果都是错的，reward全是0/负值，advantage为0，梯度为0——RL<strong>没有任何信号可以学习</strong>。</p>
+
+<h3>RL能做什么 / 做不到什么</h3>
+<table>
+<tr><th>RL能做到</th><th>RL做不到</th></tr>
+<tr><td>放大SFT模型中已有但微弱的正确行为</td><td>引入SFT模型完全不具备的新能力</td></tr>
+<tr><td>抑制存在但不良的输出模式</td><td>修复SFT阶段的严重灾难性遗忘</td></tr>
+<tr><td>精调回答的风格、格式、详细程度</td><td>补偿系统性偏差的reward model</td></tr>
+<tr><td>提升"偶尔能做对"的任务的成功率</td><td>突破base model的知识边界</td></tr>
+</table>
+
+<h3>pass@k：RL可行性的定量判据</h3>
+<p><code>pass@k</code> 指标衡量的是：对一个问题采样 $k$ 次，至少有一次正确的概率。它直接反映了SFT模型输出分布中"正确行为的密度"。</p>
+
+<div class="formula-block">
+$$\text{pass@}k = 1 - \frac{\binom{n-c}{k}}{\binom{n}{k}}$$
+<div class="formula-explain">其中 $n$ 是总采样次数，$c$ 是正确样本数，$k$ 是选取样本数。当 $n$ 足够大时，$\text{pass@}k \approx 1 - (1-p)^k$，其中 $p$ 是单次采样正确率。</div>
+</div>
+
+<p><strong>RL可行性判据：</strong></p>
+<table>
+<tr><th>SFT模型指标</th><th>RL训练预期</th><th>建议</th></tr>
+<tr><td>pass@1 < 5%</td><td>RL大概率失败</td><td>回到SFT阶段补充数据</td></tr>
+<tr><td>pass@k < 20% (k=64)</td><td>RL会非常吃力，收敛慢</td><td>考虑curriculum learning</td></tr>
+<tr><td>pass@1 = 5–30%</td><td>RL最有效的区间</td><td>正常启动RL训练</td></tr>
+<tr><td>pass@1 > 80%</td><td>RL提升空间有限</td><td>评估是否有必要做RL</td></tr>
+</table>
+
+<div class="info-box">
+<strong>直觉理解：</strong>pass@1 = 10% 意味着SFT模型每10次采样能有1次答对。RL可以"观察"到这些正确样本，赋予它们高reward，然后通过策略梯度更新让模型更频繁地产生这类正确回答。最终可能把pass@1从10%提升到60–80%。但如果pass@1 = 0%，RL永远观察不到正确样本，学习无从开始。
+</div>
+
+<h3>SFT训练的实践黄金法则</h3>
+<ol>
+<li><strong>数据质量 &gt; 数据数量</strong>：1000条高质量数据 &gt; 100,000条低质量数据。优先确保每条样本的response是正确、完整、格式良好的</li>
+<li><strong>数据覆盖是基础</strong>：确保SFT数据覆盖你想用RL改进的所有任务类型。RL无法在零覆盖的任务上工作</li>
+<li><strong>不要过度训练</strong>：1–3 epochs足够。过训（>5 epochs）会导致输出多样性急剧下降（entropy降低），RL阶段的exploration会失效</li>
+<li><strong>监控多样性指标</strong>：训练过程中跟踪 token-level entropy 和 distinct n-gram ratio。如果这些指标快速下降，说明在mode collapse</li>
+<li><strong>RL前做SFT warm-up</strong>：即使base model已经instruction-tuned，也可以在目标任务上做短暂SFT（几百步），确保模型"见过"目标任务的分布</li>
+</ol>
+
+<h3>SFT过度训练的检测</h3>
+<div class="formula-block">
+$$H(\pi_\theta) = -\sum_{v \in V} \pi_\theta(v|x) \log \pi_\theta(v|x)$$
+<div class="formula-explain">Token-level entropy $H$ 衡量模型输出分布的不确定性。健康的SFT模型应保持适度的entropy——太低意味着mode collapse（每个prompt只会输出一种回答），太高意味着欠拟合。</div>
+</div>
+
+<div class="formula-block">
+$$\text{Distinct-}n = \frac{|\text{unique n-grams}|}{|\text{total n-grams}|}$$
+<div class="formula-explain">Distinct-n 衡量生成文本中独特n-gram的比例。接近1表示高多样性，接近0表示重复输出。通常监控distinct-2和distinct-4。</div>
+</div>
+</div>
+
+<!-- ==================== 关键要点 ==================== -->
+<div class="takeaway">
+<h2>关键要点总结</h2>
+<ol>
+<li><strong>Sequence Packing</strong> 通过消除padding实现2–4倍训练加速，核心是block-diagonal attention mask保证样本隔离</li>
+<li><strong>Chat Template</strong> 必须训练-推理完全一致，永远使用 <code>apply_chat_template()</code> 而非手动拼接</li>
+<li><strong>Completion-Only Masking</strong> 只对assistant回答计算loss，避免梯度被prompt稀释或导致记忆训练集</li>
+<li><strong>温度混合</strong>（$T \approx 2$）是多任务数据配比的推荐起点，有效上采样小数据集</li>
+<li><strong>灾难性遗忘 ≠ 对齐税</strong>：前者不可逆（用LoRA + data replay预防），后者可调（降$\beta$、改prompt）</li>
+<li><strong>SFT质量 = RL天花板</strong>：pass@1 < 5%时不应启动RL，必须先改善SFT</li>
+<li>训练<strong>1–3 epochs</strong>即可，过训降低输出多样性，损害后续RL的exploration能力</li>
+<li>监控 <strong>entropy</strong> 和 <strong>distinct n-gram</strong> 指标，及时发现mode collapse</li>
+</ol>
+</div>
+
+<!-- ==================== Q&A ==================== -->
+<h2>Q&amp;A 深度问答</h2>
+
+<details>
+<summary>Q1：Sequence Packing会不会导致样本间"信息泄露"？</summary>
+<div class="answer">
+<p>如果正确实现了<strong>block-diagonal attention mask</strong>，不会。该mask确保每个样本的token只能attend到同一样本内的token。但实现细节容易出错：如果用了标准causal mask而未做修改，就会出现跨样本attention。使用Flash Attention时需要通过 <code>cu_seqlens</code> 参数传入样本边界信息。TRL的 <code>packing=True</code> 已自动处理。</p>
+</div>
+</details>
+
+<details>
+<summary>Q2：为什么Completion-Only Masking效果这么显著？</summary>
+<div class="answer">
+<p>极端例子：prompt占序列的80%。不做masking时，80%的梯度在教模型"预测已知prompt"——毫无意义且会导致memorize。Masking后100%有效梯度聚焦在生成质量上。实验表明，对于long-context任务（prompt很长、回答很短），开启masking可带来<strong>10–30%的下游任务指标提升</strong>。</p>
+</div>
+</details>
+
+<details>
+<summary>Q3：温度T怎么选？有没有理论最优值？</summary>
+<div class="answer">
+<p>没有理论最优值，但经验推荐 $T=2$ 作为起点。MultiTask论文（如T5）的实验表明 $T \in [2, 5]$ 在大多数场景下效果不错。直觉：$T=1$ 让大数据集完全主导，$T=\infty$ 完全忽略数据量。$T=2$ 是折中——大数据集仍贡献更多，但小数据集不被淹没。具体最优需在验证集上grid search。</p>
+</div>
+</details>
+
+<details>
+<summary>Q4：如何区分灾难性遗忘和对齐税？</summary>
+<div class="answer">
+<p>四步诊断：① Base model跑同一任务，成功则微调后不行=遗忘 ② 精心构造prompt尝试恢复，成功=对齐税 ③ 预训练验证集PPL飙升=遗忘，稳定=对齐税 ④ Few-shot能恢复=对齐税，不能=遗忘。核心区别：遗忘是"信息已从权重中消失"，对齐税是"信息还在但被行为约束抑制了"。</p>
+</div>
+</details>
+
+<details>
+<summary>Q5：LoRA真的能完全防止灾难性遗忘吗？</summary>
+<div class="answer">
+<p>不完全能。LoRA冻结base weights（<1%参数更新），<strong>checkpoint层面</strong>安全——去掉adapter即恢复原模型。但<strong>推理行为层面</strong>，有效权重 $W_0 + BA$ 的行为仍可能偏离。类比：LoRA保护了"硬盘数据"，但"运行程序"的行为可能已变。不过相比全参微调，LoRA的遗忘程度小得多，且可通过merge权重控制影响。</p>
+</div>
+</details>
+
+<details>
+<summary>Q6：pass@1太低时除了加数据还有什么办法？</summary>
+<div class="answer">
+<p>多种策略：① 在目标任务上增加SFT数据（最直接） ② 用curriculum learning从简单变体开始 ③ 使用更强的base model ④ 降低任务难度分级，先达到简单版本的pass@1>5%再逐步加难 ⑤ 利用rejection sampling：从大量采样中筛选正确样本进行SFT（self-improvement）。核心：<strong>必须先让SFT模型偶尔答对</strong>，RL才有正向信号可用。</p>
+</div>
+</details>
+
+<details>
+<summary>Q7：为什么过度训练SFT会损害后续RL？</summary>
+<div class="answer">
+<p>SFT过训导致<strong>mode collapse</strong>——模型对每个prompt只生成一种固定回答。而RL需要exploration：策略需要采样出多样化的回答，reward model给出差异化信号。如果输出分布已坍缩到单点，RL采样到的所有回答几乎相同，无法通过对比学习改进。监控指标：entropy下降>30%或distinct-4<0.7时应停止训练。</p>
+</div>
+</details>
+
+<details>
+<summary>Q8：EWC在实践中效果如何？为什么不如LoRA流行？</summary>
+<div class="answer">
+<p>EWC理论优雅但工程成本高：① 需在旧任务上计算Fisher矩阵（额外前向/反向传播） ② 对角近似丢失参数间相关性 ③ 超参$\lambda$难调——太大阻碍新任务学习，太小防不住遗忘 ④ 存储Fisher矩阵需要额外显存。相比之下，LoRA实现简单、不需要旧数据计算Fisher、天然保护原始权重、已有成熟工具链。所以工程实践中 <strong>LoRA + Data Replay</strong> 是标配，EWC更多见于学术论文。</p>
+</div>
+</details>
+
+</body>
+</html>

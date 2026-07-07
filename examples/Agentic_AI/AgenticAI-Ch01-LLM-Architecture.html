@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第1章 阅读笔记：LLM Architecture and Optimization Methods</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]})"></script>
+<style>
+:root {
+  --primary: #2c3e50;
+  --accent: #3498db;
+  --bg: #fafbfc;
+  --card-bg: #ffffff;
+  --border: #e1e4e8;
+  --text: #24292e;
+  --text-secondary: #586069;
+  --code-bg: #f6f8fa;
+  --highlight: #fff3cd;
+  --success: #d4edda;
+  --info: #d1ecf1;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; line-height: 1.8; color: var(--text); background: var(--bg); padding: 2rem; max-width: 900px; margin: 0 auto; }
+h1 { font-size: 1.8rem; color: var(--primary); border-bottom: 3px solid var(--accent); padding-bottom: 0.5rem; margin-bottom: 1rem; }
+h2 { font-size: 1.4rem; color: var(--primary); margin-top: 2.5rem; margin-bottom: 1rem; padding-left: 0.8rem; border-left: 4px solid var(--accent); }
+h3 { font-size: 1.15rem; color: var(--primary); margin-top: 1.8rem; margin-bottom: 0.8rem; }
+p { margin-bottom: 1rem; text-align: justify; }
+ul, ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+li { margin-bottom: 0.5rem; }
+code { background: var(--code-bg); padding: 0.15rem 0.4rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: var(--code-bg); padding: 1rem; border-radius: 6px; overflow-x: auto; margin-bottom: 1.5rem; border: 1px solid var(--border); }
+pre code { background: none; padding: 0; }
+blockquote { border-left: 4px solid var(--accent); padding: 0.8rem 1.2rem; margin: 1.5rem 0; background: var(--info); border-radius: 0 6px 6px 0; }
+.card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+.formula-block { background: var(--code-bg); border: 1px solid var(--border); border-radius: 6px; padding: 1rem; margin: 1rem 0; overflow-x: auto; }
+.formula-explain { color: var(--text-secondary); font-size: 0.92em; margin-top: 0.5rem; padding-left: 1rem; border-left: 3px solid #ddd; }
+.highlight-box { background: var(--highlight); border: 1px solid #ffc107; border-radius: 6px; padding: 1rem; margin: 1rem 0; }
+.info-box { background: var(--info); border: 1px solid #bee5eb; border-radius: 6px; padding: 1rem; margin: 1rem 0; }
+.success-box { background: var(--success); border: 1px solid #c3e6cb; border-radius: 6px; padding: 1rem; margin: 1rem 0; }
+.subtitle { color: var(--text-secondary); font-size: 1rem; margin-bottom: 0.3rem; }
+.meta { color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 2rem; }
+table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; }
+th, td { border: 1px solid var(--border); padding: 0.6rem 0.8rem; text-align: left; }
+th { background: var(--code-bg); font-weight: 600; }
+details { margin-bottom: 1rem; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+summary { padding: 0.8rem 1.2rem; background: var(--code-bg); cursor: pointer; font-weight: 500; }
+details[open] summary { border-bottom: 1px solid var(--border); }
+details .answer { padding: 1rem 1.2rem; }
+svg { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; }
+.takeaway { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 8px; padding: 1.5rem; margin: 2rem 0; }
+.takeaway h2 { color: white; border-left-color: rgba(255,255,255,0.5); }
+.takeaway li { color: rgba(255,255,255,0.95); }
+</style>
+</head>
+<body>
+
+<h1>第1章：LLM Architecture and Optimization Methods</h1>
+<p class="subtitle">大语言模型架构与优化方法——从Tokenization到安全对齐的完整技术栈</p>
+<p class="meta">来源：Agentic AI · 第1章（pp. 35–104） · 阅读笔记</p>
+
+<div class="card">
+<h3>章节摘要</h3>
+<p>本章系统性地介绍了构建现代大语言模型所需的全部核心技术。从文本如何被切分为token开始，经过Transformer架构的每个组件（Embedding、Self-Attention、FFN、Layer Norm），到训练优化（Adam、学习率调度、混合精度），再到推理加速（Flash Attention、投机解码、模型压缩），以及对齐技术（SFT、LoRA）和安全性考量。本章构成了后续强化学习与Agent系统章节的理论基础，共覆盖17个小节、70页内容。</p>
+</div>
+
+<h2>1.1 How LLMs Work: An Intuitive Overview</h2>
+
+<p>大语言模型（LLM）的核心工作原理可以用一句话概括：<strong>给定一段文本序列，预测下一个最可能出现的token</strong>。这个看似简单的目标，在海量数据和大规模参数的加持下，涌现出了令人惊叹的语言理解和生成能力。</p>
+
+<h3>信息处理流程</h3>
+<p>LLM的完整信息处理管线包含以下步骤：</p>
+<ol>
+<li><strong>Tokenization</strong>：将原始文本切分为子词单元（subword units），每个token对应词表中的一个整数索引。</li>
+<li><strong>Embedding</strong>：将离散的token ID映射为连续的高维向量表示，使模型能够在连续空间中捕捉语义关系。</li>
+<li><strong>Transformer层堆叠处理</strong>：输入向量经过多层Transformer block，每层包含Self-Attention和Feed-Forward Network，逐步构建越来越抽象的语义表示。</li>
+<li><strong>Prediction Head</strong>：最终隐层表示通过线性投影+Softmax，输出词表上的概率分布。</li>
+<li><strong>Decoding</strong>：根据概率分布选择下一个token（贪心、采样、Beam Search等策略）。</li>
+</ol>
+
+<div class="info-box">
+<p><strong>关键直觉</strong>：LLM并不"理解"语言，而是学会了统计意义上的"下一个token应该是什么"。但当这种统计模式足够精确时（由数万亿token训练而得），模型表现出的行为与"理解"难以区分。这正是Scaling Law背后的核心洞察——模型规模、数据量、计算量的指数增长带来能力的涌现。</p>
+</div>
+
+<h3>Self-Supervised Learning 范式</h3>
+<p>LLM训练采用自监督学习——训练数据本身提供监督信号，无需人工标注。对于decoder-only模型，训练目标是最大化下一个token的对数似然：</p>
+<div class="formula-block">
+$$\mathcal{L}(\theta) = -\sum_{t=1}^{T} \log P_{\theta}(x_t \mid x_1, x_2, \ldots, x_{t-1})$$
+<p class="formula-explain">其中 $x_t$ 是位置 $t$ 的token，$\theta$ 是模型参数，$T$ 是序列长度。模型通过最小化负对数似然来学习语言的条件概率分布。</p>
+</div>
+
+<p>从信息论角度看，这等价于最小化模型分布与真实语言分布之间的交叉熵。当模型完美拟合真实分布时，loss等于语言本身的熵（约1.0-1.5 bits/token对英文文本）。</p>
+
+<h2>1.2 Tokenization</h2>
+
+<p>Tokenization是NLP管线的第一步，决定了模型"看到"的文本粒度。好的tokenization方案需要在词表大小、覆盖率和计算效率之间取得平衡。</p>
+
+<h3>Byte Pair Encoding (BPE)</h3>
+<p>BPE是目前最主流的tokenization算法，被GPT系列、LLaMA等广泛采用。其核心思想是<strong>从字符级别出发，迭代地合并最频繁出现的相邻token对</strong>。</p>
+
+<p><strong>算法流程</strong>：</p>
+<ol>
+<li>初始词表 = 所有单字符（或字节，共256个）</li>
+<li>统计训练语料中所有相邻token pair的频率</li>
+<li>将频率最高的pair合并为一个新token，加入词表</li>
+<li>重复步骤2-3，直到词表达到预设大小（如32K、50K、100K）</li>
+</ol>
+
+<div class="highlight-box">
+<p><strong>示例</strong>：假设语料中 "l o w" 出现100次，"l o w e r" 出现50次。BPE首先可能合并 "l"+"o" → "lo"，然后 "lo"+"w" → "low"，逐步构建出常见子词。最终 "lowest" 可能被编码为 ["low", "est"]。</p>
+</div>
+
+<h3>其他Tokenization方法</h3>
+<ul>
+<li><strong>WordPiece</strong>（BERT使用）：与BPE类似，但合并选择基于似然增益而非频率。具体地，选择合并后使语言模型训练似然提升最大的pair。</li>
+<li><strong>Unigram Language Model</strong>（SentencePiece）：从一个大词表开始，逐步裁剪对似然影响最小的token，自顶向下构建词表。可以给出概率最优的多种分割方式。</li>
+<li><strong>Byte-level BPE</strong>（GPT-2起）：直接在字节（byte）级别操作，完全消除OOV问题，任何Unicode文本都能被编码。对非英语语言和特殊字符更友好。</li>
+</ul>
+
+<h3>最佳实践与特殊Token</h3>
+<p>现代LLM的tokenization设计遵循以下原则：</p>
+<ul>
+<li>词表大小通常在32K-150K之间（GPT-4: ~100K，LLaMA-2: 32K，Qwen-2.5: 150K）</li>
+<li>保留特殊token：<code>&lt;BOS&gt;</code>（序列开始）、<code>&lt;EOS&gt;</code>（序列结束）、<code>&lt;PAD&gt;</code>（填充）、<code>&lt;UNK&gt;</code>（未知）</li>
+<li>对话模型额外引入角色标记：<code>&lt;|system|&gt;</code>、<code>&lt;|user|&gt;</code>、<code>&lt;|assistant|&gt;</code></li>
+<li>数字和代码通常需要特殊处理（如将数字逐位切分，或为代码保留缩进token）</li>
+<li>词表越大，同一文本编码出的token数越少（压缩率更高），但embedding矩阵占用更多参数</li>
+</ul>
+
+<div class="card">
+<h3>HuggingFace Tokenizer 示例</h3>
+<pre><code>from transformers import AutoTokenizer
+
+tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-2-7b")
+text = "Hello, how are you?"
+tokens = tokenizer.encode(text)
+# tokens: [1, 15043, 29892, 920, 526, 366, 29973]
+decoded = tokenizer.decode(tokens)
+# decoded: "&lt;s&gt; Hello, how are you?"
+
+# 查看子词切分
+tokenizer.tokenize("unbelievable")
+# ['un', 'bel', 'iev', 'able']</code></pre>
+</div>
+
+<h2>1.3 The Transformer Architecture</h2>
+
+<h3>High-Level Structure</h3>
+<p>Transformer（Vaswani et al., 2017）是现代LLM的核心架构。原始Transformer采用Encoder-Decoder结构，但当代LLM主要采用<strong>Decoder-Only</strong>变体。一个Transformer模型由 $N$ 层相同的block堆叠而成，每层包含两个子模块：Multi-Head Self-Attention和Feed-Forward Network，每个子模块都配合残差连接和层归一化。</p>
+
+<h3>Encoder-Decoder vs. Decoder-Only</h3>
+<table>
+<tr><th>特征</th><th>Encoder-Decoder</th><th>Decoder-Only</th></tr>
+<tr><td>代表模型</td><td>T5, BART, mT5</td><td>GPT系列, LLaMA, Qwen</td></tr>
+<tr><td>注意力模式</td><td>Encoder双向 + Decoder因果</td><td>纯因果（causal）掩码</td></tr>
+<tr><td>适用任务</td><td>翻译、摘要等Seq2Seq</td><td>通用生成、对话、推理</td></tr>
+<tr><td>训练信号</td><td>Encoder和Decoder分离</td><td>统一的next-token prediction</td></tr>
+<tr><td>扩展性</td><td>较复杂，两部分需分别优化</td><td>简单统一，易于scaling</td></tr>
+</table>
+
+<h3>Token Embeddings</h3>
+<p>Embedding层将离散token ID映射为 $d_{\text{model}}$ 维连续向量：</p>
+<div class="formula-block">
+$$\mathbf{e}_i = \mathbf{W}_E[x_i] \in \mathbb{R}^{d_{\text{model}}}$$
+<p class="formula-explain">$\mathbf{W}_E \in \mathbb{R}^{|V| \times d_{\text{model}}}$ 是embedding矩阵，$|V|$ 是词表大小。在许多模型中（如GPT-2），输出层的投影矩阵与embedding矩阵共享权重（weight tying），减少参数量并提供正则化效果。</p>
+</div>
+
+<h3>Self-Attention 机制</h3>
+<p>Self-Attention是Transformer的核心创新，允许序列中每个位置直接关注所有其他位置。给定输入 $\mathbf{X} \in \mathbb{R}^{n \times d}$：</p>
+<div class="formula-block">
+$$\mathbf{Q} = \mathbf{X}\mathbf{W}_Q, \quad \mathbf{K} = \mathbf{X}\mathbf{W}_K, \quad \mathbf{V} = \mathbf{X}\mathbf{W}_V$$
+$$\text{Attention}(\mathbf{Q}, \mathbf{K}, \mathbf{V}) = \text{softmax}\left(\frac{\mathbf{Q}\mathbf{K}^{\top}}{\sqrt{d_k}}\right)\mathbf{V}$$
+<p class="formula-explain">$\sqrt{d_k}$ 缩放因子防止点积过大导致softmax梯度消失。直觉上，Q是"查询"，K是"键"，V是"值"——每个token根据与其他token的相关度（Q·K）来加权聚合信息（V）。在Decoder-Only模型中，使用因果掩码确保位置 $t$ 只能关注 $\leq t$ 的位置。</p>
+</div>
+
+<h3>Multi-Head Attention</h3>
+<p>将注意力分成 $h$ 个头，每个头在 $d_k = d_{\text{model}}/h$ 维子空间中独立计算：</p>
+<div class="formula-block">
+$$\text{MultiHead}(\mathbf{X}) = \text{Concat}(\text{head}_1, \ldots, \text{head}_h)\mathbf{W}_O$$
+$$\text{head}_i = \text{Attention}(\mathbf{X}\mathbf{W}_{Q_i}, \mathbf{X}\mathbf{W}_{K_i}, \mathbf{X}\mathbf{W}_{V_i})$$
+<p class="formula-explain">不同head可以关注不同类型的关系：有的head关注局部语法结构，有的关注远距离语义依赖，有的捕捉位置模式。$\mathbf{W}_O \in \mathbb{R}^{d_{\text{model}} \times d_{\text{model}}}$ 将多头输出融合。变体包括GQA（Grouped Query Attention，多个Q头共享一组K/V）和MQA（Multi-Query Attention，所有Q头共享同一K/V）。</p>
+</div>
+
+<h3>Positional Encoding</h3>
+<p>Attention机制本身是置换不变的，需要额外注入位置信息：</p>
+<ul>
+<li><strong>正弦位置编码</strong>（原始Transformer）：$\text{PE}_{(pos, 2i)} = \sin(pos / 10000^{2i/d})$，$\text{PE}_{(pos, 2i+1)} = \cos(pos / 10000^{2i/d})$</li>
+<li><strong>可学习位置编码</strong>（GPT系列）：位置embedding作为参数学习，但限制了外推能力。</li>
+<li><strong>RoPE</strong>（LLaMA, Qwen）：将位置编码为旋转矩阵作用在Q/K上，$\langle \mathbf{q}_m, \mathbf{k}_n \rangle$ 只依赖相对位置 $m-n$，天然支持长度外推。</li>
+<li><strong>ALiBi</strong>：在attention score上加线性距离偏置，无需额外参数，外推性好。</li>
+</ul>
+
+<h3>Feed-Forward Network (FFN)</h3>
+<div class="formula-block">
+$$\text{FFN}(\mathbf{x}) = \mathbf{W}_2 \cdot \sigma(\mathbf{W}_1 \mathbf{x} + \mathbf{b}_1) + \mathbf{b}_2$$
+<p class="formula-explain">隐层维度通常为 $4 \times d_{\text{model}}$。现代模型使用SwiGLU激活：$\text{SwiGLU}(\mathbf{x}) = (\mathbf{W}_1 \mathbf{x} \odot \text{Swish}(\mathbf{W}_3 \mathbf{x}))\mathbf{W}_2$，其中 $\text{Swish}(x) = x \cdot \text{sigmoid}(x)$。使用SwiGLU时隐层维度调整为 $\frac{8}{3}d_{\text{model}}$。</p>
+</div>
+
+<h3>Layer Normalization</h3>
+<div class="formula-block">
+$$\text{LayerNorm}(\mathbf{x}) = \frac{\mathbf{x} - \mu}{\sqrt{\sigma^2 + \epsilon}} \odot \gamma + \beta$$
+<p class="formula-explain">现代模型多用 Pre-Norm（归一化在子层之前）和 RMSNorm：$\text{RMSNorm}(\mathbf{x}) = \frac{\mathbf{x}}{\sqrt{\frac{1}{d}\sum_{i=1}^{d}x_i^2 + \epsilon}} \odot \gamma$，省去均值计算，更高效。</p>
+</div>
+
+<h3>Model Size 计算</h3>
+<div class="formula-block">
+$$N \approx 12 L d^2 + V \cdot d$$
+<p class="formula-explain">每层：$4d^2$（QKV+O投影）+ $8d^2$（FFN）= $12d^2$。例如 LLaMA-7B：$L=32, d=4096$，参数约 $32 \times 12 \times 4096^2 \approx 6.4\text{B}$。</p>
+</div>
+
+<h3>Attention Pathologies</h3>
+<ul>
+<li><strong>Attention Sink</strong>：模型将大量注意力分配给第一个token，因为softmax需要将概率分配到某处，而第一个位置总是可见的。StreamingLLM利用此特性实现无限长上下文。</li>
+<li><strong>Lost in the Middle</strong>：长上下文中对中间位置信息利用效率低于开头和结尾。</li>
+<li><strong>Quadratic Complexity</strong>：$O(n^2)$ 计算和内存开销，催生了Flash Attention等优化。</li>
+</ul>
+
+<h2>1.4 Prediction Heads</h2>
+
+<p>Prediction Head是将Transformer最终隐层表示映射到具体任务输出的组件。不同的头适用于不同训练目标：</p>
+
+<div class="card">
+<p><strong>1. Language Model Head (LM Head)</strong>：最常见的头，用于next-token prediction。将隐状态投影到词表维度，再通过softmax得到概率分布：</p>
+$$P(x_{t+1} \mid x_{\leq t}) = \text{softmax}(\mathbf{W}_{\text{LM}} \cdot \mathbf{h}_t + \mathbf{b})$$
+<p>通常与embedding矩阵共享权重（tied weights），即 $\mathbf{W}_{\text{LM}} = \mathbf{W}_E^{\top}$。这既减少参数量，又在语义空间中建立了输入与输出的一致性。</p>
+</div>
+
+<div class="card">
+<p><strong>2. Classification Head</strong>：取特定位置（如最后一个token或[CLS]）的隐状态，通过线性层映射到类别数：</p>
+$$\hat{y} = \text{softmax}(\mathbf{W}_{\text{cls}} \cdot \mathbf{h}_{[\text{CLS}]} + \mathbf{b}_{\text{cls}})$$
+<p>用于情感分析、自然语言推理（NLI）、文本分类等任务。</p>
+</div>
+
+<div class="card">
+<p><strong>3. Regression / Reward Head</strong>：输出单个标量值，用于回归任务或奖励模型（Reward Model）：</p>
+$$r = \mathbf{w}^{\top} \mathbf{h}_{\text{last}} + b$$
+<p>在RLHF中，Reward Model的输出驱动策略优化。通常基于最后一个token的隐状态。</p>
+</div>
+
+<div class="card">
+<p><strong>4. Sequence-to-Sequence Head</strong>：在Encoder-Decoder架构中，Decoder的LM Head在每个时间步生成输出序列的下一个token。通过Cross-Attention从Encoder接收源序列信息，实现条件生成。</p>
+</div>
+
+<h2>1.5 Optimization Theory</h2>
+
+<h3>Gradient Descent 基础</h3>
+<p>所有神经网络训练的核心是梯度下降：沿损失函数梯度的反方向更新参数。</p>
+<div class="formula-block">
+$$\theta_{t+1} = \theta_t - \eta \nabla_{\theta} \mathcal{L}(\theta_t)$$
+<p class="formula-explain">$\eta$ 是学习率，$\nabla_{\theta}\mathcal{L}$ 是损失对参数的梯度。全量梯度计算成本太高（需遍历全部数据），实际中使用Mini-batch SGD。</p>
+</div>
+
+<h3>SGD 与动量</h3>
+<p>随机梯度下降使用小batch估计梯度。动量SGD累积历史梯度方向以加速收敛：</p>
+<div class="formula-block">
+$$\mathbf{v}_t = \beta \mathbf{v}_{t-1} + \nabla_{\theta}\mathcal{L}(\theta_t), \quad \theta_{t+1} = \theta_t - \eta \mathbf{v}_t$$
+<p class="formula-explain">动量参数 $\beta$（通常0.9）使更新方向更平滑，减少震荡，加速通过窄谷（narrow valley）。物理直觉：像球在损失曲面上滚动，具有惯性。</p>
+</div>
+
+<h3>Adam 优化器</h3>
+<p>Adam结合动量（一阶矩）和自适应学习率（二阶矩），是LLM训练的标准选择：</p>
+<div class="formula-block">
+$$\begin{aligned}
+\mathbf{m}_t &= \beta_1 \mathbf{m}_{t-1} + (1 - \beta_1)\mathbf{g}_t \\
+\mathbf{v}_t &= \beta_2 \mathbf{v}_{t-1} + (1 - \beta_2)\mathbf{g}_t^2 \\
+\hat{\mathbf{m}}_t &= \frac{\mathbf{m}_t}{1 - \beta_1^t}, \quad \hat{\mathbf{v}}_t = \frac{\mathbf{v}_t}{1 - \beta_2^t} \\
+\theta_{t+1} &= \theta_t - \eta \frac{\hat{\mathbf{m}}_t}{\sqrt{\hat{\mathbf{v}}_t} + \epsilon}
+\end{aligned}$$
+<p class="formula-explain">$\beta_1 = 0.9$（动量衰减）, $\beta_2 = 0.999$（方差衰减）, $\epsilon = 10^{-8}$。偏差校正补偿零初始化偏差。Adam为每个参数维护独立的自适应学习率——梯度稳定的参数步长大，梯度波动的参数步长小。</p>
+</div>
+
+<h3>AdamW（Weight Decay Decoupled）</h3>
+<p>标准Adam中L2正则化与自适应学习率耦合（导致正则化效果随学习率变化）。AdamW将两者解耦：</p>
+<div class="formula-block">
+$$\theta_{t+1} = (1 - \eta \lambda)\theta_t - \eta \frac{\hat{\mathbf{m}}_t}{\sqrt{\hat{\mathbf{v}}_t} + \epsilon}$$
+<p class="formula-explain">$\lambda$ 是weight decay系数（通常0.01-0.1）。所有参数施加相同比例衰减，不受梯度大小影响。AdamW是当代LLM训练的事实标准优化器。</p>
+</div>
+
+<h3>学习率调度策略</h3>
+<ul>
+<li><strong>Warmup</strong>：从极小学习率线性增大，避免初始梯度过大导致发散。通常warmup步数为总步数的1-5%。</li>
+<li><strong>Cosine Decay</strong>：$\eta_t = \eta_{\min} + \frac{1}{2}(\eta_{\max} - \eta_{\min})(1 + \cos(\pi t / T))$，最流行的调度器。</li>
+<li><strong>Linear Decay</strong>：学习率线性下降至零或最小值。</li>
+<li><strong>WSD (Warmup-Stable-Decay)</strong>：新兴策略——warmup到peak，长时间稳定，最后快速decay。方便续训练。</li>
+</ul>
+
+<h3>Gradient Clipping</h3>
+<div class="formula-block">
+$$\mathbf{g} \leftarrow \frac{\mathbf{g}}{\max(1, \|\mathbf{g}\|_2 / c)}$$
+<p class="formula-explain">阈值 $c$ 通常设为1.0。当梯度范数超过 $c$ 时等比缩放，保证更新步长有上界，防止gradient explosion。</p>
+</div>
+
+<h3>混合精度训练 (Mixed Precision)</h3>
+<ul>
+<li><strong>FP16</strong>：半精度，范围 $\pm 65504$，需要loss scaling防止梯度下溢。</li>
+<li><strong>BF16</strong>：与FP32相同指数位宽（8位），范围大但尾数精度低。LLM训练首选——无需loss scaling。</li>
+<li><strong>实现方式</strong>：FP32主权重（master weights）+ BF16/FP16前向反向。梯度在FP32中累加后更新主权重。</li>
+</ul>
+<p>混合精度将内存占用减半，在Tensor Core GPU上计算速度提升2-3x，几乎不损失模型质量。</p>
+
+<h3>实践训练配置参考</h3>
+<table>
+<tr><th>超参数</th><th>典型值</th><th>说明</th></tr>
+<tr><td>优化器</td><td>AdamW</td><td>$\beta_1=0.9, \beta_2=0.95$</td></tr>
+<tr><td>学习率</td><td>$1 \times 10^{-4}$ ~ $3 \times 10^{-4}$</td><td>随模型大小递减</td></tr>
+<tr><td>Warmup</td><td>2000 steps</td><td>线性warmup</td></tr>
+<tr><td>Weight Decay</td><td>0.1</td><td>仅对非bias/norm参数</td></tr>
+<tr><td>Batch Size</td><td>2M-4M tokens</td><td>通过gradient accumulation实现</td></tr>
+<tr><td>Gradient Clip</td><td>1.0</td><td>全局梯度范数裁剪</td></tr>
+<tr><td>精度</td><td>BF16</td><td>主权重FP32，计算BF16</td></tr>
+</table>
+
+<h2>1.6 Flash Attention</h2>
+
+<p>标准Self-Attention的计算和内存复杂度均为 $O(n^2)$。Flash Attention通过<strong>IO-aware算法设计</strong>——利用GPU内存层级（SRAM vs HBM）重构计算顺序，在不改变数学结果的前提下大幅降低内存占用并提升速度。</p>
+
+<h3>Flash Attention v1：Tiling + Online Softmax</h3>
+<p>核心洞察：Attention的瓶颈不在FLOPs，而在<strong>HBM访问</strong>。标准实现需将完整 $n \times n$ 矩阵写入HBM再读回。</p>
+<ul>
+<li><strong>Tiling</strong>：将Q、K、V分成小块，每块适配GPU SRAM（~20MB），在SRAM内完成注意力计算。</li>
+<li><strong>Online Softmax</strong>：逐块更新softmax分母，无需存储完整 $n \times n$ 矩阵。</li>
+<li><strong>效果</strong>：内存从 $O(n^2)$ 降到 $O(n)$，训练加速2-4x。</li>
+</ul>
+
+<h3>Flash Attention v2：优化并行度</h3>
+<ul>
+<li>减少非matmul FLOPs（重组算法减少冗余rescaling）</li>
+<li>在序列长度维度上并行化（对长序列更友好）</li>
+<li>更好的warp间工作分配，减少共享内存同步开销</li>
+<li>相比v1进一步加速约2x，接近理论峰值FLOPS利用率</li>
+</ul>
+
+<h3>Flash Attention v3：利用硬件特性</h3>
+<ul>
+<li><strong>Warp Specialization</strong>：producer warp负责数据搬运，consumer warp负责计算，两者重叠执行</li>
+<li><strong>TMA (Tensor Memory Accelerator)</strong>：利用Hopper GPU的硬件加速数据搬运单元</li>
+<li><strong>FP8支持</strong>：结合block quantization在FP8下执行attention</li>
+<li>在H100上达到约740 TFLOPS（FP16），利用率超过75%</li>
+</ul>
+
+<h3>Flash Attention v4 / FlashMLA</h3>
+<ul>
+<li>针对推理decode阶段优化（KV Cache分页管理）</li>
+<li>原生支持GQA/MQA</li>
+<li>Prefill和Decode使用不同kernel策略</li>
+</ul>
+
+<div class="info-box">
+<p><strong>核心哲学</strong>："计算是免费的，内存访问才是瓶颈"。通过精心设计算法使数据尽量留在快速SRAM中完成计算，最小化对慢速HBM的读写。这是一种<strong>IO-Complexity</strong>优化范式。</p>
+</div>
+
+<h2>1.7 Pretraining Best Practices</h2>
+
+<h3>数据质量与多样性</h3>
+<ul>
+<li><strong>数据清洗</strong>：去重（MinHash、Exact Dedup）、过滤低质量内容、语言识别与分类</li>
+<li><strong>数据配比</strong>：Web数据（~60-80%）+ 书籍/论文（~10-20%）+ 代码（~5-10%）+ 特殊数据</li>
+<li><strong>Data Curriculum</strong>：训练后期增加高质量数据比例，类似从泛读到精读的过程</li>
+</ul>
+
+<h3>Scaling Laws</h3>
+<div class="formula-block">
+$$C \approx 6ND, \quad N_{\text{opt}} \propto C^{0.5}, \quad D_{\text{opt}} \propto C^{0.5}$$
+<p class="formula-explain">Chinchilla Law：模型参数 $N$ 和数据量 $D$ 应同比例增长。7B模型约需140B tokens。但实践中过度训练小模型性价比更高（如LLaMA用1.4T tokens训练7B）。</p>
+</div>
+
+<h3>训练稳定性</h3>
+<ul>
+<li><strong>Loss Spike处理</strong>：从spike前checkpoint恢复，跳过问题数据batch</li>
+<li><strong>Z-loss正则</strong>：对logits的log-partition function加正则，防止logits数值过大</li>
+<li><strong>Embedding正则</strong>：防止embedding层梯度过大</li>
+</ul>
+
+<h2>1.8 Supervised Fine-Tuning (SFT)</h2>
+
+<h3>SFT的目标与动机</h3>
+<p>Pretrained LLM具备强大语言能力但不懂"如何对话"。SFT通过高质量指令-回复对微调，教会模型遵循指令、对话格式和拒绝不当请求。</p>
+
+<h3>训练目标</h3>
+<div class="formula-block">
+$$\mathcal{L}_{\text{SFT}} = -\sum_{t \in \text{response}} \log P_{\theta}(x_t \mid x_{&lt;t})$$
+<p class="formula-explain">仅对response部分计算loss，prompt部分被mask。模型学习"如何回复"而不是"如何提问"。</p>
+</div>
+
+<h3>LIMA 原则</h3>
+<div class="highlight-box">
+<p><strong>"Less Is More for Alignment"</strong>：仅用1000条精心策划的高质量样本SFT，效果匹敌数万条数据训练的模型。核心发现：数据质量远比数量重要；模型知识来自pretraining，SFT只是"解锁格式"。</p>
+</div>
+
+<h3>SFT 配置最佳实践</h3>
+<table>
+<tr><th>参数</th><th>推荐值</th><th>说明</th></tr>
+<tr><td>学习率</td><td>$1 \times 10^{-5}$ ~ $5 \times 10^{-5}$</td><td>比pretraining低10-100x</td></tr>
+<tr><td>Epochs</td><td>2-5</td><td>过多导致过拟合</td></tr>
+<tr><td>数据量</td><td>1K-100K samples</td><td>质量优先</td></tr>
+<tr><td>序列长度</td><td>2048-8192</td><td>覆盖完整对话</td></tr>
+</table>
+
+<h3>高效训练技巧</h3>
+<ul>
+<li><strong>Packing</strong>：多条短样本拼接填满max_length，用attention mask隔离</li>
+<li><strong>NEFTune</strong>：embedding层加均匀噪声 $\alpha/\sqrt{Ld}$，提升生成多样性</li>
+<li><strong>Gradient Checkpointing</strong>：用时间换空间，只存部分激活值</li>
+</ul>
+
+<h2>1.9 LoRA and PEFT</h2>
+
+<h3>LoRA 核心思想</h3>
+<p>Low-Rank Adaptation基于关键假设：<strong>微调中权重变化 $\Delta W$ 具有低秩结构</strong>。</p>
+<div class="formula-block">
+$$\mathbf{W}' = \mathbf{W} + \Delta\mathbf{W} = \mathbf{W} + \frac{\alpha}{r}\mathbf{B}\mathbf{A}$$
+<p class="formula-explain">$\mathbf{W} \in \mathbb{R}^{d \times k}$ 冻结，$\mathbf{B} \in \mathbb{R}^{d \times r}$, $\mathbf{A} \in \mathbb{R}^{r \times k}$，$r \ll \min(d, k)$。初始化：$\mathbf{A} \sim \mathcal{N}(0, \sigma^2)$, $\mathbf{B} = \mathbf{0}$，确保训练开始时 $\Delta W = 0$。推理时可合并回原权重，<strong>无额外延迟</strong>。</p>
+</div>
+
+<h3>LoRA 超参数指南</h3>
+<ul>
+<li><strong>Rank $r$</strong>：4-64，通常 $r=16$ 足够。越大表达力越强但参数越多。</li>
+<li><strong>Alpha $\alpha$</strong>：缩放因子，实际缩放为 $\alpha/r$。通常 $\alpha = 2r$。</li>
+<li><strong>Target Modules</strong>：Q、K、V、O投影，可扩展至FFN。</li>
+</ul>
+
+<h3>LoRA 变体</h3>
+<ul>
+<li><strong>QLoRA</strong>：基础模型量化至4-bit（NF4），LoRA参数保持BF16。内存降4x。</li>
+<li><strong>DoRA</strong>：分解权重为方向+幅值，LoRA只学方向变化。</li>
+<li><strong>rsLoRA</strong>：缩放因子改为 $\alpha/\sqrt{r}$，不同rank表现更一致。</li>
+<li><strong>LoRA+</strong>：$A$和$B$使用不同学习率，加速收敛。</li>
+</ul>
+
+<h3>其他PEFT方法</h3>
+<ul>
+<li><strong>Prefix Tuning</strong>：每层添加可学习前缀向量</li>
+<li><strong>Adapter</strong>：子层后插入bottleneck MLP（推理有额外延迟）</li>
+<li><strong>IA3</strong>：仅学习K、V、FFN各一个缩放向量</li>
+<li><strong>Prompt Tuning</strong>：仅学习连续输入embedding</li>
+</ul>
+
+<h2>1.10 Mixture of Experts (MoE)</h2>
+
+<h3>MoE 架构原理</h3>
+<p>MoE将FFN替换为多个Expert网络，每个token只激活少数Expert。大幅增加总参数量（capacity）同时保持每次前向传播的计算量不变。</p>
+<div class="formula-block">
+$$\text{MoE}(\mathbf{x}) = \sum_{i=1}^{E} g_i(\mathbf{x}) \cdot \text{Expert}_i(\mathbf{x})$$
+$$g_i(\mathbf{x}) = \begin{cases} \text{softmax}(\text{TopK}(\mathbf{W}_g \mathbf{x}))_i & \text{if } i \in \text{TopK} \\ 0 & \text{otherwise} \end{cases}$$
+<p class="formula-explain">$E$ 为专家总数（如8-256），TopK通常为1或2。例如Mixtral 8x7B：8个Expert取Top-2，总参46.7B但每token只用12.9B。</p>
+</div>
+
+<h3>Load Balancing</h3>
+<div class="formula-block">
+$$\mathcal{L}_{\text{balance}} = \alpha \cdot E \cdot \sum_{i=1}^{E} f_i \cdot p_i$$
+<p class="formula-explain">$f_i$ 是路由到Expert $i$ 的token比例，$p_i$ 是门控对Expert $i$ 的平均概率。均匀分配时 $\mathcal{L}_{\text{balance}}$ 最小。$\alpha$ 通常取 $0.01$。</p>
+</div>
+
+<h3>Noisy Top-K Gating</h3>
+<div class="formula-block">
+$$\tilde{g}(\mathbf{x}) = \mathbf{W}_g \mathbf{x} + \text{SoftPlus}(\mathbf{W}_{\text{noise}} \mathbf{x}) \cdot \epsilon, \quad \epsilon \sim \mathcal{N}(0, 1)$$
+<p class="formula-explain">训练时加噪声增加探索性，避免过早锁定少数Expert。</p>
+</div>
+
+<h3>代表性MoE模型</h3>
+<table>
+<tr><th>模型</th><th>Expert数</th><th>激活数</th><th>总参数</th><th>激活参数</th></tr>
+<tr><td>Mixtral 8x7B</td><td>8</td><td>2</td><td>46.7B</td><td>12.9B</td></tr>
+<tr><td>DeepSeek-V2</td><td>160</td><td>6</td><td>236B</td><td>21B</td></tr>
+<tr><td>DeepSeek-V3</td><td>256</td><td>8</td><td>671B</td><td>37B</td></tr>
+</table>
+
+<h2>1.11 Diversity in LLM Training</h2>
+
+<p>训练数据的多样性对LLM的泛化能力至关重要。缺乏多样性的训练会导致模型偏差、能力不均衡和对少数群体/语言的表现不佳。</p>
+
+<h3>多样性的多个维度</h3>
+<ul>
+<li><strong>语言多样性</strong>：覆盖多种语言，不能仅依赖英文。多语言训练可以产生跨语言迁移效果——在一种语言上学到的知识可以帮助其他语言。</li>
+<li><strong>领域多样性</strong>：科学、法律、医学、代码、文学、对话等多种领域均需覆盖。领域间的知识互相补充。</li>
+<li><strong>格式多样性</strong>：对话、问答、文章、代码、表格、数学推导等不同格式都应包含。</li>
+<li><strong>观点多样性</strong>：避免训练数据中的系统性偏见（政治、文化、性别等），确保模型能够代表多元视角。</li>
+<li><strong>难度多样性</strong>：从简单文本到复杂推理链，从基础知识到前沿研究，覆盖不同认知难度。</li>
+</ul>
+
+<h3>提升多样性的技术手段</h3>
+<ul>
+<li><strong>Data Mixing</strong>：精心设计不同数据源的混合比例，通过实验确定最优配比</li>
+<li><strong>Upsampling/Downsampling</strong>：对稀缺但重要的数据源进行上采样，对冗余数据下采样</li>
+<li><strong>Deduplication</strong>：去除重复数据，增加有效多样性</li>
+<li><strong>Synthetic Data</strong>：对覆盖不足的领域用模型生成补充数据</li>
+<li><strong>Quality Filtering</strong>：高质量过滤器本身不应引入系统性偏差</li>
+</ul>
+
+<h2>1.12 Decoding Methods</h2>
+
+<p>训练完成后，LLM需要一种策略从输出概率分布中选择token来生成文本。不同解码策略在质量、多样性和效率间做不同权衡。</p>
+
+<h3>1. Greedy Decoding</h3>
+<p>每步选择概率最大的token：$x_t = \arg\max P(x \mid x_{&lt;t})$。优点是确定性且快速，缺点是容易陷入重复循环且多样性差。</p>
+
+<h3>2. Beam Search</h3>
+<p>同时维护 $B$（beam width）个候选序列，每步扩展所有候选的top-k，保留全局得分最高的 $B$ 个：</p>
+<div class="formula-block">
+$$\text{score}(y_{1:t}) = \sum_{i=1}^{t} \log P(y_i \mid y_{&lt;i})$$
+<p class="formula-explain">通常使用长度归一化：$\text{score} / t^{\alpha}$（$\alpha \approx 0.6$）避免偏好短序列。Beam Search适合翻译等需要精确性的任务，但生成文本缺乏多样性。</p>
+</div>
+
+<h3>3. Temperature Sampling</h3>
+<p>通过温度参数 $\tau$ 控制分布的"锐利程度"：</p>
+<div class="formula-block">
+$$P(x_i) = \frac{\exp(z_i / \tau)}{\sum_j \exp(z_j / \tau)}$$
+<p class="formula-explain">$\tau &lt; 1$ 使分布更尖锐（更确定），$\tau &gt; 1$ 使分布更平坦（更随机），$\tau \to 0$ 退化为贪心。通常 $\tau \in [0.6, 1.0]$。</p>
+</div>
+
+<h3>4. Top-k Sampling</h3>
+<p>只在概率最高的 $k$ 个token中采样，其余概率置零后重新归一化。$k$ 通常取20-100。问题：固定 $k$ 对不同上下文不够灵活——有时分布很集中（应少选），有时很分散（应多选）。</p>
+
+<h3>5. Top-p (Nucleus) Sampling</h3>
+<p>动态选择最小的token集合，使得累积概率 $\geq p$：</p>
+<div class="formula-block">
+$$\text{Top-p}(P) = \{x_i : \sum_{j \leq i} P(x_j) \leq p\}$$
+<p class="formula-explain">$p$ 通常取0.9-0.95。自适应地根据分布形状调整候选集大小：当模型很确定时只选少数几个token，不确定时候选更多。</p>
+</div>
+
+<h3>6. Min-p Sampling</h3>
+<p>设定一个相对阈值：只保留概率 $\geq p_{\min} \times p_{\max}$ 的token，其中 $p_{\max}$ 是当前最大概率。比Top-p更稳定，避免了低概率token的干扰。</p>
+
+<h3>7. Repetition Penalty</h3>
+<p>对已生成的token施加惩罚，减少重复：</p>
+<div class="formula-block">
+$$z_i' = \begin{cases} z_i / \theta & \text{if } x_i \in \text{generated} \text{ and } z_i > 0 \\ z_i \times \theta & \text{if } x_i \in \text{generated} \text{ and } z_i < 0 \end{cases}$$
+<p class="formula-explain">$\theta > 1$ 为惩罚因子。也有频率惩罚（frequency penalty）和存在惩罚（presence penalty）等变体。</p>
+</div>
+
+<h3>8. Typical Sampling</h3>
+<p>基于信息论：选择信息量接近条件熵的token，排除过于确定（低信息量）和过于意外（高信息量）的token。直觉是：人类语言倾向于"适度惊喜"。</p>
+
+<h3>9. Contrastive Decoding</h3>
+<p>利用大模型和小模型的对比来提升质量：选择大模型概率高但小模型概率低的token。这鼓励选择"只有大模型才能产生的高质量内容"，抑制通用的低信息量token。</p>
+
+<div class="info-box">
+<p><strong>实践建议</strong>：大多数应用使用 Temperature + Top-p 的组合。创造性任务（写故事）用较高温度（0.8-1.0）+高Top-p（0.95）；精确任务（代码、数学）用低温度（0.1-0.3）或直接贪心。</p>
+</div>
+
+<h2>1.13 Prompt Engineering</h2>
+
+<p>Prompt Engineering是通过精心设计输入提示词来引导LLM产生理想输出的技术。它不改变模型参数，而是利用模型的in-context learning能力。</p>
+
+<h3>核心策略</h3>
+<ul>
+<li><strong>Zero-shot</strong>：直接给出指令，不提供示例。依赖模型预训练中学到的任务理解能力。</li>
+<li><strong>Few-shot</strong>：提供几个输入-输出示例，让模型通过模式匹配理解任务格式。通常3-5个示例效果显著。</li>
+<li><strong>Chain-of-Thought (CoT)</strong>：要求模型展示推理步骤而非直接给答案。"Let's think step by step"可以显著提升数学和逻辑推理准确率。</li>
+<li><strong>Self-Consistency</strong>：多次采样+投票——生成多个推理路径，取最终答案的多数票。用计算换质量。</li>
+<li><strong>Tree-of-Thought</strong>：结构化探索多条推理路径，允许回溯和评估。</li>
+</ul>
+
+<h3>Prompt设计原则</h3>
+<ul>
+<li><strong>明确性</strong>：清晰说明任务、期望格式、约束条件</li>
+<li><strong>结构化</strong>：使用XML标签、markdown格式组织复杂prompt</li>
+<li><strong>角色设定</strong>：通过system prompt设定模型身份和行为准则</li>
+<li><strong>分步拆解</strong>：复杂任务拆分为子步骤逐一完成</li>
+<li><strong>输出约束</strong>：明确指定输出格式（JSON、列表等）以便程序解析</li>
+</ul>
+
+<h2>1.14 Model Compression</h2>
+
+<p>大模型推理成本高昂，模型压缩技术在保持质量的前提下减小模型大小和计算需求。</p>
+
+<h3>量化 (Quantization)</h3>
+<p>将FP16/BF16权重转换为低精度格式（INT8、INT4甚至更低）：</p>
+<ul>
+<li><strong>Post-Training Quantization (PTQ)</strong>：训练后直接量化，无需重新训练。GPTQ、AWQ、SqueezeLLM等方法。</li>
+<li><strong>Quantization-Aware Training (QAT)</strong>：训练时模拟量化误差，模型学会在低精度下工作。质量更好但需要重训。</li>
+<li><strong>权重量化公式</strong>：$x_q = \text{round}(x / s + z)$，其中 $s$ 是scale，$z$ 是zero-point。</li>
+</ul>
+
+<div class="formula-block">
+$$\text{GPTQ}: \quad \min_{\hat{\mathbf{W}}} \|\mathbf{W}\mathbf{X} - \hat{\mathbf{W}}\mathbf{X}\|_F^2$$
+<p class="formula-explain">GPTQ通过逐列量化+Hessian信息补偿误差，使量化后的输出尽量接近原始输出。通常4-bit量化后质量损失很小（perplexity增加&lt;1%）。</p>
+</div>
+
+<h3>知识蒸馏 (Knowledge Distillation)</h3>
+<p>用大模型（teacher）指导小模型（student）训练：</p>
+<div class="formula-block">
+$$\mathcal{L}_{\text{KD}} = \alpha \cdot \text{KL}(P_{\text{teacher}}^{\tau} \| P_{\text{student}}^{\tau}) + (1 - \alpha) \cdot \mathcal{L}_{\text{CE}}$$
+<p class="formula-explain">$P^{\tau}$ 是温度 $\tau$ 下的softmax输出（soft labels），传递了teacher关于类别间相似性的"暗知识"（dark knowledge）。</p>
+</div>
+
+<h3>剪枝 (Pruning)</h3>
+<ul>
+<li><strong>非结构化剪枝</strong>：将小权重置零，产生稀疏矩阵。需要特殊硬件/软件支持才能加速。</li>
+<li><strong>结构化剪枝</strong>：删除整个attention head、FFN neuron或整层。无需特殊硬件。</li>
+<li><strong>SparseGPT</strong>：在一次前向传播中确定剪枝掩码，无需重训即可达到50-60%稀疏度。</li>
+</ul>
+
+<h2>1.15 Speculative Decoding</h2>
+
+<p>投机解码利用一个小型"草稿模型"（draft model）快速生成多个候选token，然后用大模型一次性并行验证，从而将自回归生成的串行瓶颈转化为并行验证。</p>
+
+<h3>核心算法</h3>
+<ol>
+<li>Draft model快速生成 $K$ 个候选token：$\tilde{x}_1, \tilde{x}_2, \ldots, \tilde{x}_K$</li>
+<li>Target model对整个序列做一次前向传播，得到每个位置的真实概率分布</li>
+<li>从左到右逐个验证：若 $P_{\text{target}}(\tilde{x}_i) \geq P_{\text{draft}}(\tilde{x}_i)$，直接接受；否则以概率 $P_{\text{target}}(\tilde{x}_i) / P_{\text{draft}}(\tilde{x}_i)$ 接受</li>
+<li>在第一个被拒绝的位置从修正分布中采样</li>
+</ol>
+
+<div class="formula-block">
+$$P_{\text{accept}}(\tilde{x}_i) = \min\left(1, \frac{P_{\text{target}}(\tilde{x}_i \mid x_{&lt;i})}{P_{\text{draft}}(\tilde{x}_i \mid x_{&lt;i})}\right)$$
+<p class="formula-explain">关键性质：这个接受-拒绝过程保证最终输出的分布与直接用target model采样<strong>完全等价</strong>——不损失任何质量。加速比取决于draft model与target model的一致性。</p>
+</div>
+
+<h3>加速效果</h3>
+<ul>
+<li>典型加速2-3x（draft model接受率60-80%时）</li>
+<li>Draft model越接近target model，接受率越高，加速越大</li>
+<li>变体：Self-Speculative（用模型自身的浅层作为draft）、Medusa（多头预测多个未来token）</li>
+</ul>
+
+<h2>1.16 Hallucination Detection</h2>
+
+<p>幻觉（Hallucination）是LLM生成事实上不正确但看起来合理的内容。这是阻碍LLM在高可靠性场景部署的核心挑战之一。</p>
+
+<h3>幻觉类型</h3>
+<ul>
+<li><strong>事实性幻觉</strong>（Factual Hallucination）：生成与已知事实矛盾的内容，如错误的日期、人名、统计数据</li>
+<li><strong>忠实性幻觉</strong>（Faithfulness Hallucination）：在摘要/翻译等任务中，输出与源文本不一致</li>
+<li><strong>推理幻觉</strong>：推理步骤中出现逻辑错误但得出看似合理的结论</li>
+</ul>
+
+<h3>检测方法</h3>
+<ul>
+<li><strong>基于不确定性</strong>：模型对幻觉内容的输出概率通常较低或方差较大。通过采样多次看一致性。</li>
+<li><strong>基于知识库验证</strong>：将生成内容与外部知识库进行事实核查（fact-checking）。</li>
+<li><strong>自洽性检查</strong>（Self-Consistency）：同一问题多次生成，不一致的部分可能是幻觉。</li>
+<li><strong>RAG验证</strong>：检索相关文档，验证生成内容是否有文档支持。</li>
+<li><strong>NLI-based</strong>：使用自然语言推理模型判断生成内容是否被证据支持/矛盾/无关。</li>
+</ul>
+
+<h3>缓解策略</h3>
+<ul>
+<li>使用RAG提供事实基础，减少模型"编造"的需要</li>
+<li>训练时的事实性奖励（RLHF中惩罚幻觉）</li>
+<li>推理时加入验证步骤（如搜索+确认）</li>
+<li>让模型输出置信度，低置信度时拒绝回答或标注</li>
+</ul>
+
+<h2>1.17 LLM Safety</h2>
+
+<p>LLM安全性涵盖防止模型产生有害输出、抵御对抗攻击、保护隐私等多个方面。</p>
+
+<h3>主要安全威胁</h3>
+<ul>
+<li><strong>有害内容生成</strong>：暴力、仇恨言论、违法信息、虚假信息等</li>
+<li><strong>Jailbreaking</strong>：绕过安全对齐的提示攻击。方法包括角色扮演、编码绕过、多轮诱导等</li>
+<li><strong>Prompt Injection</strong>：在输入中嵌入恶意指令覆盖系统提示</li>
+<li><strong>数据泄露</strong>：模型记忆并泄露训练数据中的隐私信息（PII）</li>
+<li><strong>偏见放大</strong>：放大训练数据中的社会偏见（性别、种族等）</li>
+</ul>
+
+<h3>安全对齐技术</h3>
+<ul>
+<li><strong>RLHF/RLAIF</strong>：通过人类（或AI）反馈强化学习，训练模型拒绝有害请求</li>
+<li><strong>Constitutional AI</strong>：让模型根据一组规则（"宪法"）自我改进和自我批评</li>
+<li><strong>Red Teaming</strong>：专门团队尝试攻击模型，发现并修补漏洞</li>
+<li><strong>Safety Classifier</strong>：在输入/输出端部署分类器过滤有害内容</li>
+<li><strong>Guardrails</strong>：系统级的安全防护层（如NeMo Guardrails），拦截不安全的输入输出</li>
+</ul>
+
+<h3>安全与能力的权衡</h3>
+<div class="highlight-box">
+<p>过度的安全限制会导致"过度拒绝"（over-refusal）——模型拒绝正常、合理的请求。好的安全对齐应该是精准的：拒绝真正有害的请求，同时对合法请求保持helpful。这需要细粒度的安全策略，而非简单的关键词过滤。</p>
+</div>
+
+<div class="takeaway">
+<h2>本章关键要点</h2>
+<ul>
+<li>LLM的核心是Next-Token Prediction——简单目标+大规模数据+大参数产生涌现能力</li>
+<li>BPE是主流Tokenization方法，词表大小在32K-150K之间权衡覆盖率与计算效率</li>
+<li>Transformer的核心是Self-Attention（O(n²)）+ FFN，通过Multi-Head捕捉多种关系模式</li>
+<li>AdamW + Cosine LR Schedule + Gradient Clipping + BF16 是LLM训练的标准配置</li>
+<li>Flash Attention通过IO-aware算法设计将内存从O(n²)降到O(n)，加速2-4x</li>
+<li>SFT通过少量高质量数据"解锁"模型的对话能力（LIMA原则：质量>>数量）</li>
+<li>LoRA通过低秩分解实现高效参数微调，推理时可无损合并</li>
+<li>MoE用稀疏激活实现"大参数量+小计算量"，Load Balancing是核心挑战</li>
+<li>解码策略（Temperature, Top-p, Min-p等）在质量、多样性、效率间做权衡</li>
+<li>投机解码通过小模型草稿+大模型验证实现无损加速2-3x</li>
+<li>LLM安全需要多层防御：对齐训练 + 安全分类器 + 系统Guardrails</li>
+</ul>
+</div>
+
+<h2>自测问答</h2>
+
+<details>
+<summary>Q1: 为什么Decoder-Only架构成为LLM主流？相比Encoder-Decoder有何优势？</summary>
+<div class="answer">
+<p>Decoder-Only架构有三个关键优势：(1) <strong>统一性</strong>：所有任务统一为next-token prediction，简化训练管线；(2) <strong>Scaling简单</strong>：只需增加层数和维度，无需考虑encoder/decoder比例；(3) <strong>因果掩码天然支持生成</strong>：训练和推理使用相同的注意力模式。实验也表明，在足够规模下decoder-only模型可以通过in-context learning完成encoder-decoder擅长的任务。</p>
+</div>
+</details>
+
+<details>
+<summary>Q2: Flash Attention为什么能在不改变计算结果的情况下加速？核心洞察是什么？</summary>
+<div class="answer">
+<p>核心洞察是"计算cheap，内存IO expensive"。标准attention需要将完整$n \times n$矩阵写入HBM再读回（IO bound），而GPU SRAM（~20MB）远快于HBM。Flash Attention通过Tiling将计算分块在SRAM内完成，配合Online Softmax逐块更新归一化因子，避免存储完整attention矩阵。数学结果完全相同（精确等价，非近似），但IO复杂度从$O(n^2)$降至$O(n)$。</p>
+</div>
+</details>
+
+<details>
+<summary>Q3: LoRA为什么能以很少的参数达到接近全参数微调的效果？</summary>
+<div class="answer">
+<p>基于"内在维度"（intrinsic dimensionality）假说：预训练模型已经学到了丰富的表示，微调只需要在一个低维子空间中调整。$\Delta W$的有效秩远小于$\min(d,k)$，所以用$r=16$的低秩分解就能捕捉大部分有用的变化方向。这也解释了为什么全参数微调容易过拟合（自由度太高），而LoRA的低秩约束反而提供了有效的正则化。</p>
+</div>
+</details>
+
+<details>
+<summary>Q4: Speculative Decoding如何保证输出分布与原始模型完全一致？</summary>
+<div class="answer">
+<p>通过精心设计的接受-拒绝采样（rejection sampling）方案：当draft model的token概率不超过target model时直接接受；否则以$P_{\text{target}}/P_{\text{draft}}$的概率接受，被拒绝时从修正分布$\max(0, P_{\text{target}} - P_{\text{draft}})$中重新采样。这在数学上等价于从target model直接采样，因此零质量损失。加速来源于大模型的前向传播可以并行验证多个token。</p>
+</div>
+</details>
+
+<details>
+<summary>Q5: MoE中Load Balancing Loss为什么重要？如果去掉会怎样？</summary>
+<div class="answer">
+<p>没有Load Balancing Loss，门控网络会快速收敛到"赢者通吃"模式——少数expert接收大部分token，其余expert得不到训练信号，形成正反馈循环最终退化为稠密模型（甚至更差）。Balance Loss通过鼓励均匀分配来对抗这种"路由坍塌"。但$\alpha$需要调节：太小不起作用，太大会强制均匀分配牺牲路由质量。Noisy Top-K Gating通过添加噪声增加探索性，是另一种缓解方式。</p>
+</div>
+</details>
+
+<details>
+<summary>Q6: 为什么AdamW比Adam+L2正则更好？两者的区别本质是什么？</summary>
+<div class="answer">
+<p>在标准Adam中，L2正则的梯度$\lambda\theta$会被Adam的自适应学习率缩放（除以$\sqrt{\hat{v}}$），导致对不同参数的正则化强度不一致——梯度大的参数正则化反而弱。AdamW将weight decay从梯度更新中分离出来，直接对参数乘以$(1-\eta\lambda)$，确保所有参数受到一致的衰减。本质区别：Adam中正则化与自适应学习率耦合，AdamW中两者解耦独立作用。</p>
+</div>
+</details>
+
+</body>
+</html>

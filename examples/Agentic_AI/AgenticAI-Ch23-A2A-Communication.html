@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第23章 阅读笔记：Agent-to-Agent Communication (A2A)</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]})"></script>
+<style>
+:root {
+  --primary: #2c3e50;
+  --accent: #3498db;
+  --bg: #fafbfc;
+  --card-bg: #ffffff;
+  --border: #e1e4e8;
+  --text: #24292e;
+  --text-secondary: #586069;
+  --code-bg: #f6f8fa;
+  --highlight: #fff3cd;
+  --success: #d4edda;
+  --info: #d1ecf1;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; line-height: 1.8; color: var(--text); background: var(--bg); padding: 2rem; max-width: 900px; margin: 0 auto; }
+h1 { font-size: 1.8rem; color: var(--primary); border-bottom: 3px solid var(--accent); padding-bottom: 0.5rem; margin-bottom: 1rem; }
+h2 { font-size: 1.4rem; color: var(--primary); margin-top: 2.5rem; margin-bottom: 1rem; padding-left: 0.8rem; border-left: 4px solid var(--accent); }
+h3 { font-size: 1.15rem; color: var(--primary); margin-top: 1.8rem; margin-bottom: 0.8rem; }
+p { margin-bottom: 1rem; text-align: justify; }
+ul, ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+li { margin-bottom: 0.5rem; }
+code { background: var(--code-bg); padding: 0.15rem 0.4rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: var(--code-bg); padding: 1rem; border-radius: 6px; overflow-x: auto; margin-bottom: 1.5rem; border: 1px solid var(--border); }
+pre code { background: none; padding: 0; }
+blockquote { border-left: 4px solid var(--accent); padding: 0.8rem 1.2rem; margin: 1.5rem 0; background: var(--info); border-radius: 0 6px 6px 0; }
+.card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+.formula-block { background: var(--code-bg); border: 1px solid var(--border); border-radius: 6px; padding: 1rem; margin: 1rem 0; overflow-x: auto; }
+.formula-explain { color: var(--text-secondary); font-size: 0.92em; margin-top: 0.5rem; padding-left: 1rem; border-left: 3px solid #ddd; }
+.highlight-box { background: var(--highlight); border: 1px solid #ffc107; border-radius: 6px; padding: 1rem; margin: 1rem 0; }
+.info-box { background: var(--info); border: 1px solid #bee5eb; border-radius: 6px; padding: 1rem; margin: 1rem 0; }
+.success-box { background: var(--success); border: 1px solid #c3e6cb; border-radius: 6px; padding: 1rem; margin: 1rem 0; }
+.subtitle { color: var(--text-secondary); font-size: 1rem; margin-bottom: 0.3rem; }
+.meta { color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 2rem; }
+table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; }
+th, td { border: 1px solid var(--border); padding: 0.6rem 0.8rem; text-align: left; }
+th { background: var(--code-bg); font-weight: 600; }
+details { margin-bottom: 1rem; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+summary { padding: 0.8rem 1.2rem; background: var(--code-bg); cursor: pointer; font-weight: 500; }
+details[open] summary { border-bottom: 1px solid var(--border); }
+details .answer { padding: 1rem 1.2rem; }
+svg { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; }
+.takeaway { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 8px; padding: 1.5rem; margin: 2rem 0; }
+.takeaway h2 { color: white; border-left-color: rgba(255,255,255,0.5); }
+.takeaway li { color: rgba(255,255,255,0.95); }
+</style>
+</head>
+<body>
+
+<h1>第23章：Agent-to-Agent Communication (A2A)</h1>
+<p class="subtitle">智能体间通信——从协议设计到多Agent协作的完整技术栈</p>
+<p class="meta">来源：Agentic AI · 第23章（pp. 417–437） · 阅读笔记</p>
+
+<div class="card">
+<h3>章节摘要</h3>
+<p>当单个Agent的能力不再足以应对复杂任务时，多Agent协作成为必然选择。本章系统性地解析了Agent-to-Agent（A2A）通信的完整技术体系：从Google提出的A2A开放协议出发，深入探讨通信模式（请求-响应、流式、多轮、广播、发布-订阅、协商、拍卖）、Agent发现与路由机制、消息格式设计、协调协议（合同网、黑板系统、共识、领导者选举）、与MCP的对比定位、安全信任机制，最终通过一个Multi-Agent Research Workflow实例将所有概念落地。本章是构建生产级多Agent系统的通信基础设施蓝图。</p>
+</div>
+
+<!-- ====== 23.1 ====== -->
+<h2>23.1 Motivation: Why Agents Must Communicate</h2>
+
+<p>单Agent系统面临根本性的<strong>能力天花板</strong>：一个Agent不可能精通所有领域、拥有所有工具权限、或在合理时间内完成所有子任务。Agent间通信是将"单体智能"升级为"群体智能"的关键基础设施。</p>
+
+<h3>单Agent的局限性</h3>
+<ul>
+<li><strong>知识边界</strong>：单个Agent的context window和训练数据无法覆盖所有专业领域（法律、医疗、金融各需专家Agent）</li>
+<li><strong>工具碎片化</strong>：不同系统的API权限分散，单Agent不可能也不应该持有所有凭证</li>
+<li><strong>计算瓶颈</strong>：复杂任务需要并行处理——搜索、分析、生成可同时进行</li>
+<li><strong>可靠性要求</strong>：单点失败风险，多Agent架构天然提供冗余和容错</li>
+<li><strong>组织映射</strong>：现实组织结构本身就是多Agent协作的——团队、部门、供应链</li>
+</ul>
+
+<h3>Multi-Agent系统的价值主张</h3>
+
+<div class="formula-block">
+$$\text{System Capability} = \sum_{i=1}^{N} C_i + \underbrace{\sum_{i \neq j} \text{Synergy}(i, j)}_{\text{协作增益}} - \underbrace{\text{CommOverhead}(N)}_{\text{通信开销}}$$
+<p class="formula-explain">系统总能力 = 各Agent个体能力之和 + Agent间协作产生的协同效应 - 通信协调带来的开销。A2A协议的设计目标是最大化协同效应、最小化通信开销。</p>
+</div>
+
+<div class="info-box">
+<p><strong>核心洞察</strong>：A2A通信不仅仅是"消息传递"——它是一个完整的协作基础设施，包含发现（谁能帮忙？）、协商（如何分工？）、协调（进度如何同步？）、和信任（对方可靠吗？）四个维度。缺少任何一个维度，多Agent系统都无法在生产环境中可靠运行。</p>
+</div>
+
+<h3>从MCP到A2A的演进</h3>
+<p>如果说MCP（Model Context Protocol）解决了"Agent如何使用工具"的问题，那么A2A解决的是"Agent如何与Agent协作"的问题。二者是互补而非竞争关系：</p>
+<ul>
+<li><strong>MCP</strong>：Agent ↔ Tool（垂直集成，主从关系）</li>
+<li><strong>A2A</strong>：Agent ↔ Agent（水平协作，对等关系）</li>
+</ul>
+
+<!-- ====== 23.2 ====== -->
+<h2>23.2 The Google A2A Protocol</h2>
+
+<p>Google于2025年4月发布的Agent-to-Agent（A2A）协议是首个面向多Agent互操作性的开放标准。其核心设计哲学是：<strong>让不同框架、不同厂商构建的Agent能够像Web服务一样互相发现和协作</strong>。</p>
+
+<h3>Design Philosophy（设计哲学）</h3>
+<ol>
+<li><strong>Agent-Native</strong>：协议原生支持Agent的核心特征——不确定性、长时间运行、多轮交互，而非将Agent硬塞入传统RPC框架</li>
+<li><strong>Build on Web Standards</strong>：基于HTTP、JSON-RPC 2.0、SSE等成熟Web标准，降低采用门槛</li>
+<li><strong>Opaque Execution</strong>：Agent是黑盒——调用方无需了解对方的内部实现（用的什么LLM、什么框架）</li>
+<li><strong>Capability Discovery</strong>：通过Agent Card实现自描述和自动发现，类似Web Service的WSDL/OpenAPI</li>
+<li><strong>Secure by Design</strong>：内置OAuth 2.0、mTLS等企业级安全机制</li>
+</ol>
+
+<svg viewBox="0 0 750 380" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <marker id="arr" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#3498db"/></marker>
+    <marker id="arr-green" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#27ae60"/></marker>
+  </defs>
+  <!-- Title -->
+  <text x="375" y="25" text-anchor="middle" fill="#2c3e50" font-size="14" font-weight="bold">Google A2A Protocol Architecture</text>
+  <!-- Client Agent -->
+  <rect x="30" y="80" width="180" height="250" rx="12" fill="none" stroke="#3498db" stroke-width="2"/>
+  <text x="120" y="105" text-anchor="middle" fill="#3498db" font-size="12" font-weight="bold">Client Agent</text>
+  <rect x="50" y="120" width="140" height="35" rx="6" fill="#d1ecf1" stroke="#bee5eb"/>
+  <text x="120" y="142" text-anchor="middle" fill="#2c3e50" font-size="10">Task Manager</text>
+  <rect x="50" y="170" width="140" height="35" rx="6" fill="#d4edda" stroke="#c3e6cb"/>
+  <text x="120" y="192" text-anchor="middle" fill="#2c3e50" font-size="10">Message Composer</text>
+  <rect x="50" y="220" width="140" height="35" rx="6" fill="#fff3cd" stroke="#ffc107"/>
+  <text x="120" y="242" text-anchor="middle" fill="#2c3e50" font-size="10">SSE Listener</text>
+  <rect x="50" y="270" width="140" height="35" rx="6" fill="#e8daef" stroke="#8e44ad"/>
+  <text x="120" y="292" text-anchor="middle" fill="#2c3e50" font-size="10">Auth Handler</text>
+  <!-- Remote Agent -->
+  <rect x="540" y="80" width="180" height="250" rx="12" fill="none" stroke="#27ae60" stroke-width="2"/>
+  <text x="630" y="105" text-anchor="middle" fill="#27ae60" font-size="12" font-weight="bold">Remote Agent</text>
+  <rect x="560" y="120" width="140" height="35" rx="6" fill="#d1ecf1" stroke="#bee5eb"/>
+  <text x="630" y="142" text-anchor="middle" fill="#2c3e50" font-size="10">Agent Card</text>
+  <rect x="560" y="170" width="140" height="35" rx="6" fill="#d4edda" stroke="#c3e6cb"/>
+  <text x="630" y="192" text-anchor="middle" fill="#2c3e50" font-size="10">Task Executor</text>
+  <rect x="560" y="220" width="140" height="35" rx="6" fill="#fff3cd" stroke="#ffc107"/>
+  <text x="630" y="242" text-anchor="middle" fill="#2c3e50" font-size="10">Artifact Store</text>
+  <rect x="560" y="270" width="140" height="35" rx="6" fill="#e8daef" stroke="#8e44ad"/>
+  <text x="630" y="292" text-anchor="middle" fill="#2c3e50" font-size="10">Push Notifier</text>
+  <!-- A2A Protocol Layer -->
+  <rect x="260" y="130" width="230" height="180" rx="10" fill="#f8f9fa" stroke="#2c3e50" stroke-width="2"/>
+  <text x="375" y="155" text-anchor="middle" fill="#2c3e50" font-size="11" font-weight="bold">A2A Protocol (HTTP + JSON-RPC)</text>
+  <rect x="280" y="170" width="190" height="28" rx="5" fill="#3498db" opacity="0.15" stroke="#3498db"/>
+  <text x="375" y="189" text-anchor="middle" fill="#2c3e50" font-size="10">tasks/send · tasks/get</text>
+  <rect x="280" y="208" width="190" height="28" rx="5" fill="#27ae60" opacity="0.15" stroke="#27ae60"/>
+  <text x="375" y="227" text-anchor="middle" fill="#2c3e50" font-size="10">tasks/sendSubscribe (SSE)</text>
+  <rect x="280" y="246" width="190" height="28" rx="5" fill="#e67e22" opacity="0.15" stroke="#e67e22"/>
+  <text x="375" y="265" text-anchor="middle" fill="#2c3e50" font-size="10">tasks/pushNotification</text>
+  <rect x="280" y="284" width="190" height="16" rx="4" fill="none" stroke="#8e44ad" stroke-dasharray="3,2"/>
+  <text x="375" y="295" text-anchor="middle" fill="#8e44ad" font-size="9">OAuth 2.0 / mTLS</text>
+  <!-- Arrows -->
+  <line x1="210" y1="185" x2="258" y2="185" stroke="#3498db" stroke-width="1.5" marker-end="url(#arr)"/>
+  <line x1="492" y1="185" x2="538" y2="185" stroke="#27ae60" stroke-width="1.5" marker-end="url(#arr-green)"/>
+  <line x1="538" y1="230" x2="492" y2="230" stroke="#27ae60" stroke-width="1.5" marker-end="url(#arr-green)"/>
+  <line x1="258" y1="260" x2="210" y2="260" stroke="#3498db" stroke-width="1.5" marker-end="url(#arr)"/>
+  <!-- Discovery -->
+  <rect x="280" y="50" width="190" height="30" rx="6" fill="#2c3e50"/>
+  <text x="375" y="70" text-anchor="middle" fill="white" font-size="10">/.well-known/agent.json</text>
+  <line x1="375" y1="80" x2="375" y2="128" stroke="#2c3e50" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arr)"/>
+</svg>
+
+<h3>Agent Cards（智能体名片）</h3>
+
+<p>Agent Card是A2A协议的发现机制核心——每个Agent在 <code>/.well-known/agent.json</code> 路径下暴露一个自描述文件，类似于OpenAPI的Swagger文档。Client Agent通过读取Agent Card即可了解Remote Agent的能力、输入输出格式和认证要求。</p>
+
+<pre><code>{
+  "name": "ResearchAgent",
+  "description": "Performs deep research on academic topics with citation tracking",
+  "url": "https://research-agent.example.com",
+  "version": "1.2.0",
+  "capabilities": {
+    "streaming": true,
+    "pushNotifications": true,
+    "stateTransitionHistory": true
+  },
+  "skills": [
+    {
+      "id": "literature-search",
+      "name": "Literature Search",
+      "description": "Search and summarize academic papers on a given topic",
+      "inputModes": ["text/plain", "application/json"],
+      "outputModes": ["text/plain", "application/json", "text/markdown"]
+    },
+    {
+      "id": "citation-analysis",
+      "name": "Citation Analysis",
+      "description": "Analyze citation networks and identify key papers",
+      "inputModes": ["application/json"],
+      "outputModes": ["application/json", "image/png"]
+    }
+  ],
+  "authentication": {
+    "schemes": ["OAuth2"],
+    "credentials": "https://auth.example.com/.well-known/openid-configuration"
+  },
+  "defaultInputModes": ["text/plain", "application/json"],
+  "defaultOutputModes": ["text/plain", "application/json"]
+}</code></pre>
+
+<div class="info-box">
+<p><strong>Agent Card的设计智慧</strong>：与传统API文档不同，Agent Card不暴露具体的函数签名或参数schema——因为Agent的交互是自然语言驱动的。<code>skills</code> 字段描述的是Agent"能做什么"而非"怎么调用"，这体现了A2A"opaque execution"的哲学：调用方只需描述意图，执行方自主决定如何完成。</p>
+</div>
+
+<h3>Task Lifecycle（任务生命周期）</h3>
+
+<p>A2A中的核心抽象是<strong>Task</strong>——一个有状态的工作单元，具有明确的生命周期：</p>
+
+<svg viewBox="0 0 700 140" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <marker id="arr2" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#2c3e50"/></marker>
+  </defs>
+  <!-- States -->
+  <rect x="20" y="50" width="100" height="40" rx="20" fill="#d1ecf1" stroke="#17a2b8" stroke-width="1.5"/>
+  <text x="70" y="75" text-anchor="middle" fill="#2c3e50" font-size="11">submitted</text>
+  <rect x="160" y="50" width="100" height="40" rx="20" fill="#fff3cd" stroke="#ffc107" stroke-width="1.5"/>
+  <text x="210" y="75" text-anchor="middle" fill="#2c3e50" font-size="11">working</text>
+  <rect x="300" y="50" width="120" height="40" rx="20" fill="#cce5ff" stroke="#3498db" stroke-width="1.5"/>
+  <text x="360" y="75" text-anchor="middle" fill="#2c3e50" font-size="11">input-required</text>
+  <rect x="460" y="50" width="100" height="40" rx="20" fill="#d4edda" stroke="#28a745" stroke-width="1.5"/>
+  <text x="510" y="75" text-anchor="middle" fill="#2c3e50" font-size="11">completed</text>
+  <rect x="600" y="50" width="90" height="40" rx="20" fill="#f8d7da" stroke="#dc3545" stroke-width="1.5"/>
+  <text x="645" y="75" text-anchor="middle" fill="#2c3e50" font-size="11">failed</text>
+  <rect x="460" y="110" width="100" height="30" rx="15" fill="#e2e3e5" stroke="#6c757d" stroke-width="1.5"/>
+  <text x="510" y="130" text-anchor="middle" fill="#2c3e50" font-size="10">canceled</text>
+  <!-- Arrows -->
+  <line x1="120" y1="70" x2="158" y2="70" stroke="#2c3e50" stroke-width="1.5" marker-end="url(#arr2)"/>
+  <line x1="260" y1="70" x2="298" y2="70" stroke="#2c3e50" stroke-width="1.5" marker-end="url(#arr2)"/>
+  <line x1="420" y1="70" x2="458" y2="70" stroke="#2c3e50" stroke-width="1.5" marker-end="url(#arr2)"/>
+  <line x1="420" y1="60" x2="598" y2="60" stroke="#dc3545" stroke-width="1" stroke-dasharray="4,2" marker-end="url(#arr2)"/>
+  <path d="M360 90 Q360 110 400 110 L458 125" fill="none" stroke="#6c757d" stroke-width="1" marker-end="url(#arr2)"/>
+  <!-- Back arrow from input-required to working -->
+  <path d="M310 50 Q260 30 220 50" fill="none" stroke="#2c3e50" stroke-width="1" stroke-dasharray="3,2" marker-end="url(#arr2)"/>
+  <text x="265" y="30" text-anchor="middle" fill="#586069" font-size="9">client responds</text>
+</svg>
+
+<table>
+<tr><th>状态</th><th>含义</th><th>触发条件</th></tr>
+<tr><td><code>submitted</code></td><td>任务已提交，等待处理</td><td>Client发送 <code>tasks/send</code></td></tr>
+<tr><td><code>working</code></td><td>Agent正在处理中</td><td>Agent开始执行</td></tr>
+<tr><td><code>input-required</code></td><td>Agent需要更多输入信息</td><td>Agent判断信息不足</td></tr>
+<tr><td><code>completed</code></td><td>任务成功完成</td><td>Agent生成最终结果</td></tr>
+<tr><td><code>failed</code></td><td>任务执行失败</td><td>不可恢复错误</td></tr>
+<tr><td><code>canceled</code></td><td>任务被取消</td><td>Client主动取消 或 超时</td></tr>
+</table>
+
+<h3>Streaming / SSE（流式传输）</h3>
+
+<p>对于长时间运行的任务（如深度研究、代码生成），A2A通过 <code>tasks/sendSubscribe</code> 端点支持Server-Sent Events（SSE）流式响应。Client可以实时接收任务状态更新和部分结果：</p>
+
+<pre><code>// Client subscribes to task updates via SSE
+POST /a2a/tasks/sendSubscribe
+Content-Type: application/json
+
+{
+  "jsonrpc": "2.0",
+  "method": "tasks/sendSubscribe",
+  "id": "req-001",
+  "params": {
+    "id": "task-abc-123",
+    "message": {
+      "role": "user",
+      "parts": [{"type": "text", "text": "Research quantum computing advances in 2025"}]
+    }
+  }
+}
+
+// SSE Response Stream:
+event: status
+data: {"taskId": "task-abc-123", "state": "working", "message": "Searching databases..."}
+
+event: artifact
+data: {"taskId": "task-abc-123", "artifact": {"name": "interim-results", "parts": [...]}}
+
+event: status
+data: {"taskId": "task-abc-123", "state": "completed"}</code></pre>
+
+<h3>Push Notifications（推送通知）</h3>
+
+<p>当Client无法维持长连接（如移动端、Serverless环境）时，A2A支持Webhook-based推送通知：</p>
+<ul>
+<li>Client在创建Task时注册一个 <code>pushNotificationUrl</code></li>
+<li>Remote Agent在状态变更时向该URL发送POST请求</li>
+<li>支持 <code>tasks/pushNotification/set</code> 和 <code>tasks/pushNotification/get</code> 管理通知配置</li>
+</ul>
+
+<h3>Message Format（消息格式）</h3>
+
+<p>A2A消息由 <code>Message</code> 对象组成，每条消息包含一个或多个 <code>Part</code>：</p>
+
+<pre><code>{
+  "role": "agent",  // "user" | "agent"
+  "parts": [
+    {"type": "text", "text": "Here is the analysis report:"},
+    {"type": "file", "file": {"name": "report.pdf", "mimeType": "application/pdf", "uri": "https://..."}},
+    {"type": "data", "data": {"citations": 42, "confidence": 0.95}}
+  ],
+  "metadata": {
+    "timestamp": "2025-04-15T10:30:00Z",
+    "traceId": "trace-xyz-789"
+  }
+}</code></pre>
+
+<p>Part类型支持：<code>text</code>（纯文本）、<code>file</code>（文件引用或内联Base64）、<code>data</code>（结构化JSON数据）。这种多模态消息设计允许Agent间传递富内容——不仅是文字，还有文件、图表、结构化数据。</p>
+
+<h3>Authentication（认证机制）</h3>
+
+<p>A2A协议的安全层基于现有Web标准：</p>
+<ul>
+<li><strong>OAuth 2.0</strong>：标准bearer token认证，支持Client Credentials和Authorization Code流程</li>
+<li><strong>mTLS</strong>：双向TLS证书认证，适用于高安全需求的企业内网场景</li>
+<li><strong>API Keys</strong>：简化场景下的静态密钥认证</li>
+<li>认证要求声明在Agent Card的 <code>authentication</code> 字段中，Client在发现阶段即可获知</li>
+</ul>
+
+<!-- ====== 23.3 ====== -->
+<h2>23.3 Communication Patterns（通信模式）</h2>
+
+<p>不同的协作场景需要不同的通信模式。A2A协议的灵活设计支持从简单到复杂的多种模式：</p>
+
+<h3>23.3.1 Request-Response（请求-响应）</h3>
+<p>最简单的同步模式——Client发送请求，等待Agent返回完整结果。适用于延迟敏感、结果确定性高的短任务。</p>
+<pre><code>// Synchronous: tasks/send → wait → complete response
+Client → tasks/send(message) → Remote Agent
+Remote Agent → {status: "completed", artifacts: [...]} → Client</code></pre>
+
+<h3>23.3.2 Streaming（流式）</h3>
+<p>通过SSE实现的异步流式模式。Agent边处理边返回中间结果，适用于长时间运行任务（深度搜索、大文档生成）。Client可实时展示进度。</p>
+
+<h3>23.3.3 Multi-Turn（多轮交互）</h3>
+<p>通过 <code>input-required</code> 状态实现的交互式协作。Agent发现信息不足时暂停并向Client请求澄清，形成多轮对话：</p>
+<pre><code>Client → "Analyze this dataset" → Agent
+Agent → {state: "input-required", message: "Which metrics do you want?"}
+Client → "Focus on accuracy and latency" → Agent
+Agent → {state: "completed", artifacts: [analysis_report]}</code></pre>
+
+<h3>23.3.4 Broadcast（广播）</h3>
+<p>一对多通信——Orchestrator Agent同时向多个Worker Agent分发相同任务或通知。适用于并行处理场景（如同时搜索多个数据源）。</p>
+
+<h3>23.3.5 Pub-Sub（发布-订阅）</h3>
+<p>事件驱动的解耦模式——Agent发布事件到Topic，订阅该Topic的其他Agent异步接收。适用于松耦合系统：</p>
+<ul>
+<li>新数据到达 → 触发分析Agent</li>
+<li>任务完成 → 通知下游依赖Agent</li>
+<li>异常检测 → 广播告警到所有监控Agent</li>
+</ul>
+
+<h3>23.3.6 Negotiation（协商）</h3>
+<p>多Agent之间通过多轮消息交换达成共识或最优分工。典型场景：多个Agent竞标同一任务，通过能力声明和成本估算协商由谁执行。</p>
+
+<div class="formula-block">
+$$\text{Negotiation Outcome} = \arg\max_{a \in \text{Agents}} \frac{\text{Capability}(a, \text{task}) \cdot \text{Availability}(a)}{\text{Cost}(a, \text{task})}$$
+<p class="formula-explain">协商结果选择能力匹配度高、可用性好、成本低的Agent。实际中可通过多轮消息逐步缩小候选范围，或使用拍卖机制一步达成。</p>
+</div>
+
+<h3>23.3.7 Auction-Based（拍卖模式）</h3>
+<p>基于经济学拍卖理论的任务分配机制——Orchestrator发布任务需求，各Agent提交竞标（bid），包含预期成本、时间、质量承诺。适用于开放市场场景，如Agent Marketplace。</p>
+
+<!-- ====== 23.4 ====== -->
+<h2>23.4 Agent Discovery and Routing（发现与路由）</h2>
+
+<p>在规模化的多Agent系统中，"找到正确的Agent"本身就是一个非平凡问题。A2A生态需要健壮的发现和路由基础设施。</p>
+
+<h3>23.4.1 Registries（注册中心）</h3>
+
+<p>类似于DNS之于Web或Service Registry之于微服务，Agent Registry是多Agent系统的发现基础设施：</p>
+
+<table>
+<tr><th>注册中心类型</th><th>适用场景</th><th>实现方式</th></tr>
+<tr><td>Static Registry</td><td>小型/固定Agent集群</td><td>配置文件列举所有Agent Card URL</td></tr>
+<tr><td>DNS-based Discovery</td><td>互联网级开放生态</td><td><code>/.well-known/agent.json</code> 约定路径</td></tr>
+<tr><td>Dynamic Registry</td><td>弹性/云原生环境</td><td>Agent启动时注册、下线时注销</td></tr>
+<tr><td>Federated Registry</td><td>跨组织协作</td><td>多注册中心互联、元数据同步</td></tr>
+</table>
+
+<h3>23.4.2 Capability-Based Routing（基于能力的路由）</h3>
+
+<p>路由层根据任务需求自动匹配最合适的Agent：</p>
+
+<pre><code>class CapabilityRouter:
+    def route(self, task_description: str, required_modalities: list) -> Agent:
+        """Route task to best-matching agent based on capabilities."""
+        candidates = self.registry.search(
+            query=task_description,
+            input_modes=required_modalities
+        )
+        # Score candidates by relevance, load, and past performance
+        scored = [
+            (agent, self.score(agent, task_description))
+            for agent in candidates
+        ]
+        scored.sort(key=lambda x: x[1], reverse=True)
+        return scored[0][0] if scored else self.fallback_agent</code></pre>
+
+<p>路由决策可基于：</p>
+<ul>
+<li><strong>语义匹配</strong>：将任务描述与Agent Card的skill描述做embedding相似度计算</li>
+<li><strong>模态匹配</strong>：确保Agent支持所需的输入/输出格式</li>
+<li><strong>历史绩效</strong>：基于过往成功率、延迟、质量评分加权</li>
+<li><strong>当前负载</strong>：避免将任务路由到已饱和的Agent</li>
+</ul>
+
+<h3>23.4.3 Load Balancing（负载均衡）</h3>
+
+<p>当多个Agent具备相同能力时，需要负载均衡策略：</p>
+<ul>
+<li><strong>Round-Robin</strong>：轮询分配，最简单</li>
+<li><strong>Least-Connections</strong>：分配给当前活跃任务最少的Agent</li>
+<li><strong>Weighted</strong>：根据Agent性能等级加权分配</li>
+<li><strong>Locality-Aware</strong>：优先路由到网络距离最近的Agent实例（减少延迟）</li>
+</ul>
+
+<h3>23.4.4 Version Management（版本管理）</h3>
+
+<p>Agent Card中的 <code>version</code> 字段支持语义化版本控制。路由层可实现：</p>
+<ul>
+<li><strong>Canary Routing</strong>：新版本Agent只接收小比例流量，逐步放量</li>
+<li><strong>Backward Compatibility</strong>：Client可指定最低版本要求</li>
+<li><strong>Graceful Deprecation</strong>：旧版Agent返回deprecation warning，引导迁移</li>
+</ul>
+
+<!-- ====== 23.5 ====== -->
+<h2>23.5 Message Formats（消息格式设计）</h2>
+
+<h3>23.5.1 Structured vs. Unstructured（结构化 vs. 非结构化）</h3>
+
+<p>A2A消息设计的核心张力在于：Agent之间的通信既需要<strong>机器可解析的结构化数据</strong>（用于自动化处理），又需要<strong>自然语言的灵活性</strong>（用于表达复杂意图）。A2A通过 <code>parts</code> 数组的多态设计同时支持两者：</p>
+
+<table>
+<tr><th>消息类型</th><th>适用场景</th><th>优势</th><th>劣势</th></tr>
+<tr><td>纯文本 (text)</td><td>意图表达、解释性通信</td><td>灵活、无schema约束</td><td>解析不确定性</td></tr>
+<tr><td>结构化数据 (data)</td><td>精确参数传递、结果返回</td><td>机器友好、可验证</td><td>表达力受限</td></tr>
+<tr><td>文件引用 (file)</td><td>大型数据、二进制内容</td><td>不占消息体积</td><td>需额外网络请求</td></tr>
+<tr><td>混合消息</td><td>实际生产场景</td><td>兼具两者优势</td><td>解析复杂度增加</td></tr>
+</table>
+
+<h3>23.5.2 Multi-Modal Messages（多模态消息）</h3>
+
+<p>现代Agent不仅处理文本——视觉Agent需要接收图片，音频Agent需要接收语音。A2A的file part支持任意MIME类型：</p>
+<ul>
+<li><code>image/png</code>, <code>image/jpeg</code>：视觉内容</li>
+<li><code>application/pdf</code>：文档</li>
+<li><code>audio/wav</code>, <code>audio/mp3</code>：音频</li>
+<li><code>video/mp4</code>：视频</li>
+<li>文件可通过URI引用（大文件）或Base64内联（小文件 < 10MB）</li>
+</ul>
+
+<h3>23.5.3 Context Passing（上下文传递）</h3>
+
+<p>多Agent协作的关键挑战之一是<strong>上下文如何在Agent链中传递</strong>而不丢失关键信息：</p>
+
+<div class="formula-block">
+$$\text{Context Loss}(n) = 1 - \prod_{i=1}^{n} (1 - \epsilon_i)$$
+<p class="formula-explain">经过 $n$ 个Agent的链式传递后，上下文信息损失率。$\epsilon_i$ 是第 $i$ 个Agent的信息丢失率。即使每步只丢失5%，经过10个Agent后总损失率已达 $1 - 0.95^{10} \approx 40\%$。这说明了Context Passing机制的重要性。</p>
+</div>
+
+<p>A2A的解决方案：</p>
+<ul>
+<li><strong>Task History</strong>：完整的消息历史随Task对象传递，Agent可查看前序交互</li>
+<li><strong>Artifacts</strong>：中间结果以Artifact形式持久化，后续Agent可引用</li>
+<li><strong>Metadata Propagation</strong>：traceId、sessionId等元数据自动透传，支持全链路追踪</li>
+</ul>
+
+<h3>23.5.4 Conversation Threading（对话线程）</h3>
+
+<p>复杂协作中，单个Task可能产生多个并行子对话。Threading机制通过 <code>taskId</code> + <code>contextId</code> 维护对话树结构，防止信息混乱。</p>
+
+<!-- ====== 23.6 ====== -->
+<h2>23.6 Coordination Protocols（协调协议）</h2>
+
+<p>当多个Agent需要协同完成复杂任务时，需要正式的协调协议来确保一致性和效率。以下是四种经典协调模式：</p>
+
+<h3>23.6.1 Contract Net Protocol（合同网协议）</h3>
+
+<p>源自Smith（1980）的经典多Agent协调机制，模拟现实世界的招标-投标过程：</p>
+
+<ol>
+<li><strong>Task Announcement</strong>：Manager Agent向所有潜在Contractor Agent广播任务需求</li>
+<li><strong>Bidding</strong>：感兴趣且有能力的Agent提交投标（包含预计时间、成本、质量承诺）</li>
+<li><strong>Award</strong>：Manager评估所有bid，选择最优Contractor并授予合同</li>
+<li><strong>Execution</strong>：获选Agent执行任务并报告结果</li>
+</ol>
+
+<pre><code>class ContractNetManager:
+    async def delegate_task(self, task: Task) -> Result:
+        # 1. Announce task to potential contractors
+        announcements = await self.broadcast(
+            task_spec=task.to_spec(),
+            deadline=timedelta(seconds=30)
+        )
+        
+        # 2. Collect bids
+        bids = await self.collect_bids(timeout=30)
+        
+        # 3. Evaluate and award
+        best_bid = max(bids, key=lambda b: self.evaluate_bid(b, task))
+        contract = await self.award_contract(best_bid.agent, task)
+        
+        # 4. Monitor execution
+        result = await contract.await_completion(timeout=task.deadline)
+        return result
+    
+    def evaluate_bid(self, bid: Bid, task: Task) -> float:
+        """Multi-criteria bid evaluation."""
+        return (
+            0.4 * bid.capability_match +
+            0.3 * bid.speed_score +
+            0.2 * (1 - bid.cost_normalized) +
+            0.1 * bid.reputation
+        )</code></pre>
+
+<h3>23.6.2 Blackboard System（黑板系统）</h3>
+
+<p>共享工作空间模式——所有Agent读写同一个"黑板"（共享状态空间），各自贡献部分解决方案：</p>
+
+<ul>
+<li><strong>Blackboard</strong>：共享数据结构，存储问题状态和部分解</li>
+<li><strong>Knowledge Sources</strong>：各专家Agent，监控黑板变化并贡献知识</li>
+<li><strong>Controller</strong>：调度器，决定下一步由哪个Agent行动</li>
+</ul>
+
+<div class="info-box">
+<p><strong>适用场景</strong>：黑板系统特别适合"没有预定义工作流"的开放式问题——如诊断、设计、研究。每个Agent观察当前状态，在自己能贡献时自主行动，系统逐步收敛到解。</p>
+</div>
+
+<h3>23.6.3 Consensus Protocols（共识协议）</h3>
+
+<p>当多个Agent必须就某个决策达成一致时（如多数投票验证、集体决策），需要分布式共识算法：</p>
+
+<div class="formula-block">
+$$\text{Consensus}(v_1, v_2, \ldots, v_n) \to v^* \quad \text{s.t.} \quad |\{i : v_i = v^*\}| \geq \lceil \frac{n+1}{2} \rceil$$
+<p class="formula-explain">$n$ 个Agent分别给出判断 $v_i$，共识结果 $v^*$ 须获得超过半数Agent的支持。在Agent系统中，这常用于多Agent投票验证（如代码审查、事实核查）。</p>
+</div>
+
+<p>实践方案包括：</p>
+<ul>
+<li><strong>Majority Voting</strong>：简单多数投票，适用于分类/判断型任务</li>
+<li><strong>Weighted Voting</strong>：根据Agent在该领域的专业度加权</li>
+<li><strong>Debate + Judge</strong>：多Agent辩论后由Judge Agent仲裁</li>
+<li><strong>Iterative Refinement</strong>：轮流修改方案直到所有Agent接受</li>
+</ul>
+
+<h3>23.6.4 Leader Election（领导者选举）</h3>
+
+<p>动态多Agent系统中，需要选出协调者来分配任务和解决冲突。Leader Election算法确保即使原Leader下线，系统也能快速选出新Leader：</p>
+
+<ul>
+<li><strong>Bully Algorithm</strong>：ID最大的Agent成为Leader，简单但不健壮</li>
+<li><strong>Raft-inspired</strong>：心跳检测 + 投票选举，容忍少数节点故障</li>
+<li><strong>Capability-based</strong>：根据当前任务需求动态选出最合适的Leader（非固定角色）</li>
+</ul>
+
+<!-- ====== 23.7 ====== -->
+<h2>23.7 A2A vs. MCP（对比分析）</h2>
+
+<p>A2A和MCP是多Agent生态中的两大互补协议。理解它们的边界和协同方式是正确架构设计的前提。</p>
+
+<h3>When to Use Which（何时使用哪个）</h3>
+
+<table>
+<tr><th>维度</th><th>MCP (Model Context Protocol)</th><th>A2A (Agent-to-Agent)</th></tr>
+<tr><td><strong>关系模型</strong></td><td>主从关系（Client ↔ Server）</td><td>对等关系（Agent ↔ Agent）</td></tr>
+<tr><td><strong>核心抽象</strong></td><td>工具调用（Tool Call）</td><td>任务委托（Task Delegation）</td></tr>
+<tr><td><strong>交互模式</strong></td><td>同步、确定性、短生命周期</td><td>异步、非确定性、长生命周期</td></tr>
+<tr><td><strong>对方性质</strong></td><td>确定性服务/工具</td><td>自主Agent（有自己的目标和推理）</td></tr>
+<tr><td><strong>发现机制</strong></td><td>工具Schema描述</td><td>Agent Card自描述</td></tr>
+<tr><td><strong>状态模型</strong></td><td>无状态（单次调用）</td><td>有状态（Task生命周期）</td></tr>
+<tr><td><strong>结果确定性</strong></td><td>确定性（相同输入→相同输出）</td><td>非确定性（Agent有自主性）</td></tr>
+<tr><td><strong>通信格式</strong></td><td>Schema-defined（JSON Schema）</td><td>Opaque（自然语言+结构化）</td></tr>
+<tr><td><strong>典型场景</strong></td><td>数据库查询、文件操作、API调用</td><td>研究协作、多专家分析、流程协调</td></tr>
+<tr><td><strong>类比</strong></td><td>使用一把螺丝刀</td><td>委托同事完成子项目</td></tr>
+</table>
+
+<div class="highlight-box">
+<p><strong>判断准则</strong>：如果你需要的是"执行一个确定性操作并返回结果"→ 用MCP；如果你需要的是"委托一个有自主推理能力的实体去解决一个开放性问题"→ 用A2A。关键区别在于：MCP的Server没有自己的"想法"，A2A的Remote Agent有。</p>
+</div>
+
+<h3>Combined Architecture（组合架构）</h3>
+
+<p>生产系统中，A2A和MCP通常共存于同一架构：</p>
+
+<svg viewBox="0 0 700 300" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <marker id="arr3" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#2c3e50"/></marker>
+  </defs>
+  <text x="350" y="20" text-anchor="middle" fill="#2c3e50" font-size="13" font-weight="bold">Combined A2A + MCP Architecture</text>
+  <!-- Orchestrator -->
+  <rect x="250" y="40" width="200" height="55" rx="10" fill="#2c3e50" stroke="#3498db" stroke-width="2"/>
+  <text x="350" y="65" text-anchor="middle" fill="white" font-size="12" font-weight="bold">Orchestrator Agent</text>
+  <text x="350" y="82" text-anchor="middle" fill="#bee5eb" font-size="10">Planning &amp; Coordination</text>
+  <!-- A2A connections to other agents -->
+  <rect x="30" y="150" width="150" height="45" rx="8" fill="#d4edda" stroke="#27ae60" stroke-width="1.5"/>
+  <text x="105" y="177" text-anchor="middle" fill="#2c3e50" font-size="10">Research Agent</text>
+  <rect x="220" y="150" width="150" height="45" rx="8" fill="#d4edda" stroke="#27ae60" stroke-width="1.5"/>
+  <text x="295" y="177" text-anchor="middle" fill="#2c3e50" font-size="10">Analysis Agent</text>
+  <rect x="410" y="150" width="150" height="45" rx="8" fill="#d4edda" stroke="#27ae60" stroke-width="1.5"/>
+  <text x="485" y="177" text-anchor="middle" fill="#2c3e50" font-size="10">Writing Agent</text>
+  <!-- MCP connections -->
+  <rect x="30" y="245" width="100" height="35" rx="5" fill="#fff3cd" stroke="#ffc107"/>
+  <text x="80" y="267" text-anchor="middle" fill="#2c3e50" font-size="9">Search API</text>
+  <rect x="150" y="245" width="100" height="35" rx="5" fill="#fff3cd" stroke="#ffc107"/>
+  <text x="200" y="267" text-anchor="middle" fill="#2c3e50" font-size="9">Database</text>
+  <rect x="290" y="245" width="100" height="35" rx="5" fill="#fff3cd" stroke="#ffc107"/>
+  <text x="340" y="267" text-anchor="middle" fill="#2c3e50" font-size="9">Python REPL</text>
+  <rect x="430" y="245" width="100" height="35" rx="5" fill="#fff3cd" stroke="#ffc107"/>
+  <text x="480" y="267" text-anchor="middle" fill="#2c3e50" font-size="9">File System</text>
+  <rect x="560" y="245" width="100" height="35" rx="5" fill="#fff3cd" stroke="#ffc107"/>
+  <text x="610" y="267" text-anchor="middle" fill="#2c3e50" font-size="9">Email SMTP</text>
+  <!-- A2A labels -->
+  <line x1="290" y1="95" x2="130" y2="148" stroke="#27ae60" stroke-width="1.5" marker-end="url(#arr3)"/>
+  <line x1="350" y1="95" x2="295" y2="148" stroke="#27ae60" stroke-width="1.5" marker-end="url(#arr3)"/>
+  <line x1="410" y1="95" x2="470" y2="148" stroke="#27ae60" stroke-width="1.5" marker-end="url(#arr3)"/>
+  <text x="600" y="130" fill="#27ae60" font-size="10" font-weight="bold">A2A</text>
+  <!-- MCP labels -->
+  <line x1="80" y1="195" x2="80" y2="243" stroke="#e67e22" stroke-width="1.2" stroke-dasharray="4,2" marker-end="url(#arr3)"/>
+  <line x1="130" y1="195" x2="180" y2="243" stroke="#e67e22" stroke-width="1.2" stroke-dasharray="4,2" marker-end="url(#arr3)"/>
+  <line x1="295" y1="195" x2="320" y2="243" stroke="#e67e22" stroke-width="1.2" stroke-dasharray="4,2" marker-end="url(#arr3)"/>
+  <line x1="485" y1="195" x2="470" y2="243" stroke="#e67e22" stroke-width="1.2" stroke-dasharray="4,2" marker-end="url(#arr3)"/>
+  <line x1="530" y1="195" x2="590" y2="243" stroke="#e67e22" stroke-width="1.2" stroke-dasharray="4,2" marker-end="url(#arr3)"/>
+  <text x="600" y="220" fill="#e67e22" font-size="10" font-weight="bold">MCP</text>
+</svg>
+
+<p>在这个组合架构中：</p>
+<ul>
+<li><strong>上层（A2A）</strong>：Agent间使用A2A协议进行任务委托和协作——Orchestrator将研究任务委托给Research Agent，将数据分析委托给Analysis Agent</li>
+<li><strong>下层（MCP）</strong>：每个Agent内部使用MCP连接具体工具——Research Agent通过MCP调用Search API和Database，Writing Agent通过MCP操作File System</li>
+<li><strong>设计原则</strong>：A2A处理"智能体间协作"，MCP处理"智能体与工具的连接"。二者的分层清晰、职责明确。</li>
+</ul>
+
+<!-- ====== 23.8 ====== -->
+<h2>23.8 Security and Trust（安全与信任）</h2>
+
+<p>多Agent系统的安全挑战远超单Agent场景——每个Agent都是潜在的攻击面，Agent间的通信可能被窃听或篡改，恶意Agent可能冒充合法Agent。</p>
+
+<h3>23.8.1 Identity Verification（身份验证）</h3>
+
+<ul>
+<li><strong>Agent Identity</strong>：每个Agent持有唯一标识（DID或X.509证书），在通信前验证对方身份</li>
+<li><strong>Mutual Authentication</strong>：双方互相验证，防止中间人攻击</li>
+<li><strong>Identity Federation</strong>：跨组织场景下，通过IdP（Identity Provider）实现统一身份管理</li>
+</ul>
+
+<h3>23.8.2 Message Integrity（消息完整性）</h3>
+
+<ul>
+<li><strong>Digital Signatures</strong>：每条消息附带发送方的数字签名，接收方可验证消息未被篡改</li>
+<li><strong>Content Hashing</strong>：对Artifact内容计算哈希，确保传输过程中数据完整</li>
+<li><strong>Replay Protection</strong>：通过nonce和timestamp防止消息重放攻击</li>
+</ul>
+
+<div class="formula-block">
+$$\text{Signature} = \text{Sign}(SK_{\text{sender}}, H(\text{message} \| \text{nonce} \| \text{timestamp}))$$
+<p class="formula-explain">发送方用私钥 $SK_{\text{sender}}$ 对消息内容、随机数、时间戳的联合哈希进行签名。接收方用发送方公钥验证，确保消息来源可信且未被篡改。</p>
+</div>
+
+<h3>23.8.3 Authorization Scopes（授权范围）</h3>
+
+<p>不同Agent拥有不同权限级别，遵循最小权限原则：</p>
+
+<pre><code>{
+  "agent": "research-agent-001",
+  "scopes": [
+    "task:read",
+    "task:create",
+    "artifact:read",
+    "artifact:write:text/*",
+    "notification:subscribe"
+  ],
+  "restrictions": {
+    "maxConcurrentTasks": 10,
+    "allowedDataClassifications": ["public", "internal"],
+    "deniedOperations": ["task:cancel:others", "admin:*"]
+  },
+  "expiry": "2025-12-31T23:59:59Z"
+}</code></pre>
+
+<h3>23.8.4 Audit Trails（审计追踪）</h3>
+
+<p>生产级多Agent系统需要完整的审计日志：</p>
+<ul>
+<li><strong>Who</strong>：哪个Agent发起/执行了操作</li>
+<li><strong>What</strong>：具体的消息内容和操作类型</li>
+<li><strong>When</strong>：精确时间戳（全链路统一时钟）</li>
+<li><strong>Why</strong>：决策的推理链路（通过traceId串联）</li>
+<li><strong>Outcome</strong>：操作结果和影响范围</li>
+</ul>
+
+<div class="info-box">
+<p><strong>信任等级模型</strong>：实践中可建立Agent信任分层——从"完全信任"（内部Agent，同一安全域）到"有限信任"（合作伙伴Agent，通过联邦认证）再到"零信任"（外部Agent，每次交互都需完整验证）。信任等级决定了认证强度、授权范围和审计粒度。</p>
+</div>
+
+<!-- ====== 23.9 ====== -->
+<h2>23.9 Implementation Example: Multi-Agent Research Workflow</h2>
+
+<p>以下是一个完整的Multi-Agent Research Workflow实现，展示A2A协议在实际场景中的应用——用户提出研究问题，多个专家Agent协作完成文献搜索、分析和报告生成。</p>
+
+<svg viewBox="0 0 750 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <marker id="arr4" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#3498db"/></marker>
+  </defs>
+  <text x="375" y="18" text-anchor="middle" fill="#2c3e50" font-size="12" font-weight="bold">Multi-Agent Research Workflow</text>
+  <!-- User -->
+  <rect x="10" y="70" width="80" height="60" rx="8" fill="#e8daef" stroke="#8e44ad" stroke-width="1.5"/>
+  <text x="50" y="100" text-anchor="middle" fill="#2c3e50" font-size="10">User</text>
+  <text x="50" y="115" text-anchor="middle" fill="#586069" font-size="8">Research Q</text>
+  <!-- Orchestrator -->
+  <rect x="130" y="60" width="110" height="80" rx="8" fill="#2c3e50" stroke="#3498db" stroke-width="2"/>
+  <text x="185" y="90" text-anchor="middle" fill="white" font-size="10" font-weight="bold">Orchestrator</text>
+  <text x="185" y="108" text-anchor="middle" fill="#bee5eb" font-size="8">Plan &amp; Coord</text>
+  <text x="185" y="125" text-anchor="middle" fill="#bee5eb" font-size="8">A2A Client</text>
+  <!-- Search Agent -->
+  <rect x="290" y="30" width="110" height="50" rx="8" fill="#d4edda" stroke="#27ae60" stroke-width="1.5"/>
+  <text x="345" y="55" text-anchor="middle" fill="#2c3e50" font-size="10">Search Agent</text>
+  <text x="345" y="70" text-anchor="middle" fill="#586069" font-size="8">Papers, Web</text>
+  <!-- Analysis Agent -->
+  <rect x="290" y="95" width="110" height="50" rx="8" fill="#d1ecf1" stroke="#17a2b8" stroke-width="1.5"/>
+  <text x="345" y="120" text-anchor="middle" fill="#2c3e50" font-size="10">Analysis Agent</text>
+  <text x="345" y="135" text-anchor="middle" fill="#586069" font-size="8">Summarize, Cite</text>
+  <!-- Synthesis Agent -->
+  <rect x="290" y="155" width="110" height="50" rx="8" fill="#fff3cd" stroke="#ffc107" stroke-width="1.5"/>
+  <text x="345" y="180" text-anchor="middle" fill="#2c3e50" font-size="10">Writer Agent</text>
+  <text x="345" y="195" text-anchor="middle" fill="#586069" font-size="8">Draft Report</text>
+  <!-- QA Agent -->
+  <rect x="450" y="70" width="110" height="60" rx="8" fill="#f8d7da" stroke="#dc3545" stroke-width="1.5"/>
+  <text x="505" y="95" text-anchor="middle" fill="#2c3e50" font-size="10">QA Agent</text>
+  <text x="505" y="112" text-anchor="middle" fill="#586069" font-size="8">Fact-check</text>
+  <!-- Final output -->
+  <rect x="610" y="70" width="110" height="60" rx="8" fill="#d4edda" stroke="#27ae60" stroke-width="2"/>
+  <text x="665" y="95" text-anchor="middle" fill="#2c3e50" font-size="10" font-weight="bold">Final Report</text>
+  <text x="665" y="112" text-anchor="middle" fill="#586069" font-size="8">Verified Output</text>
+  <!-- Arrows -->
+  <line x1="90" y1="100" x2="128" y2="100" stroke="#3498db" stroke-width="1.5" marker-end="url(#arr4)"/>
+  <line x1="240" y1="85" x2="288" y2="60" stroke="#3498db" stroke-width="1.2" marker-end="url(#arr4)"/>
+  <line x1="240" y1="100" x2="288" y2="115" stroke="#3498db" stroke-width="1.2" marker-end="url(#arr4)"/>
+  <line x1="240" y1="115" x2="288" y2="175" stroke="#3498db" stroke-width="1.2" marker-end="url(#arr4)"/>
+  <line x1="400" y1="100" x2="448" y2="100" stroke="#3498db" stroke-width="1.2" marker-end="url(#arr4)"/>
+  <line x1="560" y1="100" x2="608" y2="100" stroke="#27ae60" stroke-width="1.5" marker-end="url(#arr4)"/>
+</svg>
+
+<pre><code>import asyncio
+from dataclasses import dataclass
+from typing import List, Optional
+import httpx
+
+@dataclass
+class A2AMessage:
+    role: str  # "user" | "agent"
+    parts: List[dict]
+    metadata: Optional[dict] = None
+
+@dataclass
+class TaskResult:
+    task_id: str
+    state: str
+    artifacts: List[dict]
+
+class A2AClient:
+    """Client for communicating with remote agents via A2A protocol."""
+    
+    def __init__(self, agent_url: str, auth_token: str):
+        self.agent_url = agent_url
+        self.auth_token = auth_token
+        self.client = httpx.AsyncClient(
+            headers={"Authorization": f"Bearer {auth_token}"}
+        )
+    
+    async def discover(self) -> dict:
+        """Fetch remote agent's Agent Card."""
+        resp = await self.client.get(f"{self.agent_url}/.well-known/agent.json")
+        return resp.json()
+    
+    async def send_task(self, task_id: str, message: A2AMessage) -> TaskResult:
+        """Send a task via A2A tasks/send endpoint."""
+        payload = {
+            "jsonrpc": "2.0",
+            "method": "tasks/send",
+            "id": f"req-{task_id}",
+            "params": {
+                "id": task_id,
+                "message": {
+                    "role": message.role,
+                    "parts": message.parts
+                }
+            }
+        }
+        resp = await self.client.post(f"{self.agent_url}/a2a", json=payload)
+        result = resp.json()["result"]
+        return TaskResult(
+            task_id=result["id"],
+            state=result["status"]["state"],
+            artifacts=result.get("artifacts", [])
+        )
+    
+    async def subscribe_task(self, task_id: str, message: A2AMessage):
+        """Stream task updates via SSE (tasks/sendSubscribe)."""
+        payload = {
+            "jsonrpc": "2.0",
+            "method": "tasks/sendSubscribe",
+            "id": f"req-{task_id}",
+            "params": {"id": task_id, "message": {"role": message.role, "parts": message.parts}}
+        }
+        async with self.client.stream("POST", f"{self.agent_url}/a2a", json=payload) as resp:
+            async for line in resp.aiter_lines():
+                if line.startswith("data:"):
+                    yield json.loads(line[5:])
+
+
+class ResearchOrchestrator:
+    """Orchestrator that coordinates multiple agents for research tasks."""
+    
+    def __init__(self):
+        self.search_agent = A2AClient("https://search-agent.example.com", token)
+        self.analysis_agent = A2AClient("https://analysis-agent.example.com", token)
+        self.writer_agent = A2AClient("https://writer-agent.example.com", token)
+        self.qa_agent = A2AClient("https://qa-agent.example.com", token)
+    
+    async def execute_research(self, query: str) -> dict:
+        """Execute full research workflow using A2A communication."""
+        
+        # Phase 1: Parallel search across multiple sources
+        search_msg = A2AMessage(role="user", parts=[
+            {"type": "text", "text": f"Find relevant papers on: {query}"},
+            {"type": "data", "data": {"maxResults": 20, "recency": "2024-2025"}}
+        ])
+        search_result = await self.search_agent.send_task("search-001", search_msg)
+        
+        # Phase 2: Deep analysis of search results
+        analysis_msg = A2AMessage(role="user", parts=[
+            {"type": "text", "text": "Analyze these papers and identify key findings"},
+            {"type": "data", "data": {"papers": search_result.artifacts}}
+        ])
+        analysis_result = await self.analysis_agent.send_task("analysis-001", analysis_msg)
+        
+        # Phase 3: Generate research report
+        write_msg = A2AMessage(role="user", parts=[
+            {"type": "text", "text": "Write a comprehensive research report"},
+            {"type": "data", "data": {"analysis": analysis_result.artifacts}}
+        ])
+        draft = await self.writer_agent.send_task("write-001", write_msg)
+        
+        # Phase 4: Fact-check and quality assurance
+        qa_msg = A2AMessage(role="user", parts=[
+            {"type": "text", "text": "Verify all claims and citations in this report"},
+            {"type": "data", "data": {"report": draft.artifacts, "sources": search_result.artifacts}}
+        ])
+        final = await self.qa_agent.send_task("qa-001", qa_msg)
+        
+        return {"status": "completed", "report": final.artifacts}
+
+
+# Usage
+async def main():
+    orchestrator = ResearchOrchestrator()
+    result = await orchestrator.execute_research(
+        "Recent advances in Agent-to-Agent communication protocols"
+    )
+    print(f"Research complete: {len(result['report'])} artifacts generated")</code></pre>
+
+<div class="success-box">
+<p><strong>实现要点总结</strong>：</p>
+<ul>
+<li>Orchestrator通过A2A协议与各专家Agent通信，不关心它们的内部实现</li>
+<li>消息使用 <code>parts</code> 数组混合自然语言意图和结构化数据</li>
+<li>任务通过 <code>task_id</code> 追踪，支持异步和流式</li>
+<li>工作流可扩展：增加新Agent只需注册新的Agent Card</li>
+<li>错误处理：每个阶段可独立重试，不影响整体流程</li>
+</ul>
+</div>
+
+<!-- ====== 23.10 ====== -->
+<h2>23.10 Summary</h2>
+
+<div class="takeaway">
+<h2>核心要点回顾</h2>
+<ol>
+<li><strong>A2A是多Agent协作的通信标准</strong>：解决Agent间的发现、通信、协调和信任问题，补充MCP的Agent-to-Tool能力</li>
+<li><strong>Agent Card是发现基础</strong>：通过 <code>/.well-known/agent.json</code> 实现自描述和自动发现，类似API世界的OpenAPI</li>
+<li><strong>Task是核心抽象</strong>：具有完整生命周期（submitted→working→completed），支持长时间运行和多轮交互</li>
+<li><strong>通信模式丰富多样</strong>：从简单请求-响应到复杂的协商和拍卖，适配不同协作场景</li>
+<li><strong>协调协议保障一致性</strong>：Contract Net、Blackboard、Consensus、Leader Election各有适用场景</li>
+<li><strong>A2A + MCP分层互补</strong>：A2A处理Agent间协作（水平），MCP处理Agent-Tool连接（垂直）</li>
+<li><strong>安全必须内建而非外挂</strong>：身份验证、消息完整性、授权范围、审计追踪缺一不可</li>
+<li><strong>基于Web标准降低门槛</strong>：HTTP + JSON-RPC + SSE + OAuth 2.0，无需学习新传输协议</li>
+</ol>
+</div>
+
+<!-- ====== Q&A ====== -->
+<h2>复习与思考 Q&amp;A</h2>
+
+<details>
+<summary>Q1：A2A协议中Agent Card的作用是什么？它与OpenAPI Spec有何异同？</summary>
+<div class="answer">
+<p><strong>作用</strong>：Agent Card是A2A的发现机制，允许Client Agent在调用前了解Remote Agent的能力、支持的输入/输出模态、认证要求等。它托管在 <code>/.well-known/agent.json</code>。</p>
+<p><strong>与OpenAPI的相似处</strong>：都是自描述文档、都支持自动发现、都声明了"对方能做什么"。</p>
+<p><strong>关键区别</strong>：OpenAPI描述精确的函数签名和参数Schema（确定性调用），而Agent Card只描述"能力"和"技能"——不暴露内部实现细节。因为Agent的交互是自然语言驱动的，调用方描述意图而非构造精确参数。这体现了A2A"opaque execution"的设计哲学。</p>
+</div>
+</details>
+
+<details>
+<summary>Q2：A2A的Task生命周期中，input-required状态解决了什么问题？</summary>
+<div class="answer">
+<p><code>input-required</code> 解决了Agent无法一次性获取所有必要信息的问题。传统RPC要求调用时提供完整参数，但Agent任务往往是开放性的——Agent在执行过程中才发现需要更多上下文。例如研究Agent被要求"分析市场趋势"，执行中发现需要确认"哪个市场？""什么时间范围？"。通过 <code>input-required</code> 状态，Agent可以暂停执行、向Client请求澄清，然后继续——形成人机/Agent间的多轮协作循环。这也是A2A"Agent-Native"设计哲学的体现：承认不确定性是Agent交互的常态。</p>
+</div>
+</details>
+
+<details>
+<summary>Q3：为什么A2A和MCP不是竞争关系而是互补关系？请用具体例子说明。</summary>
+<div class="answer">
+<p>二者解决不同层次的问题：MCP = "Agent如何使用工具"，A2A = "Agent如何与Agent协作"。</p>
+<p><strong>例子</strong>：考虑一个"帮我分析竞品定价策略"的任务。Orchestrator Agent通过A2A将"数据收集"委托给Data Agent、将"价格建模"委托给Analytics Agent。而Data Agent内部通过MCP调用Web Scraper工具抓取网页、调用Database工具存储数据；Analytics Agent通过MCP调用Python REPL跑回归模型。</p>
+<p>A2A处理的是"谁做什么"（任务分配），MCP处理的是"怎么做"（工具调用）。前者涉及自主推理和协商，后者是确定性执行。</p>
+</div>
+</details>
+
+<details>
+<summary>Q4：Contract Net Protocol的四步流程是什么？它比简单的Round-Robin分配有什么优势？</summary>
+<div class="answer">
+<p><strong>四步流程</strong>：(1) Task Announcement——Manager广播任务需求；(2) Bidding——感兴趣的Agent提交投标；(3) Award——Manager评估并选择最佳Contractor；(4) Execution——获选Agent执行并报告结果。</p>
+<p><strong>优势</strong>：Contract Net是"信息驱动"的分配——每个Agent根据自己当前的能力、负载和成本自主决定是否投标以及报价多少。这自然实现了负载均衡（忙的Agent不会投标）、能力匹配（不具备能力的Agent不会投标）和动态适应（新Agent上线自动参与）。Round-Robin则是"无信息"的——它不考虑Agent的当前状态和能力匹配度。</p>
+</div>
+</details>
+
+<details>
+<summary>Q5：多Agent系统中的上下文传递为什么会导致信息损失？如何缓解？</summary>
+<div class="answer">
+<p><strong>信息损失原因</strong>：每当一个Agent将上下文传递给下一个Agent时，都可能发生压缩、摘要或遗漏（Agent的context window有限，不可能传递完整历史）。经 $n$ 步传递后，损失率为 $1 - \prod(1-\epsilon_i)$，随链路长度指数增长。</p>
+<p><strong>缓解策略</strong>：(1) Artifact持久化——将关键中间结果作为Artifact保存，后续Agent直接引用原始数据而非前Agent的摘要；(2) Metadata透传——traceId等元数据自动传播，可回溯完整历史；(3) Shared Workspace——采用Blackboard模式，所有Agent读写同一状态空间，避免链式传递；(4) Context Window最大化——尽量将原始数据而非转述传递给下游Agent。</p>
+</div>
+</details>
+
+<details>
+<summary>Q6：在设计多Agent安全架构时，"零信任"模型意味着什么？</summary>
+<div class="answer">
+<p>零信任意味着<strong>每次Agent间交互都需要完整验证</strong>，不因"上次验证过"或"在同一网络内"而放松安全要求。具体包括：(1) 每条消息都附带数字签名和时间戳（防篡改+防重放）；(2) 每次请求都要验证对方身份和授权范围（不缓存信任）；(3) 最小权限原则——Agent只获得完成当前任务所需的最小权限集；(4) 完整审计——所有交互被记录用于事后审查。</p>
+<p>实践中，可以对内部Agent（同一安全域）使用"信任但验证"，对外部Agent严格零信任，通过信任等级模型平衡安全性与性能。</p>
+</div>
+</details>
+
+<details>
+<summary>Q7：Streaming模式（SSE）相比简单的轮询（Polling）有什么优势？什么场景下应选择Push Notifications？</summary>
+<div class="answer">
+<p><strong>SSE vs Polling</strong>：SSE是服务器主动推送，Client无需反复请求——延迟低（实时）、带宽省（无空轮询）、实现简洁（原生HTTP）。Polling则需要Client定期发请求查状态，浪费带宽且有延迟窗口。</p>
+<p><strong>选择Push Notifications的场景</strong>：(1) Client无法维持长连接（Serverless/Lambda环境）；(2) 移动端需要省电（不能持续连接）；(3) 任务可能运行数小时甚至数天；(4) 多个Client需要订阅同一Task的更新。Push Notifications通过Webhook回调实现——Task状态变更时POST到预注册URL。</p>
+</div>
+</details>
+
+<details>
+<summary>Q8：Blackboard系统与Contract Net各自适用什么类型的问题？</summary>
+<div class="answer">
+<p><strong>Blackboard适用于</strong>：开放式、探索性问题——问题解决没有预定义流程，需要多个专家Agent从不同角度贡献知识，系统逐步收敛。例如：医疗诊断（不同科室的Agent各自分析症状）、创意设计（多个设计Agent贡献创意并互相启发）。</p>
+<p><strong>Contract Net适用于</strong>：可分解的、有明确产出要求的任务——Manager清楚需要什么结果，但不确定谁最适合执行。例如：代码任务分配（多个开发Agent竞标）、数据处理管道（将子任务分配给负载最低的Agent）。</p>
+<p>本质区别：Blackboard是"共享状态驱动"（Agent自主决定何时贡献），Contract Net是"Manager驱动"（显式的分配-执行流程）。</p>
+</div>
+</details>
+
+</body>
+</html>

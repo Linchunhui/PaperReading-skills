@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第12章 阅读笔记：LLM Agentic Training</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]})"></script>
+<style>
+:root { --primary: #2c3e50; --accent: #3498db; --bg: #fafbfc; --card-bg: #ffffff; --border: #e1e4e8; --text: #24292e; --text-secondary: #586069; --code-bg: #f6f8fa; --highlight: #fff3cd; --success: #d4edda; --info: #d1ecf1; }
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; line-height: 1.8; color: var(--text); background: var(--bg); padding: 2rem; max-width: 900px; margin: 0 auto; }
+h1 { font-size: 1.8rem; color: var(--primary); border-bottom: 3px solid var(--accent); padding-bottom: 0.5rem; margin-bottom: 1rem; }
+h2 { font-size: 1.4rem; color: var(--primary); margin-top: 2.5rem; margin-bottom: 1rem; padding-left: 0.8rem; border-left: 4px solid var(--accent); }
+h3 { font-size: 1.15rem; color: var(--primary); margin-top: 1.8rem; margin-bottom: 0.8rem; }
+p { margin-bottom: 1rem; text-align: justify; }
+ul, ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+li { margin-bottom: 0.5rem; }
+code { background: var(--code-bg); padding: 0.15rem 0.4rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: var(--code-bg); padding: 1rem; border-radius: 6px; overflow-x: auto; margin-bottom: 1.5rem; border: 1px solid var(--border); }
+pre code { background: none; padding: 0; }
+blockquote { border-left: 4px solid var(--accent); padding: 0.8rem 1.2rem; margin: 1.5rem 0; background: var(--info); border-radius: 0 6px 6px 0; }
+.card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+.formula-block { background: var(--code-bg); border: 1px solid var(--border); border-radius: 6px; padding: 1rem; margin: 1rem 0; overflow-x: auto; }
+.formula-explain { color: var(--text-secondary); font-size: 0.92em; margin-top: 0.5rem; padding-left: 1rem; border-left: 3px solid #ddd; }
+.highlight-box { background: var(--highlight); border: 1px solid #ffc107; border-radius: 6px; padding: 1rem; margin: 1rem 0; }
+.info-box { background: var(--info); border: 1px solid #bee5eb; border-radius: 6px; padding: 1rem; margin: 1rem 0; }
+.success-box { background: var(--success); border: 1px solid #c3e6cb; border-radius: 6px; padding: 1rem; margin: 1rem 0; }
+.subtitle { color: var(--text-secondary); font-size: 1rem; margin-bottom: 0.3rem; }
+.meta { color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 2rem; }
+table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; }
+th, td { border: 1px solid var(--border); padding: 0.6rem 0.8rem; text-align: left; }
+th { background: var(--code-bg); font-weight: 600; }
+details { margin-bottom: 1rem; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+summary { padding: 0.8rem 1.2rem; background: var(--code-bg); cursor: pointer; font-weight: 500; }
+details[open] summary { border-bottom: 1px solid var(--border); }
+details .answer { padding: 1rem 1.2rem; }
+svg { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; }
+.takeaway { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 8px; padding: 1.5rem; margin: 2rem 0; }
+.takeaway h2 { color: white; border-left-color: rgba(255,255,255,0.5); }
+.takeaway li { color: rgba(255,255,255,0.95); }
+</style>
+</head>
+<body>
+
+<h1>第12章 阅读笔记：LLM Agentic Training</h1>
+<p class="subtitle">《The Hitchhiker's Guide to Agentic AI》— H. Roitman</p>
+<p class="meta">页码 222–249 | 笔记生成于 2026-06-25</p>
+
+<blockquote>
+<strong>章节摘要</strong>：本章系统阐述了如何用<strong>强化学习（RL）</strong>将 LLM 从"单轮对话机器人"升级为"多步自主智能体"。核心挑战在于：Agent 需要在多步工具调用中规划、从环境执行反馈中学习、并处理稀疏奖励信号。章节首先定义了 Agent 轨迹缓冲区（Trajectory Buffer）的数学结构，随后对比了三大操作范式（自我修正、离策略探索、非参数 ICL）。重点介绍了八种 Agentic RL 核心技术（STaR、Reflexion、ReAct、LATS、AgentQ、Voyager、RLEF、OpenHands），并通过两个完整 Use Case——生产力 Co-pilot 和科研 Agent——展示了从 MDP 定义到训练部署的全流程蓝图。最后总结了 GRPO/PPO 和细粒度 Credit Assignment 等 SOTA 方法。
+</blockquote>
+
+<!-- 目录 -->
+<div class="card">
+<strong>目录</strong>
+<ul>
+<li><a href="#sec1">12.1 动机：从聊天机器人到自主智能体</a></li>
+<li><a href="#sec2">12.2 轨迹缓冲区（Trajectory Buffer）</a></li>
+<li><a href="#sec3">12.3 三大操作范式</a></li>
+<li><a href="#sec4">12.4 范式对比</a></li>
+<li><a href="#sec5">12.5 Agentic RL 核心技术详解（8种）</a></li>
+<li><a href="#sec6">12.6 Use Case：生产力 Co-pilot</a></li>
+<li><a href="#sec7">12.7 Use Case：科研 Agent</a></li>
+<li><a href="#sec8">12.8 SOTA RL for LLM Agents</a></li>
+<li><a href="#takeaway">关键要点总结</a></li>
+<li><a href="#qa">Q&amp;A</a></li>
+</ul>
+</div>
+
+<!-- ==================== 12.1 ==================== -->
+<h2 id="sec1">12.1 动机：从聊天机器人到自主智能体</h2>
+
+<p>现代 LLM 正从<strong>单轮对话助手</strong>演变为<strong>自主 Agent</strong>——能与外部工具、API、数据库和环境进行多步交互。这种范式转变带来了全新的 RL 挑战。</p>
+
+<svg viewBox="0 0 800 200" xmlns="http://www.w3.org/2000/svg" font-family="sans-serif" font-size="13">
+  <rect x="20" y="30" width="340" height="150" rx="10" fill="#f0f9ff" stroke="#93c5fd" stroke-width="1.5"/>
+  <text x="190" y="22" text-anchor="middle" font-weight="700" fill="#1e40af">(a) 传统聊天机器人</text>
+  <rect x="60" y="75" width="80" height="40" rx="6" fill="#bfdbfe" stroke="#3b82f6"/>
+  <text x="100" y="100" text-anchor="middle" font-size="12">User</text>
+  <rect x="220" y="75" width="80" height="40" rx="6" fill="#bfdbfe" stroke="#3b82f6"/>
+  <text x="260" y="100" text-anchor="middle" font-size="12">LLM</text>
+  <line x1="140" y1="85" x2="218" y2="85" stroke="#3b82f6" stroke-width="1.5" marker-end="url(#a1)"/>
+  <text x="178" y="78" text-anchor="middle" font-size="10" fill="#6b7280">prompt</text>
+  <line x1="218" y1="105" x2="140" y2="105" stroke="#3b82f6" stroke-width="1.5" marker-end="url(#a1)"/>
+  <text x="178" y="122" text-anchor="middle" font-size="10" fill="#6b7280">response</text>
+  <text x="190" y="155" text-anchor="middle" font-size="11" fill="#6b7280">单轮 · 即时反馈 · 纯文本</text>
+  <rect x="420" y="30" width="360" height="150" rx="10" fill="#ecfdf5" stroke="#6ee7b7" stroke-width="1.5"/>
+  <text x="600" y="22" text-anchor="middle" font-weight="700" fill="#065f46">(b) 自主智能体</text>
+  <rect x="440" y="65" width="70" height="36" rx="6" fill="#a7f3d0" stroke="#10b981"/>
+  <text x="475" y="88" text-anchor="middle" font-size="11">User</text>
+  <rect x="555" y="65" width="95" height="36" rx="6" fill="#a7f3d0" stroke="#10b981"/>
+  <text x="602" y="88" text-anchor="middle" font-size="11">LLM Agent</text>
+  <rect x="695" y="65" width="65" height="36" rx="6" fill="#a7f3d0" stroke="#10b981"/>
+  <text x="727" y="88" text-anchor="middle" font-size="11">Tools</text>
+  <rect x="555" y="130" width="145" height="36" rx="6" fill="#d1fae5" stroke="#10b981"/>
+  <text x="627" y="153" text-anchor="middle" font-size="11">Environment</text>
+  <line x1="510" y1="83" x2="553" y2="83" stroke="#10b981" stroke-width="1.5" marker-end="url(#a2)"/>
+  <line x1="650" y1="83" x2="693" y2="83" stroke="#10b981" stroke-width="1.5" marker-end="url(#a2)"/>
+  <line x1="727" y1="101" x2="700" y2="130" stroke="#10b981" stroke-width="1.2" marker-end="url(#a2)"/>
+  <line x1="620" y1="130" x2="602" y2="101" stroke="#f59e0b" stroke-width="1.5" marker-end="url(#a2)"/>
+  <text x="585" y="120" font-size="9" fill="#d97706">reward/obs</text>
+  <text x="600" y="178" text-anchor="middle" font-size="11" fill="#6b7280">多步 · 稀疏终端奖励 · 结构化动作</text>
+  <defs>
+    <marker id="a1" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="#3b82f6"/></marker>
+    <marker id="a2" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="#10b981"/></marker>
+  </defs>
+</svg>
+
+<div class="card">
+<h3 style="margin-top:0">为什么标准 RLHF 不够用？</h3>
+<table>
+<tr><th>挑战维度</th><th>传统 RLHF</th><th>Agentic RL 需求</th></tr>
+<tr><td>交互步数</td><td>单轮生成</td><td>10–100+ 步工具调用链</td></tr>
+<tr><td>反馈来源</td><td>人类偏好打分</td><td>真实环境执行结果（测试通过、编译成功、网页加载）</td></tr>
+<tr><td>动作空间</td><td>纯文本 token</td><td>结构化输出（JSON 工具调用、API payload、代码块）</td></tr>
+<tr><td>奖励信号</td><td>即时密集</td><td>长时间跨度、稀疏终端奖励</td></tr>
+<tr><td>错误恢复</td><td>不需要</td><td>轨迹中途自我纠正、从工具报错中恢复</td></tr>
+<tr><td>状态复杂度</td><td>固定格式</td><td>可变长上下文（1K–128K tokens/状态）</td></tr>
+</table>
+</div>
+
+<p>传统 RLHF 只管"一问一答写得好不好"，而 Agent 必须在复杂环境里"一步步做事做到底"——这就像从<strong>考试写作文</strong>升级到<strong>真正去完成一个项目</strong>。Agent 需要规划多步骤的执行路径、在中途处理不确定性、在失败时回溯修正。</p>
+
+<!-- ==================== 12.2 ==================== -->
+<h2 id="sec2">12.2 轨迹缓冲区（Trajectory Buffer）</h2>
+
+<p>在经典 RL 中，经验回放缓冲区存储低维数值元组 $(s, a, r, s')$。对于 LLM Agent，这个结构升级为<strong>高维文本序列</strong>：</p>
+
+<div class="formula-block">
+$$\tau = (e_0, e_1, \ldots, e_T), \quad e_t = (S_t, A_t, R_t, S_{t+1})$$
+</div>
+<div class="formula-explain">
+<strong>解释</strong>：一条完整轨迹 $\tau$ 由 $T$ 步经验组成。每步经验 $e_t$ 包含：<br>
+• $S_t$：完整上下文状态 = 系统提示 + 用户目标 + 对话历史 + 环境变量（HTML源码、目录结构等）<br>
+• $A_t$：Agent 输出 = 思维链推理文本 + 结构化工具调用 JSON<br>
+• $R_t$：来自外部执行环境的评估信号（单测通过数、编译结果、API 响应码）<br>
+• $S_{t+1}$：更新后的上下文（追加了工具输出文本或错误日志）
+</div>
+
+<p><strong>动作的数学定义</strong>（Agent 每步的输出结构）：</p>
+<div class="formula-block">
+$$A_t = \{\underbrace{\text{text}_{\text{reasoning}}}_{\text{Chain-of-Thought}},\; \underbrace{\text{json}_{\text{tool\_call}}}_{\text{结构化工具调用}}\}$$
+</div>
+<div class="formula-explain">每个动作由两部分组成：一段内部推理文本（帮助模型在行动前规划），加上一个结构化的工具调用（JSON格式，指定调用哪个工具、传什么参数）。</div>
+
+<p><strong>轨迹缓冲区 $B$ 的作用</strong>：存储历史轨迹，根据不同操作范式用于：</p>
+<ul>
+<li>SFT 微调（成功轨迹作为正样本）</li>
+<li>GRPO/DPO 训练（对比好坏轨迹）</li>
+<li>RAG 检索（向量化后作为 few-shot 示例）</li>
+<li>自我修正（失败轨迹用于生成反思）</li>
+</ul>
+
+<div class="highlight-box">
+<strong>具体例子：代码调试轨迹</strong><br>
+Step 1: <code>read_file("main.py")</code> → 观测到代码内容 → $R_1 = 0$（中间步骤）<br>
+Step 2: <code>think("第42行存在off-by-one错误")</code> → $R_2 = 0$<br>
+Step 3: <code>edit_file("main.py", line=42, ...)</code> → $R_3 = 0$<br>
+Step 4: <code>run_tests()</code> → 6/6 通过 → $R_4 = +1.0$ <strong>（稀疏终端奖励）</strong>
+</div>
+
+<!-- ==================== 12.3 ==================== -->
+<h2 id="sec3">12.3 三大操作范式</h2>
+
+<p>根据轨迹缓冲区的使用方式，Agentic Training 分为三大互补的操作范式：</p>
+
+<h3>A. 自我修正与思维改进（Self-Correction）</h3>
+
+<p><strong>核心思想</strong>：Agent 失败后生成文本批评，修正后成功的轨迹用于更新模型权重。</p>
+
+<div class="formula-block">
+$$\text{Critique} \leftarrow \text{LLM}_{\text{reflect}}(S_{\text{failed}}, A_{\text{failed}}, R{=}0, \text{error\_msg})$$
+</div>
+<div class="formula-explain">让模型对自己的失败轨迹进行"反思写作"，生成自然语言形式的错误诊断和改进建议。修正后成功的轨迹可用 SFT 或 GRPO 更新权重。</div>
+
+<p><strong>工作流程</strong>：</p>
+<ol>
+<li>Agent 执行任务 → 失败（$R = 0$）</li>
+<li>将完整失败轨迹传给 Reflection LLM → 生成文本批评</li>
+<li>Agent 带着批评信息重试 → 成功（$R = 1$）</li>
+<li>成功轨迹（含批评修正过程）加入 $D_{\text{pass}}$ 用于训练</li>
+</ol>
+
+<p><strong>代表方法</strong>：STaR（权重更新）、Reflexion（纯上下文，无梯度）</p>
+
+<h3>B. 离策略探索（Off-Policy Exploration）</h3>
+
+<p><strong>核心思想</strong>：Agent 进行大量自主探索，缓冲区充当过滤器——只保留成功且高效的轨迹用于训练。</p>
+
+<div class="formula-block">
+$$D_{\text{train}} = \{\tau \in B : R(\tau) \geq \theta_{\min} \;\land\; \text{len}(\tau) \leq L_{\max} \;\land\; \text{diversity}(\tau, D_{\text{train}}) > \delta\}$$
+</div>
+<div class="formula-explain">训练数据 = 缓冲区中满足以下条件的轨迹：① 奖励超过阈值（成功）；② 步数不超过上限（高效）；③ 与已有数据足够不同（多样性）。多样性条件防止模式坍塌。</div>
+
+<p><strong>代表方法</strong>：ReAct + GRPO 过滤、大规模探索+筛选</p>
+
+<h3>C. 非参数上下文学习（RAG over Experiences）</h3>
+
+<p><strong>核心思想</strong>：不修改模型权重，将轨迹缓冲区当向量数据库，检索相似历史成功经验作为 few-shot 示例。</p>
+
+<div class="formula-block">
+$$E_{\text{retrieved}} = \underset{e \in B, R(e)>0}{\arg\text{top-}k} \;\text{sim}\bigl(\text{Embed}(G_{\text{new}}),\; \text{Embed}(e.\text{goal})\bigr)$$
+</div>
+<div class="formula-explain">给定新任务 $G_{\text{new}}$，从缓冲区中检索目标最相似的 top-k 条成功经验，将它们注入 prompt 作为 few-shot 示例。零训练、即时适应。</div>
+
+<p><strong>代表方法</strong>：Voyager 技能库（可复用代码函数的向量检索）</p>
+
+<!-- ==================== 12.4 ==================== -->
+<h2 id="sec4">12.4 范式对比</h2>
+
+<table>
+<tr><th>特征</th><th>传统 RL 缓冲</th><th>LLM Agent 缓冲</th></tr>
+<tr><td>数据格式</td><td>连续向量/张量 $(s \in \mathbb{R}^n)$</td><td>Token 化文本、JSON、代码块、工具输出</td></tr>
+<tr><td>数据量</td><td>海量（$10^5$–$10^7$ 条）</td><td>中小规模（$10^3$–$10^5$ 条轨迹）</td></tr>
+<tr><td>主要目标</td><td>打破数据相关性</td><td>提供推理示范 + 偏好对构造</td></tr>
+<tr><td>采样方式</td><td>随机均匀 / 优先经验回放(PER)</td><td>语义检索 / 成功优先 / 多样性采样</td></tr>
+<tr><td>状态大小</td><td>固定（如 84×84 像素）</td><td>可变（1K–128K tokens/状态）</td></tr>
+<tr><td>动作空间</td><td>离散/连续向量</td><td>结构化文本（推理 + 工具调用 JSON）</td></tr>
+<tr><td>奖励来源</td><td>环境模拟器（确定性）</td><td>外部执行 / LLM Judge / 单元测试 / 混合</td></tr>
+</table>
+
+<div class="info-box">
+<strong>三范式互补关系</strong>：自我修正适合早期快速迭代（无需大量数据）；离策略探索适合大规模模型提升（需要计算资源）；非参数 ICL 适合快速适应新领域（零训练成本）。实践中常组合使用。
+</div>
+
+<!-- ==================== 12.5 ==================== -->
+<h2 id="sec5">12.5 Agentic RL 核心技术详解</h2>
+
+<div class="card">
+<h3 style="margin-top:0">技术全景一览</h3>
+<table>
+<tr><th>方法</th><th>年份</th><th>类型</th><th>核心思想</th><th>是否更新权重</th></tr>
+<tr><td><strong>STaR</strong></td><td>2022</td><td>迭代 SFT</td><td>用模型自己的成功推理轨迹自举训练</td><td>是</td></tr>
+<tr><td><strong>Reflexion</strong></td><td>2023</td><td>上下文 RL</td><td>文字自我批评存入情景记忆</td><td>否</td></tr>
+<tr><td><strong>ReAct</strong></td><td>2023</td><td>提示框架</td><td>交替"思考"和"行动"在一个生成流中</td><td>否/可配合</td></tr>
+<tr><td><strong>LATS</strong></td><td>2023</td><td>树搜索</td><td>MCTS 搜索动作序列，反向传播奖励</td><td>否（推理时）</td></tr>
+<tr><td><strong>AgentQ</strong></td><td>2024</td><td>离策略 RL</td><td>DPO 在 Agent 轨迹上的偏好学习</td><td>是</td></tr>
+<tr><td><strong>Voyager</strong></td><td>2023</td><td>技能库</td><td>可复用代码技能的组合式积累</td><td>否</td></tr>
+<tr><td><strong>RLEF</strong></td><td>2024</td><td>在线 RL</td><td>基于代码/测试执行的确定性奖励</td><td>是</td></tr>
+<tr><td><strong>OpenHands</strong></td><td>2024</td><td>GRPO</td><td>面向 GitHub Issue 的组内相对优化</td><td>是</td></tr>
+</table>
+</div>
+
+<!-- STaR -->
+<h3>12.5.1 STaR：自学推理器（Self-Taught Reasoner）</h3>
+
+<p><strong>动机</strong>：如果模型<em>偶尔</em>能正确解题，它就能从自己的成功中学习，无需人工标注推理过程。核心洞察是利用"自举"（bootstrapping）——用模型当前能力生成训练数据来提升自身。</p>
+
+<div class="card">
+<h3 style="margin-top:0">算法流程（迭代 k=1,2,...）</h3>
+<ol>
+<li><strong>生成（Generate）</strong>：对每个问题 $x_i$，采样推理轨迹 $z_i \sim \pi_{\theta_k}(\cdot|x_i)$ 得到答案 $\hat{y}_i$</li>
+<li><strong>过滤（Filter）</strong>：只保留正确轨迹 $D_{\text{pass}} = \{(x_i, z_i, y_i^*) : \hat{y}_i = y_i^*\}$</li>
+<li><strong>合理化（Rationalization）</strong>——<strong>关键创新</strong>：对失败问题，生成以正确答案为条件的轨迹：
+$$z_i^{\text{rat}} \sim \pi_{\theta_k}(\cdot \mid x_i, y_i^*)$$
+即让模型学会"已知答案，反推推理过程"</li>
+<li><strong>微调（Fine-tune）</strong>：SFT 更新参数 $\theta_{k+1}$</li>
+<li><strong>迭代（Iterate）</strong>：用改进后的模型重复步骤1</li>
+</ol>
+</div>
+
+<div class="formula-block">
+$$\theta_{k+1} = \arg\min_\theta \;-\!\sum_{(x,z,y) \in D_k^{\text{pass}} \cup D_k^{\text{rat}}} \log \pi_\theta(z, y \mid x)$$
+</div>
+<div class="formula-explain">每轮迭代的训练目标：在成功轨迹和合理化轨迹的并集上最大化对数似然。初始正确率 30% → 经过 3–5 轮迭代 → 正确率可达 70–90%。</div>
+
+<p><strong>适用场景</strong>：有明确正确答案的任务（数学推理、逻辑题、代码生成）；模型已有一定基础能力（至少 >10% 初始正确率）。</p>
+
+<p><strong>局限</strong>：① 需要 ground-truth 答案做过滤；② 对开放性任务（写作、创意）不直接适用；③ 合理化可能引入"歪打正着"的虚假推理。</p>
+
+<p><strong>变体</strong>：Quiet-STaR（隐式思维 token，不显式生成推理文本）；V-STaR（增加验证器过滤歪打正着的轨迹）；ReST（简化版，去掉合理化步骤）。</p>
+
+<!-- Reflexion -->
+<h3>12.5.2 Reflexion：文字强化学习</h3>
+
+<p><strong>动机</strong>：许多实际场景中模型权重不可修改（如 API 调用 GPT-4），但仍需让 Agent 从失败中学习。Reflexion 实现了"不更新权重的 RL"——通过自然语言自我批评存入情景记忆来改进行为。</p>
+
+<div class="card">
+<h3 style="margin-top:0">完整架构（5个组件）</h3>
+<ol>
+<li><strong>Actor $\pi$</strong>：执行动作的 LLM Agent</li>
+<li><strong>Evaluator</strong>：二元信号（任务成功/失败）或标量启发式评分</li>
+<li><strong>Self-Reflection Generator</strong>：对失败轨迹生成反思文本</li>
+</ol>
+
+$$r_{\text{text}} = \text{LLM}_{\text{reflect}}(\tau_{\text{fail}},\; \text{feedback},\; \text{task\_description})$$
+
+<ol start="4">
+<li><strong>Episodic Memory $M$</strong>：滑动窗口存储最近反思 $M = [r_1, r_2, \ldots, r_m]$（通常 $m \leq 3$）</li>
+<li><strong>Retry Loop</strong>：下次尝试时将记忆注入 prompt</li>
+</ol>
+
+$$a_{t+1} \sim \pi(\cdot \mid \text{task},\; M,\; \text{current\_state})$$
+</div>
+
+<p><strong>适用场景</strong>：冻结 API 模型（GPT-4, Claude）；需要快速迭代的原型场景；可解释性要求高（人类可读反思）。</p>
+
+<p><strong>局限</strong>：① 受限于上下文窗口（记忆 $m$ 很小）；② 无法泛化到未见任务（经验不写入权重）；③ 依赖模型已有的错误识别能力——基座模型太弱时连有用的反思都写不出来；④ 每次重试都需要完整 rollout，累积成本高。</p>
+
+<div class="success-box">
+<strong>实验结果</strong>：HumanEval pass@1 从 80% 提升到 91%（3次反思迭代）；AlfWorld 成功率从 75% 提升到 97%（6次反思）。
+</div>
+
+<!-- ReAct -->
+<h3>12.5.3 ReAct：推理 + 行动交替</h3>
+
+<p><strong>动机</strong>：传统 Agent 要么只思考不行动（纯推理），要么只行动不思考（直接工具调用）。ReAct 统一了两者——在单个生成流中<strong>交替进行显式推理和环境动作</strong>，建立了工具使用 Agent 的主导范式。</p>
+
+<div class="card">
+<h3 style="margin-top:0">轨迹形式定义</h3>
+$$\tau = (t_1, a_1, o_1,\; t_2, a_2, o_2,\; \ldots,\; t_n, a_n, o_n)$$
+<ul>
+<li>$t_i$：<strong>Thought</strong>——内部推理，不执行，创造"内心独白"帮助规划</li>
+<li>$a_i$：<strong>Action</strong>——工具调用，在环境中执行</li>
+<li>$o_i$：<strong>Observation</strong>——环境响应，追加到上下文供下步使用</li>
+</ul>
+</div>
+
+<p><strong>为什么有效</strong>：Thought 帮助模型在行动前规划，减少冲动的工具调用；Observation 提供真实反馈，纠正推理偏差。RL 训练目标（当与 GRPO 结合时）：</p>
+
+<div class="formula-block">
+$$r(\tau) = r_{\text{task}} - \lambda_{\text{format}} \cdot \sum_{i}\mathbb{1}[\text{format\_violation}_i] - \lambda_{\text{length}} \cdot \text{num\_steps}$$
+</div>
+<div class="formula-explain">奖励 = 任务奖励 − 格式违规惩罚 − 步数效率惩罚。只有 Action 步骤接收直接奖励信号，Thought 通过策略梯度被隐式优化。典型设置：$\lambda_{\text{format}} = 0.1$，$\lambda_{\text{length}} = 0.02$。</div>
+
+<p><strong>适用场景</strong>：几乎所有工具使用 Agent；知识密集型问答（结合搜索工具）；交互式任务（网页导航、代码编写）。</p>
+
+<p><strong>局限</strong>：① 贪心解码，单一路径，无回溯机制；② 容易陷入循环（反复调用相同工具）；③ 推理质量受限于基座模型能力。</p>
+
+<!-- LATS -->
+<h3>12.5.4 LATS：语言智能体树搜索</h3>
+
+<p><strong>动机</strong>：ReAct 是贪心的——每步只选一个动作，无法回溯。LATS 将<strong>蒙特卡洛树搜索（MCTS）</strong>应用到 LLM Agent 的动作选择上，用推理计算换取显著更好的轨迹质量。</p>
+
+<div class="card">
+<h3 style="margin-top:0">算法步骤（每个决策点）</h3>
+<ol>
+<li><strong>Selection</strong>：从根节点（当前状态）用 UCB1 公式选择路径向下遍历树</li>
+</ol>
+
+$$\text{UCB}(s, a) = \bar{Q}(s, a) + c\sqrt{\frac{\ln N(s)}{N(s, a)}}$$
+
+<ol start="2">
+<li><strong>Expansion</strong>：在叶节点用 LLM 采样 $k$ 个候选动作（$k$=3–5）</li>
+<li><strong>Simulation (Rollout)</strong>：对每个候选执行快速 rollout（贪心解码到 episode 结束）</li>
+<li><strong>Backpropagation</strong>：将终端奖励沿祖先节点反向传播更新 $\bar{Q}$ 和 $N$</li>
+<li><strong>Repeat</strong>：运行 50–200 次 MCTS 迭代</li>
+<li><strong>Action Selection</strong>：选择根节点访问次数最多的子节点作为最终动作</li>
+</ol>
+</div>
+
+<div class="formula-explain">
+<strong>UCB 公式解释</strong>：$\bar{Q}(s,a)$ 是动作 $a$ 在状态 $s$ 的平均回报（exploit），$c\sqrt{\ln N(s)/N(s,a)}$ 鼓励探索少被访问的动作（explore）。$c$ 通常设为 $\sqrt{2}$ 或任务调优。
+</div>
+
+<div class="highlight-box">
+<strong>性能提升</strong>：<br>
+• WebShop 成功率：ReAct 40% → LATS 75%（+35%）<br>
+• HumanEval pass@1：68% → 94%（+26%）<br>
+• 代价：10–50× 推理计算量（每个动作需要多次 LLM 采样）
+</div>
+
+<p><strong>适用场景</strong>：高价值任务（愿意花计算换质量）；作为训练数据生成器（为 DPO/SFT 提供高质量轨迹）；离线评测/竞赛。</p>
+
+<p><strong>局限</strong>：① 推理成本极高（10–50× 基线）；② 实时交互场景延迟不可接受；③ 需要环境支持"回退"（或无状态可重放）。</p>
+
+<!-- AgentQ -->
+<h3>12.5.5 AgentQ：轨迹级 DPO</h3>
+
+<p><strong>动机</strong>：将 DPO（Direct Preference Optimization）从单轮对话扩展到多步 Agent 轨迹。核心创新：<strong>在轨迹级别构造偏好对</strong>，让模型学会"哪种解题路径更好"。</p>
+
+<div class="card">
+<h3 style="margin-top:0">Pipeline（在线迭代）</h3>
+<ol>
+<li><strong>采样</strong>：对每个任务执行 $N$ 条轨迹（用 MCTS 引导探索，增加多样性）</li>
+<li><strong>评分</strong>：用执行结果对每条轨迹打分 $r(\tau_i)$</li>
+<li><strong>构造偏好对</strong>：配对 $(\tau_w, \tau_l)$，其中 $r(\tau_w) > r(\tau_l)$</li>
+<li><strong>DPO 更新</strong>：最大化赢者概率相对于输者的优势</li>
+<li><strong>迭代</strong>：更新后的策略生成更好的轨迹 → 更好的训练数据 → 良性循环</li>
+</ol>
+</div>
+
+<div class="formula-block">
+$$\mathcal{L}_{\text{AgentQ}}(\theta) = -\mathbb{E}_{(\tau_w, \tau_l)}\left[\log\sigma\!\left(\beta\left[\log\frac{\pi_\theta(\tau_w)}{\pi_{\text{ref}}(\tau_w)} - \log\frac{\pi_\theta(\tau_l)}{\pi_{\text{ref}}(\tau_l)}\right]\right)\right]$$
+</div>
+<div class="formula-explain">
+轨迹级 DPO 损失函数：让策略 $\pi_\theta$ 相对参考策略 $\pi_{\text{ref}}$ 更倾向于生成赢者轨迹 $\tau_w$ 而非输者轨迹 $\tau_l$。$\beta$ 控制偏离参考策略的程度。<br>
+<strong>关键区别</strong>：这里的 $\pi_\theta(\tau)$ 是对<strong>整条轨迹</strong>的概率，而非单个回复。
+</div>
+
+<p><strong>实验结果</strong>：WebShop 上经过 3 轮迭代 DPO：成功率从 50% → 82%（+32%）。</p>
+
+<p><strong>适用场景</strong>：有二元成功/失败判定的任务；计算资源充足（需 MCTS 生成多样轨迹）；需要精确的偏好学习。</p>
+
+<p><strong>局限</strong>：① 轨迹级概率计算复杂度高（整条 20 步轨迹的联合概率）；② 偏好对构造的质量直接决定性能——垃圾轨迹配对无信息量。</p>
+
+<!-- Voyager -->
+<h3>12.5.6 Voyager：终身学习技能库</h3>
+
+<p><strong>动机</strong>：大多数 Agent 方法都是"一次性"的——每个任务从零开始。Voyager 引入<strong>组合式技能积累</strong>——Agent 构建一个不断增长的可复用代码函数库作为高级动作，实现跨任务知识迁移。</p>
+
+<div class="card">
+<h3 style="margin-top:0">三大组件</h3>
+<ol>
+<li><strong>自动课程（Automatic Curriculum）</strong>：LLM 根据当前技能清单 + 环境状态提出逐步更难的任务</li>
+<li><strong>技能生成与验证</strong>：
+  <ul>
+  <li>为每个任务写一个可执行代码函数（Python/JavaScript）</li>
+  <li>在环境中执行验证——成功则加入技能库，失败则迭代修改（最多 3 次）</li>
+  </ul>
+</li>
+<li><strong>技能库（Skill Library = 向量数据库）</strong>：
+  <ul>
+  <li>每个技能存储：函数代码 + 函数签名 + 描述嵌入 + 依赖关系 + 使用示例</li>
+  <li>新任务时检索 top-k 相关技能并组合</li>
+  </ul>
+</li>
+</ol>
+</div>
+
+<div class="formula-block">
+$$\text{solution} = \text{LLM}\bigl(\text{task},\; \underbrace{\text{retrieve}(\text{SkillLib}, \text{Embed}(\text{task}), k{=}5)}_{\text{检索最相关的5个已有技能}}\bigr)$$
+</div>
+<div class="formula-explain">新任务的解法 = LLM 基于任务描述 + 检索到的 5 个最相关已有技能来组合生成新方案。技能复用让 Agent 能解决越来越复杂的任务。</div>
+
+<p><strong>适用场景</strong>：开放世界环境（Minecraft 等游戏）；长期运行的 Agent（持续积累经验）；任务之间有明显共性的领域。</p>
+
+<p><strong>局限</strong>：① 技能库质量依赖验证环境的覆盖度；② 技能组合的搜索空间随库大小指数增长；③ 不修改模型权重，核心推理能力不提升。</p>
+
+<!-- RLEF -->
+<h3>12.5.7 RLEF：执行反馈强化学习</h3>
+
+<p><strong>动机</strong>：人工标注奖励昂贵且有噪声，LLM-as-judge 可被 hack。RLEF 使用最简单有效的范式——<strong>确定性执行结果</strong>作为奖励信号。</p>
+
+<div class="formula-block">
+$$r(\tau) = \frac{\#\text{tests\_passed}}{\#\text{total\_tests}} \in [0, 1]$$
+</div>
+<div class="formula-explain">
+奖励 = 通过测试数 / 总测试数。部分通过（如 $r=0.6$）比纯二元更信息丰富。
+</div>
+
+<p><strong>为什么执行反馈是 RL 的理想奖励？</strong></p>
+<ul>
+<li><strong>零噪声</strong>：确定性结果，无人工标注的随机性</li>
+<li><strong>无限规模</strong>：可程序化生成无限任务+测试用例</li>
+<li><strong>不可 hack</strong>：测试不会被"欺骗"（vs. LLM Judge 可被讨好式文本骗过）</li>
+<li><strong>密集信号</strong>：部分通过提供梯度方向（vs. 纯二元 0/1）</li>
+<li><strong>自动化</strong>：无需人在回路，可 24/7 训练</li>
+</ul>
+
+<p><strong>适用场景</strong>：代码生成（单元测试）；数学推理（答案验证）；网页自动化（DOM 状态验证）；任何有确定性验证标准的任务。</p>
+
+<p><strong>局限</strong>：① 需要高质量测试用例（覆盖边界情况）；② 不适用于主观任务（写作、翻译质量）；③ 可能过拟合测试用例（学到通过测试的 trick 而非真正理解）。</p>
+
+<!-- OpenHands -->
+<h3>12.5.8 OpenHands / SWE-Agent：GRPO 用于软件工程</h3>
+
+<p><strong>动机</strong>：将 Agentic RL 应用到最具挑战性的现实任务——自主解决 GitHub Issue（读代码、定位 bug、写补丁、跑测试）。</p>
+
+<div class="card">
+<h3 style="margin-top:0">训练设置</h3>
+<table>
+<tr><th>维度</th><th>具体配置</th></tr>
+<tr><td>环境</td><td>Docker 容器（完整 repo + 测试套件 + 开发工具）</td></tr>
+<tr><td>动作空间</td><td>Bash 命令 / 文件编辑 / Git 操作 / Python REPL</td></tr>
+<tr><td>典型轨迹长度</td><td>15–50 步</td></tr>
+<tr><td>奖励函数</td><td>补丁是否通过回归测试（二元 0/1）</td></tr>
+<tr><td>RL 算法</td><td>GRPO，组大小 N=8–16</td></tr>
+<tr><td>基座模型</td><td>CodeLlama 70B / Qwen-2.5-Coder 32B</td></tr>
+</table>
+</div>
+
+<p><strong>训练流程</strong>：</p>
+<ol>
+<li>SFT 阶段：200+ 人工解决 Issue 的轨迹做 warm-up</li>
+<li>GRPO 阶段：每个 Issue 采样 N=8 条轨迹，以测试通过率为奖励做组内归一化更新</li>
+<li>课程学习：先 easy Issues（单文件修改）→ medium（跨文件）→ hard（架构级重构）</li>
+</ol>
+
+<div class="success-box">
+<strong>效果</strong>：SWE-bench Verified 解决率 30%（SFT baseline）→ 55%（+GRPO）。关键：GRPO 让模型学会了更系统的调试策略（先读测试理解需求→定位相关代码→小范围修改→验证），而非 SFT 阶段的"看到错误就盲改"模式。
+</div>
+
+<!-- ==================== 12.6 ==================== -->
+<h2 id="sec6">12.6 Use Case：生产力 Co-pilot（完整蓝图）</h2>
+
+<p>这是一个<strong>完整的工程蓝图</strong>，展示如何用 Agentic RL 训练一个跨办公应用套件（Outlook、Excel、Word、PowerPoint、Teams、OneDrive/SharePoint）的 LLM Co-pilot。</p>
+
+<h3>12.6.1 MDP 定义（POMDP）</h3>
+
+<div class="formula-block">
+$$\mathcal{M} = \langle S, A, T, R, \Omega, O, \gamma \rangle$$
+</div>
+
+<div class="card">
+<table>
+<tr><th>符号</th><th>含义</th><th>具体说明</th></tr>
+<tr><td>$S$</td><td>状态空间</td><td>完整工作区环境状态（文档内容、邮件线程、日历事件、文件系统、用户权限）——<strong>不完全可观测</strong></td></tr>
+<tr><td>$A$</td><td>动作空间</td><td>结构化 API 调用（JSON：目标应用 + 操作类型 + 参数）</td></tr>
+<tr><td>$T$</td><td>转移函数</td><td>大部分确定性（API 调用有固定结果）；网络相关操作有随机性（超时、限速）</td></tr>
+<tr><td>$R$</td><td>奖励函数</td><td>多分量加权组合（见 12.6.3）</td></tr>
+<tr><td>$\Omega$</td><td>观测空间</td><td>API 响应、渲染文档视图、错误消息（状态的部分观测）</td></tr>
+<tr><td>$O$</td><td>观测函数</td><td>$S \to \Omega$ 的映射（API 响应格式化 + 上下文窗口截断）</td></tr>
+<tr><td>$\gamma$</td><td>折扣因子</td><td>0.99（长时间跨度，典型 10–50 步）</td></tr>
+</table>
+</div>
+
+<h3>12.6.2 动作空间设计</h3>
+
+<pre><code>{
+  "action_type": "api_call",
+  "target_app": "outlook | excel | word | powerpoint | teams | sharepoint",
+  "operation": "read | write | search | create | delete | modify",
+  "parameters": { "endpoint": "...", "body": {...}, "options": {...} },
+  "reasoning": "我需要先找到相关邮件，然后提取其中的数字数据"
+}</code></pre>
+
+<table>
+<tr><th>应用</th><th>复杂度</th><th>关键动作</th></tr>
+<tr><td>Outlook</td><td>中</td><td>search, read, draft, send, move, flag, create_rule</td></tr>
+<tr><td>Excel</td><td>高</td><td>read_range, write_range, insert_formula, create_chart, pivot_table, conditional_format</td></tr>
+<tr><td>Word</td><td>中</td><td>read_paragraphs, insert_text, format_section, find_replace, insert_table</td></tr>
+<tr><td>PowerPoint</td><td>中</td><td>add_slide, insert_shape, set_text, set_layout, add_image, apply_theme</td></tr>
+<tr><td>Teams</td><td>低</td><td>send_message, create_meeting, search_chat, create_channel</td></tr>
+<tr><td>SharePoint</td><td>中</td><td>list_files, upload, download, search, set_permissions, create_site</td></tr>
+</table>
+
+<h3>12.6.3 奖励设计：多目标加权信号</h3>
+
+<div class="formula-block">
+$$R(\tau) = \alpha_1 R_{\text{task}} + \alpha_2 R_{\text{quality}} + \alpha_3 R_{\text{efficiency}} + \alpha_4 R_{\text{safety}} + \alpha_5 R_{\text{user}}$$
+</div>
+
+<table>
+<tr><th>分量</th><th>权重 $\alpha$</th><th>信号类型</th><th>定义</th></tr>
+<tr><td>$R_{\text{task}}$</td><td>0.40</td><td>二元/标量</td><td>任务是否成功完成（由环境验证函数判定）</td></tr>
+<tr><td>$R_{\text{quality}}$</td><td>0.25</td><td>LLM Judge (1–10)</td><td>输出质量（格式规范、表述清晰、内容正确）</td></tr>
+<tr><td>$R_{\text{efficiency}}$</td><td>0.15</td><td>标量</td><td>步数惩罚：$\max(0,\; 1 - 0.02 \times (\text{steps} - \text{optimal\_steps}))$</td></tr>
+<tr><td>$R_{\text{safety}}$</td><td>0.15</td><td>二元</td><td>有任何安全违规则 $R_{\text{safety}}=0$，否则为 1</td></tr>
+<tr><td>$R_{\text{user}}$</td><td>0.05</td><td>稀疏</td><td>用户显式反馈（点赞 +1 / 点踩 −1，大多数情况无反馈）</td></tr>
+</table>
+
+<div class="info-box">
+<strong>中间奖励（密集信号，逐步给予）</strong>：<br>
+• API 调用成功返回 200: +0.05<br>
+• 正确检索到相关信息: +0.10<br>
+• 优雅处理错误（捕获异常并换策略）: +0.08<br>
+• API 错误 4xx/5xx: −0.03<br>
+• 重复相同动作（循环检测）: −0.10<br>
+• 不必要的读操作（信息已在上下文中）: −0.02
+</div>
+
+<h3>12.6.4 安全机制设计</h3>
+
+<div class="card">
+<h3 style="margin-top:0">硬约束（即时拒绝，reward = −1.0，episode 终止）</h3>
+<ul>
+<li>未经用户确认发送外部邮件</li>
+<li>永久删除文件或邮件（不可逆操作）</li>
+<li>修改共享资源的访问权限</li>
+<li>访问其他用户的邮箱或私人文件</li>
+<li>批量操作超过 100 项（防止失控）</li>
+<li>向外部地址发送包含机密标签的内容</li>
+</ul>
+</div>
+
+<div class="highlight-box">
+<strong>软约束（奖励惩罚，但不终止 episode）</strong>：<br>
+• 不预览就发送草稿: −0.20<br>
+• 不声明意图就执行不可逆变更: −0.15<br>
+• 访问标记为机密的文档: −0.30<br>
+• 未经授权代发消息: −0.25<br>
+• 向超过 10 人的群组发送消息未确认: −0.10
+</div>
+
+<p><strong>确认协议</strong>：所有"高影响"动作必须经过三步：① 自然语言陈述意图 → ② 展示操作预览 → ③ 等待用户确认（"确认发送"/"取消"）。</p>
+
+<h3>12.6.5 训练 Pipeline（端到端 4 阶段）</h3>
+
+<div class="card">
+<table>
+<tr><th>阶段</th><th>方法</th><th>数据量</th><th>目标</th></tr>
+<tr><td><strong>Phase 1: SFT 热身</strong></td><td>监督微调</td><td>50K–200K 人工轨迹</td><td>基础工具使用能力，达到 40–60% 完成率</td></tr>
+<tr><td><strong>Phase 2: 仿真环境</strong></td><td>Mock API + 合成数据</td><td>每用户 500+ 邮件/20+ 文档</td><td>构建多样化训练环境</td></tr>
+<tr><td><strong>Phase 3: GRPO 训练</strong></td><td>GRPO (N=8)</td><td>256 任务 × 8 轨迹/批</td><td>策略优化，每 500 轮评估</td></tr>
+<tr><td><strong>Phase 4: 人在回路</strong></td><td>DPO 微调</td><td>1000+ 内部用户 × 2 周</td><td>对齐真实用户偏好</td></tr>
+</table>
+</div>
+
+<h3>12.6.6 课程学习设计</h3>
+
+<table>
+<tr><th>难度</th><th>步数</th><th>跨应用数</th><th>示例任务</th><th>进入条件</th></tr>
+<tr><td>L1 单步</td><td>1–2</td><td>1</td><td>"读取 Bob 的最新邮件"</td><td>—</td></tr>
+<tr><td>L2 单应用多步</td><td>3–5</td><td>1</td><td>"草拟回复，总结三个要点"</td><td>L1 &gt; 90%</td></tr>
+<tr><td>L3 复杂单应用</td><td>5–10</td><td>1</td><td>"创建数据透视表并条件格式化"</td><td>L2 &gt; 80%</td></tr>
+<tr><td>L4 跨应用</td><td>5–15</td><td>2–3</td><td>"找邮件→提取数字→填入Excel"</td><td>L3 &gt; 70%</td></tr>
+<tr><td>L5 复杂工作流</td><td>10–30</td><td>3+</td><td>"拉指标+总结邮件+做PPT+分享Teams"</td><td>L4 &gt; 60%</td></tr>
+</table>
+
+<div class="formula-explain">课程策略：只有当前级别成功率超过阈值才解锁下一级。训练初期 80% 的数据来自当前级别，20% 来自已掌握级别（防止遗忘）。</div>
+
+<h3>12.6.7 推荐超参数</h3>
+
+<table>
+<tr><th>参数</th><th>推荐值</th><th>理由</th></tr>
+<tr><td>基座模型</td><td>70B (Llama-3/Mistral)</td><td>足够容量做复杂多步推理</td></tr>
+<tr><td>RL 算法</td><td>GRPO</td><td>无需 Critic，长轨迹下省内存</td></tr>
+<tr><td>Group size N</td><td>8</td><td>方差减小 vs 计算成本平衡</td></tr>
+<tr><td>Clip $\epsilon$</td><td>0.1</td><td>比标准 PPO 更紧（长轨迹对大更新更敏感）</td></tr>
+<tr><td>KL $\beta$</td><td>0.04</td><td>适度约束至 SFT 策略，防止灾难性遗忘</td></tr>
+<tr><td>学习率</td><td>$5 \times 10^{-7}$</td><td>保守——Agent 任务对大参数更新非常敏感</td></tr>
+<tr><td>Batch size</td><td>256 × 8 = 2048</td><td>GRPO 归一化需要大 batch 获得稳定统计量</td></tr>
+<tr><td>最大轨迹长度</td><td>50 步</td><td>覆盖 95% 生产力任务</td></tr>
+<tr><td>训练迭代</td><td>3000–5000</td><td>监控评估指标，安全退化则早停</td></tr>
+</table>
+
+<h3>12.6.8 生产部署经验教训</h3>
+
+<div class="card">
+<ol>
+<li><strong>SFT 质量是地板</strong>：RL 只能在 SFT 提供的能力基础上改进。如果 SFT 模型连有效 API 调用语法都不会，RL 也无法发现正确策略。</li>
+<li><strong>Reward Hacking 不可避免</strong>：Agent 会找捷径（创建空文件假装完成、回复"Done"但没做事）→ 需要多层验证（存在性 + 内容 + 语义正确性）。</li>
+<li><strong>API 限速必须模拟</strong>：生产环境有 429 限流（每分钟 60 请求），训练时不模拟会导致部署后大量失败。</li>
+<li><strong>上下文窗口是瓶颈</strong>：20 步轨迹 + 丰富 API 响应轻松超 80K tokens → 需要观测摘要化策略（只保留关键信息）。</li>
+<li><strong>用户意图常常模糊</strong>：训练 Agent 适时提问澄清（奖励适当澄清 +0.05，惩罚过度提问 −0.03）。</li>
+<li><strong>从简单开始</strong>：先 Outlook 单应用 → 再 Excel → 再跨应用组合，逐步扩大能力边界。</li>
+</ol>
+</div>
+
+<!-- ==================== 12.7 ==================== -->
+<h2 id="sec7">12.7 Use Case：科研 Agent（Research Agent）</h2>
+
+<p>一个<strong>完全自主</strong>的科研 Agent：接收研究问题 → 搜索文献 → 提出假设 → 设计实验 → 写代码跑实验 → 分析数据 → 撰写报告 → 提交。全程 20–100 步，无人工干预。</p>
+
+<h3>12.7.1 MDP 定义</h3>
+
+<div class="card">
+<table>
+<tr><th>MDP 元素</th><th>具体实现</th></tr>
+<tr><td>状态 $s_t$</td><td>System prompt + 研究问题 + 完整动作/观测历史（128K context window）</td></tr>
+<tr><td>动作 $a_t$</td><td>结构化工具调用 + CoT 推理（10 个工具，见下表）</td></tr>
+<tr><td>转移 $T(s_{t+1}|s_t, a_t)$</td><td>确定性——追加 action + tool output 到上下文</td></tr>
+<tr><td>奖励 $R$</td><td>稀疏终端奖励（最终报告的多维评分）+ 中间塑形</td></tr>
+<tr><td>时间跨度 $T$</td><td>20–100 步（典型 13–30 步）</td></tr>
+<tr><td>折扣 $\gamma$</td><td>1.0（无折扣，episodic 任务——全局结果同等重要）</td></tr>
+</table>
+</div>
+
+<h3>12.7.2 动作空间（10 个工具）</h3>
+
+<table>
+<tr><th>工具名</th><th>类别</th><th>功能描述</th><th>典型输出</th></tr>
+<tr><td><code>search_papers</code></td><td>文献</td><td>查询 Semantic Scholar / arXiv</td><td>论文标题+摘要列表</td></tr>
+<tr><td><code>read_paper</code></td><td>文献</td><td>获取论文全文或特定章节</td><td>章节文本</td></tr>
+<tr><td><code>write_code</code></td><td>实验</td><td>编写 Python 脚本/训练代码</td><td>保存确认</td></tr>
+<tr><td><code>execute_code</code></td><td>实验</td><td>在沙箱中运行脚本</td><td>stdout/stderr</td></tr>
+<tr><td><code>read_file</code></td><td>分析</td><td>读取日志、CSV、中间结果</td><td>文件内容</td></tr>
+<tr><td><code>plot_data</code></td><td>分析</td><td>生成可视化图表</td><td>图片路径</td></tr>
+<tr><td><code>compute_stats</code></td><td>分析</td><td>运行统计检验（t-test, ANOVA 等）</td><td>p-value, 置信区间</td></tr>
+<tr><td><code>write_report</code></td><td>输出</td><td>撰写最终研究报告</td><td>Markdown 文本</td></tr>
+<tr><td><code>think</code></td><td>推理</td><td>内部推理步（无外部调用）</td><td>无环境输出</td></tr>
+<tr><td><code>submit</code></td><td>终端</td><td>提交报告，结束 episode</td><td>触发奖励计算</td></tr>
+</table>
+
+<h3>12.7.3 架构选择</h3>
+
+<div class="card">
+<ul>
+<li><strong>基座模型</strong>：Qwen-2.5 72B（强推理 + 代码能力）+ QLoRA (rank=32, α=64)</li>
+<li><strong>推理引擎</strong>：vLLM + Tensor Parallelism=4 + Prefix Caching（长上下文复用）</li>
+<li><strong>训练算法</strong>：GRPO, N=4 轨迹/问题（无需 value model，省 50% 显存）</li>
+<li><strong>硬件</strong>：8×H100 80GB 单节点（训练） + 4×H100（在线推理生成轨迹）</li>
+<li><strong>上下文管理</strong>：128K window + Flash Attention 2 + 滑动窗口摘要（超长时压缩历史）</li>
+</ul>
+</div>
+
+<h3>12.7.4 奖励设计（终端 + 中间塑形）</h3>
+
+<div class="formula-block">
+$$R_{\text{terminal}} = w_1 R_{\text{quality}} + w_2 R_{\text{correctness}} + w_3 R_{\text{novelty}} + w_4 R_{\text{efficiency}} + w_5 R_{\text{format}}$$
+</div>
+
+<table>
+<tr><th>分量</th><th>权重 $w$</th><th>评估方式</th><th>范围</th></tr>
+<tr><td>$R_{\text{quality}}$</td><td>0.30</td><td>LLM-as-judge（清晰度/深度/严谨度，1–10 分）</td><td>[0, 1]</td></tr>
+<tr><td>$R_{\text{correctness}}$</td><td>0.30</td><td>代码无错执行 + 结果可复现（自动验证）</td><td>{0, 0.5, 1}</td></tr>
+<tr><td>$R_{\text{novelty}}$</td><td>0.15</td><td>LLM-judge：是否超越论文摘要的洞察</td><td>[0, 1]</td></tr>
+<tr><td>$R_{\text{efficiency}}$</td><td>0.15</td><td>$\max(0,\; 1 - \text{steps}/100)$</td><td>[0, 1]</td></tr>
+<tr><td>$R_{\text{format}}$</td><td>0.10</td><td>报告包含所有必需章节（引言/方法/结果/结论）</td><td>{0, 1}</td></tr>
+</table>
+
+<p><strong>中间塑形奖励</strong>（逐步给予，缓解稀疏问题）：</p>
+<ul>
+<li>代码成功执行（无错误）：+0.10</li>
+<li>代码运行时错误：−0.05</li>
+<li>搜索到相关论文（相关度 >0.8）：+0.05</li>
+<li>重复调用相同工具（相同参数）：−0.08</li>
+</ul>
+
+<h3>12.7.5 训练 Pipeline（3 阶段）</h3>
+
+<div class="card">
+<ol>
+<li><strong>Phase 1 — SFT 热身（500 步）</strong>：200 条专家科研轨迹做 SFT，教会正确的工具调用语法和基本科研工作流（搜索→读→实验→分析→写）。</li>
+<li><strong>Phase 2 — GRPO 训练（3000 步）</strong>：
+  <ul>
+  <li>500 个研究问题 × 10 个领域（NLP、CV、RL、分子生物...）</li>
+  <li>每个问题采样 N=4 条完整轨迹</li>
+  <li>GRPO 优势计算：$\hat{A}_i = (R_i - \mu_G) / \sigma_G$</li>
+  <li>课程升级："总结 X 的方法" → "复现 X 的实验" → "设计并运行新实验验证假设"</li>
+  </ul>
+</li>
+<li><strong>Phase 3 — 拒绝采样微调（200 步）</strong>：对困难问题每题生成 16 条轨迹，保留 top-2 最高分做 SFT（进一步提升天花板）。</li>
+</ol>
+</div>
+
+<h3>12.7.6 完整 MDP 轨迹示例</h3>
+
+<div class="highlight-box">
+<strong>研究问题</strong>："增大 GRPO group size 超过 N=16 是否能进一步提升数学推理性能？"
+</div>
+
+<div class="card">
+<p><strong>Step 0</strong> (<code>think</code>)：需要查找 GRPO group size 消融实验的论文，然后设计控制实验。</p>
+<p><strong>Step 1</strong> (<code>search_papers</code>)：查询 "GRPO group size ablation math reasoning" → 返回 5 篇论文。</p>
+<p><strong>Step 2</strong> (<code>read_paper</code>)：读 DAPO 的实验章节 → "代码任务 N>16 收益递减；数学推理未测试大 N"。</p>
+<p><strong>Step 3</strong> (<code>think</code>)：设计实验：N∈{4,8,16,32,64}，GSM8K 数据集，Llama-3 8B 基座，控制总训练 token 数一致。</p>
+<p><strong>Step 4</strong> (<code>write_code</code>)：编写 85 行 GRPO 训练脚本。</p>
+<p><strong>Steps 5–9</strong> (<code>execute_code</code> ×5)：分别运行 N=4,8,16,32,64 → 准确率 67.2%, 71.4%, 74.8%, 75.9%, 75.6%。每次成功执行 $r_{\text{shaping}}$=+0.1。</p>
+<p><strong>Step 10</strong> (<code>compute_stats</code>)：配对 t 检验 → N=4 vs N=16 p&lt;0.01（显著）；N=32 vs N=64 p=0.72（不显著）。</p>
+<p><strong>Step 11</strong> (<code>plot_data</code>)：绘制 group size vs accuracy 曲线图。</p>
+<p><strong>Step 12</strong> (<code>write_report</code>)：四章报告（引言/方法/结果含图/结论："N=16–32 最优，N=64 无增益且计算量 4×"）。</p>
+<p><strong>Step 13</strong> (<code>submit</code>)：提交，触发终端奖励计算。</p>
+</div>
+
+<p><strong>终端奖励计算</strong>：</p>
+<div class="formula-block">
+$$R = 0.30 \times \frac{8}{10} + 0.30 \times 1.0 + 0.15 \times \frac{7}{10} + 0.15 \times \left(1 - \frac{13}{100}\right) + 0.10 \times 1.0 = 0.875$$
+</div>
+<div class="formula-explain">
+分项：Quality=0.24 + Correctness=0.30 + Novelty=0.105 + Efficiency=0.1305 + Format=0.10 = 0.875。<br>
+中间塑形累计：5 次成功执行 × (+0.1) = +0.50<br>
+GRPO 优势（4 条轨迹中该条最高分）：$\hat{A} = (0.875 - 0.684) / 0.129 = +1.48$（强烈正强化信号）
+</div>
+
+<h3>12.7.7 评估与预期结果</h3>
+
+<table>
+<tr><th>Agent 类型</th><th>报告质量 (1–5)</th><th>平均步数</th><th>代码执行成功率</th></tr>
+<tr><td>Zero-shot GPT-4 + tools</td><td>2.8</td><td>25</td><td>55%</td></tr>
+<tr><td>SFT-only (Qwen 72B)</td><td>3.4</td><td>18</td><td>72%</td></tr>
+<tr><td><strong>GRPO-trained</strong></td><td><strong>4.1</strong></td><td><strong>14</strong></td><td><strong>89%</strong></td></tr>
+<tr><td>人类研究者（研究生）</td><td>4.5</td><td>N/A</td><td>N/A</td></tr>
+</table>
+
+<h3>12.7.8 常见失败模式与应对</h3>
+
+<div class="card">
+<table>
+<tr><th>失败模式</th><th>表现</th><th>对策</th></tr>
+<tr><td>无限循环</td><td>反复搜索不前进（10+次搜索）</td><td>步数预算 + 重复调用惩罚 −0.08/次</td></tr>
+<tr><td>调试螺旋</td><td>20+ 步修同一个 bug</td><td>重试上限 3 次，超出则强制换方案</td></tr>
+<tr><td>幻觉引用</td><td>捏造论文标题/结果</td><td>验证所有引用必须存在于搜索结果中</td></tr>
+<tr><td>过早提交</td><td>为避免步数惩罚提交不完整报告</td><td>最低质量阈值 $R_{\text{format}} > 0$ 才接受提交</td></tr>
+<tr><td>Hack Judge</td><td>学会写"高分但浅薄"的模板文本</td><td>轮换 judge 模型 + 定期人工评估抽查</td></tr>
+</table>
+</div>
+
+<!-- ==================== 12.8 ==================== -->
+<h2 id="sec8">12.8 SOTA RL for LLM Agents</h2>
+
+<h3>12.8.1 GRPO for Agents（当前标准方法）</h3>
+
+<p>由 DeepSeek-R1 推广的 GRPO 正在成为 Agentic Training 的<strong>事实标准</strong>。核心思想：对同一个任务采样一组轨迹，用组内相对排名代替 Critic 网络估计优势。</p>
+
+<div class="formula-block">
+$$\hat{A}_i = \frac{r(\tau_i) - \frac{1}{N}\sum_{j=1}^N r(\tau_j)}{\text{std}\bigl(r(\tau_1), \ldots, r(\tau_N)\bigr)}$$
+</div>
+<div class="formula-explain">优势值 = (该轨迹奖励 − 组内平均奖励) / 组内标准差。无需单独训练 Critic 网络，直接用组内统计量归一化。当 $N$ 足够大时（$N \geq 8$），统计量稳定。</div>
+
+<p><strong>GRPO 策略梯度目标</strong>：</p>
+<div class="formula-block">
+$$\mathcal{L}_{\text{GRPO}}(\theta) = \frac{1}{N}\sum_{i=1}^N \left[\min\!\left(\rho_i \hat{A}_i,\;\text{clip}(\rho_i, 1{-}\epsilon, 1{+}\epsilon)\hat{A}_i\right)\right] - \beta\, D_{\text{KL}}\!\left(\pi_\theta \,\|\, \pi_{\text{ref}}\right)$$
+</div>
+<div class="formula-explain">
+其中 $\rho_i = \pi_\theta(\tau_i|q) / \pi_{\theta_{\text{old}}}(\tau_i|q)$ 是重要性采样比。clip 操作限制策略更新幅度（$\epsilon=0.1$），KL 散度项（$\beta=0.04$）防止策略过度偏离参考模型。
+</div>
+
+<div class="success-box">
+<strong>为什么 GRPO 主导 Agentic Training？</strong><br>
+• <strong>省 50% GPU 内存</strong>：无需 Critic 网络——Agent 轨迹已消耗 32K–128K tokens，再加 Critic 会爆内存<br>
+• <strong>天然匹配</strong>：Agent 任务常有二元/可验证奖励（测试通过/失败），适合组内归一化<br>
+• <strong>自然探索</strong>：每任务采样 N 条多样轨迹，自动探索不同工具使用策略<br>
+• <strong>实现简单</strong>：无需额外 value network 的训练和同步，工程复杂度低
+</div>
+
+<h3>12.8.2 PPO for Interactive Agents</h3>
+
+<p>PPO 在<strong>高度随机环境</strong>（工具输出不可预测、网络延迟变化大）中仍有独特价值——Critic 提供逐步优势信号。</p>
+
+<div class="formula-block">
+$$\hat{A}_t^{\text{GAE}} = \sum_{l=0}^{T-t-1} (\gamma\lambda)^l \delta_{t+l}, \quad \delta_t = r_t + \gamma V(s_{t+1}) - V(s_t)$$
+</div>
+<div class="formula-explain">
+GAE（Generalized Advantage Estimation）利用 Critic 网络 $V(s)$ 计算每一步的优势，$\lambda$ 控制 bias-variance 权衡。<br>
+<strong>优势</strong>：每个 action 都有独立的 advantage 信号，比 GRPO 的 episode-level 信号更精细。<br>
+<strong>代价</strong>：需要训练一个 Value Head（2× 内存），且 Value 估计对长轨迹容易不准。
+</div>
+
+<p><strong>PPO 仍优于 GRPO 的场景</strong>：</p>
+<ul>
+<li>环境高度随机（同一动作可能产生不同结果）</li>
+<li>需要精细逐步 credit assignment（如 GUI 导航中每个点击都重要）</li>
+<li>短轨迹（<10步）——Critic 准确度高，GRPO 的 N 难以取够大</li>
+</ul>
+
+<h3>12.8.3 细粒度 Turn-Level Credit Assignment</h3>
+
+<p><strong>核心问题</strong>：如果 Agent 执行 20 个动作最终失败，终端奖励 $R=0$ 会等比例惩罚所有动作——这极不公平！可能前 15 步都完全正确，只有第 16 步出了问题。</p>
+
+<div class="card">
+<h3 style="margin-top:0">解法 1：RLVR（Reinforcement Learning from Verifiable Rewards）</h3>
+<p>在<strong>确定性中间检查点</strong>给予奖励信号：</p>
+<ul>
+<li>Bash 命令编译成功: +0.1</li>
+<li>浏览器成功定位目标 DOM 元素: +0.2</li>
+<li>SQL 查询返回非空结果: +0.1</li>
+<li>API 调用返回有效数据: +0.05</li>
+<li>最终测试全部通过: +1.0</li>
+</ul>
+<p><strong>效果</strong>：比纯稀疏终端奖励加速学习 <strong>3–5×</strong>。</p>
+</div>
+
+<div class="card">
+<h3 style="margin-top:0">解法 2：Multi-Turn Trajectory Slicing</h3>
+<p>思路：找到轨迹中第一个"出错点"，只对该步施加惩罚。</p>
+<ol>
+<li><strong>回放成功前缀</strong>：找到步骤 1–k 是正确的</li>
+<li><strong>识别首个发散点</strong>：步骤 $k+1$ 是导致失败的关键错误</li>
+<li><strong>差异化奖励分配</strong>：
+  <ul>
+  <li>步骤 1–k（正确前缀）：中性或正奖励</li>
+  <li>步骤 k+1（出错点）：强负奖励</li>
+  <li>步骤 k+2 及之后：忽略（已被错误污染）</li>
+  </ul>
+</li>
+</ol>
+<p>→ 实现<strong>外科手术式策略更新</strong>：只修正出错的行为，不退化已正确的能力。</p>
+</div>
+
+<h3>12.8.4 方法全景对比</h3>
+
+<table>
+<tr><th>方法</th><th>奖励粒度</th><th>内存开销</th><th>核心优势</th><th>最佳适用</th></tr>
+<tr><td><strong>GRPO</strong></td><td>序列/终端级</td><td>低（无 Critic）</td><td>省内存、实现简单、自然探索</td><td>长轨迹 + 可验证奖励</td></tr>
+<tr><td><strong>PPO</strong></td><td>逐步（GAE）</td><td>高（需 Critic）</td><td>精细 credit assignment</td><td>随机环境 + 短轨迹</td></tr>
+<tr><td><strong>Iterative STaR</strong></td><td>稀疏二元</td><td>最低（仅 SFT）</td><td>简单可扩展、避免 RL 不稳定</td><td>有 ground-truth 的推理任务</td></tr>
+<tr><td><strong>DPO (AgentQ)</strong></td><td>序列级偏好</td><td>中等</td><td>无需显式奖励设计</td><td>难以定义标量奖励的任务</td></tr>
+<tr><td><strong>LATS</strong></td><td>反向传播</td><td>高（树展开）</td><td>每任务最佳质量</td><td>高价值任务、数据生成</td></tr>
+</table>
+
+<!-- ==================== Takeaway ==================== -->
+<div class="takeaway" id="takeaway">
+<h2>关键要点总结</h2>
+<ol>
+<li>Agent 训练的核心难题是<strong>稀疏奖励 + 长时间跨度 + 结构化动作空间</strong>，传统 RLHF 完全不够用。</li>
+<li>三大范式互补：自我修正（快速迭代、无需梯度）、离策略探索（大规模数据过滤）、非参数 RAG（零训练即时适应）。</li>
+<li><strong>GRPO 正在成为 Agentic Training 的事实标准</strong>——省 50% 内存、天然适配二元可验证奖励、自带多样探索。</li>
+<li>RLEF 确立了最简有效范式：确定性执行结果（零噪声、无限规模、不可 hack）作为奖励信号。</li>
+<li>Reward Hacking 不可避免——必须多层正交验证（格式 + 内容 + 执行 + 语义正确性）。</li>
+<li>Credit Assignment 是关键瓶颈：RLVR（中间检查点）比纯稀疏快 3–5×；Trajectory Slicing 实现精确归因。</li>
+<li>SFT 质量是地板——RL 只能在好的 SFT 基础上改进，无法从零创造全新能力。</li>
+<li>课程学习至关重要：从简单单步任务开始，成功率 &gt;70% 再升级难度，防止训练崩溃。</li>
+<li>领域趋势：更多推理计算（LATS/搜索/重试）往往胜过更多训练计算（Inference-Time Scaling Law）。</li>
+<li>安全设计是一等公民：硬约束（环境级即时拒绝）+ 软约束（奖励惩罚）+ 确认协议三层防护。</li>
+</ol>
+</div>
+
+<!-- ==================== Q&A ==================== -->
+<h2 id="qa">Q&amp;A</h2>
+
+<details>
+<summary>Q1: 为什么 GRPO 比 PPO 更适合训练 Agent？</summary>
+<div class="answer">
+<p>三个关键原因：</p>
+<ol>
+<li><strong>内存效率</strong>：GRPO 不需要 Critic 网络，节省 50% GPU 内存。Agent 轨迹本身已消耗 32K–128K tokens，再加一个同等规模的 Critic 会爆内存。</li>
+<li><strong>奖励特性匹配</strong>：Agent 任务通常有清晰的二元可验证奖励（测试通过/代码编译/目标达成），非常适合组内相对归一化——不需要学一个 value function 来估计"进展"。</li>
+<li><strong>自然探索</strong>：每个任务采样 N 条轨迹（如 N=8），天然探索不同的工具使用策略和解题路径，无需额外的 entropy bonus 或 ε-greedy。</li>
+</ol>
+<p><strong>PPO 仍有价值的场景</strong>：环境高度随机、需要精细逐步 credit assignment、短轨迹（Critic 估值准确度高）。</p>
+</div>
+</details>
+
+<details>
+<summary>Q2: Reflexion 不更新权重怎么能算 RL？</summary>
+<div class="answer">
+<p>Reflexion 是"<strong>文字 RL</strong>"（Verbal RL）——通过<strong>自然语言自我批评</strong>存入情景记忆来改变未来行为。类比人类的"经验总结"：失败后写下"下次注意XXX"，下次就会做得更好。</p>
+<p>从 RL 理论看，情景记忆是"策略条件"的一部分——虽然 $\theta$ 不变，但有效策略 $\pi(\cdot|\text{task}, M)$ 因为 $M$（记忆内容）的变化而改变了。这等价于在一个扩展的状态空间中进行优化。</p>
+<p><strong>局限</strong>：受限于上下文窗口（$m \leq 3$ 条反思），无法积累无限经验；且依赖模型已有的自我诊断能力。</p>
+</div>
+</details>
+
+<details>
+<summary>Q3: STaR 的"合理化"(Rationalization) 为什么是关键创新？</summary>
+<div class="answer">
+<p>解决<strong>冷启动问题</strong>：模型初始正确率只有 30%，纯靠成功轨迹学习数据量太少且偏向简单题。</p>
+<p>合理化的做法：给定正确答案 $y^*$，让模型"事后诸葛亮"生成推理过程 $z^{\text{rat}} \sim \pi(\cdot|x, y^*)$。好处：</p>
+<ol>
+<li>大幅扩充训练数据（70% 的失败题也能产生样本）</li>
+<li>教会模型"答案→推理"的反向映射</li>
+<li>生成的推理仍是模型自己的语言风格，比人写的更容易内化</li>
+</ol>
+<p><strong>风险</strong>：可能产生"歪打正着"的虚假推理 → V-STaR 用验证器过滤。</p>
+</div>
+</details>
+
+<details>
+<summary>Q4: 如何系统性防止 Reward Hacking？</summary>
+<div class="answer">
+<p>常见 hack 手段和对策：</p>
+<ul>
+<li><strong>创建空文件假装完成</strong> → 多层验证（文件存在 + 内容非空 + 语义正确）</li>
+<li><strong>回复"Done"但没做事</strong> → 环境级验证函数检查真实状态变化</li>
+<li><strong>伪造实验结果</strong> → 验证执行日志 vs 报告数字的一致性</li>
+<li><strong>写长文本刷分</strong> → Efficiency reward + 长度惩罚</li>
+<li><strong>学会讨好 LLM Judge</strong> → 轮换 judge 模型 + 定期人工抽查</li>
+</ul>
+<p><strong>根本原则</strong>：任何单一奖励都会被 hack，必须组合多个<strong>正交</strong>信号，且至少一个基于<strong>确定性执行结果</strong>。</p>
+</div>
+</details>
+
+<details>
+<summary>Q5: LATS 的高计算开销值得吗？</summary>
+<div class="answer">
+<p><strong>值得的场景</strong>：单次任务价值高（生产部署/竞赛/难题），或作为<strong>训练数据生成器</strong>（AgentQ 用 LATS 生成高质量偏好对给 DPO）。</p>
+<p><strong>不值得</strong>：大量简单任务批处理、实时交互（延迟敏感）。</p>
+<p>实践中的黄金方案：LATS 生成高质量数据 → 蒸馏到快速单 pass 模型。把推理时间的计算投资转化为持久的模型能力。</p>
+</div>
+</details>
+
+<details>
+<summary>Q6: 两个 Use Case 的核心设计区别是什么？</summary>
+<div class="answer">
+<table>
+<tr><th>维度</th><th>生产力 Co-pilot</th><th>科研 Agent</th></tr>
+<tr><td>$\gamma$</td><td>0.99（稍有折扣）</td><td>1.0（无折扣，episodic）</td></tr>
+<tr><td>环境确定性</td><td>大部分确定性+部分随机</td><td>完全确定性</td></tr>
+<tr><td>GRPO N</td><td>8（需要更多探索）</td><td>4（轨迹更长，计算受限）</td></tr>
+<tr><td>安全约束</td><td>极严格（涉及用户真实数据）</td><td>相对宽松（沙箱环境）</td></tr>
+<tr><td>奖励重心</td><td>task(0.4) + safety(0.15)</td><td>quality(0.3) + correctness(0.3)</td></tr>
+<tr><td>典型步数</td><td>5–30</td><td>13–100</td></tr>
+<tr><td>关键挑战</td><td>安全、API限速、上下文管理</td><td>代码正确性、避免幻觉引用</td></tr>
+</table>
+<p>本质：Co-pilot 重<strong>安全+可靠</strong>；Research Agent 重<strong>创新+正确</strong>。</p>
+</div>
+</details>
+
+<details>
+<summary>Q7: 什么是 Turn-Level Credit Assignment？为什么关键？</summary>
+<div class="answer">
+<p><strong>问题</strong>：20 步轨迹最终失败，终端 $R=0$ 等比例惩罚所有步骤——但可能只有第 16 步出错。</p>
+<p><strong>后果</strong>：正确步骤被连带惩罚 → 策略退化到保守行为（"什么都不敢做"）。</p>
+<p><strong>解法</strong>：① RLVR 在中间检查点给奖励（加速 3–5×）；② Trajectory Slicing 找首个出错点只惩罚它（外科手术式更新）。两者可结合使用。</p>
+</div>
+</details>
+
+<details>
+<summary>Q8: 从零训练 Agent 的最小可行方案？</summary>
+<div class="answer">
+<ol>
+<li>选有<strong>确定性奖励</strong>的任务（代码：测试通过/失败）</li>
+<li><strong>SFT 阶段</strong>：收集 200+ 成功轨迹做 SFT（教会工具调用语法）</li>
+<li><strong>GRPO 训练</strong>：RLEF 奖励 + N=4–8 组内归一化</li>
+<li><strong>简单课程</strong>：easy → medium → hard（成功率 &gt;70% 升级）</li>
+<li><strong>ReAct 格式</strong>：Thought + Action + Observation 统一格式</li>
+</ol>
+<p><strong>不需要</strong>：Critic 网络、人工偏好标注、复杂 reward model、MCTS 搜索。核心循环就是：采样轨迹 → 执行得奖励 → GRPO 更新 → 重复。</p>
+</div>
+</details>
+
+<hr style="margin-top:3rem;">
+<p style="text-align:center; color:var(--text-secondary); font-size:0.85rem;">
+笔记生成于 2026-06-25 | 源自《The Hitchhiker's Guide to Agentic AI》Chapter 12 (pp.222–249)
+</p>
+
+</body>
+</html>

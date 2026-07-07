@@ -1,0 +1,1240 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第27章 阅读笔记：Quiz Questions & Detailed Answers</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]})"></script>
+<style>
+:root {
+  --primary: #2c3e50;
+  --accent: #3498db;
+  --bg: #fafbfc;
+  --card-bg: #ffffff;
+  --border: #e1e4e8;
+  --text: #24292e;
+  --text-secondary: #586069;
+  --code-bg: #f6f8fa;
+  --highlight: #fff3cd;
+  --success: #d4edda;
+  --info: #d1ecf1;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; line-height: 1.8; color: var(--text); background: var(--bg); padding: 2rem; max-width: 900px; margin: 0 auto; }
+h1 { font-size: 1.8rem; color: var(--primary); border-bottom: 3px solid var(--accent); padding-bottom: 0.5rem; margin-bottom: 1rem; }
+h2 { font-size: 1.4rem; color: var(--primary); margin-top: 2.5rem; margin-bottom: 1rem; padding-left: 0.8rem; border-left: 4px solid var(--accent); }
+h3 { font-size: 1.15rem; color: var(--primary); margin-top: 1.8rem; margin-bottom: 0.8rem; }
+p { margin-bottom: 1rem; text-align: justify; }
+ul, ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+li { margin-bottom: 0.5rem; }
+code { background: var(--code-bg); padding: 0.15rem 0.4rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: var(--code-bg); padding: 1rem; border-radius: 6px; overflow-x: auto; margin-bottom: 1.5rem; border: 1px solid var(--border); }
+pre code { background: none; padding: 0; }
+blockquote { border-left: 4px solid var(--accent); padding: 0.8rem 1.2rem; margin: 1.5rem 0; background: var(--info); border-radius: 0 6px 6px 0; }
+.card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+.formula-block { background: var(--code-bg); border: 1px solid var(--border); border-radius: 6px; padding: 1rem; margin: 1rem 0; overflow-x: auto; }
+.formula-explain { color: var(--text-secondary); font-size: 0.92em; margin-top: 0.5rem; padding-left: 1rem; border-left: 3px solid #ddd; }
+.highlight-box { background: var(--highlight); border: 1px solid #ffc107; border-radius: 6px; padding: 1rem; margin: 1rem 0; }
+.info-box { background: var(--info); border: 1px solid #bee5eb; border-radius: 6px; padding: 1rem; margin: 1rem 0; }
+.success-box { background: var(--success); border: 1px solid #c3e6cb; border-radius: 6px; padding: 1rem; margin: 1rem 0; }
+.subtitle { color: var(--text-secondary); font-size: 1rem; margin-bottom: 0.3rem; }
+.meta { color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 2rem; }
+table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; }
+th, td { border: 1px solid var(--border); padding: 0.6rem 0.8rem; text-align: left; }
+th { background: var(--code-bg); font-weight: 600; }
+details { margin-bottom: 1rem; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+summary { padding: 0.8rem 1.2rem; background: var(--code-bg); cursor: pointer; font-weight: 500; }
+details[open] summary { border-bottom: 1px solid var(--border); }
+details .answer { padding: 1rem 1.2rem; }
+svg { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; }
+.takeaway { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 8px; padding: 1.5rem; margin: 2rem 0; }
+.takeaway h2 { color: white; border-left-color: rgba(255,255,255,0.5); }
+.takeaway li { color: rgba(255,255,255,0.95); }
+.topic-nav { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 1.2rem; margin-bottom: 2rem; columns: 2; column-gap: 1.5rem; }
+.topic-nav a { display: block; color: var(--accent); text-decoration: none; font-size: 0.9rem; margin-bottom: 0.3rem; }
+.topic-nav a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+
+<h1>第27章：Quiz Questions & Detailed Answers</h1>
+<p class="subtitle">覆盖全书30个核心主题的综合自测题——从LLM基础到Agentic AI系统</p>
+<p class="meta">来源：Agentic AI · 第27章（pp. 513–564） · 阅读笔记</p>
+
+<div class="card">
+<h3>章节摘要</h3>
+<p>本章提供了一套全面的自测题，涵盖全书所有核心知识点。按30个主题分类，从基础概念（LLM架构、RL基础）到核心算法（PPO、DPO、GRPO）再到高级系统设计与Agentic AI。每道题都配有详尽的分析答案，适合用于自我评估：先尝试自行回答，再对照详细解答。</p>
+</div>
+
+<div class="topic-nav">
+<a href="#s1">27.1 Foundations</a>
+<a href="#s2">27.2 Core Algorithms</a>
+<a href="#s3">27.3 System Design</a>
+<a href="#s4">27.4 Practical/Debugging</a>
+<a href="#s5">27.5 GRPO Variants</a>
+<a href="#s6">27.6 DPO Extensions</a>
+<a href="#s7">27.7 GPU Architecture</a>
+<a href="#s8">27.8 Optimization/Training</a>
+<a href="#s9">27.9 Reward Model/SFT</a>
+<a href="#s10">27.10 System Architecture</a>
+<a href="#s11">27.11 Transformer</a>
+<a href="#s12">27.12 Flash Attention</a>
+<a href="#s13">27.13 LoRA/PEFT</a>
+<a href="#s14">27.14 Model Compression</a>
+<a href="#s15">27.15 MoE</a>
+<a href="#s16">27.16 Diversity</a>
+<a href="#s17">27.17 Speculative Decoding</a>
+<a href="#s18">27.18 Agentic RL</a>
+<a href="#s19">27.19 Listwise Rewards</a>
+<a href="#s20">27.20 RL for Reasoning</a>
+<a href="#s21">27.21 LLM Evaluation</a>
+<a href="#s22">27.22 Agentic Memory</a>
+<a href="#s23">27.23 Agent Orchestration</a>
+<a href="#s24">27.24 MCP</a>
+<a href="#s25">27.25 A2A</a>
+<a href="#s26">27.26 Multi-Agent</a>
+<a href="#s27">27.27 Agent Frameworks</a>
+<a href="#s28">27.28 Agentic Environments</a>
+<a href="#s29">27.29 Agentic UI</a>
+<a href="#s30">27.30 RAG</a>
+</div>
+
+<h2 id="s1">27.1 Foundations Questions</h2>
+
+<details>
+<summary>Q: Attention机制在decoder-only Transformer中的作用？为何是因果的？</summary>
+<div class="answer">
+<p>Attention机制允许每个token关注（attend to）其他token的表示并计算加权组合。在decoder-only Transformer中，attention是<strong>因果的</strong>（autoregressive）：token $t$ 只能关注位置 $1, \ldots, t$，永远不能看到未来token。</p>
+<div class="formula-block">
+$$\text{Attention}(Q,K,V) = \text{softmax}\!\left(\frac{QK^\top}{\sqrt{d_k}} + M\right)V$$
+<p class="formula-explain">其中 $M_{ij} = -\infty$ 当 $j > i$（未来位置），强制对应的attention权重为零。</p>
+</div>
+<p><strong>为什么因果？</strong>模型从左到右生成文本，推理时未来token根本不存在。训练时的因果掩码模拟了这一约束。</p>
+<div class="highlight-box">
+<p><strong>实践意义</strong>：因果性使得KV-cache优化成为可能——past tokens的keys和values不变，可以缓存复用，将生成复杂度从 $O(T^2)$ 降至每新token $O(T)$。</p>
+</div>
+</div>
+</details>
+
+<details>
+<summary>Q: 解释Flash Attention——它解决什么问题？如何实现？</summary>
+<div class="answer">
+<p>标准attention计算完整的 $T \times T$ 矩阵，需要 $O(T^2)$ 内存且受<strong>内存带宽瓶颈</strong>约束——GPU大部分时间在HBM（慢、大）和SRAM（快、小）之间搬运数据。</p>
+<p><strong>Flash Attention核心洞察</strong>：永远不在HBM中实体化完整attention矩阵。将计算分块（tiling），使每块在SRAM中完成，使用online softmax算法，只将最终输出写入HBM。</p>
+<p><strong>三个关键技术</strong>：</p>
+<ol>
+<li><strong>Tiling</strong>：将Q/K/V分成适合SRAM的小块</li>
+<li><strong>Online Softmax</strong>：用running statistics逐块计算，数学上精确等价</li>
+<li><strong>Recomputation</strong>：反向传播时从Q/K/V重新计算attention（便宜），而非存储 $T \times T$ 矩阵（昂贵）</li>
+</ol>
+<p><strong>结果</strong>：$O(T)$ HBM内存（非 $O(T^2)$），2–4× wall-clock加速，数值输出完全相同（不是近似）。</p>
+</div>
+</details>
+
+<details>
+<summary>Q: SFT、RLHF和DPO的高层区别？何时使用哪种？</summary>
+<div class="answer">
+<ul>
+<li><strong>SFT</strong>（监督微调）：模仿高质量示范。Loss = next-token prediction on curated data。教会格式和风格。</li>
+<li><strong>RLHF</strong>：从人类偏好训练reward model，然后用RL（PPO）优化policy。模型可以探索超越示范数据。教会人类偏好。</li>
+<li><strong>DPO</strong>：跳过reward model，直接在偏好对 $(y_w, y_l)$ 上用对比损失优化。与RLHF同目标，但pipeline更简单。</li>
+</ul>
+<div class="highlight-box">
+<p><strong>典型流水线</strong>：SFT（给模型好起点）→ RLHF/DPO（精炼偏好）。SFT alone容易产生冗长、对冲的回答；RLHF/DPO使输出更直接和aligned。</p>
+</div>
+<p><strong>选择指南</strong>：有gold-standard输出→SFT；有偏好对但计算有限→DPO；需要最高质量且基础设施允许→RLHF(PPO)。</p>
+</div>
+</details>
+
+<details>
+<summary>Q: Reward Model是什么？训练方式？可能出什么问题？</summary>
+<div class="answer">
+<p>Reward Model (RM) 是一个神经网络，接收(prompt, response)对并输出标量质量分数。训练数据：人类偏好对 $(y_w, y_l)$，其中 $y_w$ 被偏好。</p>
+<div class="formula-block">
+$$\mathcal{L} = -\log\sigma\bigl(R(y_w) - R(y_l)\bigr) \quad \text{(Bradley-Terry loss)}$$
+</div>
+<p><strong>可能出问题的地方</strong>：</p>
+<ol>
+<li><strong>Reward Hacking</strong>：Policy找到RM高分但实际低质的输出（过长、重复、含RM偏好短语）</li>
+<li><strong>分布偏移</strong>：RM在早期policy输出上训练，随policy变化RM得分变得不可靠</li>
+<li><strong>长度偏差</strong>：若RM学到"更长=更好"，policy就会产生不必要的冗长回答</li>
+</ol>
+</div>
+</details>
+
+<details>
+<summary>Q: 解释RL中的exploration-exploitation trade-off在LLM训练中的表现</summary>
+<div class="answer">
+<p>在RL中，agent必须平衡：<strong>利用</strong>已知的高reward行为 vs <strong>探索</strong>可能更好的未知行为。</p>
+<p>在LLM训练中的表现：</p>
+<ul>
+<li><strong>Exploitation</strong>：重复产生已知高reward模板（可能导致mode collapse）</li>
+<li><strong>Exploration</strong>：尝试新的回答方式，可能发现更好方案但也可能得到低reward</li>
+</ul>
+<p><strong>控制机制</strong>：KL penalty（$\beta$ 系数）约束policy不偏离reference太远；采样温度控制生成多样性；entropy bonus鼓励exploration。</p>
+</div>
+</details>
+
+<h2 id="s2">27.2 Core Algorithms Questions</h2>
+
+<details>
+<summary>Q: PPO的clipping机制如何防止过大更新？</summary>
+<div class="answer">
+<div class="formula-block">
+$$L^{CLIP} = \mathbb{E}\left[\min\bigl(r_t \hat{A}_t,\; \text{clip}(r_t, 1-\epsilon, 1+\epsilon)\hat{A}_t\bigr)\right]$$
+<p class="formula-explain">其中 $r_t = \pi_\theta(a_t|s_t)/\pi_{\text{old}}(a_t|s_t)$ 是概率比，$\epsilon = 0.2$ 是clip范围。</p>
+</div>
+<p><strong>工作原理</strong>：当advantage为正且ratio过大时（policy大幅增加概率），clip限制gradient；当advantage为负且ratio过小时，同样clip。这创建了一个"信任区域"（trust region），每步更新不会改变policy太多。</p>
+<p><strong>为什么不直接用大步长</strong>：RL损失是non-stationary的，大步长会"过度调整"，破坏已学到的好行为。小步+多epoch = 稳定改进。</p>
+</div>
+</details>
+
+<details>
+<summary>Q: 完整推导DPO损失函数</summary>
+<div class="answer">
+<p><strong>起点</strong>：RLHF的最优policy满足：</p>
+<div class="formula-block">
+$$\pi^*(y|x) = \frac{1}{Z(x)}\pi_{\text{ref}}(y|x)\exp\!\left(\frac{r(x,y)}{\beta}\right)$$
+</div>
+<p><strong>反解reward</strong>：</p>
+<div class="formula-block">
+$$r(x,y) = \beta\log\frac{\pi^*(y|x)}{\pi_{\text{ref}}(y|x)} + \beta\log Z(x)$$
+</div>
+<p><strong>代入Bradley-Terry</strong>：$P(y_w \succ y_l) = \sigma(r(x,y_w) - r(x,y_l))$，$Z(x)$ 消掉，得到：</p>
+<div class="formula-block">
+$$\mathcal{L}_{\text{DPO}} = -\mathbb{E}\!\left[\log\sigma\!\left(\beta\log\frac{\pi_\theta(y_w|x)}{\pi_{\text{ref}}(y_w|x)} - \beta\log\frac{\pi_\theta(y_l|x)}{\pi_{\text{ref}}(y_l|x)}\right)\right]$$
+<p class="formula-explain">DPO直接优化policy作为隐式reward model，无需显式RM训练或RL循环。</p>
+</div>
+</div>
+</details>
+
+<details>
+<summary>Q: GRPO如何消除value function？相比PPO有何优势？</summary>
+<div class="answer">
+<p><strong>核心思想</strong>：对每个prompt生成N个回答，用组内相对排名代替绝对value估计：</p>
+<div class="formula-block">
+$$\hat{A}_i = \frac{r_i - \mu_G}{\sigma_G}$$
+<p class="formula-explain">$r_i$ 是第 $i$ 个回答的reward，$\mu_G, \sigma_G$ 是该组的均值和标准差。</p>
+</div>
+<p><strong>相比PPO的优势</strong>：</p>
+<ul>
+<li>无需训练Critic网络（省50%内存 + 无value function失准问题）</li>
+<li>更稳定（组内归一化自然bounded）</li>
+<li>特别适合verifiable rewards（数学、代码有ground truth）</li>
+<li>实现更简单，超参更少</li>
+</ul>
+<p><strong>劣势</strong>：需要生成多个responses（计算开销）；对dense per-token reward支持不如PPO。</p>
+</div>
+</details>
+
+<h2 id="s3">27.3 System Design Questions</h2>
+
+<details>
+<summary>Q: LoRA微调 vs Full Fine-Tuning——何时选哪个？</summary>
+<div class="answer">
+<table>
+<tr><th>维度</th><th>LoRA (r=64)</th><th>Full Fine-Tune</th></tr>
+<tr><td>内存</td><td>原模型+少量adapter</td><td>3×模型大小（params+grad+optimizer）</td></tr>
+<tr><td>稳定性</td><td>高（冻结基础权重）</td><td>易灾难性遗忘</td></tr>
+<tr><td>质量</td><td>95-98% of Full FT</td><td>最佳</td></tr>
+<tr><td>适用</td><td>风格/格式适配</td><td>大规模能力变更</td></tr>
+</table>
+<div class="highlight-box">
+<p><strong>决策框架</strong>：①先用LoRA(r=64)，3× cheaper更稳定；②监控gradient norms，若持续>1.0则LoRA容量受限；③仅当win-rate plateau且gradient分析确认容量限制时切换Full FT；④Full FT需要LR/3，β×2，更频繁checkpoint。</p>
+</div>
+</div>
+</details>
+
+<details>
+<summary>Q: 设计一个完整的Reward Model训练pipeline</summary>
+<div class="answer">
+<p><strong>Phase 1 — 数据生成</strong>：50K-100K多样prompts，每prompt生成4-8个responses（不同温度0.3/0.7/1.0，多模型）。</p>
+<p><strong>Phase 2 — 偏好收集</strong>：人工标注（$2-5/pair，最佳质量）或LLM-judge（10×便宜，85-90%人类一致性）。筛除标注者不一致<70%的样本。最终100K-500K pairs。</p>
+<p><strong>Phase 3 — 训练</strong>：架构=base LLM+scalar head。Loss: Bradley-Terry。<strong>只训1个epoch！</strong>RM极易过拟合。验证准确率68-75%为健康值。</p>
+<p><strong>Phase 4 — 验证</strong>：hold-out准确率68-75%；与人类一致性>80%；长度偏差相关性<0.2。</p>
+</div>
+</details>
+
+<h2 id="s4">27.4 Practical & Debugging Questions</h2>
+
+<details>
+<summary>Q: KL散度爆炸——根因与修复</summary>
+<div class="answer">
+<div class="formula-block">
+$$D_{KL} = \mathbb{E}_{y\sim\pi_\theta}\!\left[\log\frac{\pi_\theta(y|x)}{\pi_{\text{ref}}(y|x)}\right]$$
+<p class="formula-explain">健康范围：训练中3-10，缓慢增长正常。突然spike=问题。</p>
+</div>
+<p><strong>根因</strong>：</p>
+<ol>
+<li><strong>学习率过高</strong>：Policy单步巨大偏移。Fix: 降LR 2-5×</li>
+<li><strong>Reward hacking</strong>：发现了exploit。Fix: 增大β，加RM ensemble</li>
+<li><strong>Mode collapse</strong>：集中于一个response模板。Fix: 增加entropy bonus</li>
+<li><strong>Bad batch</strong>：极端advantages推偏policy。Fix: gradient clipping</li>
+<li><strong>Value function发散</strong>：错误advantage估计。Fix: 切换GRPO</li>
+</ol>
+<div class="success-box">
+<p><strong>恢复协议</strong>：①检测：KL>15持续50+步；②即时：加载最后clean checkpoint(KL<10)；③调整：LR减半，β加倍，cliprange降至0.1；④恢复：前200步密切监控。</p>
+</div>
+</div>
+</details>
+
+<details>
+<summary>Q: 如何评估RL是否真正改善了模型？</summary>
+<div class="answer">
+<ol>
+<li><strong>Win-rate（最重要）</strong>：500+多样prompt，LLM-judge盲评A/B。>55%=有意义改进，>65%=强改进。要position-debiasing。</li>
+<li><strong>能力基准（回归检测）</strong>：MMLU/HumanEval/MATH/MT-Bench。任何>2%下降=alignment tax过高。</li>
+<li><strong>类别评估</strong>：Safety（拒绝率应增加）、Truthfulness（应持平或增加）、Helpfulness。</li>
+<li><strong>分布指标</strong>：response长度分布、词汇多样性、格式合规。</li>
+<li><strong>Human eval（金标准）</strong>：盲评A/B，3+标注员，仅用于最终模型选择。</li>
+</ol>
+<div class="highlight-box">
+<p><strong>红旗</strong>：RM分数↑ + win-rate平 = reward hacking；Win-rate↑ + benchmarks↓ = alignment tax过高，减弱RL强度。</p>
+</div>
+</div>
+</details>
+
+<details>
+<summary>Q: Monolithic vs Decoupled RLHF架构对比</summary>
+<div class="answer">
+<table>
+<tr><th>架构</th><th>优势</th><th>劣势</th><th>适用</th></tr>
+<tr><td>Monolithic</td><td>简单、易调试</td><td>GPU空闲60%，不超16 GPU</td><td>≤13B, 单节点, 研究</td></tr>
+<tr><td>Semi-decoupled</td><td>利用率好，64 GPU可扩展</td><td>仍共享硬件</td><td>13B-70B, 2-8节点</td></tr>
+<tr><td>Fully decoupled</td><td>独立优化，百GPU可扩展</td><td>分布式复杂度高</td><td>≥70B 生产训练</td></tr>
+</table>
+<p><strong>核心洞察</strong>：Generation是bandwidth-bound，Training是compute-bound。同一硬件无法两者都优化。解耦让gen节点用INT8/大batch，training节点用BF16/FSDP。</p>
+</div>
+</details>
+
+<h2 id="s5">27.5 GRPO Variants & Advanced RL</h2>
+
+<details>
+<summary>Q: DAPO如何改进标准GRPO？</summary>
+<div class="answer">
+<p>DAPO（Dynamic Adaptive Policy Optimization）引入5个关键改进：</p>
+<ol>
+<li><strong>Clip-Higher（非对称裁剪）</strong>：$\epsilon_{\text{low}}=0.2$，$\epsilon_{\text{high}}=0.28$。允许模型更激进地增加好action概率，同时仍限制抑制坏action。直觉：exploration需要比exploitation更大空间。</li>
+<li><strong>Overlong Filtering</strong>：命中max length的（截断的、无EOS）response从loss中完全mask。理由：截断response不含自然停止信号。</li>
+<li><strong>Token-level Loss</strong>：按所有序列总token数归一化（而非序列数），防止长序列主导gradient。</li>
+<li><strong>Soft Overlong Punishment</strong>：$r_{\text{soft}} = -c \cdot \max(0, \text{len} - L_{\text{soft}}) / (L_{\text{max}} - L_{\text{soft}})$</li>
+<li><strong>Dynamic Sampling</strong>：重新采样确保每批有success/failure混合。</li>
+</ol>
+<p><strong>适用场景</strong>：大规模reasoning RL，需要最大exploration且长completions（32K+ tokens）。</p>
+</div>
+</details>
+
+<details>
+<summary>Q: SAPO的soft gating与hard clipping有何不同？</summary>
+<div class="answer">
+<p>标准PPO/GRPO使用hard clipping: $\text{clip}(r, 1-\epsilon, 1+\epsilon)$。在边界处gradient突然降为零，创建"死区"——模型收不到学习信号。</p>
+<p><strong>SAPO替代方案</strong>：用smooth sigmoid gate，gradient被逐渐衰减而非突然清零。使用非对称温度：</p>
+<ul>
+<li>$\tau_+ = 1.0$：正advantage标准衰减</li>
+<li>$\tau_- = 1.05$：负advantage稍更激进衰减</li>
+</ul>
+<p><strong>优势</strong>：(1)无gradient cliff；(2)略超出clip范围的token仍贡献学习（衰减而非零）；(3)更稳定优化轨迹；(4)考虑完整序列上下文（sequence-coherent）。</p>
+</div>
+</details>
+
+<details>
+<summary>Q: GRPO中如何设置Group Size N？当所有响应相同时会发生什么？</summary>
+<div class="answer">
+<p>若所有N个responses相同：所有 $r_i$ 相等，$\sigma_G=0$，advantage $\hat{A}_i = (r_i - \mu_G)/\sigma_G$ 未定义（除以零）。实践中设 $\hat{A}_i=0$，该步学习信号为零——浪费。</p>
+<p><strong>Group Size经验法则</strong>：</p>
+<ul>
+<li>容易问题（pass rate>50%）：$N=4$ 足够</li>
+<li>中等问题：$N=8$</li>
+<li>困难问题（pass rate<20%）：$N=16$ 或更大（确保至少有1-2个成功）</li>
+</ul>
+<p><strong>防止同质化</strong>：①温度τ=0.7-1.0；②大N增加多样性概率；③DAPO：拒绝重复response并重新采样；④频率惩罚。</p>
+</div>
+</details>
+
+<h2 id="s6">27.6 DPO Extensions Questions</h2>
+
+<details>
+<summary>Q: f-DPO的散度选择比较——Forward KL vs JS vs Reverse KL</summary>
+<div class="answer">
+<ul>
+<li><strong>Reverse KL（默认DPO）</strong>：Mode-seeking。Policy集中于reference高概率区域。保守，适合safety。</li>
+<li><strong>Forward KL</strong>：Mass-covering。试图覆盖reference所有mode，包括低概率的。多样性好但可能生成低质量输出。</li>
+<li><strong>Jensen-Shannon</strong>：对称折中，平衡mode-coverage和mode-seeking。通常用于general alignment最佳。</li>
+<li><strong>Alpha-divergence（α=0.5）</strong>：在forward(α=0)和reverse(α=1)之间可调插值。</li>
+</ul>
+<div class="info-box">
+<p><strong>实践建议</strong>：从reverse KL（标准DPO）开始。若模型太保守→切换JS divergence。若多样性关键（创意写作）→尝试forward KL。</p>
+</div>
+</div>
+</details>
+
+<details>
+<summary>Q: SimPO——无reference model的DPO如何工作？</summary>
+<div class="answer">
+<p>SimPO不保留reference model，而是用<strong>序列对数概率的长度归一化版本</strong>作为隐式reward：</p>
+<div class="formula-block">
+$$r(x,y) = \frac{1}{|y|}\log\pi_\theta(y|x)$$
+</div>
+<p>优势：消除了需要加载和存储reference model的内存开销（70B模型省140GB）。</p>
+<p>增加了margin项 $\gamma$ 确保chosen和rejected之间有足够分离。</p>
+<p><strong>Trade-off</strong>：无reference锚定，模型有更大自由度collapse或drift。$\gamma$ margin和长度归一化部分缓解，但SimPO对激进训练可能不如DPO稳定。</p>
+</div>
+</details>
+
+<details>
+<summary>Q: Iterative RPO——为何对reasoning组合DPO与NLL loss？</summary>
+<div class="answer">
+<p>标准DPO用于reasoning有微妙失败模式：它学会<strong>辨别</strong>（给正确trace更高隐式reward），但不一定学会<strong>生成</strong>。</p>
+<p><strong>RPO的修正</strong>：在DPO loss上加NLL/SFT loss：</p>
+<div class="formula-block">
+$$L = L_{\text{DPO}} + \alpha \cdot L_{\text{NLL}}(y_w)$$
+<p class="formula-explain">NLL项显式训练模型逐步生成winning response；DPO项确保同时学会避免losing response。</p>
+</div>
+<p><strong>Iterative流程</strong>：生成 → 检查正确性 → 创建pairs → RPO训练 → 重复。每轮模型更善于生成正确reasoning，为下轮创造更高质量训练数据。</p>
+</div>
+</details>
+
+<h2 id="s7">27.7 GPU Architecture & Hardware</h2>
+
+<details>
+<summary>Q: GPU内存层次及其对LLM推理的重要性</summary>
+<div class="answer">
+<table>
+<tr><th>层级</th><th>大小</th><th>带宽</th><th>延迟</th></tr>
+<tr><td>Registers</td><td>~256KB/SM</td><td>—</td><td>0 cycles</td></tr>
+<tr><td>SRAM (Shared Mem)</td><td>~192-228KB/SM</td><td>~19 TB/s</td><td>~20 cycles</td></tr>
+<tr><td>L2 Cache</td><td>40-60MB</td><td>~5 TB/s</td><td>~200 cycles</td></tr>
+<tr><td>HBM</td><td>80GB (A100)</td><td>2-3.35 TB/s</td><td>~400 cycles</td></tr>
+<tr><td>CPU DRAM</td><td>512GB+</td><td>32-64 GB/s</td><td>~10K cycles</td></tr>
+</table>
+<div class="highlight-box">
+<p><strong>为什么重要</strong>：自回归生成每个token读取全部模型权重（70B≈140GB）。以2 TB/s HBM带宽，仅流式读取就需70ms。实际计算（矩阵向量乘）仅0.5ms。GPU 99%时间在等数据！Flash Attention正是利用这一瓶颈：将中间结果保持在SRAM中。</p>
+</div>
+</div>
+</details>
+
+<details>
+<summary>Q: Roofline Model——如何判断kernel是compute-bound还是memory-bound？</summary>
+<div class="answer">
+<p>Roofline模型将可达性能(FLOPS)绘制为arithmetic intensity (FLOPS/byte)的函数：</p>
+<ul>
+<li><strong>Memory-bound（交叉点左侧）</strong>：实际FLOPS = bandwidth × intensity。GPU利用率<100%</li>
+<li><strong>Compute-bound（交叉点右侧）</strong>：内存足够快，瓶颈是peak FLOPS</li>
+</ul>
+<p><strong>A100交叉点</strong>：312 TF / 2 TB/s = <strong>156 FLOP/byte</strong></p>
+<p><strong>LLM操作分析</strong>：</p>
+<ul>
+<li>自回归生成(batch=1)：140GB权重，140G FLOPs = 1 FLOP/byte → <strong>极度memory-bound</strong>（仅0.6% GPU利用率）</li>
+<li>训练forward(batch=128)：~200+ FLOP/byte → compute-bound，近峰值利用率</li>
+<li>Attention：取决于序列长度，Flash Attention无论长短都保持在SRAM</li>
+</ul>
+</div>
+</details>
+
+<h2 id="s8">27.8 Optimization & Training Questions</h2>
+
+<details>
+<summary>Q: 64×A100-80GB预算如何分配做70B模型RL训练？</summary>
+<div class="answer">
+<p>8节点 × 8 GPU = 64总计。分配：</p>
+<ul>
+<li><strong>Generation: 24 GPU（3节点）</strong>：6个vLLM实例，TP=4。INT8权重=70GB/model，剩余空间给KV cache。连续batching，batch≈128。</li>
+<li><strong>Scoring: 8 GPU（1节点）</strong>：RM(INT8, TP=4) + Reference model(INT8, TP=4)在同一节点交替。</li>
+<li><strong>Training: 32 GPU（4节点）</strong>：FSDP跨32 GPU。每GPU持有~2.2GB params + optimizer fraction。Gradient checkpointing。</li>
+</ul>
+<p><strong>预期吞吐</strong>：Generation: 480 responses/min；Training: batch=128，每~15s一步；Overlap: 训练step N(15s)期间generation产出~120 responses for step N+1。近完美流水线。</p>
+</div>
+</details>
+
+<details>
+<summary>Q: Curriculum Learning在RL训练中如何设置？</summary>
+<div class="answer">
+<p><strong>核心思想</strong>：逐步增加难度，让模型渐进学习。若直接给弱模型最难prompts → 全负reward → 无学习信号。</p>
+<p><strong>实施</strong>：</p>
+<ol>
+<li><strong>难度评分</strong>：用当前模型pass rate。Easy>80%, Medium 30-80%, Hard<30%</li>
+<li><strong>调度</strong>：Steps 0-1K: 70%/20%/10% → Steps 1K-5K: 30%/50%/20% → Steps 5K+: 10%/40%/50%</li>
+<li><strong>动态调整</strong>：每500步重评。pass rate>95%的prompt退休，引入新更难prompt</li>
+<li><strong>GRPO特殊考虑</strong>：Curriculum确保group总有success/failure混合，避免全零group</li>
+</ol>
+<p><strong>证据</strong>：DeepSeek-R1用隐式curriculum——从简单数学/代码开始，模型发展基础reasoning能力后解决渐进更难的问题。</p>
+</div>
+</details>
+
+<details>
+<summary>Q: Continuous Batching如何工作？为何对RLHF生成必不可少？</summary>
+<div class="answer">
+<p><strong>静态batching</strong>：启动B个序列，等所有完成。若一个生成500 tokens另一个50 tokens，50-token序列的GPU slot空闲450 tokens。</p>
+<p><strong>Continuous batching（迭代级调度）</strong>：每步检查哪些序列完成，立即插入新序列到空闲slot。GPU slot永不空闲。</p>
+<p><strong>为何对RLHF必要</strong>：</p>
+<ol>
+<li>RLHF生成多样输出（高温度），长度方差巨大（50到2000+ tokens）</li>
+<li>无continuous batching：平均利用率~40-50%</li>
+<li>有continuous batching：利用率>90%，吞吐2-3×提升</li>
+<li>vLLM调度器每decode步检查，支持KV cache抢占和CPU swap</li>
+</ol>
+</div>
+</details>
+
+<h2 id="s9">27.9 Reward Model & SFT Questions</h2>
+
+<details>
+<summary>Q: Process Reward Models (PRM) vs Outcome Reward Models (ORM)</summary>
+<div class="answer">
+<ul>
+<li><strong>ORM</strong>：仅评分最终答案。"整体response好吗？"简单但无法识别推理哪步出错。</li>
+<li><strong>PRM</strong>：评分每个中间步骤。"第3步推导正确吗？"信息量大得多但训练更难。</li>
+</ul>
+<p><strong>PRM对reasoning的优势</strong>：精确定位失败步骤；启用tree search（仅展开高分分支）；减少reward hacking；PRM+best-of-N在MATH上比ORM+best-of-N好10-20%。</p>
+<p><strong>PRM训练（Monte Carlo方法）</strong>：</p>
+<ol>
+<li>对每个问题逐步生成reasoning trace</li>
+<li>在每步k，从该点完成M=32次</li>
+<li>Step score = 达到正确答案的完成比例</li>
+<li>"正确"=完成率>50%，"错误"=<20%</li>
+</ol>
+<p><strong>在RLHF中使用PRM</strong>：Per-token rewards直接馈入GAE，每个token获即时反馈（非仅序列末尾），大幅改善长reasoning chain的credit assignment。</p>
+</div>
+</details>
+
+<h2 id="s10">27.10 System Architecture Extension</h2>
+
+<details>
+<summary>Q: vLLM train-inference mismatch问题及TIS/MIS修复</summary>
+<div class="answer">
+<p><strong>问题</strong>：用vLLM生成、训练框架(DeepSpeed/FSDP)更新时，同一模型同一权重产出不同输出。原因：</p>
+<ul>
+<li>不同并行策略导致数值精度差异</li>
+<li>不同实现的kernel（如attention）有微妙数值差异</li>
+<li>BF16舍入在不同计算顺序下累积不同</li>
+</ul>
+<p><strong>影响</strong>：KL penalty计算不准（reference model output用于KL）；importance ratio $r_t$ 有偏差。</p>
+<p><strong>TIS（Training-Inference Synchronization）</strong>：确保training和inference使用完全相同的数值路径。<strong>MIS（Model-Inference Synchronization）</strong>：用inference引擎的输出做训练的reference，消除systematic bias。</p>
+</div>
+</details>
+
+<details>
+<summary>Q: Speculative Decoding在RLHF中的应用</summary>
+<div class="answer">
+<p><strong>原理</strong>：用小draft model（如1-3B）提出候选tokens，大target model验证：</p>
+<ul>
+<li>Accept概率：$\min(1, p_{\text{large}}(\hat{x}) / q_{\text{draft}}(\hat{x}))$</li>
+<li>Rejection时：从残差分布 $\propto \max(0, p(x)-q(x))$ 采样</li>
+</ul>
+<p>数学上等价于直接从target model采样——<strong>无质量损失</strong>。平均3-4 tokens per verification step，加速2-3×。</p>
+<p><strong>对RLHF</strong>：Generation占60%计算。2-3×加速generation = 1.5-2× end-to-end加速。结合vLLM+INT8：generation不再是瓶颈。</p>
+<p><strong>限制</strong>：Draft model须共享tokenizer；高温度下效果减弱；需额外GPU内存；$k>5$ 收益递减。</p>
+</div>
+</details>
+
+<h2 id="s11">27.11 Transformer Architecture</h2>
+
+<details>
+<summary>Q: 为什么RoPE胜过learned absolute positional embeddings？</summary>
+<div class="answer">
+<p>RoPE通过旋转矩阵将相对位置编码直接注入Q/K点积。关键优势：</p>
+<ol>
+<li>Attention scores仅依赖相对距离 $i-j$，而非绝对位置——泛化到未见序列长度更好</li>
+<li>可通过频率缩放（NTK-aware, YaRN）扩展超出训练长度，无需重新训练</li>
+<li>无额外参数（rotations由position index确定性生成）</li>
+<li>Learned absolute embeddings固定于训练长度，4K训练的模型在8K失败</li>
+</ol>
+</div>
+</details>
+
+<details>
+<summary>Q: SwiGLU为何取代ReLU成为现代transformer标配？</summary>
+<div class="answer">
+<div class="formula-block">
+$$\text{FFN}(x) = W_2\bigl(\text{Swish}(W_1 x) \odot W_3 x\bigr), \quad \text{Swish}(x) = x \cdot \sigma(x)$$
+</div>
+<p><strong>优势</strong>：gating机制（$\odot W_3 x$）允许网络选择性抑制/放大维度——比pointwise ReLU更有表达力；Swish光滑无dead neurons（不像ReLU的零梯度区域）；同FLOP下benchmarks提升1-2%。</p>
+<p><strong>代价</strong>：需3个权重矩阵而非2个（通过将hidden dim从 $4d$ 降至 $8d/3$ 解决）。</p>
+</div>
+</details>
+
+<details>
+<summary>Q: Grouped Query Attention (GQA)及Llama-3为何使用它</summary>
+<div class="answer">
+<p>标准MHA: H query heads, H KV heads。GQA: H query heads但仅G < H KV heads（共享）。</p>
+<p><strong>Llama-3 70B</strong>：64 query heads, 8 KV heads（每KV head被8个query head共享）。</p>
+<p><strong>优势</strong>：KV cache减小 $H/G=8\times$（长序列推理中KV cache是主要内存开销）；质量损失<0.5%（KV patterns跨heads高度相关）；推理吞吐按KV cache减少比例提升（更多序列可放入内存）。</p>
+</div>
+</details>
+
+<details>
+<summary>Q: 为何decoder-only架构在LLM中胜出encoder-decoder？</summary>
+<div class="answer">
+<ol>
+<li><strong>统一目标</strong>：Pretraining = Fine-tuning = Inference全用next-token prediction，无架构错配</li>
+<li><strong>参数效率</strong>：所有参数贡献于生成。Encoder-decoder中encoder params在纯生成任务"浪费"</li>
+<li><strong>更简扩展</strong>：一个模型、一个loss、一组超参</li>
+<li><strong>KV cache效率</strong>：Decoder-only有一个KV cache；encoder-decoder有两个</li>
+<li><strong>涌现few-shot</strong>：Decoder-only天然支持in-context learning</li>
+</ol>
+</div>
+</details>
+
+<h2 id="s12">27.12 Flash Attention Questions</h2>
+
+<details>
+<summary>Q: Flash Attention做相同FLOPs但快2-4×，怎么可能？</summary>
+<div class="answer">
+<p>Flash Attention更快因为<strong>减少HBM内存流量而非FLOPs</strong>。标准attention在HBM中实体化n×n矩阵——softmax读取、PV乘法再读取——4次HBM round-trip over $O(n^2)$ data。</p>
+<p>Flash Attention将计算tiling使n×n矩阵完全在SRAM(19 TB/s)中计算和消费，永不写入HBM(2 TB/s)。</p>
+<p><strong>结果</strong>：HBM流量从 $O(n^2 d)$ 降至 $O(n^2 d/M)$，其中M是SRAM大小。同FLOPs，10-50×更少内存流量 → 2-4× wall-clock加速。</p>
+</div>
+</details>
+
+<details>
+<summary>Q: 为何Flash Attention不帮助FFN层？</summary>
+<div class="answer">
+<p>FFN层是<strong>compute-bound而非memory-bound</strong>。其arithmetic intensity（大batch GEMM约300 FLOP/byte）已超过roofline交叉点（A100为156 FLOP/byte）。</p>
+<p>Flash Attention帮助attention因为attention是深度memory-bound（I≈1-60 FLOP/byte）。保持数据在SRAM移除了内存瓶颈。</p>
+<p>对FFN：瓶颈已是Tensor Cores本身，减少内存流量无用。FFN受益于quantization（减小权重尺寸→更高arithmetic intensity）和更大batch。</p>
+</div>
+</details>
+
+<details>
+<summary>Q: 解释online softmax trick及其对Flash Attention的必要性</summary>
+<div class="answer">
+<p>标准softmax需要全局最大值 $m = \max_j x_j$ 才能计算任何输出——这要求先看到所有n个attention scores，强制实体化完整n×n矩阵。</p>
+<p><strong>Online softmax</strong>顺序处理块，维护running $(m, \ell, O)$ 状态：</p>
+<ol>
+<li>处理新块 → 更新running max: $m_{\text{new}} = \max(m_{\text{old}}, \max(s_{\text{new}}))$</li>
+<li>Rescale旧sum: $\ell_{\text{new}} = e^{m_{\text{old}}-m_{\text{new}}} \cdot \ell_{\text{old}} + \text{new terms}$</li>
+<li>Rescale输出: $O_{\text{new}} = \text{rescaled}(O_{\text{old}}) + \text{new contribution}$</li>
+</ol>
+<p>这是<strong>数学精确的</strong>——无近似。实现了逐块处理，每块在SRAM中完成，永不需要完整n×n矩阵在内存中。</p>
+</div>
+</details>
+
+<h2 id="s13">27.13 LoRA & PEFT Questions</h2>
+
+<details>
+<summary>Q: LoRA为何有效？低秩更新背后的理论依据？</summary>
+<div class="answer">
+<p>Aghajanyan等人证明fine-tuning在非常低的<strong>内在维度（intrinsic dimensionality）</strong>上操作——给定任务的有效参数空间远小于模型总参数量。175B模型对给定任务内在维度可能<10,000。</p>
+<p>LoRA直接利用这一点：约束更新为rank $r$（$W' = W + BA, B \in \mathbb{R}^{d \times r}$），将学习限制在每个权重矩阵的 $r$ 维子空间。因为真实任务子空间是低维的，几乎无损失，同时减少可训练参数100-1000×。</p>
+<div class="info-box">
+<p><strong>直觉</strong>：Fine-tuning不改变模型"知道什么"（full-rank W冻结）；只调整现有知识如何为新任务组合——一个低秩扰动。</p>
+</div>
+</div>
+</details>
+
+<details>
+<summary>Q: DoRA为何优于标准LoRA？</summary>
+<div class="answer">
+<p>DoRA（Weight-Decomposed Low-Rank Adaptation）将W分解为幅度$\|W\|$和方向$W/\|W\|$，然后仅对方向分量应用LoRA：</p>
+<div class="formula-block">
+$$W' = m \odot \frac{W + BA}{\|W + BA\|}$$
+<p class="formula-explain">$m$（幅度）也可训练，作为每输出神经元的简单标量。</p>
+</div>
+<p><strong>为何有效</strong>：Full fine-tuning自然独立更新幅度和方向。标准LoRA将两者耦合（低秩更新以受约束方式同时改变两者）。DoRA解耦它们，给予LoRA与full fine-tuning相同的"自由度"结构。结果：reasoning任务提升1-3%，推理时无额外计算（merge adapters）。</p>
+</div>
+</details>
+
+<details>
+<summary>Q: QLoRA vs full LoRA vs full fine-tuning对70B模型的比较</summary>
+<div class="answer">
+<table>
+<tr><th>方法</th><th>内存</th><th>GPU</th><th>质量</th><th>适用</th></tr>
+<tr><td>Full FT</td><td>560+ GB</td><td>8+ A100</td><td>Best</td><td>无限预算；继续预训练</td></tr>
+<tr><td>LoRA (r=16)</td><td>145 GB</td><td>2 A100</td><td>95-98%</td><td>一般微调</td></tr>
+<tr><td>QLoRA (r=16)</td><td>44 GB</td><td>1×48GB</td><td>93-96%</td><td>单GPU；原型；资源受限</td></tr>
+</table>
+<p><strong>决策树</strong>：(1)需要深层知识改变→Full FT；(2)适配新风格/格式→LoRA；(3)内存受限或快速迭代→QLoRA；(4)若rank重要：从r=16开始，loss plateau时增大。</p>
+</div>
+</details>
+
+<h2 id="s14">27.14 Model Compression Questions</h2>
+
+<details>
+<summary>Q: AWQ为何保护1%权重能保留99%质量？</summary>
+<div class="answer">
+<p>AWQ观察到权重重要性<strong>高度不均匀</strong>：乘以大activations的权重对输出贡献不成比例。</p>
+<p><strong>关键洞察</strong>：$\|W \cdot X\|$ 取决于W和X两者。小权重×大activation > 大权重×近零activation。</p>
+<p><strong>方法</strong>：识别top 1%"显著"通道（校准数据中activation magnitude一致大的），在量化前乘以 $s>1$（然后在activation中除以 $s$）。减少重要通道的相对量化误差。</p>
+<p><strong>结果</strong>：70B模型4-bit量化<1%质量损失，因为99%非显著权重可承受激进量化。</p>
+</div>
+</details>
+
+<details>
+<summary>Q: FP8 vs 4-bit vs BF16——何时用哪种？</summary>
+<div class="answer">
+<ul>
+<li><strong>BF16</strong>：训练（RLHF policy model），精度重要时。任何需梯度更新的模型默认BF16</li>
+<li><strong>FP8 (E4M3)</strong>：H100训练Transformer Engine（2×吞吐，<0.5%质量损失）。也用于H100推理最大吞吐</li>
+<li><strong>INT8/FP8推理</strong>：RLHF中的冻结模型（reference model, reward model）——不训练，降精度安全</li>
+<li><strong>4-bit (AWQ/GPTQ)</strong>：规模化推理服务。最佳memory/quality tradeoff。也用于QLoRA base model</li>
+<li><strong>2-bit</strong>：实验性；极端内存约束的edge部署。质量损失5-10%</li>
+</ul>
+<div class="highlight-box">
+<p><strong>规则</strong>：推理尽可能激进量化；训练保持BF16（H100上FP8）。</p>
+</div>
+</div>
+</details>
+
+<details>
+<summary>Q: NVIDIA 2:4 Structured Sparsity——加速和约束</summary>
+<div class="answer">
+<p>2:4 sparsity：每4个连续元素中恰好2个为零。在权重级别强制执行。</p>
+<p><strong>硬件支持</strong>：A100/H100 Tensor Cores有专用2:4 sparse GEMM指令，跳过零元素，实现<strong>精确2× throughput</strong>无软件开销。</p>
+<p><strong>约束</strong>：必须精确50% sparsity且遵循特定pattern。不能30%或70%，不能任意pattern。</p>
+<p><strong>实现</strong>：训练后（或微调期间），对每组4个权重，将最小2个置零，再fine-tune几百步恢复质量。大模型(70B+)质量损失典型<1%。</p>
+</div>
+</details>
+
+<h2 id="s15">27.15 Mixture of Experts Questions</h2>
+
+<details>
+<summary>Q: Mixtral 8x7B有47B参数但每token仅13B active，如何工作？</summary>
+<div class="answer">
+<p>Mixtral将每个FFN层替换为8个并行expert FFN。Router网络为每token选择<strong>Top-2 experts</strong>。</p>
+<ul>
+<li><strong>为何47B total</strong>：Attention layers共享(~5B) + 8 FFN experts(8×~5.25B=42B) ≈ 47B</li>
+<li><strong>为何13B active</strong>：每token仅2 experts激活。Active = attention(~5B) + 2 FFN(~2×5.25B) ≈ 13B</li>
+<li><strong>为何高效</strong>：计算成本按active params(13B)缩放，匹配13B dense模型。但容量（存储知识）按total params(47B)缩放。结果：Mixtral以13B计算成本匹配Llama-2 70B质量</li>
+</ul>
+<p><strong>内存成本</strong>：仍需所有47B params在内存中，但compute = 13B模型。</p>
+</div>
+</details>
+
+<details>
+<summary>Q: MoE中的Load Balancing问题及解决方案</summary>
+<div class="answer">
+<p>无约束时router倾向将大多数tokens发送至1-2个"热门"experts（马太效应）。导致：容量浪费（6/8 experts闲置）、计算不均（热门expert成瓶颈）。</p>
+<p><strong>解决方案</strong>：辅助load-balancing loss：</p>
+<div class="formula-block">
+$$L_{\text{bal}} = \alpha \cdot N \sum_{i=1}^{N} f_i \cdot p_i$$
+<p class="formula-explain">$f_i$ = 路由到expert $i$ 的token比例，$p_i$ = expert $i$ 的平均router概率。惩罚不均匀分布。</p>
+</div>
+<p>替代方案：Expert capacity factor——对每expert per batch的max tokens硬性限制，溢出tokens丢弃或重路由。典型 $\alpha$: 0.01-0.1。</p>
+</div>
+</details>
+
+<h2 id="s16">27.16 Diversity in Training Questions</h2>
+
+<details>
+<summary>Q: GRPO group中所有N个responses相同时会发生什么？</summary>
+<div class="answer">
+<p>所有N个responses相同时：所有 $r_i$ 相等，$\sigma_G = 0$，advantages $\hat{A}_i = (r_i - \mu_G)/\sigma_G$ 未定义（除以零）。实践中设 $\hat{A}_i = 0$——<strong>零学习信号，该步浪费</strong>。</p>
+<p><strong>预防措施</strong>：</p>
+<ol>
+<li>温度：使用 $\tau = 0.7\text{-}1.0$（非greedy）</li>
+<li>大N：$N=8\text{-}16$ 增加多样性概率</li>
+<li>DAPO方式：拒绝重复responses并重新采样</li>
+<li>频率惩罚：生成时惩罚重复n-grams</li>
+<li>监控：跟踪每组unique-response比率，若<50%则增温度</li>
+</ol>
+</div>
+</details>
+
+<details>
+<summary>Q: RLHF中diversity-quality tradeoff及如何检测mode collapse？</summary>
+<div class="answer">
+<p><strong>Tradeoff</strong>：高diversity（高entropy/温度）= 多样但可能random/低质；低diversity = 一致但重复、reward-hacked。</p>
+<p><strong>检测mode collapse的指标</strong>：</p>
+<ol>
+<li><strong>Response entropy</strong>：per-token $H = -\sum p_i \log p_i$，若快速下降→collapse</li>
+<li><strong>Unique n-gram ratio</strong>：同一prompt的responses间unique 4-grams比例。健康:>0.6</li>
+<li><strong>Reward分布宽度</strong>：$\sigma(\text{rewards})$ 趋近零→所有responses同质</li>
+<li><strong>KL divergence</strong>：$D_{KL}[\pi_\theta \| \pi_{\text{ref}}]$ 快速增长→policy朝narrow mode偏移</li>
+<li><strong>长度直方图</strong>：所有responses收敛到同一长度→模板行为</li>
+</ol>
+<p><strong>修复</strong>：增大KL系数β、增加entropy bonus、提高采样温度、或回滚到更早checkpoint。</p>
+</div>
+</details>
+
+<h2 id="s17">27.17 Speculative Decoding Questions</h2>
+
+<details>
+<summary>Q: Speculative Decoding号称"无质量损失"——如何证明？</summary>
+<div class="answer">
+<p>接受/拒绝方案保证<strong>分布等价</strong>：</p>
+<p>对每个draft token $\hat{x}$（draft概率 $q(\hat{x})$，target概率 $p(\hat{x})$）：</p>
+<ul>
+<li>以概率 $\min(1, p(\hat{x})/q(\hat{x}))$ 接受</li>
+<li>拒绝时：从残差分布 $\propto \max(0, p(x)-q(x))$ 采样</li>
+</ul>
+<p><strong>证明概要</strong>：输出token $x$ 的概率 = $q(x)\cdot\min(1,p(x)/q(x)) + P(\text{reject})\cdot\frac{\max(0,p(x)-q(x))}{\sum_y \max(0,p(y)-q(y))} = p(x)$</p>
+<p>加速来自摊销：draft好时（高acceptance），一次target forward pass确认多个token。保证无论draft质量如何都成立——差draft只给更低加速（更多rejection），不给更差质量。</p>
+</div>
+</details>
+
+<details>
+<summary>Q: Medusa vs Eagle vs N-gram对比</summary>
+<div class="answer">
+<table>
+<tr><th>方法</th><th>机制</th><th>Acceptance Rate</th><th>适用</th></tr>
+<tr><td>Medusa</td><td>k个并行预测head，独立预测t+i</td><td>60-80%</td><td>内存极紧；简单集成；2-2.5×加速</td></tr>
+<tr><td>Eagle</td><td>轻量自回归decoder在hidden states上</td><td>85-95%</td><td>最大加速(3-4×)；延迟敏感</td></tr>
+<tr><td>N-gram</td><td>基于历史n-gram匹配</td><td>视重复度</td><td>重复输出（代码/结构化数据）；零成本</td></tr>
+</table>
+<p><strong>核心差异</strong>：Medusa heads独立预测（不能condition t+2 on t+1）；Eagle自回归（捕获inter-token dependencies）。</p>
+</div>
+</details>
+
+<details>
+<summary>Q: 为何Speculative Decoding在高batch size下不帮忙？</summary>
+<div class="answer">
+<p>高batch(≥64)时，自回归生成已是compute-efficient：权重读取成本跨序列摊销，arithmetic intensity接近roofline交叉点。</p>
+<p><strong>Speculation的额外开销</strong>：draft生成成本、验证forward pass处理k extra tokens/序列、draft model内存、rejected tokens浪费compute。</p>
+<div class="highlight-box">
+<p><strong>规则</strong>：Speculative decoding用于<strong>延迟</strong>（小batch）；Batching用于<strong>吞吐</strong>（大batch）。不要组合。</p>
+</div>
+</div>
+</details>
+
+<h2 id="s18">27.18 Agentic RL Questions</h2>
+
+<details>
+<summary>Q: 标准RLHF（单轮PPO/DPO）为何对multi-step agents失败？</summary>
+<div class="answer">
+<p>标准RLHF优化单轮质量。Multi-step agents面临根本不同挑战：</p>
+<ol>
+<li><strong>Credit Assignment</strong>：50步trajectory中哪步导致失败？单轮reward对整个response均匀分配</li>
+<li><strong>Sparse Rewards</strong>：仅trajectory末尾有success/failure。PPO的GAE假设中间rewards</li>
+<li><strong>Action Space</strong>：结构化tool calls(JSON)，模型须同时学syntax+semantics+strategy</li>
+<li><strong>Non-stationarity</strong>：每步环境变化（tool outputs修改state）</li>
+<li><strong>Exploration</strong>：须发现新颖tool-use策略，非仅改写文本</li>
+</ol>
+<p><strong>解决方案</strong>：Trajectory-level GRPO（排名完整trajectories）、Process Reward Model（per-step反馈）、或在成功trajectories上做filtered SFT。</p>
+</div>
+</details>
+
+<details>
+<summary>Q: 如何设计agentic环境中的reward shaping？</summary>
+<div class="answer">
+<p>对WebArena类任务（如"找最便宜的航班"）：</p>
+<p><strong>Sparse reward</strong>（简单但难学）：最终状态匹配=1，否则=0。</p>
+<p><strong>Dense reward</strong>（更好用于训练）：</p>
+<ul>
+<li>进展reward：+0.1每个接近目标的页面</li>
+<li>效率惩罚：-0.01每个action</li>
+<li>里程碑reward：+0.3达到中间目标</li>
+<li>无效action惩罚：-0.05产生错误的actions</li>
+</ul>
+<p><strong>Potential-based shaping</strong>（保证不改变最优策略）：</p>
+<div class="formula-block">
+$$r_{\text{shaped}}(s,a,s') = r(s,a,s') + \gamma\Phi(s') - \Phi(s)$$
+<p class="formula-explain">$\Phi(s) = -\text{min\_steps\_to\_goal}(s)$，由启发式或learned value function估计。</p>
+</div>
+</div>
+</details>
+
+<h2 id="s19">27.19 Listwise Rewards Questions</h2>
+
+<details>
+<summary>Q: Listwise reward与pairwise preference有何区别？何时更好？</summary>
+<div class="answer">
+<p><strong>Pairwise</strong>：比较两个responses。$P(y_w \succ y_l)$。简单但信息有限。</p>
+<p><strong>Listwise</strong>：对N个responses给出完整排名或分数。信息量更大——一次比较可以建立N个responses间的相对关系。</p>
+<p><strong>Listwise优势</strong>：</p>
+<ul>
+<li>更高效的数据利用：N个responses的完整排名提供 $\binom{N}{2}$ 对pairwise信息</li>
+<li>更好的校准：绝对分数可直接比较跨batch的responses</li>
+<li>与GRPO天然匹配：group内已有排名结构</li>
+</ul>
+<p><strong>适用</strong>：有verifiable rewards（数学/代码）时listwise天然适用；纯主观偏好时pairwise更可靠（人类难以一致地rank超过5个选项）。</p>
+</div>
+</details>
+
+<h2 id="s20">27.20 RL for Reasoning Questions</h2>
+
+<details>
+<summary>Q: DeepSeek-R1的RL训练策略核心要素</summary>
+<div class="answer">
+<p>DeepSeek-R1展示了纯RL（无SFT warm-up）可以涌现reasoning能力：</p>
+<ol>
+<li><strong>GRPO + verifiable rewards</strong>：数学/代码问题有ground truth，reward=correctness</li>
+<li><strong>隐式curriculum</strong>：从简单问题开始，模型自然进展到更难问题</li>
+<li><strong>长context</strong>：允许32K+ tokens的reasoning chains</li>
+<li><strong>Emergent behaviors</strong>：模型自发发展了"let me think step by step"、self-correction、backtracking等行为——未被explicitly taught</li>
+</ol>
+<div class="highlight-box">
+<p><strong>关键洞察</strong>：RL + verifiable rewards + 足够context → reasoning能力涌现。不需要显式教模型"思考"——正确reward信号足矣。</p>
+</div>
+</div>
+</details>
+
+<details>
+<summary>Q: Goldilocks Filtering（难度过滤）在reasoning RL中的作用</summary>
+<div class="answer">
+<p><strong>问题</strong>：太容易的prompt（100% pass rate）→ 所有rewards相同 → 零gradient。太难的prompt（0% pass rate）→ 同样零gradient。</p>
+<p><strong>Goldilocks zone</strong>：选择pass rate在20-80%之间的prompts。这确保group内有success和failure的混合，产生有意义的advantages。</p>
+<p><strong>实施</strong>：</p>
+<ol>
+<li>用当前policy对prompt pool采样并检查pass rate</li>
+<li>过滤掉极端（太简单/太难）的prompts</li>
+<li>动态更新：随模型变强，之前"中等"的prompt变"简单"，引入新难题</li>
+</ol>
+</div>
+</details>
+
+<h2 id="s21">27.21 LLM Evaluation Questions</h2>
+
+<details>
+<summary>Q: LLM-as-Judge的关键设计决策和陷阱</summary>
+<div class="answer">
+<p><strong>设计决策</strong>：</p>
+<ul>
+<li><strong>Position bias</strong>：LLM偏好第一个response。Fix：swap A/B order，两次评判取平均</li>
+<li><strong>Verbosity bias</strong>：偏好更长回答。Fix：prompt中明确"简洁可以更好"</li>
+<li><strong>Self-enhancement bias</strong>：模型偏好自己风格的输出。Fix：用不同模型做judge</li>
+<li><strong>Rubric design</strong>：明确评判标准（helpfulness, correctness, safety分别打分而非一个overall分）</li>
+</ul>
+<p><strong>可靠性提升</strong>：使用多个judge模型取共识；报告95%置信区间；定期与人类标注对照校准。</p>
+</div>
+</details>
+
+<details>
+<summary>Q: Evaluation contamination问题及缓解</summary>
+<div class="answer">
+<p><strong>问题</strong>：benchmark数据可能出现在训练语料中，导致虚高分数。</p>
+<p><strong>检测</strong>：检查模型在benchmark变体（paraphrase/不同顺序）上的表现——若原版远高于变体则可能contaminated。</p>
+<p><strong>缓解</strong>：使用动态benchmarks（持续更新新题）；使用held-out private test sets；报告benchmark创建日期与模型训练日期的关系。</p>
+</div>
+</details>
+
+<h2 id="s22">27.22 Agentic Memory Questions</h2>
+
+<details>
+<summary>Q: Agent的四种记忆类型及其实现</summary>
+<div class="answer">
+<table>
+<tr><th>类型</th><th>存储</th><th>用途</th></tr>
+<tr><td>Working Memory</td><td>Context window</td><td>当前对话，即时tool结果</td></tr>
+<tr><td>Episodic Memory</td><td>Vector store</td><td>过去交互，用户偏好，session历史</td></tr>
+<tr><td>Semantic Memory</td><td>Knowledge graph / embeddings</td><td>事实，概念，领域知识</td></tr>
+<tr><td>Procedural Memory</td><td>Skill library / code</td><td>How-to过程，learned workflows</td></tr>
+</table>
+<p><strong>实践设计</strong>：Working memory = prompt engineering；Episodic = RAG on conversation logs；Semantic = structured KB + embeddings；Procedural = few-shot examples from successful past runs。</p>
+</div>
+</details>
+
+<details>
+<summary>Q: Context window管理——如何在有限token内平衡指令/历史/工具/记忆？</summary>
+<div class="answer">
+<p><strong>Token budget分配</strong>（假设128K context）：</p>
+<ul>
+<li>System prompt + instructions: 2-4K（固定）</li>
+<li>Tool descriptions: 2-8K（动态选择相关tools）</li>
+<li>Conversation history: 4-16K（最近k轮verbatim，旧的summarize）</li>
+<li>Retrieved memory/RAG: 4-16K</li>
+<li>Current input + output buffer: 剩余</li>
+</ul>
+<p><strong>Overflow处理</strong>：丢弃最不重要tool descriptions → 激进summarize history → 减少memory slots → 截断并警告用户。</p>
+<div class="highlight-box">
+<p><strong>关键原则</strong>：调用LLM<strong>前</strong>always count tokens。永不在inference时发现overflow。</p>
+</div>
+</div>
+</details>
+
+<h2 id="s23">27.23 Agent Orchestration Questions</h2>
+
+<details>
+<summary>Q: ReAct vs Plan-and-Execute编排模式比较</summary>
+<div class="answer">
+<p><strong>ReAct</strong>（Reason + Act）：</p>
+<ul>
+<li>循环：Thought → Action → Observation → Thought → ...</li>
+<li>每步基于所有previous observations决定next action</li>
+<li>优点：自适应——可根据tool输出改方向</li>
+<li>缺点：短视——无前瞻规划；可能stuck in loops；每次LLM call看全history（昂贵）</li>
+</ul>
+<p><strong>Plan-and-Execute</strong>：</p>
+<ul>
+<li>Phase 1: 生成完整计划；Phase 2: 顺序执行；Phase 3: 失败时re-plan</li>
+<li>优点：高效（规划一次比每步推理便宜）；独立步骤可并行</li>
+<li>缺点：脆弱计划——早期步骤失败可能使整个计划无效</li>
+</ul>
+<p><strong>选择</strong>：ReAct用于探索性任务/未知环境；Plan-and-Execute用于well-defined任务/并行化/成本敏感；<strong>Hybrid</strong>：高层Plan然后每步内ReAct（LangGraph推荐模式）。</p>
+</div>
+</details>
+
+<details>
+<summary>Q: 如何检测和防止agent无限循环？</summary>
+<div class="answer">
+<p><strong>检测方法</strong>：</p>
+<ol>
+<li><strong>Max iteration guard</strong>：硬限制（如25步）。简单但丢失genuinely长任务的工作</li>
+<li><strong>Action hash window</strong>：Hash最近k个(action/observation)对。若当前hash匹配最近w步中的hash → 循环</li>
+<li><strong>语义相似度</strong>：Embed recent actions。连续actions间cosine similarity>0.95 → 可能stuck</li>
+<li><strong>进展监控</strong>：定义task-specific progress metrics。N步内无进展则干预</li>
+</ol>
+<p><strong>恢复策略</strong>：①注入hint（"请尝试不同方法"）；②强制不同action（mask重复action）；③升级到用户；④回溯到循环前checkpoint尝试替代路径。</p>
+<p><strong>最佳实践</strong>：Max iterations(安全网) + hash-based detection(早期干预) + graceful escalation(保持用户信任)。</p>
+</div>
+</details>
+
+<h2 id="s24">27.24 MCP Protocol Questions</h2>
+
+<details>
+<summary>Q: MCP的N+M架构为何重要？</summary>
+<div class="answer">
+<p><strong>N×M问题</strong>：无MCP时，N个agent框架各自实现与M个tools的集成 = $N \times M$ 总集成。每增一tool需N个实现。</p>
+<p><strong>MCP的N+M方案</strong>：标准化接口。每agent实现一个MCP client(N)，每tool实现一个MCP server(M)。总 = $N + M$。</p>
+<p><strong>例</strong>：5框架 × 20 tools = 100集成 without MCP；With MCP: 5 clients + 20 servers = 25实现。</p>
+<p><strong>价值</strong>：Tool复用（build once, use everywhere）；Agent可移植性；生态增长（降低新tool门槛）；运行时动态组合。</p>
+<div class="info-box">
+<p><strong>类比</strong>：USB标准化了外设连接。MCP对agent-tool连接做同样的事。</p>
+</div>
+</div>
+</details>
+
+<details>
+<summary>Q: MCP四个核心原语及各自用途</summary>
+<div class="answer">
+<table>
+<tr><th>Primitive</th><th>方向</th><th>目的</th><th>示例</th></tr>
+<tr><td>Tools</td><td>Client → Server</td><td>执行actions</td><td>create_issue; query_db</td></tr>
+<tr><td>Resources</td><td>Client → Server</td><td>读取数据</td><td>文件内容; DB记录</td></tr>
+<tr><td>Prompts</td><td>Client → Server</td><td>获取模板</td><td>"Summarize this PR"模板</td></tr>
+<tr><td>Sampling</td><td>Server → Client</td><td>请求LLM生成</td><td>Server请LLM分类</td></tr>
+</table>
+<p><strong>关键区分</strong>：Tools有side effects（create/modify/delete），Resources是read-only——agent可自由读resources但需approval for tools。Sampling<strong>反转方向</strong>：server请求client的LLM帮助。Prompts是metadata（可复用模板）非执行。</p>
+</div>
+</details>
+
+<h2 id="s25">27.25 A2A (Agent-to-Agent) Questions</h2>
+
+<details>
+<summary>Q: Google A2A协议与MCP有何不同？何时两者都需要？</summary>
+<div class="answer">
+<p><strong>核心区分</strong>：</p>
+<ul>
+<li><strong>MCP</strong>：Agent ↔ Tool（结构化function calls，定义好的schema）</li>
+<li><strong>A2A</strong>：Agent ↔ Agent（opaque task delegation——你不知道对方agent内部如何工作）</li>
+</ul>
+<p><strong>A2A核心概念</strong>：Agent Cards（JSON描述能力）；Opaque execution（不见内部reasoning）；Task lifecycle: submitted → working → completed/failed（SSE streaming updates）。</p>
+<p><strong>两者都需要时</strong>：orchestrator用A2A委托"research this topic"给research agent → research agent用MCP调用web search/DB tools → 结果通过A2A返回orchestrator。</p>
+<div class="highlight-box">
+<p><strong>架构</strong>：A2A在inter-agent层；MCP在agent-tool层。完整系统两者都用：A2A做agents间协调，MCP做每agent的tool访问。</p>
+</div>
+</div>
+</details>
+
+<details>
+<summary>Q: Contract Net Protocol如何应用于LLM agents？</summary>
+<div class="answer">
+<p>Contract Net Protocol（CNP）是分布式AI的任务分配机制：</p>
+<ol>
+<li><strong>Announce</strong>：Manager广播任务描述</li>
+<li><strong>Bid</strong>：Agents评估自身能力，提交竞标（confidence; estimated cost; time）</li>
+<li><strong>Award</strong>：Manager选最佳bid</li>
+<li><strong>Execute</strong>：获胜agent执行</li>
+<li><strong>Report</strong>：报告结果</li>
+</ol>
+<p><strong>对LLM agents</strong>：Bidding = 自评估；Specialization涌现（code agents对code任务高竞标）；自然负载均衡。</p>
+<p><strong>限制</strong>：LLM经常高估能力（hallucinate confidence）。Bids应纳入track record（历史成功率）而非仅self-reported confidence。</p>
+</div>
+</details>
+
+<h2 id="s26">27.26 Multi-Agent Systems Questions</h2>
+
+<details>
+<summary>Q: Centralized vs Decentralized多agent架构比较</summary>
+<div class="answer">
+<table>
+<tr><th>架构</th><th>特点</th><th>优势</th><th>劣势</th><th>适用</th></tr>
+<tr><td>Centralized (Supervisor)</td><td>一个orchestrator路由到specialists</td><td>控制清晰；易调试</td><td>单点故障；token瓶颈</td><td>明确workflow；3-5 agents</td></tr>
+<tr><td>Decentralized (P2P)</td><td>Agents直接通信</td><td>弹性；水平扩展</td><td>难调试；O(n²)通信</td><td>弹性系统；创意任务</td></tr>
+<tr><td>Hierarchical</td><td>树结构+子管理器</td><td>局部自治+全局协调</td><td>设计复杂</td><td>大型(>10 agent)系统</td></tr>
+</table>
+<p><strong>决策</strong>：需要可预测性和审计→集中式；需要弹性和创意→分布式；大规模→层级式。</p>
+</div>
+</details>
+
+<details>
+<summary>Q: CTDE（Centralized Training, Decentralized Execution）为何重要？</summary>
+<div class="answer">
+<p><strong>问题</strong>：多agent RL中，每个agent的环境是non-stationary的（其他agents同时改变policy），独立训练不稳定。</p>
+<p><strong>CTDE方案</strong>：</p>
+<ul>
+<li><strong>训练时</strong>：集中式critic访问所有agents的observations和actions: $V(s_1, s_2, ..., s_n, a_1, ..., a_n)$。消除non-stationarity。</li>
+<li><strong>执行时</strong>：每agent仅基于自身observation行动: $a_i = \pi_i(o_i)$。无需通信。</li>
+</ul>
+<p><strong>对LLM agents</strong>：训练时用shared context(所有agents的trace)训练更好的个体策略；部署时每agent独立运行（低延迟、可扩展）。</p>
+</div>
+</details>
+
+<h2 id="s27">27.27 Agent Development Frameworks</h2>
+
+<details>
+<summary>Q: LangGraph vs AutoGen vs CrewAI比较</summary>
+<div class="answer">
+<table>
+<tr><th>维度</th><th>LangGraph</th><th>AutoGen</th><th>CrewAI</th></tr>
+<tr><td>编排</td><td>显式状态图（nodes+edges）</td><td>隐式（conversation-based）</td><td>隐式（role-based）</td></tr>
+<tr><td>状态管理</td><td>TypedDict schemas; checkpointing</td><td>Conversation history</td><td>简单task state</td></tr>
+<tr><td>HITL</td><td>一等公民（interrupt nodes）</td><td>Via approval tools</td><td>有限</td></tr>
+<tr><td>生产就绪</td><td>LangGraph Cloud; persistence</td><td>有限</td><td>Growing</td></tr>
+<tr><td>学习曲线</td><td>高（graph concepts）</td><td>低</td><td>非常低</td></tr>
+</table>
+<p><strong>选择</strong>：需要细粒度控制/复杂条件流/生产部署→LangGraph；快速原型/code execution→AutoGen；简单role-based teams/最少代码→CrewAI；最大性能/无lock-in→自定义。</p>
+</div>
+</details>
+
+<details>
+<summary>Q: 如何测试和评估生产中的agent系统？</summary>
+<div class="answer">
+<p><strong>Testing Pyramid</strong>：</p>
+<ol>
+<li><strong>Unit Tests（快；多）</strong>：独立测试tools（mock LLM）；测试prompt templates；测试parsers</li>
+<li><strong>Integration Tests（中速）</strong>：完整agent loops确定性输入；"Golden trajectory"测试；Tool chain端到端</li>
+<li><strong>Behavioral Tests（慢；少）</strong>：安全约束遵守？适时澄清？Token/cost budget内？</li>
+</ol>
+<p><strong>生产评估</strong>：A/B testing（5%流量到新版）；Shadow mode（新旧并行比较）；LLM-as-judge自动质量评分；用户满意度（thumbs up/down）。</p>
+<p><strong>关键指标</strong>：Task Success Rate (TSR)——agent无需人工干预正确完成任务的比例。</p>
+</div>
+</details>
+
+<h2 id="s28">27.28 Agentic Environments Questions</h2>
+
+<details>
+<summary>Q: 为Web browsing agent设计reward function</summary>
+<div class="answer">
+<p>对WebArena类任务：</p>
+<p><strong>Sparse reward</strong>：最终状态匹配ground truth=1，否则=0。简单但难以学习。</p>
+<p><strong>Dense reward（更好用于训练）</strong>：进展reward(+0.1接近目标的页面)、效率惩罚(-0.01/action)、里程碑reward(+0.3达中间目标)、无效action惩罚(-0.05)。</p>
+<p><strong>Potential-based shaping（保持最优策略）</strong>：$r_{\text{shaped}} = r + \gamma\Phi(s') - \Phi(s)$，$\Phi(s) = -\text{min\_steps\_to\_goal}(s)$。</p>
+<p><strong>挑战</strong>：部分可观测性；随机环境（页面内容变化）；reward hacking。</p>
+</div>
+</details>
+
+<details>
+<summary>Q: SWE-bench为何是特别困难的agent benchmark？</summary>
+<div class="answer">
+<p>SWE-bench测试agents解决真实GitHub Python repositories的issues：</p>
+<ol>
+<li><strong>Repository-scale context</strong>：须理解100K+行代码库，无法fit in context window</li>
+<li><strong>Underspecified tasks</strong>：Issues含隐式上下文，agent须推断真实需求</li>
+<li><strong>Multi-file edits</strong>：解决方案常跨多文件有级联依赖</li>
+<li><strong>Test verification</strong>：须通过现有tests AND验证fix的新tests</li>
+<li><strong>No hand-holding</strong>：需要完整software engineering workflow</li>
+</ol>
+<p><strong>SOTA(2024-2025)</strong>：最佳agents解决~50% SWE-bench Verified（curated subset）；Full SWE-bench ~30%。</p>
+<div class="info-box">
+<p><strong>训练洞察</strong>：SWE-bench暴露了"coding ability"与"software engineering ability"的差距。RL on SWE-bench类环境教agents exploration和planning策略，而非仅code generation。</p>
+</div>
+</div>
+</details>
+
+<h2 id="s29">27.29 Agentic UI Framework Questions</h2>
+
+<details>
+<summary>Q: Chat-based vs Canvas-based UI范式比较</summary>
+<div class="answer">
+<p><strong>Chat-based</strong>（ChatGPT默认）：线性消息流。Pro: 熟悉UX、自然探索。Con: 生成artifacts埋在对话中，难以迭代。</p>
+<p><strong>Canvas/Artifact-based</strong>（Claude Artifacts, Cursor）：侧面板显示生成内容，chat panel给指令。Pro: Artifacts独立于chat persist、用户可直接编辑、版本历史。Con: UI更复杂，需artifact类型检测。</p>
+<p><strong>选择</strong>：Chat→brainstorming/Q&A/快速任务/mobile；Canvas→代码生成/文档/数据分析；Hybrid（现代UI）→默认chat，检测到代码/文档/可视化时auto-elevate to canvas。</p>
+<p><strong>对训练的影响</strong>：Canvas UI提供显式edit反馈（用户修改artifact），可用于online learning。</p>
+</div>
+</details>
+
+<details>
+<summary>Q: Human-in-the-loop approval gates设计</summary>
+<div class="answer">
+<p><strong>三级模型</strong>：</p>
+<ol>
+<li><strong>Auto-approve（无gate）</strong>：安全可逆actions。读操作、搜索、计算</li>
+<li><strong>Notify（soft gate）</strong>：有影响但可恢复。发送email、创建draft。Agent继续但通知用户可undo</li>
+<li><strong>Block（hard gate）</strong>：不可逆或高风险。删除数据、转账、发布内容。Agent<strong>必须</strong>等待显式approval</li>
+</ol>
+<p><strong>设计原则</strong>：最小化中断（太多gates=用户放弃agent）；Show context（为什么、会改变什么、如何undo）；Batch approvals（5个file writes一起展示）；Timeout handling；从approval patterns学习自动升级。</p>
+<p><strong>实现</strong>：MCP's tool annotations（destructiveHint, readOnlyHint）驱动自动gate分配。</p>
+</div>
+</details>
+
+<h2 id="s30">27.30 RAG & Agentic RAG Questions</h2>
+
+<details>
+<summary>Q: Reciprocal Rank Fusion (RRF)为何在hybrid retrieval中有效？</summary>
+<div class="answer">
+<div class="formula-block">
+$$\text{RRF}(d) = \sum_{r \in R} \frac{1}{k + r(d)}$$
+<p class="formula-explain">$r(d)$是文档$d$在retriever $r$中的排名，$k=60$防止高排名文档过度主导。</p>
+</div>
+<p><strong>为何有效</strong>：</p>
+<ol>
+<li><strong>无需score normalization</strong>：BM25分数无界，dense similarity在[-1,1]。RRF仅用ranks，直接可比</li>
+<li><strong>对outliers鲁棒</strong>：单个retriever异常高分不会dominate</li>
+<li><strong>互补信号</strong>：BM25捕获exact keyword matches；dense retrieval捕获semantic similarity。两者都高排名的文档被boost</li>
+</ol>
+<p><strong>实践</strong>：Hybrid（BM25 + dense + RRF）在85%+ benchmarks上优于任一单独retriever。</p>
+</div>
+</details>
+
+<details>
+<summary>Q: Agentic RAG与标准RAG有何不同？</summary>
+<div class="answer">
+<p><strong>标准RAG</strong>：固定pipeline：query → retrieve → generate。无法：决定是否需要retrieval、评估retrieved docs是否充分、失败时改写query、多步combine信息。</p>
+<p><strong>Agentic RAG</strong>将retrieval视为agent MDP中的action：</p>
+<ul>
+<li><strong>Retrieve-or-not决策</strong>：评估是否已知答案（跳过retrieval）</li>
+<li><strong>Query planning</strong>：分解复杂问题为sub-queries</li>
+<li><strong>Self-evaluation</strong>：retrieval后评估relevance，不足则reformulate或换source</li>
+<li><strong>Multi-hop reasoning</strong>：retrieve → reason → identify gaps → retrieve again</li>
+<li><strong>Source routing</strong>：路由到适当knowledge base</li>
+</ul>
+<div class="highlight-box">
+<p><strong>架构差异</strong>：标准RAG = 确定性pipeline。Agentic RAG = 有条件转换的状态机（LangGraph模式：retrieve/grade/rewrite/generate nodes）。Trade-off: 更准确但更多延迟。</p>
+</div>
+</div>
+</details>
+
+<details>
+<summary>Q: Self-RAG vs CRAG改进retrieval质量的比较</summary>
+<div class="answer">
+<p><strong>Self-RAG</strong>（Asai et al., 2023）：</p>
+<ul>
+<li>训练special reflection tokens进LLM词表（[Retrieve], [IsRel], [IsSup], [IsUse]）</li>
+<li>模型自己决定何时retrieve（不是每query都需要）</li>
+<li>Retrieval后model self-grade：passage相关吗？答案follow from it吗？</li>
+<li>Pro: 单模型handle一切。Con: 需要custom training</li>
+</ul>
+<p><strong>CRAG</strong>（Corrective RAG, Yan et al., 2024）：</p>
+<ul>
+<li>用轻量retrieval evaluator（独立模型）评判retrieved docs</li>
+<li>三actions：Correct（直接用）、Ambiguous（augment with web search）、Incorrect（丢弃，fallback to web）</li>
+<li>Pro: 与任何frozen LLM配合。Con: 额外模型+延迟</li>
+</ul>
+<p><strong>核心区别</strong>：Self-RAG将retrieval决策嵌入LLM内（需训练）；CRAG是pipeline approach包裹任何LLM（无需训练）。Self-RAG更优雅；CRAG对现有模型更实用。</p>
+</div>
+</details>
+
+<details>
+<summary>Q: Lost-in-the-middle问题及缓解策略</summary>
+<div class="answer">
+<p><strong>问题</strong>：当retrieved context长时，LLM不成比例地关注开头和结尾信息，忽略中间。答案在passage 5/10时模型可能miss。</p>
+<p><strong>实证</strong>：Liu et al.(2023)显示20-document retrieval中，relevant document在位置5-15 vs 1-3时准确率下降15-20%。</p>
+<p><strong>缓解策略</strong>：</p>
+<ol>
+<li><strong>Re-rank + truncate</strong>：cross-encoder re-rank，仅保top 3-5</li>
+<li><strong>Strategic ordering</strong>：最高relevance放开头和结尾，低relevance在中间</li>
+<li><strong>Contextual compression</strong>：每passage summarize至1-2句</li>
+<li><strong>Map-reduce</strong>：独立处理每passage，再combine。完全消除position effects</li>
+<li><strong>Citation prompting</strong>：要求model cite使用了哪个passage，强制attention to all</li>
+</ol>
+<div class="success-box">
+<p><strong>Best practice</strong>：Retrieve many (20+) → re-rank to top 3-5 → order by relevance (best first)。对大多数use cases完全绕过此问题。</p>
+</div>
+</div>
+</details>
+
+<div class="takeaway">
+<h2>Key Takeaways</h2>
+<ul>
+<li>从Foundations到Agentic AI，30个主题构成完整知识图谱——每个问题都设计为暴露surface-level familiarity与genuine expertise的差距</li>
+<li>核心RL算法（PPO/DPO/GRPO）的理解不仅需要公式推导，更需掌握failure modes和debugging protocols</li>
+<li>系统设计问题（GPU分配、架构选择、continuous batching）测试将理论映射到实践约束的能力</li>
+<li>Agentic AI系统（MCP/A2A/Memory/Orchestration）代表从"模型优化"到"系统工程"的思维转变</li>
+<li>每道题的Review指向原章节——形成自然的知识回路，适合迭代学习</li>
+</ul>
+</div>
+
+</body>
+</html>

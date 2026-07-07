@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第3章 阅读笔记：Introduction to Reinforcement Learning</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]})"></script>
+<style>
+:root { --primary: #2c3e50; --accent: #3498db; --bg: #fafbfc; --card-bg: #ffffff; --border: #e1e4e8; --text: #24292e; --text-secondary: #586069; --code-bg: #f6f8fa; --highlight: #fff3cd; --success: #d4edda; --info: #d1ecf1; }
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; line-height: 1.8; color: var(--text); background: var(--bg); padding: 2rem; max-width: 900px; margin: 0 auto; }
+h1 { font-size: 1.8rem; color: var(--primary); border-bottom: 3px solid var(--accent); padding-bottom: 0.5rem; margin-bottom: 1rem; }
+h2 { font-size: 1.4rem; color: var(--primary); margin-top: 2.5rem; margin-bottom: 1rem; padding-left: 0.8rem; border-left: 4px solid var(--accent); }
+h3 { font-size: 1.15rem; color: var(--primary); margin-top: 1.8rem; margin-bottom: 0.8rem; }
+p { margin-bottom: 1rem; text-align: justify; }
+ul, ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+li { margin-bottom: 0.5rem; }
+code { background: var(--code-bg); padding: 0.15rem 0.4rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: var(--code-bg); padding: 1rem; border-radius: 6px; overflow-x: auto; margin-bottom: 1.5rem; border: 1px solid var(--border); }
+pre code { background: none; padding: 0; }
+blockquote { border-left: 4px solid var(--accent); padding: 0.8rem 1.2rem; margin: 1.5rem 0; background: var(--info); border-radius: 0 6px 6px 0; }
+.card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+.formula-block { background: var(--code-bg); border: 1px solid var(--border); border-radius: 6px; padding: 1rem; margin: 1rem 0; overflow-x: auto; }
+.formula-explain { color: var(--text-secondary); font-size: 0.92em; margin-top: 0.5rem; padding-left: 1rem; border-left: 3px solid #ddd; }
+.highlight-box { background: var(--highlight); border: 1px solid #ffc107; border-radius: 6px; padding: 1rem; margin: 1rem 0; }
+.info-box { background: var(--info); border: 1px solid #bee5eb; border-radius: 6px; padding: 1rem; margin: 1rem 0; }
+.success-box { background: var(--success); border: 1px solid #c3e6cb; border-radius: 6px; padding: 1rem; margin: 1rem 0; }
+.subtitle { color: var(--text-secondary); font-size: 1rem; margin-bottom: 0.3rem; }
+.meta { color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 2rem; }
+table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; }
+th, td { border: 1px solid var(--border); padding: 0.6rem 0.8rem; text-align: left; }
+th { background: var(--code-bg); font-weight: 600; }
+details { margin-bottom: 1rem; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+summary { padding: 0.8rem 1.2rem; background: var(--code-bg); cursor: pointer; font-weight: 500; }
+details[open] summary { border-bottom: 1px solid var(--border); }
+details .answer { padding: 1rem 1.2rem; }
+svg { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; }
+.takeaway { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 8px; padding: 1.5rem; margin: 2rem 0; }
+.takeaway h2 { color: white; border-left-color: rgba(255,255,255,0.5); }
+.takeaway li { color: rgba(255,255,255,0.95); }
+</style>
+</head>
+<body>
+
+<h1>第3章 阅读笔记：Introduction to Reinforcement Learning</h1>
+<p class="subtitle">H. Roitman — <em>The Hitchhiker's Guide to Agentic AI</em></p>
+<p class="meta">页码 119–132 · 笔记生成时间：2025-06-25</p>
+
+<div class="card">
+<h3>章节摘要</h3>
+<p>本章系统介绍了强化学习（Reinforcement Learning, RL）的完整理论基础。RL 是一种智能体通过与环境交互、接收奖励反馈来学习最优决策策略的范式。章节从马尔可夫决策过程（MDP）出发，依次阐述了价值函数体系、策略梯度方法、Actor-Critic 架构，以及广义优势估计（GAE）的偏差-方差权衡。随后讨论了 On/Off-Policy 区别、Model-Based/Free 对比，以及奖励塑形（Reward Shaping）的数学保证。全章始终以 LLM 训练为应用视角，解释了为何 PPO/GRPO 成为大模型 RL 训练的主流方案。</p>
+</div>
+
+<!-- ==================== 3.1 MDP ==================== -->
+<h2>3.1 马尔可夫决策过程 (The Markov Decision Process)</h2>
+
+<p><strong>马尔可夫决策过程</strong>（MDP）是 RL 的数学基础框架。它精确定义了智能体（agent）与环境（environment）交互的完整规则。可以将 MDP 理解为一本"游戏规则书"——告诉你世界有哪些状态、你能做什么动作、做完之后世界会怎么变、以及你能得到什么奖励。</p>
+
+<div class="card">
+<h3>MDP 五元组定义</h3>
+<p>MDP 由五元组 $\mathcal{M} = (S, A, P, R, \gamma)$ 完整定义：</p>
+<ul>
+<li><strong>$S$（状态空间, State Space）</strong>：环境所有可能状态的集合。在 LLM 中，一个"状态"就是当前已经生成的 token 序列。</li>
+<li><strong>$A$（动作空间, Action Space）</strong>：智能体在每个状态下可执行的所有动作。对 LLM 而言，动作空间就是整个词表（vocabulary），通常为 32K–128K 个 token。</li>
+<li><strong>$P: S \times A \times S \to [0,1]$（转移函数, Transition Function）</strong>：在状态 $s$ 执行动作 $a$ 后到达状态 $s'$ 的条件概率 $P(s'|s,a)$。在 LLM 生成中，转移是确定性的：$s_{t+1} = s_t \oplus a_t$（把新 token 追加到序列末尾）。</li>
+<li><strong>$R: S \times A \times S \to \mathbb{R}$（奖励函数, Reward Function）</strong>：一次状态转移获得的即时标量反馈。在 RLHF 中通常只有序列结束时才给出奖励（稀疏奖励）。</li>
+<li><strong>$\gamma \in [0,1]$（折扣因子, Discount Factor）</strong>：控制未来奖励相对于即时奖励的重要程度。$\gamma=0$ 表示只关心眼前，$\gamma=1$ 表示未来与现在同等重要。LLM 场景中通常设 $\gamma=1.0$。</li>
+</ul>
+</div>
+
+<h3>马尔可夫性质 (Markov Property)</h3>
+
+<p>MDP 的核心假设是<strong>马尔可夫性</strong>——"未来只取决于现在，与过去无关"：</p>
+
+<div class="formula-block">
+$$P(s_{t+1} | s_t, a_t, s_{t-1}, a_{t-1}, \ldots, s_0, a_0) = P(s_{t+1} | s_t, a_t)$$
+</div>
+<div class="formula-explain">给定当前状态 $s_t$ 和当前动作 $a_t$，下一个状态 $s_{t+1}$ 的概率分布与所有历史完全无关。这意味着"当前状态"已包含了做决策所需的全部信息。</div>
+
+<div class="highlight-box">
+<strong>类比理解</strong>：想象你在下国际象棋——你只需要看当前棋盘上所有棋子的位置就能决定最优走法，不需要回忆前30步是怎么走过来的。棋盘的当前布局就是"状态"，它包含了所有决策所需的信息。
+</div>
+
+<h3>智能体-环境交互循环</h3>
+
+<p>在每个时间步 $t$，交互过程如下：</p>
+<ol>
+<li>智能体观察当前状态 $s_t$</li>
+<li>智能体根据策略选择动作 $a_t \sim \pi(\cdot|s_t)$</li>
+<li>环境转移到新状态 $s_{t+1} \sim P(\cdot|s_t, a_t)$ 并给出奖励 $r_t = R(s_t, a_t, s_{t+1})$</li>
+<li>重复，直到到达终止状态或到达最大步数 $T$</li>
+</ol>
+
+<p>一次完整的交互序列 $\tau = (s_0, a_0, r_0, s_1, a_1, r_1, \ldots, s_T)$ 称为一条<strong>轨迹</strong>（trajectory）或<strong>回合</strong>（episode）。</p>
+
+<svg width="700" height="180" viewBox="0 0 700 180">
+<defs><marker id="arrow" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#3498db"/></marker></defs>
+<rect x="50" y="50" width="150" height="80" rx="10" fill="#d6eaf8" stroke="#3498db" stroke-width="2"/>
+<text x="125" y="85" text-anchor="middle" font-size="14" font-weight="bold" fill="#2c3e50">智能体 (Agent)</text>
+<text x="125" y="110" text-anchor="middle" font-size="12" fill="#5dade2">策略 π(a|s)</text>
+<rect x="450" y="50" width="150" height="80" rx="10" fill="#d5f5e3" stroke="#27ae60" stroke-width="2"/>
+<text x="525" y="85" text-anchor="middle" font-size="14" font-weight="bold" fill="#2c3e50">环境 (Env)</text>
+<text x="525" y="110" text-anchor="middle" font-size="12" fill="#27ae60">P(s'|s,a), R</text>
+<line x1="200" y1="70" x2="448" y2="70" stroke="#3498db" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="325" y="60" text-anchor="middle" font-size="12" fill="#3498db">动作 aₜ</text>
+<line x1="450" y1="110" x2="202" y2="110" stroke="#27ae60" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="325" y="140" text-anchor="middle" font-size="12" fill="#27ae60">状态 sₜ₊₁ + 奖励 rₜ</text>
+<text x="350" y="170" text-anchor="middle" font-size="11" fill="#7f8c8d">循环直到终止状态或到达时间步上限 T</text>
+</svg>
+
+<!-- ==================== 3.2 Core Concepts ==================== -->
+<h2>3.2 核心概念与定义 (Core Concepts and Definitions)</h2>
+
+<h3>策略 (Policy)</h3>
+<p><strong>策略</strong>是智能体的行为规则，定义了在每个状态下如何选择动作。形式上，策略 $\pi$ 是从状态到动作概率分布的映射：</p>
+<ul>
+<li><strong>随机策略</strong>：$\pi(a|s) = P(A_t = a | S_t = s)$，输出动作的概率分布</li>
+<li><strong>确定性策略</strong>：$a = \mu(s)$，每个状态对应唯一动作</li>
+</ul>
+<p>在 LLM 中，策略就是模型本身——给定上下文（状态），输出下一个 token 的概率分布（softmax 输出）。</p>
+
+<h3>回报 (Return)</h3>
+<div class="formula-block">
+$$G_t = \sum_{k=0}^{\infty} \gamma^k r_{t+k} = r_t + \gamma r_{t+1} + \gamma^2 r_{t+2} + \cdots$$
+</div>
+<div class="formula-explain">回报是从时刻 $t$ 开始所有未来奖励的<strong>折扣累加和</strong>。折扣因子 $\gamma$ 使得越远期的奖励权重越小——体现了"今天的一块钱比明天的一块钱更值钱"的时间偏好。当 $\gamma < 1$ 时，无穷级数保证收敛。</div>
+
+<h3>状态价值函数 (State-Value Function)</h3>
+<div class="formula-block">
+$$V^\pi(s) = \mathbb{E}_\pi[G_t | S_t = s] = \mathbb{E}_\pi\left[\sum_{k=0}^{\infty} \gamma^k r_{t+k} \;\middle|\; S_t = s\right]$$
+</div>
+<div class="formula-explain">从状态 $s$ 出发，按照策略 $\pi$ 行动，<strong>期望</strong>能获得的总回报。可以理解为"这个位置值多少分"——位置越好，未来能积累的奖励就越多。</div>
+
+<h3>动作价值函数 (Action-Value / Q Function)</h3>
+<div class="formula-block">
+$$Q^\pi(s,a) = \mathbb{E}_\pi[G_t | S_t = s, A_t = a]$$
+</div>
+<div class="formula-explain">在状态 $s$ 执行动作 $a$，然后继续按 $\pi$ 行动的期望回报。比 $V$ 多一个条件——它告诉你"在这个位置做这件事值多少分"。$V$ 是对 $Q$ 按策略求期望：$V^\pi(s) = \sum_a \pi(a|s) Q^\pi(s,a)$。</div>
+
+<h3>优势函数 (Advantage Function)</h3>
+<div class="formula-block">
+$$A^\pi(s,a) = Q^\pi(s,a) - V^\pi(s)$$
+</div>
+<div class="formula-explain">动作 $a$ 比"该状态下的平均水平"好多少。$A > 0$ 表示优于平均，$A < 0$ 表示劣于平均。注意 $\mathbb{E}_{a \sim \pi}[A^\pi(s,a)] = 0$。优势函数是 PPO/GRPO 中的核心学习信号——只强化比平均好的动作。</div>
+
+<h3>贝尔曼方程 (Bellman Equations)</h3>
+
+<p>价值函数满足优雅的<strong>递归关系</strong>——当前价值可以分解为"即时奖励 + 未来价值的折扣"：</p>
+
+<div class="formula-block">
+$$V^\pi(s) = \sum_{a} \pi(a|s) \sum_{s'} P(s'|s,a) \left[ R(s,a,s') + \gamma V^\pi(s') \right]$$
+</div>
+<div class="formula-explain"><strong>贝尔曼期望方程</strong>（Bellman Expectation Equation）：状态价值 = 对所有可能动作和后继状态求期望的（即时奖励 + 折扣后继价值）。</div>
+
+<div class="formula-block">
+$$Q^\pi(s,a) = \sum_{s'} P(s'|s,a) \left[ R(s,a,s') + \gamma \sum_{a'} \pi(a'|s') Q^\pi(s', a') \right]$$
+</div>
+<div class="formula-explain"><strong>Q 函数的贝尔曼方程</strong>：执行 $a$ 后到达 $s'$，获得即时奖励，再加上在 $s'$ 按策略行动的未来价值。</div>
+
+<p><strong>贝尔曼最优方程</strong>描述最优价值函数 $V^*$ 和 $Q^*$：</p>
+<div class="formula-block">
+$$V^*(s) = \max_{a} \sum_{s'} P(s'|s,a) \left[ R(s,a,s') + \gamma V^*(s') \right]$$
+</div>
+<div class="formula-block">
+$$Q^*(s,a) = \sum_{s'} P(s'|s,a) \left[ R(s,a,s') + \gamma \max_{a'} Q^*(s', a') \right]$$
+</div>
+<div class="formula-explain">最优策略一旦知道 $Q^*$，就是简单的贪心：$\pi^*(s) = \arg\max_a Q^*(s,a)$。</div>
+
+<div class="highlight-box">
+<strong>类比理解</strong>：贝尔曼方程就像"分期付款"——你不需要一次性计算未来所有奖励的总和，只需要知道"今天能得到多少" + "明天的位置值多少"。这种递归分解让无穷视野的问题变成了一步一步可解的子问题。
+</div>
+
+<!-- ==================== 3.3 Taxonomy ==================== -->
+<h2>3.3 RL 方法分类体系 (Taxonomy of RL Methods)</h2>
+
+<p>RL 算法可以从三个正交维度进行分类，每个维度代表一种设计抉择：</p>
+
+<div class="card">
+<table>
+<tr><th>维度</th><th>类别 A</th><th>类别 B</th><th>LLM 选择</th></tr>
+<tr><td><strong>学什么</strong></td><td>Value-Based（学价值函数）</td><td>Policy-Based（学策略）</td><td>Policy-Based</td></tr>
+<tr><td><strong>数据来源</strong></td><td>On-Policy（只用当前策略数据）</td><td>Off-Policy（可用任何策略数据）</td><td>On-Policy</td></tr>
+<tr><td><strong>环境模型</strong></td><td>Model-Free（不学环境模型）</td><td>Model-Based（学环境模型）</td><td>Model-Free</td></tr>
+</table>
+</div>
+
+<svg width="700" height="260" viewBox="0 0 700 260">
+<rect x="265" y="5" width="170" height="36" rx="8" fill="#3498db" stroke="none"/>
+<text x="350" y="28" text-anchor="middle" font-size="13" fill="#fff" font-weight="bold">RL 方法分类</text>
+<line x1="350" y1="41" x2="130" y2="75" stroke="#7f8c8d" stroke-width="1.5"/>
+<line x1="350" y1="41" x2="350" y2="75" stroke="#7f8c8d" stroke-width="1.5"/>
+<line x1="350" y1="41" x2="575" y2="75" stroke="#7f8c8d" stroke-width="1.5"/>
+<rect x="40" y="75" width="180" height="30" rx="6" fill="#d6eaf8" stroke="#3498db" stroke-width="1.5"/>
+<text x="130" y="95" text-anchor="middle" font-size="11" fill="#2c3e50">Value-Based vs Policy-Based</text>
+<rect x="260" y="75" width="180" height="30" rx="6" fill="#d5f5e3" stroke="#27ae60" stroke-width="1.5"/>
+<text x="350" y="95" text-anchor="middle" font-size="11" fill="#2c3e50">On-Policy vs Off-Policy</text>
+<rect x="485" y="75" width="180" height="30" rx="6" fill="#fdebd0" stroke="#e67e22" stroke-width="1.5"/>
+<text x="575" y="95" text-anchor="middle" font-size="11" fill="#2c3e50">Model-Free vs Model-Based</text>
+<line x1="85" y1="105" x2="70" y2="130" stroke="#bdc3c7" stroke-width="1"/>
+<line x1="175" y1="105" x2="190" y2="130" stroke="#bdc3c7" stroke-width="1"/>
+<rect x="10" y="130" width="120" height="24" rx="5" fill="#f8f9fa" stroke="#dee2e6"/>
+<text x="70" y="147" text-anchor="middle" font-size="10" fill="#495057">Value: DQN, Q-Lrn</text>
+<rect x="140" y="130" width="120" height="24" rx="5" fill="#f8f9fa" stroke="#dee2e6"/>
+<text x="200" y="147" text-anchor="middle" font-size="10" fill="#495057">Policy: PPO, GRPO</text>
+<line x1="305" y1="105" x2="295" y2="130" stroke="#bdc3c7" stroke-width="1"/>
+<line x1="395" y1="105" x2="410" y2="130" stroke="#bdc3c7" stroke-width="1"/>
+<rect x="235" y="130" width="120" height="24" rx="5" fill="#f8f9fa" stroke="#dee2e6"/>
+<text x="295" y="147" text-anchor="middle" font-size="10" fill="#495057">On: PPO, GRPO, A2C</text>
+<rect x="360" y="130" width="120" height="24" rx="5" fill="#f8f9fa" stroke="#dee2e6"/>
+<text x="420" y="147" text-anchor="middle" font-size="10" fill="#495057">Off: DQN, SAC, DPO</text>
+<line x1="530" y1="105" x2="520" y2="130" stroke="#bdc3c7" stroke-width="1"/>
+<line x1="620" y1="105" x2="635" y2="130" stroke="#bdc3c7" stroke-width="1"/>
+<rect x="460" y="130" width="120" height="24" rx="5" fill="#f8f9fa" stroke="#dee2e6"/>
+<text x="520" y="147" text-anchor="middle" font-size="10" fill="#495057">Free: PPO, DQN</text>
+<rect x="585" y="130" width="120" height="24" rx="5" fill="#f8f9fa" stroke="#dee2e6"/>
+<text x="645" y="147" text-anchor="middle" font-size="10" fill="#495057">Based: MuZero</text>
+<rect x="175" y="200" width="350" height="45" rx="8" fill="#fadbd8" stroke="#e74c3c" stroke-width="1.5"/>
+<text x="350" y="220" text-anchor="middle" font-size="12" font-weight="bold" fill="#922b21">LLM RL 主流路径</text>
+<text x="350" y="238" text-anchor="middle" font-size="11" fill="#641e16">Model-Free + Policy-Based + On-Policy → PPO / GRPO</text>
+</svg>
+
+<div class="info-box">
+<strong>为什么 LLM 用 Policy-Based？</strong> 语言模型的动作空间是整个词表（32K–128K 个 token）。在如此大的离散空间中对每个动作计算 $Q$ 值是计算上不可行的。而策略 $\pi_\theta(a|s)$ 恰好就是 LLM 的 softmax 输出层——无需额外架构，直接参数化策略是最自然的选择。
+</div>
+
+<!-- ==================== 3.4 TD Learning ==================== -->
+<h2>3.4 时序差分学习 (Temporal Difference Learning)</h2>
+
+<p><strong>时序差分（TD）学习</strong>是 RL 的核心学习机制，由 Richard Sutton 于 1988 年提出。它巧妙地结合了蒙特卡洛方法（从经验中学）和动态规划（用自举法更新），实现了"每走一步就更新一次"的在线学习。</p>
+
+<div class="highlight-box">
+<strong>类比理解</strong>：想象你每天开车回家，预计需要30分钟。某天开了10分钟后遇到施工，GPS 更新显示还需35分钟（新的总预估是45分钟）。TD 误差 = 45 - 30 = +15分钟——实际比预期差了15分钟。你会用这个"意外"来修正你对"出发位置→家"这段路的时间估计。关键是：你<strong>不需要</strong>等到真正到家才更新。
+</div>
+
+<h3>TD 误差 (TD Error)：核心学习信号</h3>
+
+<div class="formula-block">
+$$\delta_t = r_{t} + \gamma V(s_{t+1}) - V(s_t)$$
+</div>
+<div class="formula-explain">
+<ul>
+<li>$r_t$：执行动作后获得的即时奖励（"这一步实际得到了什么"）</li>
+<li>$\gamma V(s_{t+1})$：对下一状态价值的折扣估计（"我期望未来还能得到多少"）</li>
+<li>$r_t + \gamma V(s_{t+1})$：称为 <strong>TD 目标</strong>（TD Target），是对 $G_t$ 的一步估计</li>
+<li>$V(s_t)$：当前状态的原始估计（"我之前以为能得到多少"）</li>
+<li>$\delta_t$：本质上是"预测误差"或"惊讶度"——结果比预期好（$\delta > 0$）还是差（$\delta < 0$）</li>
+</ul>
+</div>
+
+<h3>价值更新规则 (TD(0) Update)</h3>
+<div class="formula-block">
+$$V(s_t) \leftarrow V(s_t) + \alpha \cdot \delta_t = V(s_t) + \alpha \left[ r_t + \gamma V(s_{t+1}) - V(s_t) \right]$$
+</div>
+<div class="formula-explain">
+<ul>
+<li>$\alpha \in (0,1]$ 是学习率，控制每次更新的幅度</li>
+<li>$\delta_t > 0$：结果比预期好 → 提高该状态价值估计</li>
+<li>$\delta_t < 0$：结果比预期差 → 降低该状态价值估计</li>
+<li>$\delta_t = 0$：预测完美 → 已收敛，无需调整</li>
+</ul>
+</div>
+
+<h3>TD vs Monte Carlo：关键权衡</h3>
+
+<table>
+<tr><th>特性</th><th>TD 学习</th><th>Monte Carlo</th></tr>
+<tr><td>更新时机</td><td>每一步都更新（在线）</td><td>必须等到回合结束</td></tr>
+<tr><td>偏差 (Bias)</td><td>有偏（依赖 $V$ 估计的准确性）</td><td>无偏（使用真实回报 $G_t$）</td></tr>
+<tr><td>方差 (Variance)</td><td>低方差（一步更新，噪声不累积）</td><td>高方差（完整轨迹上的随机性累积）</td></tr>
+<tr><td>自举 (Bootstrap)</td><td>是（用 $V(s_{t+1})$ 估计未来）</td><td>否（直接用实际回报）</td></tr>
+<tr><td>适用场景</td><td>连续任务、不能等到结束</td><td>有限回合、高质量环境</td></tr>
+</table>
+
+<p><strong>TD(λ)</strong> 在 TD(0) 和 MC 之间平滑插值：$\lambda=0$ 是纯一步 TD，$\lambda=1$ 是纯蒙特卡洛。GAE（见 3.8 节）本质上就是用 TD(λ) 来估计优势函数。</p>
+
+<!-- ==================== 3.5 Q-Learning ==================== -->
+<h2>3.5 Q-Learning</h2>
+
+<p><strong>Q-Learning</strong>（Watkins, 1989）是最经典的无模型、off-policy、基于价值的 RL 算法。它直接学习最优动作价值函数 $Q^*$，无需知道环境动力学 $P$。</p>
+
+<h3>Q-Learning 更新规则</h3>
+<div class="formula-block">
+$$Q(s_t, a_t) \leftarrow Q(s_t, a_t) + \alpha \left[ r_t + \gamma \max_{a'} Q(s_{t+1}, a') - Q(s_t, a_t) \right]$$
+</div>
+<div class="formula-explain">更新使用 $\max_{a'} Q(s_{t+1}, a')$——下一状态中<strong>最优动作</strong>的价值。无论智能体实际选了什么探索动作，学习目标始终瞄准最优策略。这就是它 off-policy 的本质：行为策略（探索用）和学习目标（最优策略）可以不同。</div>
+
+<div class="highlight-box">
+<strong>类比理解</strong>：你在一个迷宫中探索，虽然有时候会随机走（探索），但每次你记笔记时写的都是"如果我足够聪明，这条路最短能走多快"。行走策略可以很随机（探索），但学习的知识始终指向最优解。
+</div>
+
+<h3>DQN (Deep Q-Network) 三大创新</h3>
+
+<div class="card">
+<p>Mnih et al. (2015) 用深度网络 $Q_\theta(s,a)$ 逼近 Q 值表，解决了高维状态空间问题。三个关键技巧：</p>
+<ol>
+<li><strong>经验回放缓冲区 (Experience Replay Buffer)</strong>：存储转移元组 $e_t = (s_t, a_t, r_t, s_{t+1}, d_t)$，训练时随机采样小批量，打破数据的时间相关性。</li>
+<li><strong>目标网络 (Target Network)</strong>：冻结的 $Q$ 网络副本 $Q_{\bar{\theta}}$，每 $C$ 步同步一次参数。防止"追逐移动靶"导致训练发散。</li>
+<li><strong>$\epsilon$-贪心探索</strong>：以概率 $\epsilon$ 随机选择动作（探索），以概率 $1-\epsilon$ 选择 $\arg\max_a Q(s,a)$（利用）。$\epsilon$ 随训练进度从 1.0 衰减到 0.01。</li>
+</ol>
+</div>
+
+<h3>DQN 损失函数</h3>
+<div class="formula-block">
+$$L(\theta) = \mathbb{E}_{(s,a,r,s') \sim \mathcal{B}} \left[ \left( r + \gamma \max_{a'} Q_{\bar{\theta}}(s', a') - Q_\theta(s, a) \right)^2 \right]$$
+</div>
+<div class="formula-explain">最小化 TD 误差的均方值。注意目标网络 $Q_{\bar{\theta}}$ 的参数在计算损失时被视为常数（stop-gradient），梯度只回传到在线网络 $Q_\theta$。$\mathcal{B}$ 代表回放缓冲区。</div>
+
+<h3>回放缓冲区的三大好处</h3>
+<div class="card">
+<ul>
+<li><strong>打破数据相关性</strong>：连续时间步的数据高度相关，随机采样使训练批次近似 i.i.d.（独立同分布）</li>
+<li><strong>防止灾难性遗忘</strong>：通过反复回顾过去的经验，确保对旧场景的记忆不被新数据覆盖</li>
+<li><strong>提高样本效率</strong>：同一个转移可以被采样多次用于多次权重更新（数据复用）</li>
+</ul>
+<p><strong>优先经验回放 (PER)</strong>：按 TD 误差绝对值 $|\delta|$ 分配采样概率——"惊讶度"越大的经验越值得反复学习，加速收敛。</p>
+</div>
+
+<div class="info-box">
+<strong>为什么 Q-Learning 不适合 LLM？</strong> 语言生成的动作空间是整个词表 $|A| = 32\text{K}$–$128\text{K}$，状态空间是所有可能的 token 序列（组合爆炸）。在每个 token 位置对 128K 个动作逐一计算 $Q$ 值是不现实的。因此 LLM RL 转向直接参数化策略的方法。
+</div>
+
+<!-- ==================== 3.6 Policy Gradient ==================== -->
+<h2>3.6 策略梯度方法 — REINFORCE</h2>
+
+<p>策略梯度方法的核心思想：<strong>不再通过学习价值函数间接推导策略，而是直接优化策略参数</strong> $\theta$ 以最大化期望回报。</p>
+
+<h3>优化目标</h3>
+<div class="formula-block">
+$$J(\theta) = \mathbb{E}_{\tau \sim \pi_\theta}[R(\tau)] = \mathbb{E}_{\tau \sim \pi_\theta}\left[\sum_{t=0}^{T} \gamma^t r_t\right]$$
+</div>
+<div class="formula-explain">目标函数 $J(\theta)$ 是策略 $\pi_\theta$ 下轨迹回报的期望值。我们要找到使 $J(\theta)$ 最大的参数 $\theta^*$。</div>
+
+<h3>策略梯度定理 (Policy Gradient Theorem)</h3>
+<div class="formula-block">
+$$\nabla_\theta J(\theta) = \mathbb{E}_{\pi_\theta}\left[\sum_{t=0}^{T} \nabla_\theta \log \pi_\theta(a_t|s_t) \cdot G_t\right]$$
+</div>
+<div class="formula-explain">这个定理的优雅之处：梯度<strong>不需要</strong>对环境动力学 $P(s'|s,a)$ 求导（环境可以是黑盒）。通过对数导数技巧，将梯度转换为可通过采样轨迹来估计的期望。</div>
+
+<h3>推导过程（五步）</h3>
+<div class="card">
+<ol>
+<li><strong>定义轨迹概率</strong>：$P(\tau|\theta) = p(s_0) \prod_{t=0}^{T-1} \pi_\theta(a_t|s_t) P(s_{t+1}|s_t,a_t)$</li>
+<li><strong>展开梯度</strong>：$\nabla_\theta J = \nabla_\theta \int P(\tau|\theta) R(\tau) d\tau = \int \nabla_\theta P(\tau|\theta) R(\tau) d\tau$</li>
+<li><strong>对数导数技巧</strong>：利用 $
+abla P = P \cdot 
+abla \log P$，得 $
+abla_\theta J = \mathbb{E}_{\tau \sim \pi_\theta}[
+abla_\theta \log P(\tau|\theta) \cdot R(\tau)]$</li>
+<li><strong>环境项消失</strong>：$\log P(\tau|\theta) = \log p(s_0) + \sum_t [\log \pi_\theta(a_t|s_t) + \log P(s_{t+1}|s_t,a_t)]$，对 $\theta$ 求导后只剩 $\sum_t \nabla_\theta \log \pi_\theta(a_t|s_t)$</li>
+<li><strong>因果性约束</strong>：时刻 $t$ 的动作不影响过去的奖励，因此每个 $\nabla_\theta \log \pi_\theta(a_t|s_t)$ 只与未来回报 $G_t = \sum_{k=t}^T \gamma^{k-t} r_k$ 配对</li>
+</ol>
+</div>
+
+<h3>REINFORCE 直觉："奖励加权的最大似然"</h3>
+<div class="highlight-box">
+<strong>类比理解</strong>：想象你在学做菜。$\nabla_\theta \log \pi_\theta(a_t|s_t)$ 是"让动作 $a_t$ 更可能"的梯度方向。乘以回报 $G_t$ 就像是：好吃的菜（高回报）→ 记住这个配方（增加概率）；难吃的菜（低回报）→ 换个做法（降低概率）。REINFORCE 本质上就是用结果好坏来加权的监督学习。
+</div>
+
+<h3>方差缩减：基线 (Baseline)</h3>
+<div class="formula-block">
+$$\nabla_\theta J(\theta) = \mathbb{E}_{\pi_\theta}\left[\sum_{t=0}^{T} \nabla_\theta \log \pi_\theta(a_t|s_t) \cdot (G_t - b(s_t))\right]$$
+</div>
+<div class="formula-explain">减去不依赖动作的基线 $b(s_t)$ 不改变梯度期望（证明：$\mathbb{E}_a[\nabla \log \pi \cdot b] = b \cdot \nabla \sum_a \pi = b \cdot \nabla 1 = 0$），但能大幅降低方差。最佳选择：$b(s_t) = V^\pi(s_t)$，此时 $G_t - V(s_t) \approx A^\pi(s_t, a_t)$。</div>
+
+<h3>REINFORCE 的局限</h3>
+<div class="card">
+<ul>
+<li><strong>高方差</strong>：用单条轨迹的回报估计梯度，波动极大，需大量样本才能稳定</li>
+<li><strong>无自举</strong>：必须等完整回合结束获得 $G_t$，无法在线逐步更新</li>
+<li><strong>样本低效</strong>：On-policy，数据用一次即丢弃</li>
+<li><strong>无步长控制</strong>：没有机制防止灾难性的大步策略更新</li>
+</ul>
+<p>这些局限推动了演进路线：<strong>REINFORCE → Actor-Critic → TRPO → PPO → GRPO</strong></p>
+</div>
+
+<!-- ==================== 3.7 Actor-Critic ==================== -->
+<h2>3.7 Actor-Critic 方法</h2>
+
+<p><strong>Actor-Critic</strong> 将策略梯度（Actor）与学习到的价值函数（Critic）优雅结合。Actor 负责"做决策"，Critic 负责"评价好坏"。这种分工让两个网络各司其职，相互促进。</p>
+
+<svg width="600" height="220" viewBox="0 0 600 220">
+<defs><marker id="arr2" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#7f8c8d"/></marker></defs>
+<rect x="50" y="30" width="170" height="70" rx="10" fill="#d6eaf8" stroke="#3498db" stroke-width="2"/>
+<text x="135" y="60" text-anchor="middle" font-size="14" font-weight="bold" fill="#2c3e50">Actor (演员)</text>
+<text x="135" y="82" text-anchor="middle" font-size="11" fill="#3498db">策略网络 π_θ(a|s)</text>
+<rect x="370" y="30" width="170" height="70" rx="10" fill="#d5f5e3" stroke="#27ae60" stroke-width="2"/>
+<text x="455" y="60" text-anchor="middle" font-size="14" font-weight="bold" fill="#2c3e50">Critic (评论家)</text>
+<text x="455" y="82" text-anchor="middle" font-size="11" fill="#27ae60">价值网络 V_φ(s)</text>
+<rect x="200" y="150" width="200" height="50" rx="10" fill="#fdebd0" stroke="#e67e22" stroke-width="2"/>
+<text x="300" y="180" text-anchor="middle" font-size="13" font-weight="bold" fill="#2c3e50">环境</text>
+<line x1="135" y1="100" x2="135" y2="148" stroke="#7f8c8d" stroke-width="1.5" marker-end="url(#arr2)"/>
+<text x="105" y="128" font-size="10" fill="#7f8c8d">动作</text>
+<line x1="300" y1="150" x2="170" y2="102" stroke="#7f8c8d" stroke-width="1.5" marker-end="url(#arr2)"/>
+<text x="215" y="130" font-size="10" fill="#7f8c8d">s, r</text>
+<line x1="370" y1="65" x2="222" y2="65" stroke="#e74c3c" stroke-width="2" marker-end="url(#arr2)"/>
+<text x="296" y="52" text-anchor="middle" font-size="11" font-weight="bold" fill="#e74c3c">优势 Â_t 指导策略更新</text>
+</svg>
+
+<h3>Actor 更新（策略改进）</h3>
+<div class="formula-block">
+$$\nabla_\theta J = \mathbb{E}\left[\nabla_\theta \log \pi_\theta(a_t|s_t) \cdot \hat{A}_t\right]$$
+</div>
+<div class="formula-explain">Actor 用优势估计 $\hat{A}_t$ 替代原始回报 $G_t$，方差显著降低。$\hat{A}_t > 0$ 时加强该动作，$\hat{A}_t < 0$ 时削弱。</div>
+
+<h3>Critic 更新（价值评估）</h3>
+<div class="formula-block">
+$$L_{\text{critic}}(\phi) = \mathbb{E}\left[\left(r_t + \gamma V_\phi(s_{t+1}) - V_\phi(s_t)\right)^2\right]$$
+</div>
+<div class="formula-explain">Critic 通过最小化 TD 误差的均方来逼近真实价值函数。训练越充分，Critic 给出的优势估计就越准确，进而让 Actor 的梯度方向越可靠。</div>
+
+<h3>一步优势估计</h3>
+<div class="formula-block">
+$$\hat{A}_t = r_t + \gamma V_\phi(s_{t+1}) - V_\phi(s_t) = \delta_t$$
+</div>
+<div class="formula-explain">最简单的优势估计就是一步 TD 误差。实践中通常用 GAE（见 3.8 节）做更精确的多步估计。</div>
+
+<h3>从 REINFORCE 到 PPO 的演进</h3>
+<table>
+<tr><th>方法</th><th>核心改进</th><th>主要问题</th></tr>
+<tr><td>REINFORCE</td><td>策略梯度基础公式</td><td>高方差，无自举，样本低效</td></tr>
+<tr><td>A2C/A3C</td><td>Critic 提供 TD 优势，降低方差</td><td>步长无界，可能崩溃</td></tr>
+<tr><td>TRPO</td><td>KL 散度约束策略更新幅度</td><td>二阶优化，计算昂贵</td></tr>
+<tr><td>PPO</td><td>裁剪比率实现稳定更新</td><td>LLM RL 标准方案</td></tr>
+<tr><td>GRPO</td><td>去掉 Critic，用组内统计量</td><td>更简单，适合可验证奖励</td></tr>
+</table>
+
+<!-- ==================== 3.8 GAE ==================== -->
+<h2>3.8 广义优势估计 (Generalized Advantage Estimation)</h2>
+
+<p><strong>GAE</strong>（Schulman et al., 2016）是 PPO 的核心组件之一，通过单个超参数 $\lambda$ 在偏差（Bias）与方差（Variance）之间实现可控的权衡。</p>
+
+<h3>GAE 公式</h3>
+<div class="formula-block">
+$$\hat{A}_t^{\text{GAE}(\gamma,\lambda)} = \sum_{l=0}^{T-t-1} (\gamma\lambda)^l \delta_{t+l}$$
+</div>
+<div class="formula-explain">其中 $\delta_t = r_t + \gamma V(s_{t+1}) - V(s_t)$ 是一步 TD 误差。GAE 对未来所有 TD 误差做指数衰减加权求和——近处的 $\delta$ 权重大（$(\gamma\lambda)^0 = 1$），远处的权重呈指数递减。</div>
+
+<p>展开写：</p>
+<div class="formula-block">
+$$\hat{A}_t^{\text{GAE}} = \delta_t + (\gamma\lambda)\delta_{t+1} + (\gamma\lambda)^2\delta_{t+2} + \cdots$$
+</div>
+
+<h3>λ 的两个极端——边界分析</h3>
+
+<div class="card">
+<h3>λ = 0：高偏差 / 低方差</h3>
+<div class="formula-block">
+$$\hat{A}_t^{\text{GAE}(\gamma,0)} = \delta_t = r_t + \gamma V(s_{t+1}) - V(s_t)$$
+</div>
+<p>退化为一步 TD 误差。完全信任价值网络，只看一步的信息。如果 $V$ 的估计不准确，优势估计就会系统性地偏离真实值。好处是更新平滑稳定。</p>
+<p><strong>风险</strong>：策略可能陷入局部最优——无法发现需要多步才能看到回报的复杂行为模式。</p>
+</div>
+
+<div class="card">
+<h3>λ = 1：低偏差 / 高方差</h3>
+<div class="formula-block">
+$$\hat{A}_t^{\text{GAE}(\gamma,1)} = \sum_{l=0}^{T-t-1} \gamma^l \delta_{t+l} = \sum_{l=0}^{T-t-1} \gamma^l r_{t+l} - V(s_t) = G_t - V(s_t)$$
+</div>
+<p>退化为完整的蒙特卡洛回报减去基线——完全无偏（不依赖 $V$ 的准确性），但方差极大：轨迹前期的微小随机性会通过长序列累积放大。</p>
+<p><strong>风险</strong>：巨大的梯度噪声导致破坏性策略更新，训练爆炸或震荡。</p>
+</div>
+
+<div class="success-box">
+<strong>最佳实践：$\lambda \in [0.95, 0.99]$</strong>——在偏差和方差之间取得最优均方误差（MSE）。对 LLM 训练通常设 $\gamma = 1.0$（单轮对话中所有 token 同等重要，不打折），$\lambda = 0.95$（稍微偏向信任 Critic，但保留足够长的视野）。
+</div>
+
+<h3>λ 调优的诊断信号</h3>
+<div class="card">
+<table>
+<tr><th>观察现象</th><th>诊断</th><th>建议操作</th></tr>
+<tr><td>策略熵骤降 + 训练不稳定</td><td>高方差：梯度噪声大</td><td>降低 λ（更信任 Critic）</td></tr>
+<tr><td>训练稳定但性能不增长</td><td>高偏差：低估长期依赖</td><td>提高 λ 接近 1.0</td></tr>
+<tr><td>价值函数解释方差为负</td><td>Critic 质量差</td><td>先改善 Critic 训练，再调 λ</td></tr>
+</table>
+</div>
+
+<!-- ==================== 3.9 On vs Off Policy ==================== -->
+<h2>3.9 On-Policy vs Off-Policy</h2>
+
+<p>这一维度区分的是<strong>"用谁的数据来学习"</strong>的问题。</p>
+
+<table>
+<tr><th>特性</th><th>On-Policy（在策略）</th><th>Off-Policy（离策略）</th></tr>
+<tr><td>数据来源</td><td>仅来自<strong>当前</strong>策略 $\pi_\theta$</td><td>可来自<strong>任何</strong>策略（回放缓冲区）</td></tr>
+<tr><td>更新后的数据</td><td>旧数据失效，必须重新采样</td><td>旧数据仍可复用</td></tr>
+<tr><td>样本效率</td><td>低——数据用一次即丢弃</td><td>高——同一数据可反复使用</td></tr>
+<tr><td>训练稳定性</td><td>更稳定（数据分布一致）</td><td>可能发散（分布不匹配）</td></tr>
+<tr><td>代表算法</td><td>REINFORCE, PPO, A2C, GRPO</td><td>Q-Learning, DQN, SAC, DPO</td></tr>
+<tr><td>LLM 应用</td><td>PPO/GRPO（实时生成新回复）</td><td>DPO（静态偏好数据集）</td></tr>
+</table>
+
+<div class="card">
+<h3>RLHF 中的 On/Off-Policy 光谱</h3>
+<ul>
+<li><strong>PPO/GRPO（纯 On-Policy）</strong>：用当前 LLM 生成回复 → 奖励模型打分 → 计算优势 → 更新参数 → 丢弃旧回复 → 重新生成。生成阶段占总计算量的 ~60%。</li>
+<li><strong>DPO（纯 Off-Policy）</strong>：在固定的人类偏好数据集上训练，无需生成。计算便宜但面临分布偏移问题——训练数据来自旧模型或人类，和当前模型的分布差距越来越大。</li>
+<li><strong>Online DPO（混合方案）</strong>：用当前策略生成新回复（on-policy 采集），但用 DPO 的对比损失优化（off-policy 风格目标）。</li>
+<li><strong>PPO 的巧妙折中</strong>：从一批 on-policy 数据中做 4 个 epoch 的梯度更新——通过裁剪比率 $r_t(\theta) = \pi_\theta(a_t|s_t) / \pi_{\theta_{old}}(a_t|s_t)$ 控制新旧策略的偏离程度，实现"受控的轻微 off-policy"。</li>
+</ul>
+</div>
+
+<div class="highlight-box">
+<strong>类比理解</strong>：On-Policy 像是"只看自己做的实验来学习"——每次改进方法后，之前的实验数据就过时了，得重新做实验。Off-Policy 像是"可以从别人的论文中学习"——不限于自己的经验，但别人的方法可能和你不匹配。PPO 则像是"做一批实验后，从中反复琢磨4遍，但琢磨时有安全机制确保不过度解读"。
+</div>
+
+<!-- ==================== 3.10 Model-Based vs Model-Free ==================== -->
+<h2>3.10 Model-Based vs Model-Free</h2>
+
+<table>
+<tr><th>特性</th><th>Model-Free（无模型）</th><th>Model-Based（基于模型）</th></tr>
+<tr><td>核心学习内容</td><td>直接学策略 $\pi$ 和/或价值 $V/Q$</td><td>学习环境模型 $\hat{P}(s'|s,a)$ 和 $\hat{R}(s,a)$</td></tr>
+<tr><td>规划能力</td><td>无规划，反应式决策</td><td>可在"想象"中模拟未来轨迹</td></tr>
+<tr><td>样本效率</td><td>低——必须亲身经历每种情况</td><td>高——可在脑内"虚拟演练"</td></tr>
+<tr><td>模型误差</td><td>无模型偏差</td><td>模型不精确时误差会随步数累积（复合误差）</td></tr>
+<tr><td>适用场景</td><td>复杂/未知/难以建模的环境</td><td>动力学简单、需要极高样本效率</td></tr>
+<tr><td>代表算法</td><td>PPO, DQN, SAC, GRPO</td><td>MuZero, Dreamer, AlphaGo/AlphaZero</td></tr>
+</table>
+
+<div class="info-box">
+<strong>为什么 LLM RL 是 Model-Free？</strong> 语言生成的环境动力学是<strong>确定性且平凡的</strong>：$s_{t+1} = s_t \oplus a_t$（当前序列拼接新 token）。不需要"学习"或"预测"环境转移——它就是字符串拼接。真正的挑战在于<strong>奖励</strong>——预测人类对回复质量的评判。RLHF 中的奖励模型虽然某种意义上是个"模型"，但它提供的是<strong>奖励信号</strong>而非用于规划/仿真的环境动力学模型。因此 LLM RL 本质上是无模型的策略优化。
+</div>
+
+<div class="card">
+<h3>Model-Based 的优势场景：棋类游戏</h3>
+<p>AlphaZero 学习了棋类游戏的精确动力学模型（规则已知），然后用蒙特卡洛树搜索（MCTS）在"脑中"模拟未来成千上万个棋局，从中选择最优走法。这种"先想后做"的能力使它在围棋、国际象棋中达到了超人水平。但对 LLM 来说，"模拟未来"就是自回归生成本身，没有额外的计算优势。</p>
+</div>
+
+<!-- ==================== 3.11 Reward Shaping ==================== -->
+<h2>3.11 奖励塑形 (Reward Shaping)</h2>
+
+<p><strong>奖励塑形</strong>是向原始奖励函数中添加辅助信号的技术。目标是将稀疏奖励（只有任务完成才有反馈）转化为密集奖励（每步都有中间反馈），加速收敛。但如果塑形不当，可能引导智能体走向错误的最优解。</p>
+
+<h3>基本形式</h3>
+<div class="formula-block">
+$$R'(s,a,s') = R(s,a,s') + F(s,a,s')$$
+</div>
+<div class="formula-explain">在原始环境奖励 $R$ 上叠加一个人工设计的塑形函数 $F$。问题是：如何设计 $F$ 才能加速学习又不扭曲最优策略？</div>
+
+<h3>朴素塑形的危险：奖励黑客 (Reward Hacking)</h3>
+<div class="highlight-box">
+<strong>类比理解</strong>：假设你训练一个导航机器人去终点，如果对"到达中间检查点"给额外奖励，机器人可能学会在两个相邻检查点之间无限来回跑来刷分——永远不会到达终点。在 LLM 中，如果奖励"回复自信的语气"，模型可能学会无论对错都先说"Absolutely!"，而不是给出准确答案。
+</div>
+
+<h3>基于势函数的奖励塑形 (Potential-Based Reward Shaping, PBRS)</h3>
+
+<p>Ng, Harada & Russell (1999) 提出了一种<strong>数学上有保证的</strong>塑形方法：</p>
+
+<div class="formula-block">
+$$F(s, a, s') = \gamma \Phi(s') - \Phi(s)$$
+</div>
+<div class="formula-explain">塑形函数被约束为势函数 $\Phi: S \to \mathbb{R}$ 在相邻状态间的折扣差值。$\Phi(s)$ 衡量状态 $s$ 对目标的"接近程度"——越接近目标，势越高。</div>
+
+<p>完整的塑形后奖励：</p>
+<div class="formula-block">
+$$R'(s,a,s') = R(s,a,s') + \gamma\Phi(s') - \Phi(s)$$
+</div>
+
+<h3>PBRS 的三大理论保证</h3>
+<div class="card">
+<ol>
+<li><strong>策略不变性 (Policy Invariance)</strong>：在塑形后奖励 $R'$ 下的最优策略 $\pi^*$ 与在原始奖励 $R$ 下的最优策略<strong>完全相同</strong>。塑形不会引入次优行为，只会加速发现最优解的过程。</li>
+<li><strong>环路免疫 (Loop Immunity)</strong>：任何起止于同一状态的循环轨迹 $s \to s_1 \to \cdots \to s$，其累积塑形奖励恰好为零：
+$$\sum_{i} F(s_i, a_i, s_{i+1}) = \gamma\Phi(s_1) - \Phi(s) + \gamma\Phi(s_2) - \Phi(s_1) + \cdots = 0$$
+（望远镜消去）。智能体<strong>无法</strong>通过循环来刷塑形奖励。</li>
+<li><strong>收敛加速</strong>：最优策略不变，但密集的中间奖励信号使策略梯度的信噪比大幅提升，收敛速度在稀疏奖励环境中可加速 5–50 倍。</li>
+</ol>
+</div>
+
+<div class="info-box">
+<strong>PBRS 在 RLHF 中的体现</strong>：PPO/GRPO 中常用的 KL 散度惩罚项 $-\beta \text{KL}(\pi_\theta \| \pi_{\text{ref}})$ 可以被解释为一种 PBRS——势函数 $\Phi(s) = \beta \log \pi_{\text{ref}}(a|s)$ 使得偏离参考策略的行为被"自动惩罚"。这保证了最终策略不会太偏离预训练的 SFT 模型。
+</div>
+
+<!-- ==================== Takeaway ==================== -->
+<div class="takeaway">
+<h2>关键要点总结</h2>
+<ol>
+<li><strong>MDP 是 RL 的数学基石</strong>：五元组 $(S,A,P,R,\gamma)$ + 马尔可夫性质使问题可解。LLM 中状态=已生成序列，动作=下一个 token。</li>
+<li><strong>贝尔曼方程的递归之美</strong>：$V(s) = r + \gamma V(s')$ 将无穷视野问题分解为一步子问题，是所有 DP 和 TD 方法的基础。</li>
+<li><strong>TD 误差是核心学习信号</strong>："惊讶度"$\delta_t = r + \gamma V(s') - V(s)$ 驱动逐步更新，无需等到回合结束。</li>
+<li><strong>Q-Learning 适合小动作空间</strong>：对 LLM 不可行（词表 128K），因此 LLM 用策略梯度方法。</li>
+<li><strong>策略梯度定理的优雅性</strong>：无需对环境微分，通过对数技巧将梯度转为可采样的期望。</li>
+<li><strong>Actor-Critic 是 PPO 的架构基础</strong>：Actor 提出动作，Critic 评估好坏，优势函数 $\hat{A}$ 指导更新方向与幅度。</li>
+<li><strong>GAE 通过 λ 控制偏差-方差权衡</strong>：$\lambda=0.95$ 是实践中的甜点，平衡稳定训练与准确信用分配。</li>
+<li><strong>On-Policy 更稳定但更昂贵</strong>：PPO/GRPO 每轮都要重新生成数据，生成占 60% 计算量。DPO 用固定数据集更便宜但有分布偏移。</li>
+<li><strong>PBRS 保证奖励塑形的安全性</strong>：势函数差值形式确保最优策略不变且环路免疫，同时大幅加速学习收敛。</li>
+</ol>
+</div>
+
+<!-- ==================== Q&A ==================== -->
+<h2>Q&amp;A 自测</h2>
+
+<details>
+<summary>Q1：为什么马尔可夫性质让 RL 问题"可解"？如果现实不满足马尔可夫性怎么办？</summary>
+<div class="answer">
+<p>马尔可夫性意味着未来只取决于当前状态，不需要记住全部历史。这把指数级复杂的历史依赖问题简化为只关注当前"快照"。如果现实不满足（如扑克需要记住历史出牌），常用方案：(1) 将历史编码进状态（如 LSTM/Transformer 的隐藏状态）；(2) 使用 POMDP（部分可观测 MDP）框架。LLM 中，完整的 token 序列本身就包含全部历史上下文，天然满足马尔可夫性。</p>
+</div>
+</details>
+
+<details>
+<summary>Q2：TD 学习为什么"有偏但低方差"？这个偏差有害吗？</summary>
+<div class="answer">
+<p>TD 用 $V(s_{t+1})$ 的<strong>估计值</strong>来代替真实未来回报——如果 $V$ 不准确，就引入了系统性偏差。但好处是只看一步，避免了长轨迹中随机性的累积。实践中随着训练进行，$V$ 越来越准确，偏差自然趋于零。这种"有偏但收敛快"的特性通常优于"无偏但噪声太大导致学不动"的纯蒙特卡洛方法。</p>
+</div>
+</details>
+
+<details>
+<summary>Q3：REINFORCE 的"奖励加权最大似然"直觉是什么意思？</summary>
+<div class="answer">
+<p>$\nabla \log \pi_\theta(a|s)$ 的方向是"让动作 $a$ 概率增大"。乘以回报 $G_t$ 就是：好的轨迹（$G_t$ 大）→ 用大步长强化其中的动作概率；差的轨迹（$G_t$ 小或负）→ 削弱其动作概率。这本质上就是<strong>加权监督学习</strong>——把自己产生的动作当"标签"，用结果好坏决定学习权重。加了基线后变为"比平均好就增强、比平均差就削弱"。</p>
+</div>
+</details>
+
+<details>
+<summary>Q4：GAE 中 λ=0.95 为什么是"甜点"？能否自动调整？</summary>
+<div class="answer">
+<p>$\lambda = 0.95$ 在多数环境中使优势估计的均方误差（MSE = Bias² + Variance）最小——既不过度信任可能有误的 Critic（避免偏差），也不完全依赖波动大的实际回报（控制方差）。自动调 λ 是一个活跃的研究方向：可根据训练曲线动态调整，如策略熵骤降时降 λ，性能停滞时升 λ。但实践中固定 0.95 通常足够健壮。</p>
+</div>
+</details>
+
+<details>
+<summary>Q5：PPO 是 on-policy 的，为什么能做多次梯度更新？</summary>
+<div class="answer">
+<p>PPO 通过重要性比率 $r_t(\theta) = \pi_\theta(a_t|s_t) / \pi_{\theta_{old}}(a_t|s_t)$ 衡量新旧策略的偏离程度，并用裁剪（clip）确保 $r_t \in [1-\epsilon, 1+\epsilon]$。只要新策略和旧策略差距不大，就可以安全地从同一批数据中榨取多次梯度步（通常 4 个 epoch）。一旦比率超出范围，梯度被截断，防止过度利用旧数据。这是"受控的轻微 off-policy"。</p>
+</div>
+</details>
+
+<details>
+<summary>Q6：PBRS 如何保证"环路免疫"？</summary>
+<div class="answer">
+<p>因为塑形奖励 $F = \gamma\Phi(s') - \Phi(s)$ 是势函数的差值。对于任何闭合循环 $s_0 \to s_1 \to \cdots \to s_0$，沿路径的塑形奖励之和类似望远镜求和——中间项全部消去：$[\gamma\Phi(s_1) - \Phi(s_0)] + [\gamma\Phi(s_2) - \Phi(s_1)] + \cdots$，最终净变化为 $\Phi(s_0) - \Phi(s_0) = 0$。因此循环不能带来任何额外塑形奖励，彻底杜绝了"绕圈刷分"的可能。</p>
+</div>
+</details>
+
+<details>
+<summary>Q7：为什么说 LLM 的 RL 训练本质上是 Model-Free 的？</summary>
+<div class="answer">
+<p>语言生成的环境转移是<strong>确定性且已知的</strong>：当前状态（token 序列）+ 新动作（新 token）= 新状态（拼接后的序列）。没有任何需要"学习"的环境不确定性。Model-Based 方法的核心优势——"在脑中模拟未来"——对 LLM 毫无意义，因为"模拟下一个状态"就是字符串拼接，零信息量。真正的挑战在于奖励预测（人类偏好），而奖励模型只提供标量反馈，不用于规划。</p>
+</div>
+</details>
+
+<details>
+<summary>Q8：在 RLHF 场景中，KL 惩罚项与 PBRS 有什么关系？</summary>
+<div class="answer">
+<p>PPO-RLHF 的奖励通常写为 $R'(s,a) = R_{\text{RM}}(s,a) - \beta \log \frac{\pi_\theta(a|s)}{\pi_{\text{ref}}(a|s)}$。其中 KL 项 $-\beta \log(\pi_\theta / \pi_{\text{ref}})$ 可以分解为 $\beta \log \pi_{\text{ref}}(a|s) - \beta \log \pi_\theta(a|s)$。如果定义势函数 $\Phi(s) \propto \beta \log \pi_{\text{ref}}(\cdot|s)$，KL 惩罚就近似于 PBRS 形式。这保证了策略不会离参考模型太远，同时不会扭曲最终的最优行为方向。</p>
+</div>
+</details>
+
+</body>
+</html>

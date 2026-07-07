@@ -77,6 +77,7 @@
   .icon-vlm  { background: #1f6feb22; color: #58a6ff; }
   .icon-wam  { background: #23883522; color: #3fb950; }
   .icon-vla  { background: #9e6a0322; color: #d29922; }
+  .icon-agi  { background: #db6d2822; color: #db6d28; }
   .icon-other { background: #8957e522; color: #bc8cff; }
 
   /* Grid */
@@ -119,9 +120,10 @@
 
   <div class="stats">
     <div class="stat"><div class="num" id="total">0</div><div class="label">篇笔记</div></div>
-    <div class="stat"><div class="num">4</div><div class="label">个分类</div></div>
+    <div class="stat"><div class="num">5</div><div class="label">个分类</div></div>
     <div class="stat"><div class="num">VLM</div><div class="label">视觉语言</div></div>
     <div class="stat"><div class="num">WAM</div><div class="label">世界模型</div></div>
+    <div class="stat"><div class="num">AGI</div><div class="label">Agentic AI</div></div>
   </div>
 
   <div class="search-box">
@@ -178,12 +180,52 @@ const categories = [
     ]
   },
   {
+    id: "agi",
+    name: "Agentic AI — 从 RL 到 Agent 系统",
+    desc: "完整教程系列：LLM 架构 → RL 对齐训练（PPO/DPO/GRPO）→ Agent 设计模式 → MCP/多 Agent 系统",
+    icon: "icon-agi",
+    emoji: "🧩",
+    papers: [
+      { file: "examples/Agentic_AI/AgenticAI-Index.html",                    title: "📖 目录索引",            desc: "全部 29 章总目录与导航" },
+      { file: "examples/Agentic_AI/AgenticAI-Ch01-LLM-Architecture.html",     title: "Ch01 LLM Architecture",      desc: "Transformer 架构与注意力机制" },
+      { file: "examples/Agentic_AI/AgenticAI-Ch02-Systems-Foundations.html",  title: "Ch02 Systems Foundations",   desc: "训练系统与推理基础设施" },
+      { file: "examples/Agentic_AI/AgenticAI-Ch03-RL-Introduction.html",      title: "Ch03 RL Introduction",       desc: "强化学习基础概念" },
+      { file: "examples/Agentic_AI/AgenticAI-Ch04-RL-for-LLMs.html",          title: "Ch04 RL for LLMs",           desc: "RLHF 与 LLM 对齐训练" },
+      { file: "examples/Agentic_AI/AgenticAI-Ch05-PPO.html",                  title: "Ch05 PPO",                   desc: "近端策略优化算法详解" },
+      { file: "examples/Agentic_AI/AgenticAI-Ch06-DPO.html",                  title: "Ch06 DPO",                   desc: "直接偏好优化算法" },
+      { file: "examples/Agentic_AI/AgenticAI-Ch07-GRPO.html",                 title: "Ch07 GRPO",                  desc: "分组相对策略优化（DeepSeek）" },
+      { file: "examples/Agentic_AI/AgenticAI-Ch08-Preference-Variants.html",  title: "Ch08 Preference Variants",   desc: "偏好优化变体与对比" },
+      { file: "examples/Agentic_AI/AgenticAI-Ch09-Reward-Model.html",         title: "Ch09 Reward Model",          desc: "奖励模型设计与训练" },
+      { file: "examples/Agentic_AI/AgenticAI-Ch10-SFT-Best-Practices.html",   title: "Ch10 SFT Best Practices",    desc: "监督微调最佳实践" },
+      { file: "examples/Agentic_AI/AgenticAI-Ch11-System-Architecture.html",  title: "Ch11 System Architecture",   desc: "Agent 系统架构设计" },
+      { file: "examples/Agentic_AI/AgenticAI-Ch12-Agentic-Training.html",     title: "Ch12 Agentic Training",      desc: "Agent 行为训练方法" },
+      { file: "examples/Agentic_AI/AgenticAI-Ch13-RL-Reasoning.html",         title: "Ch13 RL Reasoning",          desc: "RL 驱动的推理能力增强" },
+      { file: "examples/Agentic_AI/AgenticAI-Ch14-LLM-Evaluation.html",       title: "Ch14 LLM Evaluation",        desc: "LLM 评估方法与基准" },
+      { file: "examples/Agentic_AI/AgenticAI-Ch15-Agentic-AI-Intro.html",     title: "Ch15 Agentic AI Intro",      desc: "Agentic AI 导论" },
+      { file: "examples/Agentic_AI/AgenticAI-Ch16-RAG.html",                  title: "Ch16 RAG",                   desc: "检索增强生成" },
+      { file: "examples/Agentic_AI/AgenticAI-Ch17-Agentic-Memory.html",       title: "Ch17 Agentic Memory",        desc: "Agent 记忆系统设计" },
+      { file: "examples/Agentic_AI/AgenticAI-Ch18-Agent-Harness.html",        title: "Ch18 Agent Harness",          desc: "Agent 运行时框架" },
+      { file: "examples/Agentic_AI/AgenticAI-Ch19-Agent-Design-Patterns.html", title: "Ch19 Agent Design Patterns", desc: "Agent 设计模式" },
+      { file: "examples/Agentic_AI/AgenticAI-Ch20-Agentic-Environments.html",  title: "Ch20 Agentic Environments",  desc: "Agent 运行环境" },
+      { file: "examples/Agentic_AI/AgenticAI-Ch21-MCP.html",                  title: "Ch21 MCP",                   desc: "模型上下文协议" },
+      { file: "examples/Agentic_AI/AgenticAI-Ch22-Agent-Skills.html",         title: "Ch22 Agent Skills",          desc: "Agent 技能系统" },
+      { file: "examples/Agentic_AI/AgenticAI-Ch23-A2A-Communication.html",    title: "Ch23 A2A Communication",     desc: "Agent 间通信协议" },
+      { file: "examples/Agentic_AI/AgenticAI-Ch24-Multi-Agent-Systems.html",  title: "Ch24 Multi-Agent Systems",   desc: "多 Agent 协作系统" },
+      { file: "examples/Agentic_AI/AgenticAI-Ch25-Agent-Frameworks.html",     title: "Ch25 Agent Frameworks",      desc: "主流 Agent 框架对比" },
+      { file: "examples/Agentic_AI/AgenticAI-Ch26-Agentic-UI.html",           title: "Ch26 Agentic UI",            desc: "Agent 用户界面设计" },
+      { file: "examples/Agentic_AI/AgenticAI-Ch27-Quiz.html",                 title: "Ch27 Quiz",                  desc: "全章节测验" },
+      { file: "examples/Agentic_AI/AgenticAI-Ch28-Quick-Reference.html",      title: "Ch28 Quick Reference",       desc: "快速参考手册" },
+      { file: "examples/Agentic_AI/AgenticAI-Ch29-Conclusion.html",           title: "Ch29 Conclusion",            desc: "总结与展望" },
+    ]
+  },
+  {
     id: "others",
     name: "Others",
-    desc: "其他方向：语言模型架构探索与扩散模型",
+    desc: "其他方向：推测解码、语言模型架构探索与扩散模型",
     icon: "icon-other",
     emoji: "✨",
     papers: [
+      { file: "examples/speculative-decoding-evolution.html", title: "Speculative Decoding Evolution", desc: "推测解码技术演化全景" },
       { file: "examples/Others/Cola-DLM.html",    title: "Cola-DLM",    desc: "Cola 扩散语言模型" },
       { file: "examples/Others/LLaDA2-Uni.html",  title: "LLaDA2-Uni",  desc: "LLaDA2 统一扩散自回归架构" },
     ]

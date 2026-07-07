@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第21章 阅读笔记：Model Context Protocol (MCP)</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]})"></script>
+<style>
+:root {
+  --primary: #2c3e50;
+  --accent: #3498db;
+  --bg: #fafbfc;
+  --card-bg: #ffffff;
+  --border: #e1e4e8;
+  --text: #24292e;
+  --text-secondary: #586069;
+  --code-bg: #f6f8fa;
+  --highlight: #fff3cd;
+  --success: #d4edda;
+  --info: #d1ecf1;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; line-height: 1.8; color: var(--text); background: var(--bg); padding: 2rem; max-width: 900px; margin: 0 auto; }
+h1 { font-size: 1.8rem; color: var(--primary); border-bottom: 3px solid var(--accent); padding-bottom: 0.5rem; margin-bottom: 1rem; }
+h2 { font-size: 1.4rem; color: var(--primary); margin-top: 2.5rem; margin-bottom: 1rem; padding-left: 0.8rem; border-left: 4px solid var(--accent); }
+h3 { font-size: 1.15rem; color: var(--primary); margin-top: 1.8rem; margin-bottom: 0.8rem; }
+p { margin-bottom: 1rem; text-align: justify; }
+ul, ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+li { margin-bottom: 0.5rem; }
+code { background: var(--code-bg); padding: 0.15rem 0.4rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: var(--code-bg); padding: 1rem; border-radius: 6px; overflow-x: auto; margin-bottom: 1.5rem; border: 1px solid var(--border); }
+pre code { background: none; padding: 0; }
+blockquote { border-left: 4px solid var(--accent); padding: 0.8rem 1.2rem; margin: 1.5rem 0; background: var(--info); border-radius: 0 6px 6px 0; }
+.card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+.formula-block { background: var(--code-bg); border: 1px solid var(--border); border-radius: 6px; padding: 1rem; margin: 1rem 0; overflow-x: auto; }
+.formula-explain { color: var(--text-secondary); font-size: 0.92em; margin-top: 0.5rem; padding-left: 1rem; border-left: 3px solid #ddd; }
+.highlight-box { background: var(--highlight); border: 1px solid #ffc107; border-radius: 6px; padding: 1rem; margin: 1rem 0; }
+.info-box { background: var(--info); border: 1px solid #bee5eb; border-radius: 6px; padding: 1rem; margin: 1rem 0; }
+.success-box { background: var(--success); border: 1px solid #c3e6cb; border-radius: 6px; padding: 1rem; margin: 1rem 0; }
+.subtitle { color: var(--text-secondary); font-size: 1rem; margin-bottom: 0.3rem; }
+.meta { color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 2rem; }
+table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; }
+th, td { border: 1px solid var(--border); padding: 0.6rem 0.8rem; text-align: left; }
+th { background: var(--code-bg); font-weight: 600; }
+details { margin-bottom: 1rem; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+summary { padding: 0.8rem 1.2rem; background: var(--code-bg); cursor: pointer; font-weight: 500; }
+details[open] summary { border-bottom: 1px solid var(--border); }
+details .answer { padding: 1rem 1.2rem; }
+svg { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; }
+.takeaway { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 8px; padding: 1.5rem; margin: 2rem 0; }
+.takeaway h2 { color: white; border-left-color: rgba(255,255,255,0.5); }
+.takeaway li { color: rgba(255,255,255,0.95); }
+</style>
+</head>
+<body>
+
+<h1>第21章：Model Context Protocol (MCP)</h1>
+<p class="subtitle">模型上下文协议——AI工具集成的USB-C标准，实现LLM与外部世界的统一连接</p>
+<p class="meta">来源：Agentic AI · 第21章（pp. 392–410） · 阅读笔记</p>
+
+<div class="card">
+<h3>章节摘要</h3>
+<p>Model Context Protocol（MCP）是由Anthropic于2024年底发布的开放标准协议，旨在解决AI系统与外部工具、数据源之间碎片化集成的根本问题。正如USB-C统一了物理接口，MCP为LLM与外部能力之间提供了一个<strong>标准化的通信层</strong>。本章从动机出发，深入解析MCP的三角色架构（Host/Client/Server）、核心原语（Tools/Resources/Prompts/Sampling）、JSON-RPC 2.0协议规范、安全模型、Python实现模式，以及与替代方案（OpenAI Function Calling、LangChain等）的对比。最后探讨MCP如何服务于Agent训练——标准化的动作空间与轨迹记录为强化学习提供了理想的环境接口。</p>
+</div>
+
+<h2>21.1 Motivation: The Tool Integration Problem</h2>
+
+<p>在MCP出现之前，每个AI应用都面临<strong>M×N集成问题</strong>：如果有M个AI模型/应用、N个外部工具/数据源，则需要编写M×N个定制连接器。这产生了大量重复工作、不一致的接口设计、以及难以维护的集成代码。</p>
+
+<h3>碎片化的代价</h3>
+<ul>
+<li><strong>开发者负担</strong>：每接入一个新工具都需要从头编写适配代码，处理认证、错误处理、数据格式转换等</li>
+<li><strong>不一致性</strong>：不同工具的集成方式差异巨大——有的用REST API，有的用SDK，有的用CLI</li>
+<li><strong>安全漏洞</strong>：各自为政的集成缺乏统一的安全模型，权限控制参差不齐</li>
+<li><strong>可复用性差</strong>：为一个AI平台编写的工具集成无法直接迁移到另一个平台</li>
+</ul>
+
+<div class="formula-block">
+$$C_{\text{integration}} = M \times N \times c_{\text{connector}}$$
+<p class="formula-explain">其中 $M$ 是AI应用数量，$N$ 是外部工具数量，$c_{\text{connector}}$ 是单个连接器的开发维护成本。MCP将其降为 $M + N$：每个应用实现一个MCP Client，每个工具实现一个MCP Server。</p>
+</div>
+
+<h3>USB-C类比</h3>
+<div class="info-box">
+<p><strong>核心洞察</strong>：正如USB-C为物理设备提供了统一接口（一根线连接显示器、充电器、硬盘等），MCP为AI系统提供了统一的"数字接口"。工具提供者只需实现一次MCP Server，就可以被任何支持MCP的AI应用调用；AI应用只需实现一个MCP Client，就能连接任何MCP Server。</p>
+</div>
+
+<h2>21.2 Architecture Overview</h2>
+
+<h3>Three-Role Model（三角色模型）</h3>
+<p>MCP定义了三个核心角色，各司其职：</p>
+
+<table>
+<thead>
+<tr><th>角色</th><th>职责</th><th>典型实现</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>Host</strong></td><td>用户直接交互的AI应用，管理安全策略和用户授权</td><td>Claude Desktop、VS Code Copilot、IDE插件</td></tr>
+<tr><td><strong>Client</strong></td><td>维护与Server的1:1连接，处理协议层通信</td><td>SDK中的MCP Client类（嵌入Host中）</td></tr>
+<tr><td><strong>Server</strong></td><td>暴露特定能力（工具/资源/提示），连接实际外部系统</td><td>文件系统Server、数据库Server、GitHub Server</td></tr>
+</tbody>
+</table>
+
+<svg viewBox="0 0 700 360" xmlns="http://www.w3.org/2000/svg">
+  <!-- Host -->
+  <rect x="220" y="20" width="260" height="70" rx="10" fill="#ebf5fb" stroke="#2980b9" stroke-width="2"/>
+  <text x="350" y="50" text-anchor="middle" font-size="14" font-weight="bold" fill="#2c3e50">Host (AI Application)</text>
+  <text x="350" y="72" text-anchor="middle" font-size="11" fill="#586069">Claude Desktop / IDE / Custom App</text>
+  <!-- Clients -->
+  <rect x="60" y="140" width="160" height="55" rx="8" fill="#fef9e7" stroke="#f39c12" stroke-width="2"/>
+  <text x="140" y="163" text-anchor="middle" font-size="12" font-weight="bold" fill="#2c3e50">MCP Client A</text>
+  <text x="140" y="182" text-anchor="middle" font-size="10" fill="#586069">1:1 connection</text>
+  <rect x="270" y="140" width="160" height="55" rx="8" fill="#fef9e7" stroke="#f39c12" stroke-width="2"/>
+  <text x="350" y="163" text-anchor="middle" font-size="12" font-weight="bold" fill="#2c3e50">MCP Client B</text>
+  <text x="350" y="182" text-anchor="middle" font-size="10" fill="#586069">1:1 connection</text>
+  <rect x="480" y="140" width="160" height="55" rx="8" fill="#fef9e7" stroke="#f39c12" stroke-width="2"/>
+  <text x="560" y="163" text-anchor="middle" font-size="12" font-weight="bold" fill="#2c3e50">MCP Client C</text>
+  <text x="560" y="182" text-anchor="middle" font-size="10" fill="#586069">1:1 connection</text>
+  <!-- Servers -->
+  <rect x="60" y="260" width="160" height="70" rx="8" fill="#eafaf1" stroke="#27ae60" stroke-width="2"/>
+  <text x="140" y="285" text-anchor="middle" font-size="12" font-weight="bold" fill="#2c3e50">MCP Server</text>
+  <text x="140" y="305" text-anchor="middle" font-size="10" fill="#586069">File System</text>
+  <text x="140" y="320" text-anchor="middle" font-size="9" fill="#888">Tools + Resources</text>
+  <rect x="270" y="260" width="160" height="70" rx="8" fill="#eafaf1" stroke="#27ae60" stroke-width="2"/>
+  <text x="350" y="285" text-anchor="middle" font-size="12" font-weight="bold" fill="#2c3e50">MCP Server</text>
+  <text x="350" y="305" text-anchor="middle" font-size="10" fill="#586069">Database (PostgreSQL)</text>
+  <text x="350" y="320" text-anchor="middle" font-size="9" fill="#888">Tools + Resources</text>
+  <rect x="480" y="260" width="160" height="70" rx="8" fill="#eafaf1" stroke="#27ae60" stroke-width="2"/>
+  <text x="560" y="285" text-anchor="middle" font-size="12" font-weight="bold" fill="#2c3e50">MCP Server</text>
+  <text x="560" y="305" text-anchor="middle" font-size="10" fill="#586069">GitHub API</text>
+  <text x="560" y="320" text-anchor="middle" font-size="9" fill="#888">Tools + Resources</text>
+  <!-- Arrows Host to Clients -->
+  <line x1="280" y1="90" x2="160" y2="140" stroke="#7f8c8d" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="350" y1="90" x2="350" y2="140" stroke="#7f8c8d" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="420" y1="90" x2="540" y2="140" stroke="#7f8c8d" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <!-- Arrows Clients to Servers -->
+  <line x1="140" y1="195" x2="140" y2="260" stroke="#27ae60" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arrow2)"/>
+  <line x1="350" y1="195" x2="350" y2="260" stroke="#27ae60" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arrow2)"/>
+  <line x1="560" y1="195" x2="560" y2="260" stroke="#27ae60" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arrow2)"/>
+  <!-- Arrow markers -->
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#7f8c8d"/></marker>
+    <marker id="arrow2" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#27ae60"/></marker>
+  </defs>
+  <!-- Labels -->
+  <text x="350" y="125" text-anchor="middle" font-size="10" fill="#7f8c8d">manages &amp; spawns</text>
+  <text x="350" y="240" text-anchor="middle" font-size="10" fill="#27ae60">JSON-RPC 2.0 (stdio / HTTP+SSE)</text>
+</svg>
+
+<h3>Transport Layers（传输层）</h3>
+<p>MCP支持两种传输机制，适应不同部署场景：</p>
+
+<table>
+<thead>
+<tr><th>传输方式</th><th>适用场景</th><th>特点</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>stdio</strong></td><td>本地Server（子进程）</td><td>Host启动Server进程，通过stdin/stdout交换JSON-RPC消息；零网络开销，安全隔离好</td></tr>
+<tr><td><strong>HTTP + SSE</strong></td><td>远程Server（网络服务）</td><td>Client通过HTTP POST发送请求，Server通过Server-Sent Events推送响应/通知；支持跨网络部署</td></tr>
+</tbody>
+</table>
+
+<h3>Protocol Lifecycle（协议生命周期）</h3>
+<ol>
+<li><strong>Initialize</strong>：Client发送<code>initialize</code>请求，包含协议版本和客户端能力声明</li>
+<li><strong>Negotiate</strong>：Server回复支持的能力（tools/resources/prompts/sampling）</li>
+<li><strong>Initialized</strong>：Client发送<code>initialized</code>通知确认，连接就绪</li>
+<li><strong>Operation</strong>：正常的请求-响应和通知交换阶段</li>
+<li><strong>Shutdown</strong>：任一方可发起优雅关闭</li>
+</ol>
+
+<h3>Stateful vs. Stateless</h3>
+<div class="highlight-box">
+<p><strong>设计选择</strong>：MCP是<strong>有状态协议</strong>。一旦连接建立，Client和Server之间维护持久会话。Server可以缓存上下文、跟踪资源订阅、并向Client推送变更通知。这与无状态的REST API形成对比——MCP优化的是<strong>持续的交互式协作</strong>，而非一次性请求。</p>
+</div>
+
+<h2>21.3 Core Primitives</h2>
+
+<p>MCP定义了四类核心原语（Primitives），覆盖了AI与外部世界交互的所有维度：</p>
+
+<h3>Tools（工具）</h3>
+<p>工具是MCP中最核心的原语——允许LLM<strong>执行操作</strong>（副作用）。工具类似于函数调用：有明确的输入schema、执行逻辑和输出结果。</p>
+<ul>
+<li><strong>控制方</strong>：Model-controlled（模型决定何时调用）</li>
+<li><strong>类比</strong>：POST请求——可能改变外部状态</li>
+<li><strong>示例</strong>：<code>execute_sql</code>、<code>send_email</code>、<code>create_github_issue</code></li>
+</ul>
+
+<h3>Resources（资源）</h3>
+<p>资源提供<strong>只读的上下文数据</strong>，不产生副作用。模型或应用可以请求资源来丰富自己的上下文。</p>
+<ul>
+<li><strong>控制方</strong>：Application-controlled（应用侧决定何时获取）</li>
+<li><strong>类比</strong>：GET请求——幂等、只读</li>
+<li><strong>示例</strong>：<code>file://project/src/main.py</code>、<code>db://users/schema</code></li>
+<li><strong>支持订阅</strong>：Client可订阅资源变更通知</li>
+</ul>
+
+<h3>Prompts（提示模板）</h3>
+<p>预定义的提示模板，帮助用户以标准化方式与特定领域交互。</p>
+<ul>
+<li><strong>控制方</strong>：User-controlled（用户选择使用哪个模板）</li>
+<li><strong>用途</strong>：将最佳实践编码为可复用的交互模式</li>
+<li><strong>示例</strong>：<code>review_code</code>（代码审查模板）、<code>explain_error</code>（错误解释模板）</li>
+</ul>
+
+<h3>Sampling（采样）</h3>
+<p>最独特的原语——允许Server<strong>反向请求LLM生成</strong>。这打破了传统的单向调用模式，使Server能够利用LLM的推理能力。</p>
+<ul>
+<li><strong>控制方</strong>：Server-initiated（Server主动请求Host中的LLM）</li>
+<li><strong>用途</strong>：让工具Server在执行过程中"思考"——例如，代码分析Server请求LLM解释错误模式</li>
+<li><strong>安全约束</strong>：所有Sampling请求必须经过Host的用户授权审批</li>
+</ul>
+
+<div class="card">
+<h3>四原语对比总结</h3>
+<table>
+<thead>
+<tr><th>原语</th><th>方向</th><th>控制者</th><th>副作用</th><th>类比</th></tr>
+</thead>
+<tbody>
+<tr><td>Tools</td><td>Client → Server</td><td>Model</td><td>有</td><td>POST / 函数调用</td></tr>
+<tr><td>Resources</td><td>Client → Server</td><td>Application</td><td>无</td><td>GET / 文件读取</td></tr>
+<tr><td>Prompts</td><td>Client → Server</td><td>User</td><td>无</td><td>模板 / Snippet</td></tr>
+<tr><td>Sampling</td><td>Server → Client</td><td>Server</td><td>视情况</td><td>回调 / 反向RPC</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2>21.4 Protocol Specification</h2>
+
+<h3>JSON-RPC 2.0</h3>
+<p>MCP建立在JSON-RPC 2.0之上，这是一个轻量级的远程过程调用协议。所有消息均为JSON格式，分为三类：</p>
+
+<pre><code>// Request（请求）——带有id，期望响应
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "method": "tools/call",
+  "params": {
+    "name": "execute_sql",
+    "arguments": {
+      "query": "SELECT * FROM users LIMIT 10"
+    }
+  }
+}
+
+// Response（响应）——匹配请求id
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "| id | name | email |\n|---|---|---|\n| 1 | Alice | alice@example.com |"
+      }
+    ]
+  }
+}
+
+// Notification（通知）——无id，不期望响应
+{
+  "jsonrpc": "2.0",
+  "method": "notifications/resources/updated",
+  "params": {
+    "uri": "file://project/config.yaml"
+  }
+}</code></pre>
+
+<h3>Capability Negotiation（能力协商）</h3>
+<p>连接建立时，双方通过<code>initialize</code>交换能力声明：</p>
+
+<pre><code>// Client → Server: initialize request
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "method": "initialize",
+  "params": {
+    "protocolVersion": "2024-11-05",
+    "capabilities": {
+      "sampling": {},           // Client支持Sampling
+      "roots": { "listChanged": true }
+    },
+    "clientInfo": {
+      "name": "claude-desktop",
+      "version": "1.2.0"
+    }
+  }
+}
+
+// Server → Client: initialize response
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": {
+    "protocolVersion": "2024-11-05",
+    "capabilities": {
+      "tools": { "listChanged": true },
+      "resources": { "subscribe": true, "listChanged": true },
+      "prompts": { "listChanged": true }
+    },
+    "serverInfo": {
+      "name": "postgres-server",
+      "version": "0.5.0"
+    }
+  }
+}</code></pre>
+
+<h3>Error Handling（错误处理）</h3>
+<p>MCP使用JSON-RPC标准错误码，并扩展了特定于协议的错误：</p>
+
+<table>
+<thead>
+<tr><th>错误码</th><th>含义</th><th>场景</th></tr>
+</thead>
+<tbody>
+<tr><td>-32700</td><td>Parse Error</td><td>JSON格式无效</td></tr>
+<tr><td>-32600</td><td>Invalid Request</td><td>不符合JSON-RPC 2.0规范</td></tr>
+<tr><td>-32601</td><td>Method Not Found</td><td>调用不存在的方法</td></tr>
+<tr><td>-32602</td><td>Invalid Params</td><td>参数不符合schema</td></tr>
+<tr><td>-32603</td><td>Internal Error</td><td>Server内部执行错误</td></tr>
+</tbody>
+</table>
+
+<h3>Progress Reporting（进度报告）</h3>
+<p>对于长时间运行的操作，Server可以通过通知发送进度更新：</p>
+
+<pre><code>{
+  "jsonrpc": "2.0",
+  "method": "notifications/progress",
+  "params": {
+    "progressToken": "op-123",
+    "progress": 45,
+    "total": 100,
+    "message": "Processing file 45 of 100..."
+  }
+}</code></pre>
+
+<h2>21.5 Tool Definition and Discovery</h2>
+
+<h3>Schema Format（Schema格式）</h3>
+<p>MCP工具使用JSON Schema定义输入参数，确保类型安全和自描述性：</p>
+
+<pre><code>{
+  "name": "execute_sql",
+  "description": "Execute a read-only SQL query against the connected database. Returns results as formatted text. Use for data retrieval only.",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "query": {
+        "type": "string",
+        "description": "The SQL SELECT query to execute"
+      },
+      "database": {
+        "type": "string",
+        "description": "Target database name",
+        "default": "main"
+      },
+      "limit": {
+        "type": "integer",
+        "description": "Maximum rows to return",
+        "default": 100,
+        "maximum": 1000
+      }
+    },
+    "required": ["query"]
+  }
+}</code></pre>
+
+<div class="info-box">
+<p><strong>最佳实践</strong>：工具的<code>description</code>字段至关重要——它是LLM决定是否使用该工具的主要依据。应明确说明：(1) 工具做什么；(2) 适用场景；(3) 限制条件。避免模糊描述如"执行操作"。</p>
+</div>
+
+<h3>Dynamic Registration（动态注册）</h3>
+<p>MCP支持运行时工具列表的动态变更。Server可以在连接存续期间添加/移除工具，并通过<code>notifications/tools/list_changed</code>通知Client重新拉取工具列表：</p>
+
+<pre><code>// Server通知Client工具列表已变更
+{
+  "jsonrpc": "2.0",
+  "method": "notifications/tools/list_changed"
+}
+
+// Client随后调用 tools/list 获取最新工具列表</code></pre>
+
+<h3>Annotations（注解）</h3>
+<p>工具注解为Host提供额外的元信息，帮助做出安全和用户体验决策：</p>
+
+<pre><code>{
+  "name": "delete_file",
+  "description": "Permanently delete a file from the filesystem",
+  "annotations": {
+    "destructive": true,         // 破坏性操作——需要用户确认
+    "idempotent": false,         // 非幂等——重复调用有不同效果
+    "readOnlyHint": false,       // 非只读——会修改外部状态
+    "openWorldHint": true        // 开放世界——可能影响外部系统
+  },
+  "inputSchema": { ... }
+}</code></pre>
+
+<h2>21.6 Security Model</h2>
+
+<h3>Trust Hierarchy（信任层级）</h3>
+<p>MCP建立了清晰的三层信任模型：</p>
+
+<svg viewBox="0 0 600 200" xmlns="http://www.w3.org/2000/svg">
+  <rect x="180" y="10" width="240" height="45" rx="8" fill="#fadbd8" stroke="#e74c3c" stroke-width="2"/>
+  <text x="300" y="38" text-anchor="middle" font-size="13" font-weight="bold" fill="#2c3e50">User (最高信任)</text>
+  <rect x="130" y="75" width="340" height="45" rx="8" fill="#fef9e7" stroke="#f39c12" stroke-width="2"/>
+  <text x="300" y="103" text-anchor="middle" font-size="13" font-weight="bold" fill="#2c3e50">Host / Client (中间层 — 受用户授权)</text>
+  <rect x="80" y="140" width="440" height="45" rx="8" fill="#eafaf1" stroke="#27ae60" stroke-width="2"/>
+  <text x="300" y="168" text-anchor="middle" font-size="13" font-weight="bold" fill="#2c3e50">Server (最低信任 — 视为不可信外部代码)</text>
+</svg>
+
+<ul>
+<li><strong>User</strong>：拥有最终决策权，所有敏感操作需用户确认</li>
+<li><strong>Host</strong>：代表用户执行安全策略，过滤和审批Server请求</li>
+<li><strong>Server</strong>：被视为<strong>不可信的第三方代码</strong>，其输出需要验证，其请求需要授权</li>
+</ul>
+
+<h3>User Consent（用户同意）</h3>
+<p>MCP的安全模型要求"human-in-the-loop"——关键操作必须经过用户明确授权：</p>
+<ol>
+<li>首次连接Server时，Host向用户展示Server声明的能力</li>
+<li>Server请求Sampling时，Host必须获取用户批准</li>
+<li>带有<code>destructive: true</code>注解的工具调用需二次确认</li>
+<li>用户可以随时撤销Server的特定能力权限</li>
+</ol>
+
+<h3>Input Validation（输入验证）</h3>
+<div class="highlight-box">
+<p><strong>关键安全原则</strong>：Server绝不能信任来自Client的输入。即使Client发送的参数通过了JSON Schema验证，Server仍必须进行业务逻辑层面的验证——检查路径遍历攻击、SQL注入、命令注入等。MCP的schema验证是第一道防线，但绝非唯一防线。</p>
+</div>
+
+<h3>Credential Management（凭证管理）</h3>
+<ul>
+<li>凭证（API key、token）<strong>永远不应通过MCP协议传输</strong></li>
+<li>Server使用自有的凭证管理（环境变量、secret store）</li>
+<li>Host不应向Server暴露用户的认证信息</li>
+<li>OAuth流程通过独立的安全通道完成，不走MCP消息</li>
+</ul>
+
+<h3>Sandboxing（沙箱隔离）</h3>
+<ul>
+<li>每个Server进程在独立的沙箱中运行</li>
+<li>文件系统访问限定为声明的<code>roots</code>范围</li>
+<li>网络访问可通过Host策略限制</li>
+<li>Server之间<strong>不能直接通信</strong>——必须通过Host中转</li>
+</ul>
+
+<h2>21.7 Implementation Patterns</h2>
+
+<h3>Server in Python（Python实现Server）</h3>
+<p>以下是一个功能完整的MCP Server示例，展示了工具定义、资源暴露和错误处理：</p>
+
+<pre><code>import asyncio
+from mcp.server import Server
+from mcp.server.stdio import stdio_server
+from mcp.types import (
+    Tool, TextContent, Resource,
+    GetPromptResult, PromptMessage
+)
+
+# 创建Server实例
+app = Server("demo-server")
+
+# ========== 工具定义 ==========
+@app.list_tools()
+async def list_tools() -> list[Tool]:
+    return [
+        Tool(
+            name="word_count",
+            description="Count words in a given text string",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "text": {
+                        "type": "string",
+                        "description": "Text to count words in"
+                    }
+                },
+                "required": ["text"]
+            }
+        ),
+        Tool(
+            name="file_search",
+            description="Search for files matching a glob pattern",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "pattern": {
+                        "type": "string",
+                        "description": "Glob pattern (e.g., '**/*.py')"
+                    },
+                    "root_dir": {
+                        "type": "string",
+                        "description": "Root directory to search from",
+                        "default": "."
+                    }
+                },
+                "required": ["pattern"]
+            }
+        )
+    ]
+
+@app.call_tool()
+async def call_tool(name: str, arguments: dict) -> list[TextContent]:
+    if name == "word_count":
+        text = arguments["text"]
+        count = len(text.split())
+        return [TextContent(
+            type="text",
+            text=f"Word count: {count}"
+        )]
+    elif name == "file_search":
+        import glob
+        pattern = arguments["pattern"]
+        root = arguments.get("root_dir", ".")
+        matches = glob.glob(pattern, root_dir=root, recursive=True)
+        return [TextContent(
+            type="text",
+            text="\n".join(matches[:50])  # 限制返回数量
+        )]
+    else:
+        raise ValueError(f"Unknown tool: {name}")
+
+# ========== 资源定义 ==========
+@app.list_resources()
+async def list_resources() -> list[Resource]:
+    return [
+        Resource(
+            uri="config://server/status",
+            name="Server Status",
+            description="Current server health and configuration",
+            mimeType="application/json"
+        )
+    ]
+
+@app.read_resource()
+async def read_resource(uri: str) -> str:
+    if uri == "config://server/status":
+        import json
+        return json.dumps({
+            "status": "healthy",
+            "uptime_seconds": 3600,
+            "tools_registered": 2
+        }, indent=2)
+    raise ValueError(f"Unknown resource: {uri}")
+
+# ========== 启动Server ==========
+async def main():
+    async with stdio_server() as (read_stream, write_stream):
+        await app.run(read_stream, write_stream)
+
+if __name__ == "__main__":
+    asyncio.run(main())</code></pre>
+
+<h3>Client Implementation（Client实现）</h3>
+
+<pre><code>from mcp.client import ClientSession
+from mcp.client.stdio import stdio_client, StdioServerParameters
+
+async def run_client():
+    # 配置Server进程
+    server_params = StdioServerParameters(
+        command="python",
+        args=["demo_server.py"],
+        env={"PYTHONPATH": "."}
+    )
+    
+    async with stdio_client(server_params) as (read, write):
+        async with ClientSession(read, write) as session:
+            # 1. 初始化连接
+            await session.initialize()
+            
+            # 2. 发现可用工具
+            tools = await session.list_tools()
+            print(f"Available tools: {[t.name for t in tools.tools]}")
+            
+            # 3. 调用工具
+            result = await session.call_tool(
+                "word_count",
+                arguments={"text": "Hello world from MCP"}
+            )
+            print(f"Result: {result.content[0].text}")
+            
+            # 4. 读取资源
+            resource = await session.read_resource("config://server/status")
+            print(f"Server status: {resource.contents[0].text}")
+
+asyncio.run(run_client())</code></pre>
+
+<h3>Multi-Server Architecture（多Server架构）</h3>
+<p>生产环境中，一个Host通常连接多个Server，每个负责不同领域：</p>
+
+<pre><code># Host配置示例（claude_desktop_config.json）
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/Users/me/projects"],
+      "env": {}
+    },
+    "postgres": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-postgres"],
+      "env": {
+        "DATABASE_URL": "postgresql://localhost:5432/mydb"
+      }
+    },
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_TOKEN": "ghp_xxxxxxxxxxxx"
+      }
+    }
+  }
+}</code></pre>
+
+<h3>Error Recovery（错误恢复）</h3>
+<div class="card">
+<p>MCP Client应实现健壮的错误恢复策略：</p>
+<ul>
+<li><strong>重连机制</strong>：Server进程崩溃时，Client应自动重启并重新初始化</li>
+<li><strong>超时控制</strong>：每个工具调用设置合理超时（如30s），超时后返回错误而非无限等待</li>
+<li><strong>降级处理</strong>：当特定Server不可用时，Host应继续运行（减少能力但不完全失败）</li>
+<li><strong>幂等重试</strong>：对于标记为<code>idempotent: true</code>的工具，可安全重试失败的调用</li>
+</ul>
+</div>
+
+<h2>21.8 The MCP Ecosystem</h2>
+
+<h3>Popular Servers（流行的MCP Server）</h3>
+<table>
+<thead>
+<tr><th>Server</th><th>功能</th><th>工具示例</th></tr>
+</thead>
+<tbody>
+<tr><td>filesystem</td><td>本地文件读写、搜索</td><td>read_file, write_file, search_files</td></tr>
+<tr><td>postgres / sqlite</td><td>数据库查询与管理</td><td>query, list_tables, describe_table</td></tr>
+<tr><td>github</td><td>仓库、Issue、PR操作</td><td>create_issue, search_code, create_pr</td></tr>
+<tr><td>slack</td><td>消息发送、频道管理</td><td>send_message, list_channels</td></tr>
+<tr><td>puppeteer</td><td>浏览器自动化</td><td>navigate, screenshot, click</td></tr>
+<tr><td>memory</td><td>持久化知识图谱</td><td>create_entity, search_nodes</td></tr>
+<tr><td>brave-search</td><td>网络搜索</td><td>web_search, local_search</td></tr>
+</tbody>
+</table>
+
+<h3>Production Applications（生产应用）</h3>
+<ul>
+<li><strong>Claude Desktop</strong>：Anthropic的桌面客户端，最早支持MCP的Host实现</li>
+<li><strong>Cursor / Windsurf</strong>：AI-native IDE，通过MCP接入代码分析、文件系统、终端等能力</li>
+<li><strong>Zed Editor</strong>：使用MCP连接语言服务器和AI辅助功能</li>
+<li><strong>企业内部系统</strong>：通过自定义MCP Server接入内部数据库、知识库、工作流系统</li>
+</ul>
+
+<h3>Registries（注册中心）</h3>
+<p>MCP生态正在形成标准化的Server发现和分发机制：</p>
+<ul>
+<li><strong>官方Registry</strong>：Anthropic维护的MCP Server目录，提供安全审计和质量保证</li>
+<li><strong>npm/PyPI</strong>：大量社区开发的MCP Server通过包管理器分发</li>
+<li><strong>企业私有Registry</strong>：组织内部的MCP Server目录，配合ACL控制访问</li>
+</ul>
+
+<h2>21.9 MCP vs. Alternatives</h2>
+
+<h3>全面对比</h3>
+<table>
+<thead>
+<tr><th>维度</th><th>MCP</th><th>OpenAI Function Calling</th><th>LangChain Tools</th><th>Custom REST API</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>标准化程度</strong></td><td>开放协议标准</td><td>厂商特定</td><td>框架特定</td><td>无标准</td></tr>
+<tr><td><strong>传输层</strong></td><td>stdio / HTTP+SSE</td><td>HTTP（嵌入Chat API）</td><td>进程内调用</td><td>HTTP REST</td></tr>
+<tr><td><strong>有状态性</strong></td><td>有状态持久连接</td><td>无状态</td><td>进程内状态</td><td>通常无状态</td></tr>
+<tr><td><strong>双向通信</strong></td><td>支持（Sampling）</td><td>不支持</td><td>部分支持</td><td>需WebSocket</td></tr>
+<tr><td><strong>动态发现</strong></td><td>运行时工具发现</td><td>静态定义</td><td>静态注册</td><td>需API文档</td></tr>
+<tr><td><strong>安全模型</strong></td><td>三层信任 + 用户授权</td><td>由应用自行实现</td><td>由应用自行实现</td><td>由应用自行实现</td></tr>
+<tr><td><strong>模型无关</strong></td><td>完全无关</td><td>限OpenAI模型</td><td>模型抽象层</td><td>完全无关</td></tr>
+<tr><td><strong>生态系统</strong></td><td>快速增长中</td><td>成熟</td><td>成熟</td><td>最成熟</td></tr>
+<tr><td><strong>进程隔离</strong></td><td>天然隔离</td><td>无</td><td>无</td><td>网络隔离</td></tr>
+</tbody>
+</table>
+
+<h3>When to Use MCP（何时使用MCP）</h3>
+<div class="success-box">
+<p><strong>推荐使用MCP的场景</strong>：</p>
+<ul>
+<li>构建需要连接<strong>多个外部系统</strong>的AI应用（M×N问题明显时）</li>
+<li>需要<strong>跨不同AI平台</strong>复用同一套工具集成</li>
+<li>安全性要求高，需要<strong>进程隔离</strong>和<strong>用户授权控制</strong></li>
+<li>工具集动态变化，需要<strong>运行时发现和热加载</strong></li>
+<li>团队协作中，希望工具开发与AI应用开发<strong>解耦</strong></li>
+</ul>
+</div>
+
+<div class="highlight-box">
+<p><strong>不需要MCP的场景</strong>：</p>
+<ul>
+<li>只使用单一模型平台（如仅用OpenAI），Function Calling足够</li>
+<li>工具逻辑简单且固定，不需要进程隔离</li>
+<li>延迟极度敏感的场景（进程间通信有额外开销）</li>
+</ul>
+</div>
+
+<h3>Migration Paths（迁移路径）</h3>
+<ol>
+<li><strong>从Function Calling迁移</strong>：将现有函数定义转换为MCP Tool schema，将实现逻辑封装为MCP Server</li>
+<li><strong>从LangChain迁移</strong>：将LangChain Tool包装为MCP Server，保留原有逻辑，添加schema和传输层</li>
+<li><strong>渐进式采用</strong>：在现有架构中逐步引入MCP Server，先从独立性强的工具开始（如文件系统、搜索），逐步扩展</li>
+</ol>
+
+<h2>21.10 MCP for Agent Training</h2>
+
+<p>MCP不仅是生产部署的集成标准，更是Agent训练的理想基础设施。其标准化的接口定义为强化学习提供了规范的环境抽象。</p>
+
+<h3>RL Environment Interfaces（强化学习环境接口）</h3>
+<p>MCP天然适配RL训练中的"环境"概念：</p>
+
+<div class="formula-block">
+$$\text{MDP}: \mathcal{M} = (\mathcal{S}, \mathcal{A}, T, R, \gamma)$$
+<p class="formula-explain">将MCP映射到MDP：状态$\mathcal{S}$对应Resources提供的上下文，动作$\mathcal{A}$对应Tools的调用，转移函数$T$由Server执行结果决定，奖励$R$可从执行反馈推导。</p>
+</div>
+
+<pre><code># MCP作为RL环境的接口抽象
+class MCPEnvironment:
+    """将MCP Server包装为Gymnasium兼容的RL环境"""
+    
+    def __init__(self, server_params: StdioServerParameters):
+        self.session = None
+        self.server_params = server_params
+    
+    async def reset(self) -> dict:
+        """重置环境，返回初始观测（Resources）"""
+        # 重新连接Server
+        self.session = await self._connect()
+        # 初始观测 = 所有资源的当前状态
+        resources = await self.session.list_resources()
+        obs = await self._gather_observations(resources)
+        return obs
+    
+    async def step(self, action: dict) -> tuple:
+        """执行动作（Tool调用），返回(obs, reward, done, info)"""
+        tool_name = action["tool"]
+        arguments = action["arguments"]
+        
+        try:
+            result = await self.session.call_tool(tool_name, arguments)
+            obs = self._parse_result(result)
+            reward = self._compute_reward(result)
+            done = self._check_termination(result)
+            return obs, reward, done, {"success": True}
+        except Exception as e:
+            return {}, -1.0, False, {"error": str(e)}
+    
+    @property
+    def action_space(self) -> list:
+        """动作空间 = 所有可用工具及其参数schema"""
+        return self._cached_tools</code></pre>
+
+<h3>Standardized Action Spaces（标准化动作空间）</h3>
+<p>MCP的工具schema为RL Agent提供了精确定义的动作空间：</p>
+<ul>
+<li><strong>结构化动作</strong>：每个工具的<code>inputSchema</code>定义了该动作的参数空间，天然支持类型约束</li>
+<li><strong>动态动作集</strong>：通过<code>tools/list</code>，Agent可以在运行时发现可用动作，适应环境变化</li>
+<li><strong>动作注解</strong>：<code>destructive</code>、<code>idempotent</code>等元信息帮助RL训练策略设计exploration策略</li>
+</ul>
+
+<div class="formula-block">
+$$\pi_\theta(a|s) = \text{LLM}_\theta\big(\text{tool\_call} \mid \text{context}(s), \text{tools\_schema}\big)$$
+<p class="formula-explain">策略$\pi_\theta$即LLM在给定上下文状态$s$和工具schema的条件下，生成工具调用$a$的概率分布。MCP保证了tools_schema的标准化格式，使得同一Agent可以无修改地跨不同MCP Server训练。</p>
+</div>
+
+<h3>Recording Trajectories（轨迹记录）</h3>
+<p>MCP的协议消息天然构成可解析的交互轨迹，直接可用于离线RL和模仿学习：</p>
+
+<pre><code># 轨迹格式：JSON-RPC消息序列即为完整的episode记录
+trajectory = [
+    {"role": "assistant", "tool_call": {"name": "list_files", "args": {"dir": "/src"}}},
+    {"role": "tool",      "result": "main.py\nutils.py\nconfig.yaml"},
+    {"role": "assistant", "tool_call": {"name": "read_file", "args": {"path": "/src/main.py"}}},
+    {"role": "tool",      "result": "import asyncio\n..."},
+    {"role": "assistant", "content": "The main.py file contains..."}
+]
+
+# 直接可用于：
+# 1. SFT — 监督微调学习最优工具使用序列
+# 2. DPO — 对比好/坏轨迹训练偏好
+# 3. GRPO — 基于最终奖励的RL训练</code></pre>
+
+<div class="info-box">
+<p><strong>训练优势</strong>：由于MCP标准化了消息格式，从不同Server收集的轨迹可以混合训练，无需格式转换。这使得构建大规模、多领域的Agent训练数据集变得可行——一个Agent可以同时在文件操作、数据库查询、API调用等多种环境中学习。</p>
+</div>
+
+<h2>21.11 Summary</h2>
+
+<div class="takeaway">
+<h2>Key Takeaways</h2>
+<ul>
+<li><strong>MCP解决M×N问题</strong>：通过标准协议将集成成本从$O(M \times N)$降至$O(M + N)$，实现工具与应用的解耦</li>
+<li><strong>三角色架构</strong>：Host管理安全、Client管理连接、Server暴露能力——职责清晰，信任分层</li>
+<li><strong>四类原语</strong>：Tools（执行动作）、Resources（提供数据）、Prompts（标准化交互）、Sampling（反向LLM调用）</li>
+<li><strong>JSON-RPC 2.0</strong>：轻量级、语言无关的协议基础，支持请求/响应/通知三种消息模式</li>
+<li><strong>安全第一</strong>：不可信Server模型 + 用户授权 + 进程隔离 + 凭证不穿透</li>
+<li><strong>生态爆发</strong>：从文件系统到数据库到SaaS API，MCP Server生态快速扩展</li>
+<li><strong>训练友好</strong>：标准化接口天然构成RL环境，协议消息直接可作为训练轨迹</li>
+</ul>
+</div>
+
+<h2>Q&A 深度问答</h2>
+
+<details>
+<summary>Q1: MCP与传统REST API的本质区别是什么？为什么不直接用REST？</summary>
+<div class="answer">
+<p>本质区别在三个维度：(1) <strong>有状态性</strong>——MCP维护持久连接和会话上下文，REST是无状态的请求-响应；(2) <strong>双向通信</strong>——MCP支持Server主动推送通知和Sampling请求，REST是严格的客户端驱动；(3) <strong>语义标准化</strong>——MCP定义了统一的工具发现、能力协商和安全模型，REST只规定了HTTP动词语义。REST适合简单的数据CRUD，MCP适合复杂的AI-工具交互协作。</p>
+</div>
+</details>
+
+<details>
+<summary>Q2: Sampling原语的实际使用场景是什么？为什么Server需要反向调用LLM？</summary>
+<div class="answer">
+<p>典型场景：(1) <strong>智能数据转换</strong>——数据库Server收到查询结果后，请求LLM将原始数据总结为自然语言描述；(2) <strong>动态工具生成</strong>——代码分析Server发现新的API后，请求LLM生成对应的工具描述；(3) <strong>错误诊断</strong>——Server执行出错时，请求LLM基于错误上下文生成修复建议；(4) <strong>多步推理</strong>——复杂工具需要中间推理步骤（如规划SQL查询策略），Server可请求LLM"思考"。关键约束是所有Sampling都经Host审批，防止Server滥用LLM资源。</p>
+</div>
+</details>
+
+<details>
+<summary>Q3: MCP的有状态设计是否会带来可靠性问题？如何处理连接中断？</summary>
+<div class="answer">
+<p>有状态确实引入可靠性挑战，MCP通过以下机制应对：(1) <strong>自动重连</strong>——Client检测到连接断开后自动重启Server进程并重新初始化；(2) <strong>幂等性标记</strong>——带<code>idempotent: true</code>的工具可安全重试；(3) <strong>进度恢复</strong>——长操作通过<code>progressToken</code>可在重连后查询状态；(4) <strong>优雅降级</strong>——Host不依赖单一Server，某Server不可用时其他Server继续服务。实践中，对于关键操作，建议设计为"可检查状态+可安全重试"模式。</p>
+</div>
+</details>
+
+<details>
+<summary>Q4: 如何设计一个安全的MCP Server？有哪些必须避免的安全反模式？</summary>
+<div class="answer">
+<p><strong>必须做的</strong>：(1) 验证所有输入参数，即使已通过schema校验；(2) 限制文件访问在声明的roots内；(3) 对SQL查询使用参数化语句；(4) 对外部命令执行进行白名单控制；(5) 设置操作超时。<strong>必须避免的反模式</strong>：(1) 在工具中暴露环境变量或内部凭证；(2) 允许任意路径访问（路径遍历）；(3) 将用户输入直接拼接到shell命令；(4) 信任Client声称的用户身份；(5) 在错误消息中泄露内部实现细节。</p>
+</div>
+</details>
+
+<details>
+<summary>Q5: MCP如何支持Agent的工具学习？从"不会用工具"到"熟练使用"的训练路径是什么？</summary>
+<div class="answer">
+<p>MCP为Agent工具学习提供了完整的基础设施：<strong>第一阶段（SFT）</strong>——使用人类专家的MCP交互轨迹做监督微调，让Agent学会基本的工具调用格式和常见使用模式；<strong>第二阶段（RL Exploration）</strong>——将MCP Server作为RL环境，Agent通过trial-and-error学习最优工具使用策略。由于MCP的schema提供了精确的动作空间定义，exploration更高效（不需要猜测参数格式）；<strong>第三阶段（Continual Learning）</strong>——当新MCP Server上线时，Agent通过schema的自描述性快速适应新工具，无需重新训练。</p>
+</div>
+</details>
+
+<details>
+<summary>Q6: 在多Server架构中，Host如何路由请求？如果多个Server提供同名工具怎么办？</summary>
+<div class="answer">
+<p>Host维护一个<strong>工具注册表</strong>，记录每个工具来自哪个Server。路由策略：(1) <strong>命名空间隔离</strong>——实践中建议工具名带Server前缀（如<code>github.create_issue</code>vs<code>jira.create_issue</code>）；(2) <strong>优先级配置</strong>——Host可配置同名工具的优先级；(3) <strong>能力合并</strong>——将所有Server的工具列表合并后统一呈现给LLM，由LLM根据description选择最合适的。对于真正冲突的情况，规范建议Host在初始化时检测并向用户报告命名冲突。</p>
+</div>
+</details>
+
+<details>
+<summary>Q7: MCP的性能开销如何？相比进程内函数调用，延迟增加了多少？</summary>
+<div class="answer">
+<p>stdio传输的典型开销：(1) <strong>进程启动</strong>——首次连接时启动Server进程，Python约200-500ms，Node.js约100-300ms（仅一次）；(2) <strong>单次调用</strong>——序列化→管道传输→反序列化约增加1-5ms延迟（相比进程内调用的微秒级）；(3) <strong>内存</strong>——每个Server进程独立占用内存（Python进程约30-80MB）。HTTP+SSE传输额外增加网络RTT。总体来说，对于LLM应用（单次推理本身需要数百ms到数秒），MCP的额外1-5ms开销<strong>可以忽略不计</strong>。真正的性能瓶颈在LLM推理本身，而非协议层。</p>
+</div>
+</details>
+
+<details>
+<summary>Q8: MCP协议的未来演进方向是什么？有哪些已知的局限性正在被解决？</summary>
+<div class="answer">
+<p>当前已知局限和演进方向：(1) <strong>认证标准化</strong>——当前版本缺乏标准的OAuth/OIDC集成流程，2025年版本将内建身份认证支持；(2) <strong>Streamable HTTP</strong>——新传输层替代SSE，支持更灵活的双向流式通信；(3) <strong>Server-to-Server</strong>——允许MCP Server之间直接通信（当前必须经Host中转）；(4) <strong>Registry标准</strong>——标准化的Server发现和版本管理协议；(5) <strong>性能优化</strong>——批量调用（batch requests）和消息压缩。MCP正从"协议规范"演进为"完整平台"。</p>
+</div>
+</details>
+
+</body>
+</html>

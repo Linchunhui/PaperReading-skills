@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第2章 阅读笔记：Systems Foundations for LLMs</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]})"></script>
+<style>
+:root {
+  --primary: #2c3e50;
+  --accent: #3498db;
+  --bg: #fafbfc;
+  --card-bg: #ffffff;
+  --border: #e1e4e8;
+  --text: #24292e;
+  --text-secondary: #586069;
+  --code-bg: #f6f8fa;
+  --highlight: #fff3cd;
+  --success: #d4edda;
+  --info: #d1ecf1;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; line-height: 1.8; color: var(--text); background: var(--bg); padding: 2rem; max-width: 900px; margin: 0 auto; }
+h1 { font-size: 1.8rem; color: var(--primary); border-bottom: 3px solid var(--accent); padding-bottom: 0.5rem; margin-bottom: 1rem; }
+h2 { font-size: 1.4rem; color: var(--primary); margin-top: 2.5rem; margin-bottom: 1rem; padding-left: 0.8rem; border-left: 4px solid var(--accent); }
+h3 { font-size: 1.15rem; color: var(--primary); margin-top: 1.8rem; margin-bottom: 0.8rem; }
+p { margin-bottom: 1rem; text-align: justify; }
+ul, ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+li { margin-bottom: 0.5rem; }
+code { background: var(--code-bg); padding: 0.15rem 0.4rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: var(--code-bg); padding: 1rem; border-radius: 6px; overflow-x: auto; margin-bottom: 1.5rem; border: 1px solid var(--border); }
+pre code { background: none; padding: 0; }
+blockquote { border-left: 4px solid var(--accent); padding: 0.8rem 1.2rem; margin: 1.5rem 0; background: var(--info); border-radius: 0 6px 6px 0; }
+.card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+.formula-block { background: var(--code-bg); border: 1px solid var(--border); border-radius: 6px; padding: 1rem; margin: 1rem 0; overflow-x: auto; }
+.formula-explain { color: var(--text-secondary); font-size: 0.92em; margin-top: 0.5rem; padding-left: 1rem; border-left: 3px solid #ddd; }
+.highlight-box { background: var(--highlight); border: 1px solid #ffc107; border-radius: 6px; padding: 1rem; margin: 1rem 0; }
+.info-box { background: var(--info); border: 1px solid #bee5eb; border-radius: 6px; padding: 1rem; margin: 1rem 0; }
+.success-box { background: var(--success); border: 1px solid #c3e6cb; border-radius: 6px; padding: 1rem; margin: 1rem 0; }
+.subtitle { color: var(--text-secondary); font-size: 1rem; margin-bottom: 0.3rem; }
+.meta { color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 2rem; }
+table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; }
+th, td { border: 1px solid var(--border); padding: 0.6rem 0.8rem; text-align: left; }
+th { background: var(--code-bg); font-weight: 600; }
+details { margin-bottom: 1rem; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+summary { padding: 0.8rem 1.2rem; background: var(--code-bg); cursor: pointer; font-weight: 500; }
+details[open] summary { border-bottom: 1px solid var(--border); }
+details .answer { padding: 1rem 1.2rem; }
+svg { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; }
+.takeaway { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 8px; padding: 1.5rem; margin: 2rem 0; }
+.takeaway h2 { color: white; border-left-color: rgba(255,255,255,0.5); }
+.takeaway li { color: rgba(255,255,255,0.95); }
+</style>
+</head>
+<body>
+
+<h1>第2章 阅读笔记：Systems Foundations for LLMs</h1>
+<p class="subtitle">来源：<em>The Hitchhiker's Guide to Agentic AI</em>, H. Roitman</p>
+<p class="meta">章节页码：105–118 | 笔记日期：2025-06</p>
+
+<div class="card">
+<h3>摘要</h3>
+<p>本章回答一个核心问题：<strong>大模型的训练和推理为什么如此依赖 GPU，怎样才能把 GPU 利用率拉满？</strong></p>
+<p>第一部分（2.1）以 NVIDIA GPU 为主线，从"CPU vs GPU 设计哲学"出发，逐步展开微架构代际演进、SM（流式多处理器）内部结构、内存层次（从寄存器到 HBM）、算术强度与 Roofline 模型、Tensor Core 工作原理，以及 NVLink/InfiniBand 通信架构——让读者能判断"这个操作是 memory-bound 还是 compute-bound"。</p>
+<p>第二部分（2.2）聚焦 vLLM 推理引擎，介绍 KV Cache 碎片问题、PagedAttention（借鉴 OS 虚拟内存分页）、Continuous Batching、Speculative Decoding、Prefix Caching 和 Guided Decoding，展示如何将 GPU 显存利用率从 20–40% 提升至 90–95%。</p>
+</div>
+
+<!-- ==================== 2.1 GPU Architecture ==================== -->
+<h2>2.1 GPU 架构——从硅片到 LLM 训练</h2>
+
+<h3>2.1.1 为什么深度学习要用 GPU？</h3>
+<p><strong>CPU</strong> 的设计哲学是优化<strong>延迟（latency）</strong>：大面积芯片预算分配给庞大的缓存层次（L1/L2/L3 可达 64 MB+）、复杂的分支预测器和乱序执行引擎，让少量线程以最低延迟跑完任务。现代服务器 CPU 拥有 8–128 个核心，每核心支持深度流水线和超标量执行。</p>
+<p><strong>GPU</strong> 的设计哲学完全不同——优化<strong>吞吐（throughput）</strong>：用海量并行线程（数万到数十万）来隐藏延迟。GPU 的核心面积主要分配给成百上千的计算单元和大容量寄存器堆，而非复杂控制逻辑。线程以 <strong>Warp</strong>（32 线程）为最小调度单位，数千个 warp 在飞行中交替执行，使数据从 HBM 读取的数百 cycle 延迟被其他 warp 的计算所掩盖。</p>
+
+<div class="highlight-box">
+<strong>为什么深度学习天然适合 GPU？</strong> 深度学习的核心运算是矩阵乘法，计算复杂度为 $O(n^3)$，数据规模为 $O(n^2)$——<strong>计算/数据比随规模增长而增大</strong>，天然适合大规模并行。一个 70B 模型的单次前向传播，每个 token 需要约 140 TFLOP 计算量；反向传播约为前向的 2 倍。这些运算几乎不存在控制流分支，完美匹配 GPU 的 SIMT（Single Instruction, Multiple Threads）执行模型。
+</div>
+
+<h3>2.1.2 NVIDIA GPU 微架构代际演进</h3>
+<p>NVIDIA 自 2016 年以来，每 2 年迭代一代 GPU 微架构，每代都带来针对深度学习的关键突破：</p>
+
+<table>
+<tr><th>架构</th><th>年份</th><th>旗舰</th><th>工艺</th><th>深度学习关键创新</th></tr>
+<tr><td>Pascal</td><td>2016</td><td>P100</td><td>16nm</td><td>首款 HBM2 GPU；原生 FP16；NVLink 1 (160 GB/s)</td></tr>
+<tr><td>Volta</td><td>2017</td><td>V100</td><td>12nm</td><td><strong>Tensor Core 诞生</strong>；混合精度训练 (FP16+FP32)；125 TFLOPS</td></tr>
+<tr><td>Turing</td><td>2018</td><td>T4</td><td>12nm</td><td>INT8/INT4 推理 Tensor Core；RT Core（光追）</td></tr>
+<tr><td>Ampere</td><td>2020</td><td>A100</td><td>7nm</td><td>BF16/TF32 Tensor Core；3rd-gen NVLink；MIG 多实例</td></tr>
+<tr><td>Hopper</td><td>2022</td><td>H100</td><td>4nm</td><td>FP8 Tensor Core；TMA（Tensor Memory Accelerator）；Transformer Engine</td></tr>
+<tr><td>Blackwell</td><td>2024</td><td>B200</td><td>4nm</td><td>FP4 Tensor Core；NVLink 5 (1.8 TB/s)；2nd-gen Transformer Engine</td></tr>
+</table>
+
+<h3>2.1.3 常见 GPU 选型</h3>
+<table>
+<tr><th>场景</th><th>推荐 GPU</th><th>关键指标</th><th>理由</th></tr>
+<tr><td>训练 70B+ 模型</td><td>H100/B200 SXM + NVLink</td><td>989 TFLOPS FP8, 80GB HBM3</td><td>TP 要求高带宽互连；至少 8×H100 一个节点</td></tr>
+<tr><td>低延迟推理（大模型）</td><td>H200 / MI300X</td><td>141GB / 192GB HBM</td><td>超大显存可缓存更多 KV Cache</td></tr>
+<tr><td>微调 7B–13B</td><td>A100-80GB</td><td>312 TFLOPS BF16, 2 TB/s</td><td>性价比最优；LoRA 单卡可做</td></tr>
+<tr><td>预算有限</td><td>A10 (24GB) / L4 (24GB)</td><td>125/242 TFLOPS INT8</td><td>量化推理 7B 模型；边缘部署</td></tr>
+</table>
+
+<h3>2.1.4 GPU 内部架构——流式多处理器 (SM)</h3>
+<p>整个 GPU 芯片本质上是一个 <strong>SM 阵列</strong>。每个 SM 像一台微型并行处理器，拥有独立的执行单元、寄存器堆和共享内存。理解 SM 的结构就是理解 GPU 的性能来源。</p>
+
+<div class="card">
+<strong>SM 关键组件（以 A100 为例）：</strong>
+<ul>
+<li><strong>64 CUDA Cores (FP32)</strong>：标量算术单元，负责通用浮点和整数运算</li>
+<li><strong>4 Tensor Cores (3rd Gen)</strong>：矩阵乘累加专用单元，每周期执行 4×4×4 MMA</li>
+<li><strong>4 Warp Schedulers</strong>：每 cycle 可各自 dispatch 一条指令，即 SM 内最多 4 个 warp 同时执行</li>
+<li><strong>Register File (256 KB)</strong>：线程私有寄存器，延迟 1 cycle，带宽 >100 TB/s（全芯片合计 ~27 MB）</li>
+<li><strong>Shared Memory / L1 (192 KB)</strong>：可编程片上缓存，用户控制数据放置，延迟 ~20 cycle</li>
+</ul>
+</div>
+
+<p><strong>A100 全芯片规格</strong>：108 个 SM × 64 CUDA Cores = 6,912 FP32 Cores；108 × 4 = 432 Tensor Cores；L2 Cache 40 MB；HBM2e 80 GB @ 2 TB/s。</p>
+
+<h3>2.1.5 GPU 芯片代际扩展</h3>
+<table>
+<tr><th>指标</th><th>V100</th><th>A100</th><th>H100 SXM</th><th>B200</th></tr>
+<tr><td>SM 数量</td><td>80</td><td>108</td><td>132</td><td>192</td></tr>
+<tr><td>FP32 Cores</td><td>5,120</td><td>6,912</td><td>16,896</td><td>18,432</td></tr>
+<tr><td>Tensor Cores</td><td>640</td><td>432</td><td>528</td><td>768</td></tr>
+<tr><td>BF16 TFLOPS</td><td>125</td><td>312</td><td>989</td><td>2,250</td></tr>
+<tr><td>HBM 容量</td><td>32 GB</td><td>80 GB</td><td>80 GB</td><td>192 GB</td></tr>
+<tr><td>HBM 带宽</td><td>900 GB/s</td><td>2,039 GB/s</td><td>3,350 GB/s</td><td>8,000 GB/s</td></tr>
+<tr><td>TDP</td><td>300W</td><td>400W</td><td>700W</td><td>1000W</td></tr>
+</table>
+<p class="formula-explain">趋势：每代算力涨 ~3×，带宽涨 ~1.5–2×，算力增速快于带宽——GPU 越来越"饥饿"，对内存优化的要求越来越高。</p>
+
+<h3>2.1.6 GPU 内存层次与带宽</h3>
+<p>理解内存层次是理解所有 GPU 优化技术的根基。核心规律：<strong>每层比上一层慢约 10 倍、大约 100–1000 倍</strong>。</p>
+
+<table>
+<tr><th>层级</th><th>容量 (A100)</th><th>带宽</th><th>延迟</th><th>位置</th></tr>
+<tr><td>Registers</td><td>~256 KB/SM (27 MB 全芯片)</td><td>>100 TB/s</td><td>1 cycle</td><td>片上，线程私有</td></tr>
+<tr><td>Shared Memory / L1</td><td>192 KB/SM</td><td>~19 TB/s</td><td>~20 cycles</td><td>片上，SM 内共享</td></tr>
+<tr><td>L2 Cache</td><td>40 MB</td><td>~5 TB/s</td><td>~200 cycles</td><td>片上，全芯片共享</td></tr>
+<tr><td>HBM2e（显存）</td><td>80 GB</td><td>2 TB/s</td><td>~400 cycles (~200 ns)</td><td>封装内 HBM 叠层</td></tr>
+<tr><td>CPU DRAM (via PCIe)</td><td>512 GB+</td><td>~32 GB/s (Gen4)</td><td>~10 μs</td><td>主机侧</td></tr>
+<tr><td>NVMe SSD</td><td>TB 级</td><td>7 GB/s</td><td>~100 μs</td><td>存储</td></tr>
+</table>
+
+<div class="info-box">
+<strong>关键洞察</strong>：A100 有 312 TFLOP/s (BF16) 算力，但只有 2 TB/s 显存带宽。如果每次浮点运算都需要从 HBM 读 1 字节，那 GPU 只能做 2 TFLOP/s 的"有效计算"——利用率仅 0.6%。只有当每字节数据平均复用 $312/2 = 156$ 次计算时，GPU 才能满载。
+</div>
+
+<h3>2.1.7 算术强度与 Roofline 模型</h3>
+<p><strong>算术强度（Arithmetic Intensity）</strong>是判断一个 kernel 瓶颈的第一工具：</p>
+
+<div class="formula-block">
+$$I = \frac{\text{FLOPs (浮点运算次数)}}{\text{Bytes accessed from HBM (HBM 搬运字节)}}$$
+</div>
+<p class="formula-explain">$I$ 越大表示越"计算密集"（compute-bound），越小表示越"带宽受限"（memory-bound）。</p>
+
+<p><strong>Roofline 模型</strong>将可达性能表示为：</p>
+<div class="formula-block">
+$$\text{Attainable FLOP/s} = \min\bigl(\text{Peak FLOP/s},\; I \times \text{Peak Bandwidth}\bigr)$$
+</div>
+<p class="formula-explain">当 $I < I_{\text{ridge}}$ 时受带宽限制（性能随 $I$ 线性增长）；当 $I \geq I_{\text{ridge}}$ 时受计算限制（性能打到峰值平台）。</p>
+
+<p><strong>屋脊点（Ridge Point）</strong>是两条线的交叉点：</p>
+<div class="formula-block">
+$$I_{\text{ridge}} = \frac{\text{Peak FLOP/s}}{\text{Peak Bandwidth}} = \frac{312 \times 10^{12}}{2 \times 10^{12}} = 156 \text{ FLOP/Byte (A100 BF16)}$$
+</div>
+<p class="formula-explain">低于 156 的 kernel 是 memory-bound；高于 156 的是 compute-bound。对于 H100：$I_{\text{ridge}} = 989/3.35 \approx 295$ FLOP/Byte。</p>
+
+<h3>2.1.8 Attention 是 Memory-Bound；FFN 是 Compute-Bound</h3>
+<p><strong>标准 Attention 的算术强度分析</strong>（设 $n=4096$，$d=128$）：</p>
+<ul>
+<li>计算量：$QK^T$ 需 $2n^{2}d$ FLOPs，$\text{Softmax}(S) \cdot V$ 需 $2n^{2}d$ FLOPs → 总计 $4n^{2}d \approx 8.6 \times 10^{9}$ FLOPs</li>
+<li>HBM 数据搬运（标准实现需写回 $n \times n$ 注意力矩阵 $S$）：Q/K/V 读入 + $S$ 写出 + $S$ 读入 + O 写出 $\approx 138$ MB</li>
+<li>算术强度：$I = 8.6 \times 10^{9} / (138 \times 10^{6}) \approx 62$ FLOP/Byte</li>
+</ul>
+<p>$62 < 156$（屋脊点），标准 Attention <strong>严重 memory-bound</strong>——GPU 约 60% 的时间在等数据搬运。</p>
+
+<p><strong>Flash Attention 如何逆转？</strong> Flash Attention 永远不把 $n \times n$ 矩阵写入 HBM，而是在 SRAM 内做 tiling：</p>
+<div class="formula-block">
+$$I_{\text{Flash}} = \frac{4n^{2}d}{4 \cdot n \cdot d \cdot \text{bytes\_per\_elem}} = \frac{4n^{2}d}{4nd \cdot 2} = \frac{n}{2} = \frac{4096}{2} = 2048 \text{ FLOP/Byte}$$
+</div>
+<p class="formula-explain">2048 是屋脊点 156 的 13 倍——从 memory-bound 直接变为深度 compute-bound，GPU 满载运行。</p>
+
+<p><strong>FFN/MLP 层的算术强度</strong>（设隐藏维度 $h=8192$，中间维度 $4h=32768$，batch tokens $B=2048$）：</p>
+<ul>
+<li>计算量：两个线性层 $2 \times 2 \times B \times h \times 4h = 2 \times 2 \times 2048 \times 8192 \times 32768 \approx 2.2 \times 10^{12}$ FLOPs</li>
+<li>HBM 搬运：权重 $2 \times h \times 4h \times 2 = 1$ GB + 激活值 ~34 MB ≈ 1.03 GB</li>
+<li>算术强度：$I = 2.2 \times 10^{12} / (1.03 \times 10^{9}) \approx 2136$ FLOP/Byte</li>
+</ul>
+
+<div class="success-box">
+<strong>结论</strong>：Attention 层 memory-bound → <strong>Flash Attention</strong>（减少 HBM 流量）是最有效优化；FFN/MLP 层 compute-bound → <strong>量化</strong>（减小权重体积从而减小 GEMM 尺寸）和 <strong>Tensor Core 混合精度</strong>更有效。
+</div>
+
+<h3>2.1.9 Tensor Cores</h3>
+<p><strong>Tensor Core</strong> 是 NVIDIA 在 Volta (2017) 引入的专用矩阵乘累加（MMA）单元。每个 Tensor Core 在<strong>单个时钟周期</strong>内完成：</p>
+<div class="formula-block">
+$$D_{4 \times 4} = A_{4 \times 4} \times B_{4 \times 4} + C_{4 \times 4}$$
+</div>
+<p class="formula-explain">单个 MMA 操作：$4 \times 4 \times 4 = 64$ FMA（128 FLOPs）。A100 全芯片 432 Tensor Cores × 1.41 GHz ≈ 312 TFLOP/s (BF16)。</p>
+
+<p><strong>各代 Tensor Core 精度支持与吞吐</strong>：</p>
+<table>
+<tr><th>代际</th><th>GPU</th><th>支持精度</th><th>峰值 TFLOPS</th><th>MMA tile</th></tr>
+<tr><td>1st Gen</td><td>V100</td><td>FP16</td><td>125</td><td>4×4×4</td></tr>
+<tr><td>3rd Gen</td><td>A100</td><td>FP16/BF16/TF32/FP64/INT8</td><td>312 (BF16)</td><td>8×8×4 (BF16)</td></tr>
+<tr><td>4th Gen</td><td>H100</td><td>+FP8</td><td>989 (FP8)</td><td>WGMMA 64×256×16</td></tr>
+<tr><td>5th Gen</td><td>B200</td><td>+FP4</td><td>4,500 (FP4)</td><td>更大 tile</td></tr>
+</table>
+
+<p><strong>使用 Tensor Core 的条件</strong>：</p>
+<ul>
+<li>矩阵维度必须为 8 (BF16) 或 16 (FP8) 的倍数——不满足时需要 padding</li>
+<li>内部以 <strong>FP32 累加</strong>：低精度输入乘法 → FP32 累加 → 可选舍入回低精度，避免点积中的精度灾难</li>
+<li>GEMM 必须是 <strong>compute-bound</strong>：batch=1 推理时 M=1 维度导致 tile 大量空位，Tensor Core 利用率极低</li>
+</ul>
+
+<div class="highlight-box">
+<strong>Tensor Core 陷阱</strong>：如果 kernel 是 memory-bound（如 batch=1 推理），即使 Tensor Core 计算速度无限快也没用——瓶颈在等数据。这就是推理引擎必须拼命凑大 batch 的根本原因。
+</div>
+
+<h3>2.1.10 通信架构——NVLink、InfiniBand 与 PCIe</h3>
+
+<p><strong>PCIe——主机与设备的连接</strong>：</p>
+<table>
+<tr><th>代际</th><th>单向带宽 (×16)</th><th>双向</th><th>典型 GPU</th></tr>
+<tr><td>Gen3</td><td>16 GB/s</td><td>32 GB/s</td><td>V100 PCIe</td></tr>
+<tr><td>Gen4</td><td>32 GB/s</td><td>64 GB/s</td><td>A100 PCIe</td></tr>
+<tr><td>Gen5</td><td>64 GB/s</td><td>128 GB/s</td><td>H100 PCIe</td></tr>
+</table>
+
+<p><strong>NVLink——节点内 GPU-to-GPU 高速互连</strong>：</p>
+<table>
+<tr><th>代际</th><th>链路数</th><th>双向总带宽</th><th>GPU</th></tr>
+<tr><td>NVLink 2</td><td>6</td><td>300 GB/s</td><td>V100</td></tr>
+<tr><td>NVLink 3</td><td>12</td><td>600 GB/s</td><td>A100</td></tr>
+<tr><td>NVLink 4</td><td>18</td><td>900 GB/s</td><td>H100</td></tr>
+<tr><td>NVLink 5</td><td>18</td><td>1,800 GB/s</td><td>B200</td></tr>
+</table>
+<p><strong>NVSwitch</strong>：DGX H100 中 8 卡通过 4 个 NVSwitch 实现 full-bisection bandwidth 全互联，任意两卡同时满速通信。相比简单环形拓扑效率提升约 30%。</p>
+
+<p><strong>InfiniBand——跨节点通信</strong>：</p>
+<ul>
+<li><strong>NDR 400 Gb/s</strong> = 50 GB/s 单向/端口；多端口可叠加至 400 GB/s/节点</li>
+<li><strong>GPUDirect RDMA</strong>：数据走 HBM → NIC → 网络 → NIC → HBM，完全绕过 CPU，延迟 ~1–2 μs（TCP/IP 约 100 μs）</li>
+<li><strong>SHARP (In-Network Reduction)</strong>：交换机内完成 AllReduce 的 reduce 操作，减半跨节点流量</li>
+</ul>
+
+<p><strong>并行策略与通信拓扑的对应关系</strong>：</p>
+<div class="info-box">
+<ul>
+<li><strong>Tensor Parallelism (TP)</strong>：每层都做 AllReduce → 通信量大、频率极高 → <strong>只在 NVLink 节点内</strong>（TP=8 标准配置）</li>
+<li><strong>Pipeline Parallelism (PP)</strong>：层间 Point-to-Point 通信 → 可跨节点，但有 micro-batch bubble 开销</li>
+<li><strong>Data Parallelism (DP/FSDP/ZeRO)</strong>：梯度 AllReduce 或 AllGather+ReduceScatter → 频率低（每步一次），可走 InfiniBand</li>
+</ul>
+</div>
+
+<p><strong>实际计算示例——70B 模型梯度 AllReduce 耗时</strong>：</p>
+<p>设 70B 参数，BF16 梯度，8 节点 × 8 卡 = 64 GPU（数据并行度 64）：</p>
+<div class="formula-block">
+$$\begin{aligned}
+\text{梯度大小} &= 70 \times 10^{9} \times 2 = 140 \text{ GB} \\
+\text{Ring AllReduce 每卡通信量} &= 2 \times \frac{N-1}{N} \times 140 \approx 275 \text{ GB} \\
+\text{可用跨节点带宽 (8 NIC)} &= 8 \times 50 = 400 \text{ GB/s} \\
+\text{AllReduce 时间} &= 275 / 400 \approx 0.69 \text{ s}
+\end{aligned}$$
+</div>
+<p class="formula-explain">若计算步耗时 1s，通信占比 41%。这就是梯度压缩、通信/计算重叠（FSDP prefetch）、以及 SHARP 在网络内规约等优化的动力来源。</p>
+
+<!-- ==================== 2.2 vLLM ==================== -->
+<h2>2.2 vLLM——PagedAttention 与高吞吐推理</h2>
+<p>vLLM (Kwon et al., 2023) 的核心洞察：将操作系统的<strong>分页虚拟内存</strong>思想引入 GPU KV Cache 管理。在 LLM 推理中，KV Cache 是最大的内存消费者，高效管理它直接决定吞吐量和并发能力。</p>
+
+<h3>2.2.1 KV Cache 碎片问题</h3>
+<p><strong>KV Cache 大小公式</strong>：</p>
+<div class="formula-block">
+$$\text{KV Cache (bytes)} = 2 \times L \times H_{\text{kv}} \times d \times n \times b$$
+</div>
+<p class="formula-explain">$L$ = 层数，$H_{\text{kv}}$ = KV 头数（GQA 下可能 < $H_q$），$d$ = 头维度，$n$ = 序列长度，$b$ = bytes/element。</p>
+
+<p>以 <strong>Llama-3 70B</strong> (BF16, GQA $H_{\text{kv}}=8$, $L=80$, $d=128$) 为例：</p>
+<div class="formula-block">
+$$\text{KV per token} = 2 \times 80 \times 8 \times 128 \times 2 = 327{,}680 \text{ bytes} \approx 320 \text{ KB/token}$$
+</div>
+<p>当 $n=4096$ 时，<strong>单条序列 KV Cache ≈ 1.28 GB</strong>。8×A100-80GB 集群，除去模型权重后可用于 KV 的空间有限。</p>
+
+<p><strong>两种碎片类型</strong>：</p>
+<ul>
+<li><strong>内部碎片（Internal Fragmentation）</strong>：预分配 max_seq_len 块（如 4096 tokens），实际序列可能只用 500 tokens → 87% 空间白白浪费</li>
+<li><strong>外部碎片（External Fragmentation）</strong>：序列结束释放后，空闲内存散落成大小不一的碎片，新的长序列无法分配，即使总空余充足</li>
+</ul>
+
+<div class="highlight-box">
+<strong>实测数据</strong>：朴素连续分配策略下，GPU 显存有效利用率通常仅 <strong>20–40%</strong>，大量显存被碎片"锁死"。
+</div>
+
+<h3>2.2.2 PagedAttention——KV Cache 的虚拟内存</h3>
+<p>PagedAttention 将 KV Cache 切成固定大小的<strong>物理块（Block）</strong>（默认每块存 16 tokens 的 KV），并用<strong>块表（Block Table）</strong>做间接映射——类似 CPU 页表将虚拟地址翻译为物理地址。</p>
+
+<p><strong>核心机制</strong>：</p>
+<ul>
+<li><strong>逻辑块</strong>：每个序列看到连续的逻辑地址空间 [Block 0, Block 1, ...]</li>
+<li><strong>物理块池</strong>：GPU HBM 预分配好的等大小 block 池，启动时一次性分配，运行时零动态 malloc</li>
+<li><strong>块表</strong>：每个序列一张，记录 逻辑块号 → 物理块号 的映射</li>
+<li><strong>动态分配</strong>：序列增长时按需从池中取空闲 block，不需预知最终长度</li>
+<li><strong>Copy-on-Write (CoW)</strong>：共享前缀的多个序列指向同一物理 block；只有某序列写入不同 token 时才拷贝新 block</li>
+</ul>
+
+<div class="success-box">
+<strong>碎片消除效果</strong>：内部碎片最多浪费 1 个 block（最后块未满）；外部碎片彻底消除（所有 block 等大可互换）。显存利用率从 20–40% 跃升至 <strong>90–95%</strong>。
+</div>
+
+<h3>2.2.3 PagedAttention 的收益量化</h3>
+<p>以 Llama-3 70B、128 个并发聊天用户、1000-token 共享系统提示为例：</p>
+<ul>
+<li><strong>无 PagedAttention + 无前缀共享</strong>：每用户独立分配 max_len KV → $128 \times 4096 \times 320\text{KB} \approx 160$ GB KV 需求（超出单节点 8×80GB）</li>
+<li><strong>PagedAttention（按实际长度分配）</strong>：假设平均实际长度 1500 tokens → $128 \times 1500 \times 320\text{KB} \approx 60$ GB</li>
+<li><strong>+ Prefix Sharing</strong>：1000-token 系统提示只存一份 → 再节省 $127 \times 1000 \times 320\text{KB} \approx 38.8$ GB</li>
+</ul>
+
+<h3>2.2.4 Continuous Batching（连续批处理）</h3>
+<p><strong>传统 Static Batching 的问题</strong>：组成一个 batch 后，必须等 batch 内<strong>所有</strong>序列都生成完毕才能换新序列——短序列跑完后 GPU 空等长序列，利用率骤降。</p>
+
+<div class="info-box">
+<strong>Continuous Batching 原理</strong>：以<strong>单步解码</strong>（iteration-level）为调度粒度。每执行完一步：
+<ol>
+<li>检查哪些序列已生成 EOS → 移除，释放其 KV blocks 回池</li>
+<li>从 Waiting Queue 取新请求填充空位（即时分配 KV blocks）</li>
+<li>以更新后的异构 batch 执行下一步前向</li>
+</ol>
+Batch 组成<strong>每步都在变化</strong>——GPU 利用率接近 100%，吞吐提升 <strong>1.5–3×</strong>。
+</div>
+
+<p><strong>为什么依赖 PagedAttention？</strong> 动态增删序列需要即时分配/释放 KV 内存。连续分配会产生碎片导致加入新序列失败；分页管理下 block 回池即刻可复用，$O(1)$ 操作。</p>
+
+<h3>2.2.5 Speculative Decoding（投机解码）</h3>
+<p>自回归解码的延迟瓶颈：每步只产生 1 个 token，但要读取全部模型权重。投机解码的思路：</p>
+<ol>
+<li>用一个<strong>小的 Draft 模型</strong>（如 1B 参数）快速自回归生成 $k$ 个候选 token（$k$ 通常 3–8）</li>
+<li>将 $k$ 个候选一次性喂入<strong>大的 Target 模型</strong>做<strong>并行验证</strong>（单次前向 pass，$k+1$ 个位置同时算 logits）</li>
+<li>从左到右逐 token 用 rejection sampling 验证：第一个被拒绝的 token 之前全部接受</li>
+<li>期望每轮接受 3–5 个 token → 等效延迟降低 <strong>2–3×</strong>，输出分布<strong>数学上等价于直接用大模型解码</strong></li>
+</ol>
+
+<p><strong>与 PagedAttention 的协同</strong>：Draft token 分配投机 KV block → 被拒绝则释放（分页代价极低）→ 被接受则提升为正式 block。Block Table 更新仅需修改 $O(k)$ 条映射。</p>
+
+<h3>2.2.6 70B 模型推理显存预算计算</h3>
+<p>Llama-3 70B, BF16, 8×A100-80GB (TP=8)：</p>
+<div class="formula-block">
+$$\begin{aligned}
+\text{模型权重} &= 70 \times 10^{9} \times 2\text{B} = 140 \text{ GB} \div 8 = 17.5 \text{ GB/卡} \\
+\text{KV Cache 可用} &= 80 - 17.5 - 3\text{(激活+系统)} = 59.5 \text{ GB/卡} \\
+\text{每 token KV (TP=8 后)} &= 2 \times 80 \times 1 \times 128 \times 2 = 40{,}960 \text{ B} \approx 40 \text{ KB} \\
+\text{最大容纳 token 数} &= \frac{59.5 \times 10^{9}}{40{,}960} \approx 1{,}452{,}000 \text{ tokens} \\
+\text{128 并发 × 4096 长度} &= 524{,}288 \text{ tokens → 余量充足}
+\end{aligned}$$
+</div>
+<p class="formula-explain">无 PagedAttention 时碎片浪费约 50%，同等条件仅能跑约 64 条并发——吞吐直接减半。</p>
+
+<h3>2.2.7-2.2.8 端到端系统与架构</h3>
+<p>vLLM 的工程实现采用经典的<strong>异步 Producer-Consumer</strong>架构：</p>
+<ul>
+<li><strong>前端</strong>：异步 API Server（兼容 OpenAI 格式）→ Tokenizer → 请求入队</li>
+<li><strong>调度层</strong>：Scheduler 每步从 Waiting/Running/Swapped 三队列中选择最优 batch 组合</li>
+<li><strong>执行层</strong>：Model Executor（管理 TP Workers）+ PagedAttention Kernel + KV Block Manager</li>
+<li><strong>输出层</strong>：Detokenizer → SSE Streaming → 客户端</li>
+</ul>
+
+<h3>2.2.9 vLLM 核心组件详解</h3>
+<div class="card">
+<ul>
+<li><strong>API Server</strong>：基于 FastAPI，兼容 OpenAI Chat/Completions 接口，支持 streaming 和 tool calls</li>
+<li><strong>Scheduler</strong>：vLLM 的"大脑"，维护 Waiting / Running / Swapped 三队列。调度策略：优先级 + FCFS + 预算约束（不超过 max_num_seqs 和显存上限）。支持 preemption：显存不足时将低优先级序列 swap 到 CPU</li>
+<li><strong>Block Manager</strong>：实现虚拟内存抽象——分配、释放、Copy-on-Write、Swap to CPU、Prefix Caching 查找</li>
+<li><strong>Model Executor</strong>：封装 TP/PP 逻辑；调用 PagedAttention CUDA kernel（支持 Flash Attention 后端）</li>
+<li><strong>KV Block Pool</strong>：启动时预分配所有物理 block（默认 16 token/block），运行时<strong>零动态内存分配</strong></li>
+</ul>
+</div>
+
+<h3>2.2.10 请求生命周期</h3>
+<ol>
+<li>请求到达 API Server → tokenize → 加入 <strong>Waiting Queue</strong></li>
+<li>Scheduler 检查可用 block 数 → 满足则移入 <strong>Running Queue</strong>，分配初始 KV blocks</li>
+<li><strong>Prefill 阶段</strong>：一次前向处理所有 prompt tokens，填充 KV Cache</li>
+<li><strong>Decode 阶段</strong>：每步生成 1 token，追加 KV 到当前 block（block 满则分配新 block）</li>
+<li>生成 EOS 或达到 max_tokens → 移出 Running → 释放所有 block 回 Free List</li>
+<li>若中途显存紧张 → Scheduler 可选择 preempt：将序列 KV blocks swap 到 CPU DRAM → 移入 <strong>Swapped Queue</strong> → 空闲时 swap 回继续</li>
+</ol>
+
+<h3>2.2.11 Prefix Caching（自动前缀缓存）</h3>
+<p>利用 LLM 应用中大量请求共享相同前缀（如系统提示）的特征：</p>
+<ol>
+<li>对每个物理 block 的 token 内容计算 <strong>hash</strong></li>
+<li>新请求到达时逐 block 查询缓存：hash 命中 → 跳过该 block 的 prefill 计算，直接复用物理 KV</li>
+<li>命中的 block 标记引用计数 +1（Copy-on-Write 保护）</li>
+<li>淘汰策略：<strong>LRU</strong>，仅在显存压力时释放最久未用的缓存 block</li>
+</ol>
+
+<div class="success-box">
+<strong>效果</strong>：对于 2K+ token 共享系统提示的聊天场景，Prefix Caching 可将 TTFT（Time-To-First-Token）降低 <strong>60–80%</strong>，等效 prefill 计算量减少 50%+。
+</div>
+
+<h3>2.2.12 Guided (Constrained) Decoding——结构化输出</h3>
+<p>vLLM 原生支持受约束解码，保证输出<strong>语法上合法</strong>（如合法 JSON、匹配正则）：</p>
+<ul>
+<li><strong>原理</strong>：模型输出 logits 后、采样前，用 FSM/PDA 状态机生成 mask，屏蔽不合法 token 的 logit 为 $-\infty$</li>
+<li><strong>约束类型</strong>：JSON Schema、正则表达式、EBNF 文法、枚举选择（Choice）</li>
+<li><strong>引擎后端</strong>：XGrammar（默认 v0.7+，C++ 实现的下推自动机）；Outlines（FSM 回退方案）</li>
+<li><strong>性能影响</strong>：mask 操作 <1 ms/step，吞吐量损失 <2%</li>
+<li><strong>Schema 编译</strong>：首次 0.5–5s（复杂 schema 更久），之后跨请求复用缓存</li>
+</ul>
+
+<div class="highlight-box">
+<strong>注意</strong>：结构化输出 ≠ 正确输出。Constrained Decoding 只保证"语法合法"（能 parse 为合法 JSON），不保证"语义正确"——模型仍可能生成合法但事实错误的字段值。
+</div>
+
+<p><strong>vLLM vs HuggingFace Generate 性能对比</strong>（70B, 4×A100, TP=4）：</p>
+<table>
+<tr><th>指标</th><th>vLLM</th><th>HF Generate</th><th>原因</th></tr>
+<tr><td>吞吐量 (tok/s)</td><td>2,500–4,000</td><td>300–600</td><td>Continuous Batching + PagedAttention</td></tr>
+<tr><td>显存利用率</td><td>90–95%</td><td>50–60%</td><td>零碎片 + 动态 block 分配</td></tr>
+<tr><td>最大并发序列</td><td>200–500</td><td>16–32</td><td>分页 KV 消除预留浪费</td></tr>
+<tr><td>TTFT (首 token 延迟)</td><td>100–300 ms</td><td>500–2000 ms</td><td>Prefix Caching + Chunked Prefill</td></tr>
+</table>
+
+<!-- ==================== 关键要点 ==================== -->
+<div class="takeaway">
+<h2>关键要点总结</h2>
+<ol>
+<li><strong>GPU 的本质</strong>：用海量并行线程换取高吞吐，代价是单线程延迟高。LLM 的矩阵乘天然匹配。</li>
+<li><strong>内存层次决定一切</strong>：Registers → SRAM → L2 → HBM，每级带宽跌 10 倍。所有优化本质都是"少搬数据"。</li>
+<li><strong>Roofline 模型</strong>：算术强度 $I$ vs 屋脊点 $I_{\text{ridge}}$，一算就知道瓶颈在计算还是内存。</li>
+<li><strong>Attention = memory-bound, FFN = compute-bound</strong>：不同层需要不同策略（Flash Attention vs 量化）。</li>
+<li><strong>Tensor Core</strong> 只在 compute-bound GEMM 时有效；batch=1 推理回到 memory-bound 无法利用。</li>
+<li><strong>通信拓扑决定并行策略</strong>：NVLink 内 TP=8；IB 跨节点 DP/FSDP；PP 连接层间。</li>
+<li><strong>KV Cache 碎片</strong>是推理的主要显存瓶颈。PagedAttention 用分页消除碎片，利用率 20% → 95%。</li>
+<li><strong>Continuous Batching</strong>：以单步为粒度动态增删序列，GPU 永不空等，吞吐翻倍。</li>
+<li><strong>Speculative Decoding</strong>：小模型猜、大模型验，延迟降 2–3×，质量数学证明无损。</li>
+<li><strong>Prefix Caching + CoW</strong>：共享前缀只存一份，TTFT 降低 60–80%。</li>
+<li><strong>Guided Decoding</strong>：logits mask 实现结构化输出，性能影响 <2%。</li>
+</ol>
+</div>
+
+<!-- ==================== Q&A ==================== -->
+<h2>Q&amp;A 自测</h2>
+
+<details>
+<summary>Q1：为什么说"理解内存层次是所有优化的根基"？</summary>
+<div class="answer">
+<p>因为几乎所有 GPU 上的 LLM 优化——Flash Attention、量化、KV Cache 分页、梯度累积——本质都在做同一件事：<strong>减少从慢存储读写的字节数</strong>。GPU 的计算力远超其"喂数据"的能力：A100 可以每秒 312 万亿次运算，但显存只能喂 2 TB/s。如果不理解 Registers → SRAM → L2 → HBM → CPU 的带宽阶梯（每级跌 10 倍），就无法判断 kernel 瓶颈在哪，更无法选择正确的优化手段。</p>
+</div>
+</details>
+
+<details>
+<summary>Q2：Flash Attention 的核心 trick 是什么？为什么让 Attention 从 memory-bound 变成 compute-bound？</summary>
+<div class="answer">
+<p>标准 Attention 将 $n \times n$ 的注意力矩阵 $S = QK^T$ 写入 HBM 再读回（对 $n=4096$ 约 138 MB 流量），导致算术强度仅 62 FLOP/Byte。Flash Attention 的核心是<strong>SRAM 内 tiling</strong>：将 Q/K/V 按行方向切成小块，每块完全在 192KB SRAM 内完成 softmax 融合计算（用 online softmax 技巧处理数值稳定性），<strong>永不将 $n \times n$ 矩阵写回 HBM</strong>。HBM 流量降至仅读写 Q/K/V/O ≈ 4 MB → 算术强度从 62 飙到 2048 FLOP/Byte，超过屋脊点 13 倍。</p>
+</div>
+</details>
+
+<details>
+<summary>Q3：为什么 Tensor Core 在 batch=1 推理时几乎无用？</summary>
+<div class="answer">
+<p>Tensor Core 是矩阵乘加速器（4×4×4 MMA），高效前提是 GEMM 的 M/N/K 维度足够大以填满 tile，且整体是 compute-bound。batch=1 时，输入维度 M=1（本质是矩阵-向量乘），tile 大部分为空。更关键的是：需要从 HBM 读取全部权重（70B=140GB）却只做 1 token 计算，算术强度约 $2 \times 70 \times 10^9 / (140 \times 10^9) = 1$ FLOP/Byte，远低于屋脊点 156。kernel 完全 memory-bound，Tensor Core 再快也只能空等数据。</p>
+</div>
+</details>
+
+<details>
+<summary>Q4：PagedAttention 和操作系统虚拟内存有何异同？</summary>
+<div class="answer">
+<p><strong>相似</strong>：逻辑连续 → 物理不连续的映射；固定大小的"页"；页表做翻译；支持 CoW 和 Swap。<br>
+<strong>差异</strong>：(1) OS 用硬件 MMU/TLB 做地址翻译，PagedAttention 是纯软件（在 attention kernel 中 gather）；(2) OS 页 4KB，PagedAttention block 默认 16 tokens（物理大小 ~640KB）；(3) LLM KV Cache 是<strong>只追加</strong>的（序列生成方向单调递增），不存在随机写入，比通用虚拟内存场景简单高效得多。</p>
+</div>
+</details>
+
+<details>
+<summary>Q5：Continuous Batching 为什么依赖 PagedAttention？</summary>
+<div class="answer">
+<p>Continuous Batching 每步都要动态增删序列：序列结束释放内存，新序列加入需要分配。如果 KV Cache 连续分配，移除序列后留下外部碎片，新序列比空洞长就放不进去——要么做昂贵的 defrag，要么浪费空间。PagedAttention 的 block 全等大、可互换：释放即回池、分配即取块，$O(1)$ 完成，完美匹配"每步有序列进出"的需求。</p>
+</div>
+</details>
+
+<details>
+<summary>Q6：Speculative Decoding 为什么不影响输出质量？</summary>
+<div class="answer">
+<p>关键在于<strong>验证步用原始大模型做 rejection sampling</strong>。Draft 模型只负责产生候选；大模型一次前向 pass 给所有候选打分，用 $\min(1, p_{\text{target}}(x)/p_{\text{draft}}(x))$ 的接受概率逐 token 判定。数学上可证明：被接受的序列分布与直接用大模型逐 token 采样<strong>完全一致</strong>。最坏情况只是猜错浪费了 draft 模型的计算，绝不会接受大模型不认可的 token。</p>
+</div>
+</details>
+
+<details>
+<summary>Q7：NVLink 和 InfiniBand 分别解决什么问题？为什么 TP 只在 NVLink 内？</summary>
+<div class="answer">
+<p><strong>NVLink</strong> 解决节点内 GPU 间高带宽通信（H100: 900 GB/s 双向）；<strong>InfiniBand</strong> 解决节点间通信（NDR: 50 GB/s/port）。Tensor Parallelism 在每层的前向/反向中都做 AllReduce，通信频率极高（每层 2 次）。若走 IB (50 GB/s) 而非 NVLink (900 GB/s)，通信时间膨胀 18×，成为严重瓶颈。因此 TP 只在 NVLink 互连的同节点内使用。而 Data Parallelism 只在每训练步结尾做一次梯度 AllReduce（可与计算重叠），能容忍 IB 的较低带宽。</p>
+</div>
+</details>
+
+<details>
+<summary>Q8：Guided Decoding 的 mask 操作为什么几乎不影响吞吐？</summary>
+<div class="answer">
+<p>因为 mask 发生在模型前向 pass <strong>完成之后</strong>。模型的重计算（attention + FFN，数百 TFLOP）已结束，输出一个 vocab_size 大小的 logits 向量。约束引擎只需根据当前 FSM/PDA 状态查预计算的合法 token 集合，将不合法位设为 $-\infty$——这是一次 $O(\text{vocab\_size})$ 的 mask 操作，与前向计算相比完全可忽略（<1ms vs 前向 ~50ms）。Schema 编译成本（0.5–5s）仅首次请求承担，后续复用缓存。</p>
+</div>
+</details>
+
+<details>
+<summary>Q9：如何判断一个新的 GPU kernel 是 compute-bound 还是 memory-bound？</summary>
+<div class="answer">
+<p>三步判断法：(1) 数 FLOPs：统计 kernel 的总浮点运算次数；(2) 数 Bytes：统计 kernel 需要从 HBM 读写的总字节数；(3) 计算算术强度 $I = \text{FLOPs} / \text{Bytes}$，与目标 GPU 的屋脊点 $I_{\text{ridge}}$ 比较。若 $I < I_{\text{ridge}}$（A100 BF16 为 156），kernel 是 memory-bound——优化方向是减少数据搬运（融合 kernel、tiling、减少中间结果写入）。若 $I > I_{\text{ridge}}$，kernel 是 compute-bound——优化方向是用更低精度（FP8/INT8）或更大 tile 提升 Tensor Core 利用率。</p>
+</div>
+</details>
+
+<details>
+<summary>Q10：为什么推理引擎要"拼命凑大 batch"？</summary>
+<div class="answer">
+<p>单序列推理（batch=1）时，每步需要从 HBM 读取全部模型权重（70B=140GB），但只计算 1 个 token 的前向——算术强度约 1 FLOP/Byte，GPU 利用率 < 1%。当 batch=B 时，同一份权重被 B 个序列复用，算术强度变为 $\sim B$ FLOP/Byte。要让 GPU 达到峰值性能需要 $B \geq I_{\text{ridge}} = 156$（A100 BF16）——即 batch ≥ 156 才能让 Tensor Core 跑满。这就是 Continuous Batching 和 PagedAttention 凑大 batch 的本质动力。</p>
+</div>
+</details>
+
+</body>
+</html>

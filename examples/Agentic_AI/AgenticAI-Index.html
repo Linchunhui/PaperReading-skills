@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Hitchhiker's Guide to Agentic AI — 阅读笔记目录</title>
+<style>
+:root {
+  --primary: #2c3e50;
+  --accent: #3498db;
+  --bg: #fafbfc;
+  --card-bg: #ffffff;
+  --border: #e1e4e8;
+  --text: #24292e;
+  --text-secondary: #586069;
+  --code-bg: #f6f8fa;
+  --part1: #2980b9;
+  --part2: #8e44ad;
+  --part3: #27ae60;
+  --part4: #e67e22;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; line-height: 1.8; color: var(--text); background: var(--bg); padding: 2rem; max-width: 1200px; margin: 0 auto; }
+h1 { font-size: 1.9rem; color: var(--primary); border-bottom: 3px solid var(--accent); padding-bottom: 0.5rem; margin-bottom: 0.5rem; }
+.subtitle { color: var(--text-secondary); font-size: 1rem; margin-bottom: 0.3rem; }
+.meta { color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 2.5rem; }
+.meta a { color: var(--accent); text-decoration: none; }
+.meta a:hover { text-decoration: underline; }
+
+.part-section { margin-bottom: 2.5rem; }
+.part-header { font-size: 1.3rem; font-weight: 700; padding: 0.6rem 1.2rem; border-radius: 6px; margin-bottom: 1.2rem; color: #fff; }
+.part-header.part1 { background: var(--part1); }
+.part-header.part2 { background: var(--part2); }
+.part-header.part3 { background: var(--part3); }
+.part-header.part4 { background: var(--part4); }
+
+.card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 1rem; }
+
+.card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 1.2rem 1.4rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05); transition: box-shadow 0.2s, transform 0.2s; display: flex; flex-direction: column; }
+.card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.1); transform: translateY(-2px); }
+.card .ch-num { font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.3rem; }
+.card.part1 .ch-num { color: var(--part1); }
+.card.part2 .ch-num { color: var(--part2); }
+.card.part3 .ch-num { color: var(--part3); }
+.card.part4 .ch-num { color: var(--part4); }
+.card .ch-title { font-size: 1.05rem; font-weight: 600; color: var(--primary); margin-bottom: 0.5rem; }
+.card .ch-desc { font-size: 0.88rem; color: var(--text-secondary); flex: 1; margin-bottom: 0.8rem; }
+.card .ch-link { font-size: 0.85rem; font-weight: 500; text-decoration: none; color: var(--accent); }
+.card .ch-link:hover { text-decoration: underline; }
+.card .ch-link::after { content: ' \2192'; }
+
+.card.part1 { border-top: 3px solid var(--part1); }
+.card.part2 { border-top: 3px solid var(--part2); }
+.card.part3 { border-top: 3px solid var(--part3); }
+.card.part4 { border-top: 3px solid var(--part4); }
+
+footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--border); color: var(--text-secondary); font-size: 0.82rem; text-align: center; }
+</style>
+</head>
+<body>
+
+<h1>The Hitchhiker's Guide to Agentic AI — 阅读笔记目录</h1>
+<p class="subtitle">A Comprehensive Technical Guide to Building LLM-Based Agent Systems</p>
+<p class="meta">作者：Haggai Roitman · 2026 · arXiv: <a href="https://arxiv.org/abs/2606.24937" target="_blank">2606.24937</a> · 全书29章阅读笔记索引</p>
+
+<!-- Part I -->
+<div class="part-section">
+<div class="part-header part1">Part I · LLM 基础 (Ch 1–2)</div>
+<div class="card-grid">
+
+<div class="card part1">
+  <div class="ch-num">Chapter 1</div>
+  <div class="ch-title">LLM Architecture and Optimization</div>
+  <div class="ch-desc">Transformer架构、Tokenization、Flash Attention、预训练、SFT、LoRA/PEFT、MoE、Prompt Engineering、模型压缩、投机解码、幻觉检测、LLM安全</div>
+  <a class="ch-link" href="AgenticAI-Ch01-LLM-Architecture.html">阅读笔记</a>
+</div>
+
+<div class="card part1">
+  <div class="ch-num">Chapter 2</div>
+  <div class="ch-title">Systems Foundations for LLMs</div>
+  <div class="ch-desc">GPU架构（NVLink/InfiniBand）、vLLM推理引擎、PagedAttention、高吞吐服务</div>
+  <a class="ch-link" href="AgenticAI-Ch02-Systems-Foundations.html">阅读笔记</a>
+</div>
+
+</div>
+</div>
+
+<!-- Part II -->
+<div class="part-section">
+<div class="part-header part2">Part II · 强化学习与对齐 (Ch 3–13)</div>
+<div class="card-grid">
+
+<div class="card part2">
+  <div class="ch-num">Chapter 3</div>
+  <div class="ch-title">Introduction to Reinforcement Learning</div>
+  <div class="ch-desc">MDP、TD Learning、Q-Learning、Policy Gradient、Actor-Critic、GAE</div>
+  <a class="ch-link" href="AgenticAI-Ch03-RL-Introduction.html">阅读笔记</a>
+</div>
+
+<div class="card part2">
+  <div class="ch-num">Chapter 4</div>
+  <div class="ch-title">RL Foundations for Language Models</div>
+  <div class="ch-desc">RLHF vs RLVR范式、文本生成MDP建模、RLHF四阶段Pipeline</div>
+  <a class="ch-link" href="AgenticAI-Ch04-RL-for-LLMs.html">阅读笔记</a>
+</div>
+
+<div class="card part2">
+  <div class="ch-num">Chapter 5</div>
+  <div class="ch-title">Proximal Policy Optimization (PPO)</div>
+  <div class="ch-desc">PPO目标函数推导、Clip机制、GAE集成、TRL实现、权重生命周期</div>
+  <a class="ch-link" href="AgenticAI-Ch05-PPO.html">阅读笔记</a>
+</div>
+
+<div class="card part2">
+  <div class="ch-num">Chapter 6</div>
+  <div class="ch-title">Direct Preference Optimization (DPO)</div>
+  <div class="ch-desc">DPO完整推导6步、8种变体（f-DPO/SimPO/TR-DPO等）、批大小配置</div>
+  <a class="ch-link" href="AgenticAI-Ch06-DPO.html">阅读笔记</a>
+</div>
+
+<div class="card part2">
+  <div class="ch-num">Chapter 7</div>
+  <div class="ch-title">Group Relative Policy Optimization (GRPO)</div>
+  <div class="ch-desc">GRPO公式推导、11种变体（DAPO/GSPO/CISPO/GDPO/GOPO等）</div>
+  <a class="ch-link" href="AgenticAI-Ch07-GRPO.html">阅读笔记</a>
+</div>
+
+<div class="card part2">
+  <div class="ch-num">Chapter 8</div>
+  <div class="ch-title">Preference Optimization Variants</div>
+  <div class="ch-desc">Online DPO、KTO、IPO、ORPO、Best-of-N、方法选择决策树</div>
+  <a class="ch-link" href="AgenticAI-Ch08-Preference-Variants.html">阅读笔记</a>
+</div>
+
+<div class="card part2">
+  <div class="ch-num">Chapter 9</div>
+  <div class="ch-title">Reward Model Training</div>
+  <div class="ch-desc">Bradley-Terry推导、PRM vs ORM、规则奖励、多目标奖励、Listwise排序</div>
+  <a class="ch-link" href="AgenticAI-Ch09-Reward-Model.html">阅读笔记</a>
+</div>
+
+<div class="card part2">
+  <div class="ch-num">Chapter 10</div>
+  <div class="ch-title">SFT Best Practices</div>
+  <div class="ch-desc">Sequence Packing、Chat Templates、Completion-Only Masking、数据混合、灾难性遗忘</div>
+  <a class="ch-link" href="AgenticAI-Ch10-SFT-Best-Practices.html">阅读笔记</a>
+</div>
+
+<div class="card part2">
+  <div class="ch-num">Chapter 11</div>
+  <div class="ch-title">System Architecture at Scale</div>
+  <div class="ch-desc">并行策略（DP/TP/SP/PP/FSDP）、内存估算、成本分析、超参配置</div>
+  <a class="ch-link" href="AgenticAI-Ch11-System-Architecture.html">阅读笔记</a>
+</div>
+
+<div class="card part2">
+  <div class="ch-num">Chapter 12</div>
+  <div class="ch-title">LLM Agentic Training</div>
+  <div class="ch-desc">STaR、Reflexion、ReAct、LATS、AgentQ、Voyager、RLEF、OpenHands、两个完整Use Case</div>
+  <a class="ch-link" href="AgenticAI-Ch12-Agentic-Training.html">阅读笔记</a>
+</div>
+
+<div class="card part2">
+  <div class="ch-num">Chapter 13</div>
+  <div class="ch-title">RL for Large Reasoning Models</div>
+  <div class="ch-desc">DeepSeek-R1、OpenAI o1/o3、QwQ、Test-Time Scaling 9种方法、Scaling Laws</div>
+  <a class="ch-link" href="AgenticAI-Ch13-RL-Reasoning.html">阅读笔记</a>
+</div>
+
+</div>
+</div>
+
+<!-- Part III -->
+<div class="part-section">
+<div class="part-header part3">Part III · Agentic AI 系统 (Ch 14–26)</div>
+<div class="card-grid">
+
+<div class="card part3">
+  <div class="ch-num">Chapter 14</div>
+  <div class="ch-title">LLM Evaluation</div>
+  <div class="ch-desc">评估设计、数据收集、合成数据、排名指标（ELO/BT）、生成指标（BLEU/ROUGE）、Agentic指标、LLM-as-Judge</div>
+  <a class="ch-link" href="AgenticAI-Ch14-LLM-Evaluation.html">阅读笔记</a>
+</div>
+
+<div class="card part3">
+  <div class="ch-num">Chapter 15</div>
+  <div class="ch-title">Introduction to Agentic AI</div>
+  <div class="ch-desc">Agentic AI定义、perceive-reason-act循环、五大挑战、11层架构栈</div>
+  <a class="ch-link" href="AgenticAI-Ch15-Agentic-AI-Intro.html">阅读笔记</a>
+</div>
+
+<div class="card part3">
+  <div class="ch-num">Chapter 16</div>
+  <div class="ch-title">Retrieval-Augmented Generation (RAG)</div>
+  <div class="ch-desc">核心RAG架构、检索方法（BM25/DPR/ColBERT）、Chunking策略、高级RAG模式、Agentic RAG</div>
+  <a class="ch-link" href="AgenticAI-Ch16-RAG.html">阅读笔记</a>
+</div>
+
+<div class="card part3">
+  <div class="ch-num">Chapter 17</div>
+  <div class="ch-title">Agentic Memory Systems</div>
+  <div class="ch-desc">记忆分类（Working/Episodic/Semantic/Procedural）、架构模式、MemGPT、RL训练记忆、CoALA/Mem0</div>
+  <a class="ch-link" href="AgenticAI-Ch17-Agentic-Memory.html">阅读笔记</a>
+</div>
+
+<div class="card part3">
+  <div class="ch-num">Chapter 18</div>
+  <div class="ch-title">Agent Harness – Context & Orchestration</div>
+  <div class="ch-desc">Context管理、Prompt架构、工具集成、编排模式（ReAct/Plan-Execute）、状态管理、错误处理</div>
+  <a class="ch-link" href="AgenticAI-Ch18-Agent-Harness.html">阅读笔记</a>
+</div>
+
+<div class="card part3">
+  <div class="ch-num">Chapter 19</div>
+  <div class="ch-title">Agent Design Patterns</div>
+  <div class="ch-desc">Workflow模式（Chaining/Routing/Parallelization）、自主Agent模式（ReAct/Planning/Reflection）、设计原则</div>
+  <a class="ch-link" href="AgenticAI-Ch19-Agent-Design-Patterns.html">阅读笔记</a>
+</div>
+
+<div class="card part3">
+  <div class="ch-num">Chapter 20</div>
+  <div class="ch-title">Agentic Environments and Benchmarks</div>
+  <div class="ch-desc">环境设计原则、7种环境类型、OpenEnv标准接口、自定义环境构建、评估体系</div>
+  <a class="ch-link" href="AgenticAI-Ch20-Agentic-Environments.html">阅读笔记</a>
+</div>
+
+<div class="card part3">
+  <div class="ch-num">Chapter 21</div>
+  <div class="ch-title">Model Context Protocol (MCP)</div>
+  <div class="ch-desc">三角色架构、四大原语、JSON-RPC协议、安全模型、Python实现、生态系统</div>
+  <a class="ch-link" href="AgenticAI-Ch21-MCP.html">阅读笔记</a>
+</div>
+
+<div class="card part3">
+  <div class="ch-num">Chapter 22</div>
+  <div class="ch-title">Agent Skills</div>
+  <div class="ch-desc">Skill定义与架构、Anthropic案例分析、生命周期、注册中心、Skills vs Fine-Tuning</div>
+  <a class="ch-link" href="AgenticAI-Ch22-Agent-Skills.html">阅读笔记</a>
+</div>
+
+<div class="card part3">
+  <div class="ch-num">Chapter 23</div>
+  <div class="ch-title">Agent-to-Agent Communication (A2A)</div>
+  <div class="ch-desc">Google A2A协议、通信模式、Agent发现与路由、协调协议、安全与信任</div>
+  <a class="ch-link" href="AgenticAI-Ch23-A2A-Communication.html">阅读笔记</a>
+</div>
+
+<div class="card part3">
+  <div class="ch-num">Chapter 24</div>
+  <div class="ch-title">Multi-Agent Systems</div>
+  <div class="ch-desc">四种架构、协调机制、7种LLM多Agent模式、MARL训练（CTDE/自博弈/Nash）</div>
+  <a class="ch-link" href="AgenticAI-Ch24-Multi-Agent-Systems.html">阅读笔记</a>
+</div>
+
+<div class="card part3">
+  <div class="ch-num">Chapter 25</div>
+  <div class="ch-title">Agent Development Frameworks</div>
+  <div class="ch-desc">LangGraph、AutoGen、CrewAI、OpenAI SDK、DSPy、Semantic Kernel、测试与部署</div>
+  <a class="ch-link" href="AgenticAI-Ch25-Agent-Frameworks.html">阅读笔记</a>
+</div>
+
+<div class="card part3">
+  <div class="ch-num">Chapter 26</div>
+  <div class="ch-title">Agentic UI Frameworks</div>
+  <div class="ch-desc">UI范式、关键组件、框架对比（Vercel/Chainlit/Gradio）、Generative UI、Streaming、HITL</div>
+  <a class="ch-link" href="AgenticAI-Ch26-Agentic-UI.html">阅读笔记</a>
+</div>
+
+</div>
+</div>
+
+<!-- Part IV -->
+<div class="part-section">
+<div class="part-header part4">Part IV · 参考与总结 (Ch 27–29)</div>
+<div class="card-grid">
+
+<div class="card part4">
+  <div class="ch-num">Chapter 27</div>
+  <div class="ch-title">Quiz Questions & Answers</div>
+  <div class="ch-desc">30个主题、74道自测题及详细解答</div>
+  <a class="ch-link" href="AgenticAI-Ch27-Quiz.html">阅读笔记</a>
+</div>
+
+<div class="card part4">
+  <div class="ch-num">Chapter 28</div>
+  <div class="ch-title">Quick Reference</div>
+  <div class="ch-desc">23个主题速查卡片（公式、超参、API、决策树、安全清单等）</div>
+  <a class="ch-link" href="AgenticAI-Ch28-Quick-Reference.html">阅读笔记</a>
+</div>
+
+<div class="card part4">
+  <div class="ch-num">Chapter 29</div>
+  <div class="ch-title">Conclusion and Future Directions</div>
+  <div class="ch-desc">全书总结、开放挑战（Learning from Interaction、Scalable Oversight）</div>
+  <a class="ch-link" href="AgenticAI-Ch29-Conclusion.html">阅读笔记</a>
+</div>
+
+</div>
+</div>
+
+<footer>
+  <p>阅读笔记由 AI 辅助生成 · 基于《The Hitchhiker's Guide to Agentic AI》(Roitman, 2026)</p>
+</footer>
+
+</body>
+</html>

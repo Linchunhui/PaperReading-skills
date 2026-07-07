@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第16章 阅读笔记：Retrieval-Augmented Generation (RAG)</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]})"></script>
+<style>
+:root {
+  --primary: #2c3e50;
+  --accent: #3498db;
+  --bg: #fafbfc;
+  --card-bg: #ffffff;
+  --border: #e1e4e8;
+  --text: #24292e;
+  --text-secondary: #586069;
+  --code-bg: #f6f8fa;
+  --highlight: #fff3cd;
+  --success: #d4edda;
+  --info: #d1ecf1;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; line-height: 1.8; color: var(--text); background: var(--bg); padding: 2rem; max-width: 900px; margin: 0 auto; }
+h1 { font-size: 1.8rem; color: var(--primary); border-bottom: 3px solid var(--accent); padding-bottom: 0.5rem; margin-bottom: 1rem; }
+h2 { font-size: 1.4rem; color: var(--primary); margin-top: 2.5rem; margin-bottom: 1rem; padding-left: 0.8rem; border-left: 4px solid var(--accent); }
+h3 { font-size: 1.15rem; color: var(--primary); margin-top: 1.8rem; margin-bottom: 0.8rem; }
+p { margin-bottom: 1rem; text-align: justify; }
+ul, ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+li { margin-bottom: 0.5rem; }
+code { background: var(--code-bg); padding: 0.15rem 0.4rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: var(--code-bg); padding: 1rem; border-radius: 6px; overflow-x: auto; margin-bottom: 1.5rem; border: 1px solid var(--border); }
+pre code { background: none; padding: 0; }
+blockquote { border-left: 4px solid var(--accent); padding: 0.8rem 1.2rem; margin: 1.5rem 0; background: var(--info); border-radius: 0 6px 6px 0; }
+.card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+.formula-block { background: var(--code-bg); border: 1px solid var(--border); border-radius: 6px; padding: 1rem; margin: 1rem 0; overflow-x: auto; }
+.formula-explain { color: var(--text-secondary); font-size: 0.92em; margin-top: 0.5rem; padding-left: 1rem; border-left: 3px solid #ddd; }
+.highlight-box { background: var(--highlight); border: 1px solid #ffc107; border-radius: 6px; padding: 1rem; margin: 1rem 0; }
+.info-box { background: var(--info); border: 1px solid #bee5eb; border-radius: 6px; padding: 1rem; margin: 1rem 0; }
+.success-box { background: var(--success); border: 1px solid #c3e6cb; border-radius: 6px; padding: 1rem; margin: 1rem 0; }
+.subtitle { color: var(--text-secondary); font-size: 1rem; margin-bottom: 0.3rem; }
+.meta { color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 2rem; }
+table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; }
+th, td { border: 1px solid var(--border); padding: 0.6rem 0.8rem; text-align: left; }
+th { background: var(--code-bg); font-weight: 600; }
+details { margin-bottom: 1rem; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+summary { padding: 0.8rem 1.2rem; background: var(--code-bg); cursor: pointer; font-weight: 500; }
+details[open] summary { border-bottom: 1px solid var(--border); }
+details .answer { padding: 1rem 1.2rem; }
+svg { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; }
+.takeaway { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 8px; padding: 1.5rem; margin: 2rem 0; }
+.takeaway h2 { color: white; border-left-color: rgba(255,255,255,0.5); }
+.takeaway li { color: rgba(255,255,255,0.95); }
+</style>
+</head>
+<body>
+
+<h1>第16章：Retrieval-Augmented Generation (RAG)</h1>
+<p class="subtitle">检索增强生成——从基础架构到Agentic RAG的完整技术体系</p>
+<p class="meta">来源：The Hitchhiker's Guide to Agentic AI · 第16章（pp. 295–318） · 阅读笔记</p>
+
+<div class="card">
+<h3>章节摘要</h3>
+<p>本章系统性地介绍了检索增强生成（RAG）的完整技术栈。从LLM为何需要外部知识开始，经过核心RAG架构（索引、检索、生成），到各种检索方法的详细对比（BM25、DPR、SPLADE、ColBERT），再到分块策略、高级RAG模式（Self-RAG、CRAG、Graph RAG），以及效率优化（REFRAG）。本章重点介绍了Agentic RAG——将检索框定为序列决策问题，以及Search-R1通过强化学习训练模型学习何时、如何检索。最终覆盖评估框架、生产部署考量和RAG+Fine-Tuning协同策略，共11节24页。</p>
+</div>
+
+<h2>16.1 Motivation and Problem Statement</h2>
+
+<p>RAG已成为生产环境中部署LLM最具实际影响力的技术之一。它不再仅依赖训练时编码在模型权重中的知识，而是为LLM配备动态、可更新的<strong>外部记忆</strong>，使其能够在知识密集型任务中生成准确、有据可查且可验证的回答。</p>
+
+<h3>LLM需要外部知识的三大根本限制</h3>
+<ol>
+<li><strong>幻觉（Hallucination）</strong>：模型在超出可靠知识边界时，会自信地生成听起来合理但事实上错误的陈述。</li>
+<li><strong>知识过时（Knowledge Staleness）</strong>：训练数据有截止日期；模型无法知道训练后发生的事件。</li>
+<li><strong>领域特异性（Domain Specificity）</strong>：通用模型缺乏对专有代码库、内部文档、专业法规的深度知识。</li>
+</ol>
+
+<h3>16.1.1 参数化 vs 非参数化知识</h3>
+
+<p>设 $M_\theta$ 为参数为 $\theta$ 的语言模型，$\mathcal{D} = \{d_1, d_2, \ldots, d_N\}$ 为外部文档语料库。两种范式下生成答案 $a$ 的概率：</p>
+
+<div class="formula-block">
+$$P_{\text{parametric}}(a \mid q) = P_{M_\theta}(a \mid q)$$
+$$P_{\text{RAG}}(a \mid q, \mathcal{D}) = \sum_{d \in \mathcal{D}} P_{M_\theta}(a \mid q, d) \cdot P_{\text{ret}}(d \mid q, \mathcal{D})$$
+<p class="formula-explain">其中 $P_{\text{ret}}(d \mid q, \mathcal{D})$ 是文档的检索分布。RAG通过对检索到的证据进行边缘化，将生成过程锚定在非参数化知识上。参数化模型像是一位毕业多年的学者（记忆丰富但过时），而RAG为其提供了"图书馆借阅证"——可以实时查找、引用来源。</p>
+</div>
+
+<h3>16.1.2 RAG vs Fine-Tuning vs Long Context 决策指南</h3>
+
+<table>
+<tr><th>决策标准</th><th>RAG</th><th>Fine-Tuning</th><th>Long Context</th><th>RAG + FT</th></tr>
+<tr><td>知识频繁更新</td><td>✓</td><td>×</td><td>×</td><td>✓</td></tr>
+<tr><td>需要引用/溯源</td><td>✓</td><td>×</td><td>✓</td><td>✓</td></tr>
+<tr><td>专有大型语料库</td><td>✓</td><td>×</td><td>×</td><td>✓</td></tr>
+<tr><td>适应特定风格/格式</td><td>×</td><td>✓</td><td>×</td><td>✓</td></tr>
+<tr><td>教授新推理能力</td><td>×</td><td>✓</td><td>×</td><td>✓</td></tr>
+<tr><td>语料适合放入上下文窗口</td><td>×</td><td>×</td><td>✓</td><td>×</td></tr>
+<tr><td>低延迟要求</td><td>×</td><td>✓</td><td>×</td><td>×</td></tr>
+</table>
+
+<div class="highlight-box">
+<p><strong>常见误解</strong>：RAG不是Fine-Tuning的替代品。Fine-Tuning教模型<em>如何</em>推理和回答；RAG提供<em>关于什么</em>进行推理的材料。它们是互补的——经过Fine-Tuning的模型能更有效地利用检索到的上下文。</p>
+</div>
+
+<h2>16.2 Core RAG Architecture</h2>
+
+<p>标准RAG系统由两个阶段组成：<strong>离线索引管线</strong>（处理和存储文档）和<strong>在线检索-生成管线</strong>（服务查询）。</p>
+
+<h3>16.2.1 索引管线（Indexing Pipeline）</h3>
+<ol>
+<li><strong>文档加载（Document Loading）</strong>：从PDF、HTML、Markdown、DOCX、代码等异构格式中提取纯文本，保留元数据（来源URL、页码、章节标题、时间戳）。</li>
+<li><strong>分块（Chunking）</strong>：将长文档拆分为适合嵌入模型上下文窗口（通常512 tokens）且语义连贯的块。这是RAG系统设计中<strong>影响最大的决策之一</strong>。</li>
+<li><strong>嵌入（Embedding）</strong>：每个块 $c_i$ 被编码为稠密向量 $e_i = f_\phi(c_i) \in \mathbb{R}^d$，与原始文本和元数据一起存储在向量数据库中。</li>
+</ol>
+
+<h3>16.2.2 检索（Retrieval）</h3>
+
+<p>给定查询 $q$，检索步骤将其编码为 $\mathbf{q} = f_\phi(q)$，通过余弦相似度找到最相似的 $k$ 个块：</p>
+
+<div class="formula-block">
+$$\text{sim}(\mathbf{q}, \mathbf{e}_i) = \frac{\mathbf{q} \cdot \mathbf{e}_i}{\|\mathbf{q}\| \|\mathbf{e}_i\|}$$
+<p class="formula-explain">返回相似度最高的 $k$ 个块 $C_k = \{c^{(1)}, \ldots, c^{(k)}\}$ 作为生成上下文。</p>
+</div>
+
+<h3>16.2.3 生成（Generation）</h3>
+
+<p>检索到的块被注入到提示模板中，系统指令要求模型仅使用提供的上下文回答，并使用 <code>[Doc N]</code> 标注引用来源。若上下文不足，需明确说明。</p>
+
+<pre><code>SYSTEM_PROMPT = """You are a helpful assistant. Answer the question using ONLY
+the provided context. If the context does not contain enough information,
+say so explicitly. Cite your sources using [Doc N] notation."""
+
+def build_rag_prompt(query: str, chunks: list[dict]) -> str:
+    context_str = "\n\n".join(
+        f"[Doc {i+1}] (Source: {c['source']}, Page: {c.get('page','N/A')})\n{c['text']}"
+        for i, c in enumerate(chunks)
+    )
+    return f"""{SYSTEM_PROMPT}\nContext:\n{context_str}\nQuestion: {query}\nAnswer:"""</code></pre>
+
+<h2>16.3 Retrieval Methods</h2>
+
+<h3>16.3.1 稀疏检索：BM25 和 TF-IDF</h3>
+
+<p>稀疏检索方法将文档和查询表示为词汇表上的高维稀疏向量。经典的BM25评分函数：</p>
+
+<div class="formula-block">
+$$\text{BM25}(d, q) = \sum_{i=1}^{n} \text{IDF}(t_i) \cdot \frac{f(t_i, d) \cdot (k_1 + 1)}{f(t_i, d) + k_1 \cdot \left(1 - b + b \cdot \frac{|d|}{\text{avgdl}}\right)}$$
+<p class="formula-explain">其中 $f(t_i, d)$ 是词频，$|d|$ 是文档长度，$\text{avgdl}$ 是平均文档长度，$k_1 \in [1.2, 2.0]$、$b = 0.75$ 是调优参数。IDF项衡量词的区分度，分母中的长度归一化防止长文档获得不公平的优势。</p>
+</div>
+
+<div class="info-box">
+<p><strong>稀疏检索仍然获胜的场景</strong>：精确关键词匹配（产品代码、错误代码、专有名词）、低资源领域（不足以训练密集模型）、可解释性（易于调试）、速度（无需GPU，亿级文档规模的倒排索引）、词汇外术语。</p>
+</div>
+
+<h3>16.3.2 稠密检索：DPR</h3>
+
+<p>Dense Passage Retrieval (DPR) 使用两个独立的BERT编码器——查询编码器 $E_Q$ 和段落编码器 $E_P$——通过对比损失训练，使相关的查询-段落对在嵌入空间中距离更近。</p>
+
+<div class="formula-block">
+$$\text{sim}(q, p) = E_Q(q)^\top E_P(p)$$
+<p class="formula-explain">双编码器架构：查询和段落分别编码为单向量，通过内积计算相似度。</p>
+</div>
+
+<p><strong>In-Batch Negatives 训练</strong>：给定批次中 $B$ 个查询-段落对 $\{(q_i, p_i^+)\}_{i=1}^B$，对比损失将同批其他段落视为负样本：</p>
+
+<div class="formula-block">
+$$\mathcal{L}_{\text{DPR}} = -\frac{1}{B}\sum_{i=1}^{B} \log \frac{\exp\left(E_Q(q_i)^\top E_P(p_i^+)/\tau\right)}{\sum_{j=1}^{B} \exp\left(E_Q(q_i)^\top E_P(p_j)/\tau\right)}$$
+<p class="formula-explain">其中 $\tau$ 是温度超参数。Hard negatives（词汇相似但语义无关的段落）对训练强检索器至关重要。</p>
+</div>
+
+<p><strong>近似最近邻搜索（ANN）</strong>：规模化时穷举搜索不可行，FAISS提供高效ANN搜索：</p>
+<ul>
+<li><strong>IVF</strong>（倒排文件索引）：将向量聚类到Voronoi单元，只搜索邻近单元</li>
+<li><strong>HNSW</strong>（层次可导航小世界图）：图索引，$O(\log N)$ 搜索复杂度</li>
+<li><strong>PQ</strong>（乘积量化）：压缩向量以减少内存占用</li>
+</ul>
+
+<h3>16.3.3 混合检索：Reciprocal Rank Fusion (RRF)</h3>
+
+<p>混合检索结合稀疏和稠密分数。简单线性组合为：</p>
+
+<div class="formula-block">
+$$s_{\text{hybrid}}(d, q) = \alpha \cdot s_{\text{dense}}(d, q) + (1-\alpha) \cdot s_{\text{sparse}}(d, q)$$
+<p class="formula-explain">但不同系统的分数不可直接比较。Reciprocal Rank Fusion 通过操作排名而非分数来解决这个问题：</p>
+</div>
+
+<div class="formula-block">
+$$\text{RRF}(d) = \sum_{r \in R} \frac{1}{k + \text{rank}_r(d)}$$
+<p class="formula-explain">其中 $R$ 是多个排序列表的集合（如BM25排名和Dense排名），$\text{rank}_r(d)$ 是文档 $d$ 在列表 $r$ 中的排名，$k=60$ 是平滑常数，减少极高排名文档的影响。例：BM25排名第3、Dense排名第7的文档 → $\text{RRF}(d) = \frac{1}{63} + \frac{1}{67} \approx 0.0308$。</p>
+</div>
+
+<h3>16.3.4 学习型稀疏检索：SPLADE</h3>
+
+<p><strong>核心动机</strong>：BM25依赖精确词汇匹配（"car"无法匹配"automobile"）；DPR捕获语义但失去可解释性且需GPU。SPLADE兼得两者优势：稀疏向量（快速倒排索引查找）+ 学习的语义扩展。</p>
+
+<p><strong>SPLADE v1 架构</strong>：使用预训练MLM（如BERT）为每个文档/查询产生词汇表上的稀疏向量。MLM头已知哪些词与文本中每个位置语义相关——SPLADE将此知识重新用作词项重要性权重：</p>
+
+<div class="formula-block">
+$$w_t(x) = \log\left(1 + \text{ReLU}\left(\max_{i \in [1,n]} H_i[t]\right)\right)$$
+<p class="formula-explain">其中 $H_i[t]$ 是输入位置 $i$ 处词汇token $t$ 的MLM logit。$\log(1+\cdot)$ 饱和防止单词主导（类似BM25中的TF饱和）；ReLU确保稀疏性；max pooling跨位置捕获最强信号；扩展：原文中不存在的token也可获得非零权重（如"neural networks"文档可获得"deep learning"的权重）。</p>
+</div>
+
+<p><strong>评分</strong>：查询和文档各映射为稀疏向量 $w^q, w^d \in \mathbb{R}^{|V|}$，相关性分数为点积：</p>
+
+<div class="formula-block">
+$$s(q, d) = \sum_{t \in V} w_t^q \cdot w_t^d$$
+<p class="formula-explain">由于两个向量都是稀疏的（通常30K词汇中仅20-200个非零项），可用标准倒排索引高效计算——查询时无需GPU。</p>
+</div>
+
+<p><strong>训练损失</strong>（含稀疏正则化）：</p>
+<div class="formula-block">
+$$\mathcal{L} = \mathcal{L}_{\text{contrastive}} + \lambda_q \|w^q\|_1 + \lambda_d \|w^d\|_1$$
+<p class="formula-explain">L1惩罚鼓励稀疏性——没有它们模型会学习密集表示，失去效率优势。</p>
+</div>
+
+<p><strong>SPLADEv2 关键改进</strong>：</p>
+<ol>
+<li><strong>Cross-encoder蒸馏</strong>：使用MonoT5等交叉编码器教师提供软相关分数 → $\mathcal{L}_{\text{distill}} = \text{KL}(\sigma(s_{\text{student}}) \| \sigma(s_{\text{teacher}}))$</li>
+<li><strong>非对称编码器</strong>：查询更稀疏（快速查找），文档可稍密集（离线预计算）→ $\lambda_q > \lambda_d$</li>
+<li><strong>FLOPS正则化</strong>：直接惩罚预期检索成本 → $\mathcal{L}_{\text{FLOPS}} = \sum_{t \in V}(\bar{a}_t^q)^2 + \sum_{t \in V}(\bar{a}_t^d)^2$</li>
+<li><strong>高效骨干</strong>：DistilBERT (66M) 替代 BERT-base (110M)，编码时间减半</li>
+</ol>
+
+<table>
+<tr><th>方面</th><th>SPLADE v1</th><th>SPLADEv2</th></tr>
+<tr><td>训练信号</td><td>二值相关性 + hard negatives</td><td>Cross-encoder蒸馏</td></tr>
+<tr><td>稀疏控制</td><td>L1正则化</td><td>FLOPS-aware正则化</td></tr>
+<tr><td>查询/文档对称性</td><td>相同编码器，相同λ</td><td>非对称（查询更稀疏）</td></tr>
+<tr><td>骨干网络</td><td>BERT-base (110M)</td><td>DistilBERT (66M)</td></tr>
+<tr><td>MRR@10 (MS MARCO)</td><td>34.0</td><td>36.8</td></tr>
+<tr><td>平均非零项/文档</td><td>~200</td><td>~120（稀疏40%）</td></tr>
+</table>
+
+<h3>16.3.5 ColBERT：Late Interaction</h3>
+
+<p>ColBERT将查询和文档编码为<strong>token级嵌入集合</strong>，使用MaxSim算子评分：</p>
+
+<div class="formula-block">
+$$s(q, d) = \sum_{i \in |q|} \max_{j \in |d|} \mathbf{q}_i^\top \mathbf{d}_j$$
+<p class="formula-explain">对每个查询token，找到与之最相似的文档token并取内积，然后将所有查询token的最大相似度求和。这种"晚期交互"机制比单向量双编码器更有表达力，同时比交叉编码器快得多（文档嵌入离线预计算）。</p>
+</div>
+
+<p><strong>架构细节</strong>：查询/文档编码器都是BERT，输出per-token嵌入（非单个[CLS]向量），投影到低维（128维）：</p>
+<div class="formula-block">
+$$\mathbf{q}_i = \text{Linear}(E_Q(q)_i) \in \mathbb{R}^{128}, \quad \mathbf{d}_j = \text{Linear}(E_D(d)_j) \in \mathbb{R}^{128}$$
+</div>
+
+<p><strong>训练损失</strong>（pairwise softmax交叉熵）：</p>
+<div class="formula-block">
+$$\mathcal{L}_{\text{ColBERT}} = -\log \frac{\exp(s(q, d^+))}{\exp(s(q, d^+)) + \sum_{k=1}^{N} \exp(s(q, d_k^-))}$$
+<p class="formula-explain">负样本来源：in-batch negatives（免费、充足）、BM25 hard negatives（对质量影响最大）、ColBERTv2中的蒸馏negatives。</p>
+</div>
+
+<p><strong>索引与服务</strong>：PLAID索引——聚类文档嵌入，用质心初筛候选，仅对候选计算精确MaxSim，延迟降低5-10×。索引大小：每文档 $|d| \times 128$ 浮点数（可通过残差量化压缩至~2 bytes/维度）。</p>
+
+<h3>16.3.6 检索方法综合对比</h3>
+
+<table>
+<tr><th>方法</th><th>延迟</th><th>精度</th><th>索引大小</th><th>需GPU</th><th>最佳应用</th></tr>
+<tr><td>TF-IDF</td><td>极低</td><td>低</td><td>小</td><td>否</td><td>基线，精确匹配</td></tr>
+<tr><td>BM25</td><td>极低</td><td>中</td><td>小</td><td>否</td><td>关键词搜索，稀有术语</td></tr>
+<tr><td>DPR / bi-encoder</td><td>低</td><td>高</td><td>大</td><td>是</td><td>语义相似度</td></tr>
+<tr><td>SPLADE</td><td>低</td><td>高</td><td>中</td><td>是</td><td>混合精度+速度</td></tr>
+<tr><td>ColBERT</td><td>中</td><td>极高</td><td>极大</td><td>是</td><td>高精度检索</td></tr>
+<tr><td>Cross-encoder</td><td>高</td><td>最高</td><td>N/A</td><td>是</td><td>重排top-k</td></tr>
+<tr><td>Hybrid (RRF)</td><td>低</td><td>极高</td><td>大</td><td>是</td><td>生产系统</td></tr>
+</table>
+
+<h2>16.4 Chunking Strategies</h2>
+
+<p>分块是将文档拆分为以下三方面平衡的片段的过程：(1) 足够小以适配嵌入模型的上下文窗口，(2) 语义连贯，(3) 单独检索时包含足够上下文。</p>
+
+<h3>16.4.1 固定大小分块（带重叠）</h3>
+
+<p>最简单策略：每 $W$ 个token切分，连续块间有 $O$ 个token重叠。</p>
+
+<div class="formula-block">
+$$N_{\text{chunks}} = \left\lceil \frac{L - O}{W - O} \right\rceil$$
+<p class="formula-explain">其中 $L$ 是文档长度（token数），$W$ 是块大小，$O$ 是重叠大小。重叠确保跨边界的上下文不丢失。</p>
+</div>
+
+<h3>16.4.2 语义分块（Semantic Chunking）</h3>
+
+<p>不在固定间隔切分，而是在通过测量连续句子间嵌入相似度检测到的<strong>主题边界</strong>处切分。当相邻句子的embedding余弦相似度低于阈值（如第95百分位的不相似度）时断开。</p>
+
+<h3>16.4.3 文档结构感知分块</h3>
+<ul>
+<li><strong>Markdown</strong>：在 <code>##</code> 标题处切分，保留章节上下文</li>
+<li><strong>HTML</strong>：在 <code>&lt;section&gt;</code>、<code>&lt;article&gt;</code>、<code>&lt;p&gt;</code> 标签处切分</li>
+<li><strong>代码</strong>：在函数/类定义处切分，每块保留import语句</li>
+<li><strong>表格</strong>：整表作为单个块；永远不在行中间切分</li>
+</ul>
+
+<h3>16.4.4 父子分块（Parent-Child Chunking）</h3>
+
+<p>一种将<strong>检索粒度</strong>与<strong>生成上下文</strong>解耦的强大模式：</p>
+<ol>
+<li>索引小的<strong>子块</strong>（如128 tokens）用于精确检索</li>
+<li>返回大的<strong>父块</strong>（如512 tokens）给LLM以提供更丰富的上下文</li>
+</ol>
+
+<h3>16.4.5 块大小经验指南</h3>
+
+<table>
+<tr><th>用例</th><th>推荐块大小</th><th>重叠</th></tr>
+<tr><td>事实问答（精确事实）</td><td>128–256 tokens</td><td>20–32 tokens</td></tr>
+<tr><td>摘要/综合</td><td>512–1024 tokens</td><td>64–128 tokens</td></tr>
+<tr><td>代码检索</td><td>完整函数</td><td>无</td></tr>
+<tr><td>法律/监管文档</td><td>段落级别</td><td>1句</td></tr>
+<tr><td>对话/聊天</td><td>256–512 tokens</td><td>32–64 tokens</td></tr>
+</table>
+
+<h2>16.5 Advanced RAG Patterns</h2>
+
+<h3>16.5.1 Query Transformation</h3>
+
+<p>原始用户查询往往模糊、过短或与文档语言不匹配。查询变换技术在搜索步骤<strong>之前</strong>提升检索质量。</p>
+
+<p><strong>HyDE（Hypothetical Document Embeddings）</strong>：不直接嵌入查询，而是先让LLM生成假设性答案，然后嵌入该答案：</p>
+
+<div class="formula-block">
+$$\hat{d} = \text{LLM}(q), \quad \mathbf{e}_{\text{query}} = f_\phi(\hat{d})$$
+<p class="formula-explain">直觉：假设性答案与真实文档处于相同的语言寄存器（linguistic register），减少查询-文档分布差距。</p>
+</div>
+
+<p><strong>Step-Back Prompting</strong>：对具体问题先生成更一般性的"后退"问题，对两者都检索并组合上下文。例："乙醇在2 atm下的沸点是多少？" → 后退："什么因素影响液体的沸点？"</p>
+
+<p><strong>Multi-Query Generation</strong>：生成 $M$ 个多样化的查询重写，分别检索，对结果取并集去重。</p>
+
+<h3>16.5.2 Re-Ranking（重排）</h3>
+
+<p>初始检索top-k候选后，<strong>交叉编码器</strong>对每个query-document对联合评分（同时关注两者），产生更精确的相关性分数：</p>
+
+<div class="formula-block">
+$$s_{\text{cross}}(q, d) = \text{CrossEncoder}([q; d])$$
+<p class="formula-explain">交叉编码器不能用于一阶检索（无预计算文档嵌入），但非常适合重排小候选集（通常 $k=20\text{-}100$）。典型选择：BAAI/bge-reranker-large。</p>
+</div>
+
+<h3>16.5.3 Contextual Compression（上下文压缩）</h3>
+
+<p>检索到的块通常包含围绕相关段落的无关句子。上下文压缩使用LLM<strong>仅提取相关部分</strong>，减少噪声并节省上下文窗口。</p>
+
+<h3>16.5.4 Self-RAG</h3>
+
+<p>Self-RAG训练单一模型同时完成三个决策：(1) 决定是否检索，(2) 带/不带检索生成，(3) 使用特殊反思token自我批评输出：</p>
+<ul>
+<li><code>[Retrieve]</code>：模型是否应该检索额外段落？</li>
+<li><code>[IsRel]</code>：检索到的段落是否与查询相关？</li>
+<li><code>[IsSup]</code>：生成的陈述是否源自检索段落？</li>
+<li><code>[IsUse]</code>：整体回答是否有用？</li>
+</ul>
+<p>模型端到端训练以预测这些token和回答，实现对检索和自评分的细粒度控制。</p>
+
+<h3>16.5.5 CRAG：Corrective RAG</h3>
+
+<p>CRAG添加<strong>检索评估器</strong>，对检索文档评分并触发纠正动作：</p>
+<ol>
+<li>检索top-k文档</li>
+<li>对每个文档评级：Correct / Ambiguous / Incorrect</li>
+<li>若所有文档不正确或模糊 → 回退到<strong>Web搜索</strong></li>
+<li>若部分文档正确 → 使用知识精炼（剥离无关句子）</li>
+<li>从精炼后的上下文生成答案</li>
+</ol>
+
+<h3>16.5.6 Adaptive RAG</h3>
+
+<p>根据预测的查询复杂度<strong>路由到不同检索策略</strong>：</p>
+<ul>
+<li><strong>无检索</strong>：简单事实查询，模型可从参数知识回答</li>
+<li><strong>单步RAG</strong>：标准检索-生成，适合中等查询</li>
+<li><strong>多步RAG</strong>：迭代检索，适合复杂多跳问题</li>
+</ul>
+<p>一个轻量级分类器（基于查询复杂度标签训练）路由每个传入查询。</p>
+
+<h3>16.5.7 Graph RAG</h3>
+
+<p>微软的Graph RAG从文档语料库构建<strong>知识图谱</strong>，使用社区检测生成层次化摘要：</p>
+<ol>
+<li><strong>实体提取</strong>：LLM从每个块中提取实体和关系</li>
+<li><strong>图构建</strong>：构建图 $G = (V, E)$，节点为实体，边为关系</li>
+<li><strong>社区检测</strong>：应用Leiden算法在多个分辨率下发现社区</li>
+<li><strong>社区摘要</strong>：LLM为每个社区生成摘要</li>
+<li><strong>查询</strong>：全局查询→对社区摘要做map-reduce；局部查询→标准向量搜索</li>
+</ol>
+
+<div class="info-box">
+<p><strong>何时使用Graph RAG</strong>：擅长需要跨多文档综合信息的全局查询（"这个语料库的主要主题是什么？"），但构建和维护成本高。标准RAG更适合局部查询（"文档X关于主题Y说了什么？"）。</p>
+</div>
+
+<h3>16.5.8 RAG-Fusion</h3>
+
+<p>RAG-Fusion从原始查询生成多个搜索查询，分别检索，然后使用RRF融合排名列表。将Multi-Query Generation与RRF评分相结合，实现多视角检索的统一排名。</p>
+
+<h2>16.6 Efficient RAG Decoding: REFRAG</h2>
+
+<p>RAG的实际瓶颈是<strong>解码延迟</strong>：检索到的段落拼接入LLM上下文往往很长但稀疏相关，膨胀了TTFT（Time-to-First-Token）和KV-cache内存。REFRAG观察到检索段落是独立来源的（经多样性/去重重排），其注意力模式呈<strong>块对角</strong>——大部分跨段落注意力接近零。</p>
+
+<h3>Compress–Sense–Expand 框架</h3>
+
+<ol>
+<li><strong>Compress</strong>：用紧凑摘要（如每段落块的mean-pooled keys/values）替换完整KV表示，大幅减少内存</li>
+<li><strong>Sense</strong>：每个解码步骤，对压缩表示做轻量注意力，识别哪些段落块与当前token相关</li>
+<li><strong>Expand</strong>：仅对选中的块重建完整KV条目，在稀疏活跃集上执行精确注意力</li>
+</ol>
+
+<div class="success-box">
+<p><strong>性能结果</strong>：在LLaMA模型上，REFRAG实现高达<strong>30.85× TTFT加速</strong>（比先前稀疏注意力基线提升3.75×），无困惑度损失。在固定内存预算下将有效上下文长度扩展16×。对Agentic RAG尤其重要——多轮检索会累积延迟，REFRAG使每轮解码成本与上下文长度呈亚线性关系。</p>
+</div>
+
+<h2>16.7 Agentic RAG</h2>
+
+<h3>16.7.1 Motivation：静态RAG的局限</h3>
+
+<p>标准RAG遵循固定的retrieve-then-generate模式，在以下场景失败：</p>
+<ul>
+<li><strong>多跳问题</strong>："谁创立了2023年收购OpenAI主要竞争对手的公司？"——需要链式多次检索</li>
+<li><strong>模糊查询</strong>：正确的检索策略取决于找到了什么</li>
+<li><strong>异构源</strong>：不同子问题需要不同知识库</li>
+<li><strong>迭代精炼</strong>：初始检索可能揭示需要不同查询</li>
+</ul>
+
+<div class="highlight-box">
+<p><strong>RAG作为MDP</strong>：Agentic RAG将检索框定为序列决策问题。状态是当前上下文（查询+已检索文档）；动作包括retrieve、reason、generate、stop；奖励是答案正确性。智能体学习一个决策策略：何时检索、检索什么。</p>
+</div>
+
+<h3>16.7.2 Agentic RAG 架构</h3>
+
+<p>Agent迭代执行：<strong>计划 → 检索 → 评估充分性 → 自检grounding</strong>，然后返回答案。关键设计模式是<strong>条件循环</strong>：评估后，agent要么继续生成（上下文充分或迭代预算耗尽），要么带精炼的子查询返回检索。</p>
+
+<h3>16.7.3 Multi-Source Routing（多源路由）</h3>
+
+<p>核心洞察：不同问题类型需要不同的检索后端——没有单一索引能胜任一切。</p>
+<ul>
+<li>"我们公司的PTO政策是什么？" → <strong>向量数据库</strong>（内部文档）</li>
+<li>"美联储昨天宣布了什么？" → <strong>Web搜索</strong>（实时信息）</li>
+<li>"显示Q3各地区营收" → <strong>SQL数据库</strong>（结构化数据）</li>
+<li>"我们的auth中间件如何验证token？" → <strong>代码索引</strong>（代码库）</li>
+</ul>
+
+<p><strong>三种路由策略</strong>（复杂度递增）：</p>
+<ol>
+<li><strong>规则路由</strong>：关键词触发（如SQL关键词→数据库）。快速可解释但对模糊查询脆弱。</li>
+<li><strong>分类器路由</strong>：轻量模型（fine-tuned BERT或查询嵌入上的逻辑回归）预测最佳源。延迟<10ms，可从路由日志训练。</li>
+<li><strong>LLM路由</strong>：LLM在结构化输出调用中自行决定源。最灵活——处理新查询类型并可解释推理——但增加一次LLM调用延迟。</li>
+</ol>
+
+<h3>16.7.4 完整Agentic RAG实现（LangGraph）</h3>
+
+<p>使用LangGraph将四个节点串联为有状态图：</p>
+<ol>
+<li><strong>Plan</strong>：将用户查询分解为子查询</li>
+<li><strong>Retrieve</strong>：路由每个子查询到合适的源并获取文档</li>
+<li><strong>Evaluate</strong>：判断累积上下文是否足以回答原始查询</li>
+<li><strong>Generate</strong>：从检索上下文合成带引用的最终答案</li>
+</ol>
+
+<pre><code># 条件循环：评估后决定继续检索还是生成
+def should_retrieve(state: AgentState) -> str:
+    if state["context_sufficient"]:
+        return "generate"
+    if state["iterations"] >= state["max_iterations"]:
+        return "generate"  # 用现有内容生成
+    return "retrieve"
+
+workflow = StateGraph(AgentState)
+workflow.add_node("plan", plan_node)
+workflow.add_node("retrieve", retrieve_node)
+workflow.add_node("evaluate", evaluate_node)
+workflow.add_node("generate", generate_node)
+workflow.set_entry_point("plan")
+workflow.add_edge("plan", "retrieve")
+workflow.add_edge("retrieve", "evaluate")
+workflow.add_conditional_edges("evaluate", should_retrieve,
+    {"retrieve": "retrieve", "generate": "generate"})
+workflow.add_edge("generate", END)</code></pre>
+
+<h3>16.7.5 Tool-Augmented RAG</h3>
+
+<p>Agentic RAG可将检索与<strong>计算工具</strong>结合：向量搜索、SQL查询、Web搜索、Python执行等注册为工具，由LLM Agent根据需求调用。</p>
+
+<h3>16.7.6 Search-R1：RL训练的Agentic RAG</h3>
+
+<p>上述方法依赖提示工程编排。<strong>Search-R1</strong>采用根本不同的方法：通过<strong>强化学习训练LLM学习何时、什么、多少次搜索</strong>作为其推理过程的一部分。</p>
+
+<p><strong>核心思想</strong>：扩展DeepSeek-R1推理框架，将搜索引擎查询视为RL训练循环中的动作。模型在CoT生成中可发出特殊token <code>&lt;search&gt;query&lt;/search&gt;</code> 触发实时检索，结果注入推理上下文后继续生成：</p>
+
+<div class="formula-block">
+$$\text{think}_1 \to \underbrace{\langle\text{search}\rangle q_1 \langle/\text{search}\rangle}_{\text{action}} \to \underbrace{[\text{results}_1]}_{\text{observation}} \to \text{think}_2 \to \cdots \to \text{answer}$$
+<p class="formula-explain">整个轨迹（推理+搜索+最终答案）由终端奖励评分：最终答案相对于ground-truth的正确性。</p>
+</div>
+
+<p><strong>训练算法</strong>（GRPO）：</p>
+<ol>
+<li>每个问题采样 $N$ 条轨迹，每条可能包含0-5次搜索</li>
+<li>实时执行搜索——环境返回真实搜索引擎结果</li>
+<li>评分最终答案正确性（精确匹配或F1）</li>
+<li>计算组相对优势：$\hat{A}_i = (R_i - \mu_G)/\sigma_G$</li>
+<li>用GRPO裁剪目标更新策略——强化有效搜索的轨迹</li>
+</ol>
+
+<p><strong>模型学会</strong>：不确定时搜索（避免已知知识的无效搜索）、制定有效查询、多次搜索（基于初始结果迭代精炼）、整合检索上下文。</p>
+
+<table>
+<tr><th>维度</th><th>Prompt-Based Agentic RAG</th><th>Search-R1</th></tr>
+<tr><td>搜索决策</td><td>提示/启发式</td><td>通过RL学习</td></tr>
+<tr><td>查询制定</td><td>提示引导（"重写查询"）</td><td>端到端训练</td></tr>
+<tr><td>搜索次数</td><td>固定或推理时LLM决定</td><td>学习最优次数</td></tr>
+<tr><td>训练信号</td><td>无（冻结模型）</td><td>正确性奖励</td></tr>
+<tr><td>搜索集成</td><td>追加到上下文</td><td>交织在CoT中</td></tr>
+<tr><td>失败恢复</td><td>重试启发式</td><td>学习退避/重构</td></tr>
+<tr><td>推理开销</td><td>框架开销（LangGraph）</td><td>模型原生行为</td></tr>
+</table>
+
+<div class="success-box">
+<p><strong>Search-R1核心结果</strong>：7B模型在NQ、TriviaQA、HotpotQA上超越标准RAG 15-20%准确率，超越提示式Agentic RAG (ReAct风格) 8-12%，接近70B模型+标准RAG的表现。<strong>关键洞察</strong>：学习何时和如何搜索比拥有更大模型更有价值——一个搜索得好的小模型胜过不搜索的大模型。</p>
+</div>
+
+<div class="highlight-box">
+<p><strong>范式转变</strong>：传统RAG问的是"给定这个查询，我应该检索什么？"（生成前的管线决策）。Search-R1问的是"给定我迄今的推理，我需要更多信息吗？如果需要，什么具体问题能填补这个空白？"（生成中的学习决策）。这是考试前查课本的学生 vs. 做题时卡住才查参考资料的学生之间的区别——后者更高效、更有针对性。</p>
+</div>
+
+<h2>16.8 Evaluation</h2>
+
+<p>评估RAG系统比单独评估检索或生成更难——错误可能来自管线的任何阶段且会累积。完美的生成器无法补偿无关的检索，完美的检索器若生成器幻觉则浪费。有效评估在三个层面运作：</p>
+
+<h3>16.8.1 检索指标</h3>
+
+<p>设 $R_K$ 为排名前K的检索文档集合，$R^*$ 为相关文档集合：</p>
+
+<div class="formula-block">
+$$\text{Recall@K} = \frac{|R_K \cap R^*|}{|R^*|}$$
+$$\text{Precision@K} = \frac{|R_K \cap R^*|}{K}$$
+<p class="formula-explain">Recall@K衡量相关文档被检索到的比例；Precision@K衡量检索结果中相关文档的比例。</p>
+</div>
+
+<div class="formula-block">
+$$\text{MRR} = \frac{1}{|Q|}\sum_{i=1}^{|Q|} \frac{1}{\text{rank}_i}$$
+<p class="formula-explain">Mean Reciprocal Rank：$\text{rank}_i$ 是查询 $i$ 的第一个相关文档的排名。衡量"找到第一个正确答案有多快"。</p>
+</div>
+
+<div class="formula-block">
+$$\text{NDCG@K} = \frac{\text{DCG@K}}{\text{IDCG@K}}, \quad \text{DCG@K} = \sum_{i=1}^{K} \frac{\text{rel}_i}{\log_2(i+1)}$$
+<p class="formula-explain">$\text{rel}_i \in \{0, 1, 2, \ldots\}$ 是第 $i$ 个结果的分级相关度，IDCG是理想（完美排序）的DCG。NDCG考虑位置折扣和多级相关性。</p>
+</div>
+
+<h3>16.8.2 生成指标</h3>
+
+<div class="formula-block">
+$$\text{Faithfulness} = \frac{\text{上下文支持的声明数}}{\text{答案中的总声明数}}$$
+<p class="formula-explain">衡量生成答案是否基于检索上下文——答案中的每个声明是否可归因于检索文档。由LLM评判。</p>
+</div>
+
+<div class="formula-block">
+$$\text{AnswerRelevance} = \frac{1}{N}\sum_{i=1}^{N} \cos(E(q), E(\hat{q}_i))$$
+<p class="formula-explain">从答案反向生成问题 $\hat{q}_i$，衡量其与原始查询的嵌入相似度。答案越相关，反向生成的问题越接近原查询。</p>
+</div>
+
+<div class="formula-block">
+$$\text{ContextPrecision@K} = \frac{1}{K}\sum_{k=1}^{K} \text{Precision@k} \cdot \mathbf{1}[\text{doc}_k \text{ is relevant}]$$
+$$\text{ContextRecall} = \frac{\text{可归因于上下文的ground-truth声明数}}{\text{总ground-truth声明数}}$$
+</div>
+
+<h3>16.8.3 RAGAs 框架</h3>
+
+<p>RAGAs (Retrieval Augmented Generation Assessment) 提供<strong>无参考评估框架</strong>，使用LLM作为评判者，覆盖faithfulness、answer_relevancy、context_precision、context_recall、answer_correctness五个维度。</p>
+
+<h3>16.8.4 常见失败模式</h3>
+
+<table>
+<tr><th>失败模式</th><th>描述</th><th>原因</th></tr>
+<tr><td>检索遗漏</td><td>相关文档存在但未被检索</td><td>分块不当、嵌入模型不匹配、查询-文档词汇鸿沟</td></tr>
+<tr><td>上下文中毒</td><td>检索文档含误导/矛盾信息</td><td>语料质量差、对抗性内容</td></tr>
+<tr><td>中间遗忘</td><td>LLM对长上下文首尾关注更强，中间信息被忽略</td><td>注意力位置偏差</td></tr>
+<tr><td>过度检索</td><td>过多块稀释相关信号</td><td>K值过大、检索阈值过低</td></tr>
+<tr><td>有检索仍幻觉</td><td>模型忽略上下文从参数记忆生成</td><td>上下文与训练数据矛盾时尤甚</td></tr>
+<tr><td>引用伪造</td><td>模型将声明归因于不支持的文档</td><td>引用对齐不足</td></tr>
+</table>
+
+<h2>16.9 Production Considerations</h2>
+
+<h3>16.9.1 嵌入模型选择</h3>
+
+<p>嵌入模型是RAG系统中<strong>影响最大的单一组件选择</strong>——它决定了检索的质量天花板。</p>
+
+<table>
+<tr><th>模型</th><th>维度</th><th>最大Token</th><th>MTEB Avg</th><th>访问</th><th>特点</th></tr>
+<tr><th colspan="6">API托管</th></tr>
+<tr><td>Voyage voyage-4-large</td><td>1024</td><td>32K</td><td>—</td><td>API</td><td>最佳检索质量</td></tr>
+<tr><td>OpenAI text-embedding-3-large</td><td>3072</td><td>8191</td><td>64.6</td><td>API</td><td>Matryoshka维度</td></tr>
+<tr><td>Cohere embed-english-v3.0</td><td>1024</td><td>512</td><td>64.5</td><td>API</td><td>int8/binary支持</td></tr>
+<tr><td>Google text-embedding-005</td><td>768</td><td>2048</td><td>—</td><td>API</td><td>Vertex AI集成</td></tr>
+<tr><th colspan="6">开放权重（自托管）</th></tr>
+<tr><td>nvidia/NV-Embed-v2</td><td>4096</td><td>32K</td><td>72.3</td><td>Free</td><td>MTEB #1 (Sep 2024)</td></tr>
+<tr><td>Alibaba-NLP/gte-Qwen2-7B</td><td>3584</td><td>32K</td><td>70.2</td><td>Free</td><td>Apache-2.0, 多语言</td></tr>
+<tr><td>BAAI/bge-m3</td><td>1024</td><td>8192</td><td>65.0</td><td>Free</td><td>Dense+Sparse+Multi-vec</td></tr>
+<tr><td>jinaai/jina-embeddings-v3</td><td>1024</td><td>8192</td><td>66.0</td><td>Free</td><td>多语言, LoRA适配器</td></tr>
+<tr><td>BAAI/bge-large-en-v1.5</td><td>1024</td><td>512</td><td>64.2</td><td>Free</td><td>成熟, 支持完善</td></tr>
+</table>
+
+<p><strong>选择标准</strong>：领域匹配（专用模型可提升5-15%）、上下文长度（32K可嵌入整个文档免分块）、Matryoshka嵌入（灵活维度权衡质量/存储）、量化支持（int8/binary减少4-32×索引大小）、多语言能力。</p>
+
+<h3>16.9.2 向量数据库对比</h3>
+
+<table>
+<tr><th>数据库</th><th>托管</th><th>规模</th><th>过滤</th><th>混合搜索</th><th>最佳用途</th></tr>
+<tr><td>FAISS</td><td>自托管</td><td>十亿级</td><td>有限</td><td>否</td><td>研究, 离线</td></tr>
+<tr><td>Pinecone</td><td>托管</td><td>十亿级</td><td>是</td><td>是</td><td>Serverless, 易用</td></tr>
+<tr><td>Weaviate</td><td>两者</td><td>十亿级</td><td>是</td><td>是</td><td>GraphQL, 多模态</td></tr>
+<tr><td>Chroma</td><td>自托管</td><td>百万级</td><td>是</td><td>否</td><td>本地开发, 原型</td></tr>
+<tr><td>Qdrant</td><td>两者</td><td>十亿级</td><td>是</td><td>是</td><td>高性能</td></tr>
+<tr><td>Milvus</td><td>两者</td><td>十亿级</td><td>是</td><td>是</td><td>企业, GPU加速</td></tr>
+<tr><td>pgvector</td><td>自托管</td><td>百万级</td><td>是</td><td>是</td><td>已有Postgres的用户</td></tr>
+</table>
+
+<h3>16.9.3 延迟优化</h3>
+<ol>
+<li><strong>Pre-filtering</strong>：用元数据过滤（日期、类别、来源）在ANN搜索前缩小搜索空间</li>
+<li><strong>Approximate NN</strong>：使用HNSW或IVF索引，接受~1%召回损失换取10×加速</li>
+<li><strong>Embedding缓存</strong>：缓存频繁重复查询的嵌入</li>
+<li><strong>异步检索</strong>：并行从多个源检索</li>
+<li><strong>流式生成</strong>：检索完成时流式输出LLM结果</li>
+<li><strong>量化</strong>：int8或binary量化嵌入减少内存、提升吞吐量</li>
+</ol>
+
+<h3>16.9.4 增量索引与版本管理</h3>
+
+<p>生产中文档语料不是静态的。增量索引通过文档级变更避免全量重建：</p>
+<ul>
+<li><strong>Upsert</strong>：文档创建/更新时删除该doc_id的所有现有块，重新分块、嵌入、插入</li>
+<li><strong>Delete/Expire</strong>：按doc_id删除或按TTL自动垃圾回收</li>
+<li><strong>Version tracking</strong>：在块元数据中存储version和indexed_at时间戳，支持回滚和审计</li>
+</ul>
+
+<p><strong>一致性挑战</strong>：嵌入模型漂移（升级模型时新旧向量不兼容→维护独立索引或用Matryoshka兼容模型）、块边界偏移（改变分块策略使现有块失效）、最终一致性（分布式向量数据库中新插入的向量可能不立即可搜索）。</p>
+
+<h2>16.10 RAG + Fine-Tuning Synergy</h2>
+
+<h3>16.10.1 何时结合RAG与Fine-Tuning</h3>
+<ul>
+<li><strong>仅Fine-Tuning</strong>：模型学习风格和格式但可能幻觉事实</li>
+<li><strong>仅RAG</strong>：模型有事实访问但可能不知如何最优使用</li>
+<li><strong>组合</strong>：微调模型以<em>善用</em>检索上下文——引用来源、承认不确定性、忽略无关上下文</li>
+</ul>
+
+<h3>16.10.2 RAFT：Retrieval-Augmented Fine-Tuning</h3>
+
+<p>RAFT训练模型在<strong>混合相关和干扰文档</strong>的情况下回答问题，教模型识别并仅使用相关上下文：</p>
+<ol>
+<li>对每个训练样本 $(q, a, d^*)$，采样 $k-1$ 个干扰文档 $\{d_i^-\}$</li>
+<li>微调输入：$[q, d^*, d_1^-, \ldots, d_{k-1}^-] \to [\text{chain-of-thought} + a]$</li>
+<li>CoT显式引用 $d^*$，教模型将答案grounding</li>
+</ol>
+
+<div class="formula-block">
+$$\mathcal{L}_{\text{RAFT}} = -\mathbb{E}_{(q, a, d^*, \{d_i^-\})} \left[\log P_\theta\left(\text{CoT}(d^*) \oplus a \mid q, d^*, \{d_i^-\}\right)\right]$$
+<p class="formula-explain">通过在训练中混入干扰文档，模型学会从噪声上下文中识别真正相关的文档并基于其生成答案，这直接模拟了RAG系统的实际使用场景。</p>
+</div>
+
+<h3>16.10.3 联合检索器-生成器训练</h3>
+
+<p>为获得最大性能，检索器和生成器可联合训练，梯度流经检索步骤：</p>
+
+<div class="formula-block">
+$$\nabla_\theta \mathcal{L} = \nabla_\theta \left[-\log \sum_{d \in \mathcal{D}} P_\theta(a \mid q, d) \cdot P_\phi(d \mid q)\right]$$
+<p class="formula-explain">检索器参数 $\phi$ 通过REINFORCE估计器更新，或将 $P_\phi(d|q)$ 视为文档上的可微注意力。挑战：(1) 文档索引须随 $\phi$ 变化定期刷新，(2) 训练信号稀疏（仅top-k文档贡献），(3) 无预训练检索器良好初始化时训练不稳定。</p>
+</div>
+
+<h2>16.11 Comprehensive RAG Approach Comparison</h2>
+
+<table>
+<tr><th>方法</th><th>精度</th><th>延迟</th><th>复杂度</th><th>成本</th><th>最佳用途</th></tr>
+<tr><td>Naive RAG</td><td>中</td><td>低</td><td>低</td><td>低</td><td>原型, 简单QA</td></tr>
+<tr><td>RAG + Re-ranking</td><td>高</td><td>中</td><td>中</td><td>中</td><td>生产QA系统</td></tr>
+<tr><td>HyDE</td><td>高</td><td>中</td><td>低</td><td>中</td><td>语义不匹配领域</td></tr>
+<tr><td>Multi-Query RAG</td><td>高</td><td>中</td><td>中</td><td>中</td><td>模糊查询</td></tr>
+<tr><td>RAG-Fusion</td><td>高</td><td>中</td><td>中</td><td>中</td><td>多样查询类型</td></tr>
+<tr><td>Self-RAG</td><td>高</td><td>中</td><td>高</td><td>中</td><td>选择性检索</td></tr>
+<tr><td>CRAG</td><td>高</td><td>中</td><td>高</td><td>高</td><td>不可靠语料</td></tr>
+<tr><td>Adaptive RAG</td><td>高</td><td>低–高</td><td>高</td><td>中</td><td>混合查询复杂度</td></tr>
+<tr><td>Graph RAG</td><td>极高</td><td>高</td><td>极高</td><td>高</td><td>全局综合查询</td></tr>
+<tr><td>Agentic RAG</td><td>极高</td><td>高</td><td>极高</td><td>高</td><td>多跳推理</td></tr>
+<tr><td>RAFT</td><td>极高</td><td>低</td><td>极高</td><td>极高</td><td>领域特定部署</td></tr>
+</table>
+
+<div class="highlight-box">
+<p><strong>RAG系统设计关键问题</strong>：(1) 查询分布是什么？事实型/分析型/多跳查询需不同策略。(2) 语料多大多动态？百万文档+频繁更新宜用托管向量数据库+增量索引。(3) 延迟要求？亚100ms排除重排和agentic循环。(4) grounding有多关键？高风险领域需faithfulness评估和引用验证。(5) 词汇是否专业？需混合检索或领域适配嵌入模型。</p>
+</div>
+
+<div class="takeaway">
+<h2>核心要点</h2>
+<ul>
+<li>RAG通过外部非参数化记忆弥补LLM的幻觉、知识过时、领域特异性三大限制</li>
+<li>BM25在精确匹配场景仍有不可替代的优势；DPR+hard negatives是密集检索的基础</li>
+<li>SPLADE用MLM头实现语义扩展的稀疏向量，兼具BM25的效率和DPR的语义能力</li>
+<li>ColBERT的MaxSim晚期交互在表达力和效率间取得最佳平衡</li>
+<li>Hybrid (BM25 + Dense + RRF) 是生产系统的强默认选择</li>
+<li>分块策略是影响最大但最常被忽视的决策——先优化分块再优化其他组件</li>
+<li>REFRAG通过Compress-Sense-Expand框架实现30×解码加速，使迭代检索实用化</li>
+<li>Search-R1证明"学习何时搜索"比"拥有更大模型"更有价值——范式从管线决策转向生成中学习决策</li>
+<li>RAFT通过在训练中混入干扰文档教模型抗噪声检索，是RAG+FT协同的最佳实践</li>
+<li>评估必须覆盖检索和生成两个层面——仅优化一个层面可能恶化另一个</li>
+</ul>
+</div>
+
+<h2>Q&A 自测</h2>
+
+<details>
+<summary>Q1：RAG的参数化与非参数化知识有何本质区别？为什么需要对检索文档进行边缘化？</summary>
+<div class="answer">
+<p>参数化知识压缩在模型权重中（$P_{M_\theta}(a|q)$），静态且训练后不变；非参数化知识存储在外部语料库中，可动态更新。RAG通过对检索文档边缘化 $P_{\text{RAG}}(a|q,\mathcal{D}) = \sum_d P_{M_\theta}(a|q,d) \cdot P_{\text{ret}}(d|q,\mathcal{D})$，将生成过程锚定在可验证的外部证据上。这使得模型可以引用来源、承认不确定性，而非仅依赖可能过时或错误的参数记忆。</p>
+</div>
+</details>
+
+<details>
+<summary>Q2：BM25为什么在某些场景仍然优于密集检索？RRF如何统一异质评分？</summary>
+<div class="answer">
+<p>BM25在以下场景胜出：(1) 精确关键词匹配（产品代码、错误代码）；(2) 词汇外术语（嵌入模型训练未见的新词）；(3) 无需GPU的大规模部署；(4) 可解释性。RRF通过操作排名而非原始分数解决异质评分问题：$\text{RRF}(d) = \sum_{r \in R} \frac{1}{k + \text{rank}_r(d)}$，不同系统的分数量纲不同但排名可直接比较，$k=60$的平滑常数减少极端排名的过大影响。</p>
+</div>
+</details>
+
+<details>
+<summary>Q3：SPLADE如何兼具稀疏检索的效率和密集检索的语义能力？</summary>
+<div class="answer">
+<p>SPLADE利用预训练MLM头的知识：MLM头已学会每个位置哪些词语义相关。通过$w_t(x) = \log(1+\text{ReLU}(\max_i H_i[t]))$产生词汇表上的稀疏向量。关键：(1) 不在原文中的词也可获得非零权重（语义扩展，如"car"→"automobile"）；(2) ReLU确保大部分权重为零（稀疏性→可用倒排索引）；(3) log饱和防止单词主导（类比BM25的TF饱和）。结果：查询时无需GPU，可用Lucene/Elasticsearch，同时捕获同义词和相关概念。</p>
+</div>
+</details>
+
+<details>
+<summary>Q4：ColBERT的MaxSim为什么比单向量bi-encoder更有表达力？代价是什么？</summary>
+<div class="answer">
+<p>单向量bi-encoder将整个文档压缩为一个向量，丢失细粒度token级信息。ColBERT保留所有token嵌入并通过MaxSim $s(q,d)=\sum_{i\in|q|}\max_{j\in|d|}\mathbf{q}_i^\top\mathbf{d}_j$ 做晚期交互——每个查询token独立找最佳匹配的文档token。这使其能捕获局部对齐和多方面匹配。代价：索引大小为$|d|\times 128$浮点数/文档（远大于单向量），但可通过残差量化（ColBERTv2的PLAID索引）压缩至~2 bytes/维度。</p>
+</div>
+</details>
+
+<details>
+<summary>Q5：Self-RAG和CRAG在处理检索质量问题时有何不同策略？</summary>
+<div class="answer">
+<p>Self-RAG在<strong>模型内部</strong>解决：训练单一模型预测反思token（[Retrieve]、[IsRel]、[IsSup]、[IsUse]），实现对"是否检索"和"检索是否有用"的细粒度自我控制。CRAG在<strong>管线外部</strong>解决：添加一个独立的检索评估器对文档评级（Correct/Ambiguous/Incorrect），然后触发纠正动作（不正确→回退到Web搜索；部分正确→知识精炼剥离无关句子）。Self-RAG更端到端但需特殊训练；CRAG更模块化可插拔到现有系统。</p>
+</div>
+</details>
+
+<details>
+<summary>Q6：REFRAG的Compress-Sense-Expand如何实现30×TTFT加速？</summary>
+<div class="answer">
+<p>REFRAG利用关键观察：检索段落是独立来源的，其注意力模式呈块对角——跨段落注意力接近零。(1) Compress：将每个段落块的完整KV替换为紧凑摘要（如mean-pooled keys/values）；(2) Sense：每步解码用轻量注意力在压缩表示上识别相关块；(3) Expand：仅对选中块重建完整KV做精确注意力。由于大部分块在大部分解码步骤中不被需要，这使解码成本与上下文长度呈亚线性而非线性关系，实现30.85×加速且无困惑度损失。</p>
+</div>
+</details>
+
+<details>
+<summary>Q7：Search-R1相比提示式Agentic RAG的本质优势在哪里？</summary>
+<div class="answer">
+<p>本质区别是<strong>学习决策 vs. 工程决策</strong>。提示式方法依赖人工设计的启发式（何时搜索、如何重写查询、搜几次），对未见场景泛化差。Search-R1通过GRPO强化学习让模型从正确性奖励中学习：(1) 不确定时才搜索（避免冗余）；(2) 学会制定有效查询（不是简单重写）；(3) 学会最优搜索次数和失败退避策略；(4) 搜索作为推理的一部分交织在CoT中而非管线外部步骤。结果：7B模型搜索良好可媲美70B模型不搜索。</p>
+</div>
+</details>
+
+<details>
+<summary>Q8：RAG评估中为什么"Lost-in-the-Middle"和"Over-Retrieval"问题经常同时出现？</summary>
+<div class="answer">
+<p>两者存在因果关系：Over-Retrieval（K值过大）导致大量边缘相关文档被纳入上下文，上下文变长后触发Lost-in-the-Middle效应——LLM注意力偏向首尾，中间段落（可能包含最关键信息）被忽视。更糟的是，过多块还增加latency和cost。解决方案：(1) 控制K值（通常5-10即可）；(2) 使用re-ranking只保留最相关的子集；(3) 使用contextual compression提取精华；(4) 将最相关文档放在上下文首尾。</p>
+</div>
+</details>
+
+<details>
+<summary>Q9：RAFT如何解决RAG系统中"模型不会用检索结果"的问题？</summary>
+<div class="answer">
+<p>RAFT模拟RAG的真实使用场景训练：每个样本包含1个相关文档$d^*$和$k-1$个干扰文档$\{d_i^-\}$，目标是生成CoT+答案，其中CoT必须显式引用$d^*$。这教会模型三个能力：(1) 从噪声上下文中<strong>识别</strong>哪个文档相关；(2) <strong>引用</strong>相关文档中的具体内容而非凭记忆生成；(3) <strong>忽略</strong>干扰文档即使它们看起来相关。相当于开卷考试训练——不是给标准答案，而是教学生如何在参考资料中找到答案。</p>
+</div>
+</details>
+
+<details>
+<summary>Q10：设计生产RAG系统的推荐"最小可行方案"是什么？何时升级到Agentic RAG？</summary>
+<div class="answer">
+<p><strong>最小可行方案</strong>：(1) 语义分块（512 tokens, 64 overlap）+ 结构感知；(2) BM25 + Dense混合检索 + RRF融合；(3) Cross-encoder重排top-20→取top-5；(4) 标准RAG prompt + citation要求。<strong>升级到Agentic RAG的信号</strong>：(1) 频繁出现需要多步推理的查询；(2) 需要从异构源（向量库+SQL+Web）获取信息；(3) 初始检索经常不充分需要精炼查询；(4) 用户满意度瓶颈在于"没找到正确信息"而非"找到了但答不好"。先确保基础RAG的分块和检索质量过关，再考虑复杂架构。</p>
+</div>
+</details>
+
+</body>
+</html>

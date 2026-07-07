@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第8章 阅读笔记：Preference Optimization Variants</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]})"></script>
+<style>
+:root { --primary: #2c3e50; --accent: #3498db; --bg: #fafbfc; --card-bg: #ffffff; --border: #e1e4e8; --text: #24292e; --text-secondary: #586069; --code-bg: #f6f8fa; --highlight: #fff3cd; --success: #d4edda; --info: #d1ecf1; }
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; line-height: 1.8; color: var(--text); background: var(--bg); padding: 2rem; max-width: 900px; margin: 0 auto; }
+h1 { font-size: 1.8rem; color: var(--primary); border-bottom: 3px solid var(--accent); padding-bottom: 0.5rem; margin-bottom: 1rem; }
+h2 { font-size: 1.4rem; color: var(--primary); margin-top: 2.5rem; margin-bottom: 1rem; padding-left: 0.8rem; border-left: 4px solid var(--accent); }
+h3 { font-size: 1.15rem; color: var(--primary); margin-top: 1.8rem; margin-bottom: 0.8rem; }
+p { margin-bottom: 1rem; text-align: justify; }
+ul, ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+li { margin-bottom: 0.5rem; }
+code { background: var(--code-bg); padding: 0.15rem 0.4rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: var(--code-bg); padding: 1rem; border-radius: 6px; overflow-x: auto; margin-bottom: 1.5rem; border: 1px solid var(--border); }
+pre code { background: none; padding: 0; }
+blockquote { border-left: 4px solid var(--accent); padding: 0.8rem 1.2rem; margin: 1.5rem 0; background: var(--info); border-radius: 0 6px 6px 0; }
+.card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+.formula-block { background: var(--code-bg); border: 1px solid var(--border); border-radius: 6px; padding: 1rem; margin: 1rem 0; overflow-x: auto; }
+.formula-explain { color: var(--text-secondary); font-size: 0.92em; margin-top: 0.5rem; padding-left: 1rem; border-left: 3px solid #ddd; }
+.highlight-box { background: var(--highlight); border: 1px solid #ffc107; border-radius: 6px; padding: 1rem; margin: 1rem 0; }
+.info-box { background: var(--info); border: 1px solid #bee5eb; border-radius: 6px; padding: 1rem; margin: 1rem 0; }
+.success-box { background: var(--success); border: 1px solid #c3e6cb; border-radius: 6px; padding: 1rem; margin: 1rem 0; }
+.subtitle { color: var(--text-secondary); font-size: 1rem; margin-bottom: 0.3rem; }
+.meta { color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 2rem; }
+table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; }
+th, td { border: 1px solid var(--border); padding: 0.6rem 0.8rem; text-align: left; }
+th { background: var(--code-bg); font-weight: 600; }
+details { margin-bottom: 1rem; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+summary { padding: 0.8rem 1.2rem; background: var(--code-bg); cursor: pointer; font-weight: 500; }
+details[open] summary { border-bottom: 1px solid var(--border); }
+details .answer { padding: 1rem 1.2rem; }
+svg { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; }
+.takeaway { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 8px; padding: 1.5rem; margin: 2rem 0; }
+.takeaway h2 { color: white; border-left-color: rgba(255,255,255,0.5); }
+.takeaway li { color: rgba(255,255,255,0.95); }
+</style>
+</head>
+<body>
+
+<h1>第8章 阅读笔记：Preference Optimization Variants</h1>
+<p class="subtitle">偏好优化变体：超越标准DPO的五大方法</p>
+<p class="meta">来源：H. Roitman — <em>The Hitchhiker's Guide to Agentic AI</em>，第174–181页 · 2025</p>
+
+<div class="card">
+<strong>章节概述</strong>
+<p>标准 DPO 虽然将 RLHF 从复杂的在线 RL 简化为离线监督学习，但它本身并非完美。本章系统介绍了五种重要的偏好优化变体，每种方法针对 DPO 的一个具体痛点提出解决方案：</p>
+<ul>
+  <li><strong>Online DPO</strong> — 解决分布偏移问题（distribution shift）</li>
+  <li><strong>KTO</strong> — 解决配对数据需求问题（需借助前景理论）</li>
+  <li><strong>IPO</strong> — 解决过拟合/退化解问题（通过正则化）</li>
+  <li><strong>ORPO</strong> — 解决参考模型开销问题（无需 reference model）</li>
+  <li><strong>Best-of-N</strong> — 提供最简单的对齐基准（无需额外训练）</li>
+</ul>
+<p>理解这些方法的<strong>设计动机</strong>和<strong>适用边界</strong>，是在实际项目中做出正确技术选型的基础。</p>
+</div>
+
+<!-- ============================================ -->
+<h2 id="s81">8.1 Online DPO</h2>
+
+<h3>8.1.1 动机：DPO 的分布偏移问题</h3>
+<p>标准（离线）DPO 的训练数据来自一个<strong>固定的偏好数据集</strong>，这些数据通常由旧模型或完全不同的模型生成。随着训练推进，当前策略 $\pi_\theta$ 所产生的文本分布与训练数据的分布渐行渐远——这就是<strong>分布偏移（distribution shift）</strong>。</p>
+
+<p>分布偏移的具体影响：</p>
+<ul>
+  <li>模型在训练分布上学到的"好坏区分能力"无法迁移到自身当前生成的文本上</li>
+  <li>随着策略变化，原来的 chosen/rejected 边界可能不再有意义</li>
+  <li>DPO 的隐式奖励 $r(x,y) = \beta \log\frac{\pi_\theta(y|x)}{\pi_{\text{ref}}(y|x)}$ 在偏离分布上的估计变得不准确</li>
+</ul>
+
+<p>PPO 通过在线采样解决了这个问题，但代价是需要 4 个模型（策略、参考、奖励、价值网络），训练极不稳定。<strong>Online DPO 的目标</strong>：用最小代价获得在线采样的好处，同时保留 DPO 的训练简洁性。</p>
+
+<h3>8.1.2 算法流程</h3>
+<div class="card">
+<p><strong>Online DPO 的核心循环：</strong></p>
+<ol>
+  <li><strong>生成</strong>：对每个 prompt $x$，从当前策略 $\pi_\theta$ 采样 $K$ 条候选回答 $\{y_1, y_2, \ldots, y_K\}$</li>
+  <li><strong>评分</strong>：用奖励模型 $r_\phi$ 对所有候选打分：$r_\phi(x, y_i)$，$i = 1, \ldots, K$</li>
+  <li><strong>配对</strong>：选最高分作为 chosen（$y_w = \arg\max_i r_\phi(x, y_i)$），最低分作为 rejected（$y_l = \arg\min_i r_\phi(x, y_i)$）</li>
+  <li><strong>更新</strong>：在这些新鲜配对上计算标准 DPO 损失并更新参数 $\theta$</li>
+  <li><strong>迭代</strong>：回到第 1 步（每一步都用最新策略重新生成）</li>
+</ol>
+</div>
+
+<h3>8.1.3 损失函数</h3>
+<p>Online DPO 的损失函数与标准 DPO 完全相同，差异仅在于数据来源：</p>
+<div class="formula-block">
+$$\mathcal{L}_{\text{OnlineDPO}}(\theta) = -\mathbb{E}_{(x,y_w,y_l) \sim \pi_\theta}\left[\log\sigma\!\left(\beta \log\frac{\pi_\theta(y_w|x)}{\pi_{\text{ref}}(y_w|x)} - \beta \log\frac{\pi_\theta(y_l|x)}{\pi_{\text{ref}}(y_l|x)}\right)\right]$$
+</div>
+<div class="formula-explain">
+关键区别在期望符号的下标：标准 DPO 中 $(x,y_w,y_l)$ 来自<strong>静态数据集</strong>；Online DPO 中它们来自<strong>当前策略 $\pi_\theta$ 的实时生成</strong>。这保证了损失函数始终在策略当前分布上优化。
+</div>
+
+<h3>8.1.4 Online DPO = DPO + PPO 的最佳融合</h3>
+<div class="highlight-box">
+<p><strong>来自 DPO 的优点：</strong></p>
+<ul>
+  <li>简单的监督式损失函数（binary cross-entropy 形式）</li>
+  <li>无需训练价值网络（critic），无需计算 GAE（广义优势估计）</li>
+  <li>训练稳定，超参数少</li>
+</ul>
+<p><strong>来自 PPO 的优点：</strong></p>
+<ul>
+  <li>在策略数据（on-policy data），无分布偏移</li>
+  <li>模型可以自我探索和进步</li>
+  <li>不受静态数据质量的天花板限制</li>
+</ul>
+<p><strong>与 GRPO 的区别：</strong>GRPO 使用单样本的 PPO 式优势加权损失；Online DPO 使用成对对比的 DPO 损失。GRPO 更适合可验证奖励（如数学正确性），Online DPO 更通用。</p>
+</div>
+
+<h3>8.1.5 三种方法的系统对比</h3>
+<table>
+<tr><th>维度</th><th>Offline DPO</th><th>Online DPO</th><th>PPO</th></tr>
+<tr><td>数据来源</td><td>静态偏好数据集</td><td>当前策略实时生成</td><td>当前策略实时生成</td></tr>
+<tr><td>模型数量</td><td>2（策略 + 参考）</td><td>3（策略 + 参考 + 奖励模型）</td><td>4（策略 + 参考 + 奖励 + 价值头）</td></tr>
+<tr><td>损失函数</td><td>DPO loss</td><td>DPO loss</td><td>PPO clipped surrogate</td></tr>
+<tr><td>分布偏移</td><td>有（核心缺陷）</td><td>无</td><td>无</td></tr>
+<tr><td>训练稳定性</td><td>高</td><td>中高</td><td>低（需大量调参）</td></tr>
+<tr><td>计算开销</td><td>低</td><td>中</td><td>非常高</td></tr>
+<tr><td>最适场景</td><td>快速对齐，计算受限</td><td>DPO 遇瓶颈，需要探索</td><td>追求极限质量</td></tr>
+</table>
+
+<h3>8.1.6 适用场景与局限性</h3>
+<div class="success-box">
+<strong>适用场景：</strong>DPO 训练已收敛但效果不满意；有足够计算资源部署奖励模型；需要模型在分布外区域探索新能力。
+</div>
+<div class="info-box">
+<strong>局限性：</strong>需要额外部署和维护一个高质量的奖励模型；每步需要完整的生成→评分→训练循环，迭代速度慢于离线 DPO；奖励模型的偏差会传导到策略。
+</div>
+
+<!-- ============================================ -->
+<h2 id="s82">8.2 KTO — Kahneman-Tversky Optimization</h2>
+
+<h3>8.2.1 动机：配对数据的稀缺性</h3>
+<p>DPO 要求严格的<strong>配对偏好数据</strong>——同一个 prompt 必须同时拥有一个 chosen（好回答）和一个 rejected（坏回答）。但在实际生产环境中，绝大多数用户反馈是<strong>非配对的单点信号</strong>：</p>
+<ul>
+  <li>用户对单条回答点赞或踩（不是对比两条选一条）</li>
+  <li>论坛帖子的 upvote/downvote</li>
+  <li>客服满意度评分（1-5星）</li>
+  <li>对话是否被用户中断（隐式负反馈）</li>
+</ul>
+<p>强行将非配对数据组装成配对格式既困难又引入噪声。KTO 的核心创新是：<strong>完全不需要配对数据</strong>，只需要独立的"好/坏"二元标签即可训练。</p>
+
+<h3>8.2.2 理论基础：前景理论（Prospect Theory）</h3>
+<p>KTO 的设计灵感来自 Kahneman 和 Tversky 的行为经济学研究——人类决策中的两个核心偏差：</p>
+<div class="card">
+<ul>
+  <li><strong>损失厌恶（Loss Aversion）</strong>：人们对损失的感受强度大约是等量收益的 2 倍。丢掉 100 元的痛苦 > 捡到 100 元的快乐。</li>
+  <li><strong>边际效用递减（Diminishing Sensitivity）</strong>：从 0 到 100 的快乐感 > 从 100 到 200 的快乐感。</li>
+</ul>
+<p>将这一心理学洞察映射到 LLM 对齐中：模型对"坏回答"的惩罚梯度应该<strong>大于</strong>对"好回答"的奖励梯度——一个错误比一个正确更值得关注。</p>
+</div>
+
+<h3>8.2.3 核心公式</h3>
+<div class="formula-block">
+$$\mathcal{L}_{\text{KTO}}(\theta) = \mathbb{E}_{(x,y_w)}\!\left[\lambda_w \cdot \left(1 - v(x, y_w)\right)\right] + \mathbb{E}_{(x,y_l)}\!\left[\lambda_l \cdot v(x, y_l)\right]$$
+</div>
+<div class="formula-explain">
+<strong>第一项</strong>：对好回答 $y_w$，希望效用函数 $v(x,y_w)$ 接近 1（模型认可它）；偏离 1 则受惩罚。<br>
+<strong>第二项</strong>：对坏回答 $y_l$，希望效用函数 $v(x,y_l)$ 接近 0（模型排斥它）；偏离 0 则受惩罚。<br>
+<strong>$\lambda_l > \lambda_w$</strong>：坏样本的权重更大，体现"损失厌恶"。
+</div>
+
+<p>其中效用函数 $v$ 的定义为：</p>
+<div class="formula-block">
+$$v(x, y) = \sigma\!\left(\beta \log\frac{\pi_\theta(y|x)}{\pi_{\text{ref}}(y|x)} - z_{\text{ref}}\right)$$
+</div>
+<div class="formula-explain">
+<strong>$\beta$</strong>：温度参数，控制策略偏离参考模型的幅度。<br>
+<strong>$z_{\text{ref}}$</strong>：运行中的 KL 散度基线（running baseline），即当前 batch 中所有样本的平均 log-ratio。它使每个样本的贡献相对于整体水平来衡量，而非绝对值。<br>
+<strong>$\sigma$</strong>：sigmoid 函数，将值压缩到 $[0,1]$ 区间。
+</div>
+
+<h3>8.2.4 数据格式对比</h3>
+<div class="card">
+<p><strong>DPO 要求的配对格式：</strong></p>
+<pre><code>{"prompt": "...", "chosen": "好回答", "rejected": "坏回答"}</code></pre>
+<p><strong>KTO 只需的非配对格式：</strong></p>
+<pre><code>{"prompt": "...", "completion": "某条回答", "label": true}  // 好
+{"prompt": "...", "completion": "另一条回答", "label": false} // 坏</code></pre>
+<p>好回答和坏回答可以来自<strong>完全不同的 prompt</strong>，无需一一匹配。这极大地降低了数据收集门槛。</p>
+</div>
+
+<h3>8.2.5 KTO 对数据不平衡的鲁棒性</h3>
+<p>实际场景中，好样本通常远多于坏样本（如 90% 好 / 10% 坏）。DPO 在这种不平衡下表现差，因为它依赖配对——少量坏样本只能配出少量训练对。KTO 的独立样本处理方式天然适应不平衡：</p>
+<ul>
+  <li>通过调整 $\lambda_w$ 和 $\lambda_l$ 的比值，直接控制好坏样本的相对重要性</li>
+  <li>论文建议 $\lambda_l / \lambda_w \approx 1.0 \sim 2.0$（反映损失厌恶系数）</li>
+  <li>即使坏样本极少，每个坏样本仍能独立贡献梯度，不被"淹没"</li>
+</ul>
+
+<h3>8.2.6 适用场景与局限性</h3>
+<div class="success-box">
+<strong>适用场景：</strong>大量非配对二元反馈（点赞/踩、投票、评分）；数据类别极度不平衡；快速迭代（无需费力构造配对）；来自多源的异构反馈数据。
+</div>
+<div class="info-box">
+<strong>局限性：</strong>仍需参考模型（显存开销与 DPO 相当）；理论保证弱于 DPO（loss landscape 更复杂）；对 $z_{\text{ref}}$ 基线的估计质量敏感；在高质量配对数据可用时，DPO 通常效果更好。
+</div>
+
+<!-- ============================================ -->
+<h2 id="s83">8.3 IPO — Identity Preference Optimization</h2>
+
+<h3>8.3.1 动机：DPO 的退化解问题</h3>
+<p>DPO 的损失函数使用 log-sigmoid 形式：$-\log\sigma(\text{margin})$。这个函数有一个关键性质——当 margin（chosen 和 rejected 的对数概率差）趋向 $+\infty$ 时，损失趋向 0。这意味着：</p>
+<div class="highlight-box">
+<strong>DPO 的退化现象：</strong>模型可以通过将 chosen 概率推向 1、rejected 概率推向 0（即 margin → ∞）来无限降低损失。实际表现为：
+<ul>
+  <li>模型在训练集上"背诵"——对 chosen 回答过度自信</li>
+  <li>1个 epoch 后继续训练就开始退化</li>
+  <li>噪声标注的样本（错标的 chosen/rejected）会被无限放大</li>
+  <li>泛化能力下降——在未见过的 prompt 上表现反而变差</li>
+</ul>
+</div>
+
+<p>IPO 的核心修复思路：<strong>将无限目标换成有限目标</strong>——不是让 margin 越大越好，而是让它收敛到一个特定的有限值。</p>
+
+<h3>8.3.2 核心公式</h3>
+<div class="formula-block">
+$$\mathcal{L}_{\text{IPO}}(\theta) = \mathbb{E}_{(x,y_w,y_l)}\left[\left(\log\frac{\pi_\theta(y_w|x)}{\pi_{\text{ref}}(y_w|x)} - \log\frac{\pi_\theta(y_l|x)}{\pi_{\text{ref}}(y_l|x)} - \frac{1}{2\beta}\right)^{\!2}\right]$$
+</div>
+<div class="formula-explain">
+<strong>直觉解释</strong>：定义 margin 为 $h = \log\frac{\pi_\theta(y_w|x)}{\pi_{\text{ref}}(y_w|x)} - \log\frac{\pi_\theta(y_l|x)}{\pi_{\text{ref}}(y_l|x)}$。IPO 要求 $h$ 精确等于目标值 $\frac{1}{2\beta}$。偏离目标（无论偏大还是偏小）都会受到二次惩罚。这是一个有"刹车"的目标——margin 不会被推向无穷大。
+</div>
+
+<h3>8.3.3 为什么平方损失能防过拟合</h3>
+<div class="card">
+<p><strong>DPO（log-sigmoid 损失）的行为：</strong></p>
+<ul>
+  <li>当 margin 很大时，梯度趋向 0（饱和区），但损失也接近 0——没有反向推力</li>
+  <li>优化器没有动机停止，只要还能增大 margin 就继续推</li>
+  <li>一个错标样本（实际应该 rejected 标为 chosen）会被推到极端位置</li>
+</ul>
+<p><strong>IPO（平方损失）的行为：</strong></p>
+<ul>
+  <li>当 margin 偏离目标 $\frac{1}{2\beta}$ 时，loss 和梯度都在增长</li>
+  <li>当 margin 正好等于目标时，梯度为零——这是一个<strong>稳定平衡点</strong></li>
+  <li>如果 margin 超过目标，会被拉回来（有反向推力）</li>
+  <li>错标样本的影响被自然限制在有限范围内（bounded influence function）</li>
+</ul>
+</div>
+
+<h3>8.3.4 IPO vs DPO 特性对比</h3>
+<table>
+<tr><th>特性</th><th>DPO</th><th>IPO</th></tr>
+<tr><td>优化目标</td><td>$\sigma(\text{margin}) \to 1$，即 margin $\to +\infty$</td><td>margin $\to \frac{1}{2\beta}$（有限值）</td></tr>
+<tr><td>自然停止点</td><td>无（需要 early stopping）</td><td>有（平方损失的零梯度点）</td></tr>
+<tr><td>噪声鲁棒性</td><td>差（错标样本被无限放大）</td><td>好（bounded influence）</td></tr>
+<tr><td>多 epoch 训练</td><td>1 epoch 后快速退化</td><td>多 epoch 仍稳定</td></tr>
+<tr><td>超参数敏感度</td><td>$\beta$ 影响收敛速度</td><td>$\beta$ 直接决定目标 margin</td></tr>
+<tr><td>实现复杂度</td><td>TRL: <code>loss_type="sigmoid"</code></td><td>TRL: <code>loss_type="ipo"</code></td></tr>
+</table>
+
+<h3>8.3.5 实现要点</h3>
+<p>在 HuggingFace TRL 库中，IPO 作为 DPO Trainer 的一个变体实现，切换极其简单：</p>
+<pre><code>from trl import DPOTrainer, DPOConfig
+
+config = DPOConfig(
+    loss_type="ipo",  # 唯一改动：从 "sigmoid" 改为 "ipo"
+    beta=0.1,         # 注意：IPO 中 beta 的含义与 DPO 不同
+)
+trainer = DPOTrainer(model=model, ref_model=ref_model, args=config, ...)</code></pre>
+
+<h3>8.3.6 适用场景与局限性</h3>
+<div class="success-box">
+<strong>适用场景：</strong>偏好数据有噪声（众包标注、AI 自动评判）；需要多 epoch 训练充分利用有限数据；DPO 训练后期出现过拟合/退化迹象；对泛化能力有高要求。
+</div>
+<div class="info-box">
+<strong>局限性：</strong>目标 margin $\frac{1}{2\beta}$ 需要调参（$\beta$ 过大→目标太小，区分度不够；$\beta$ 过小→目标太大，可能欠拟合）；在极端场景下收敛可能比 DPO 慢；仍需参考模型。
+</div>
+
+<!-- ============================================ -->
+<h2 id="s84">8.4 ORPO — Odds Ratio Preference Optimization</h2>
+
+<h3>8.4.1 动机：参考模型的高昂代价</h3>
+<p>DPO、KTO、IPO 都需要一个<strong>参考模型（reference model）</strong>。它的作用是提供 KL 正则化锚点，防止策略偏离初始行为太远。但参考模型带来的代价是巨大的：</p>
+<ul>
+  <li><strong>显存翻倍</strong>：70B 模型需要额外 140GB（FP16）/ 70GB（Int8）显存来存放参考模型</li>
+  <li><strong>计算开销</strong>：每个 batch 需要同时前向传播策略模型和参考模型</li>
+  <li><strong>工程复杂度</strong>：多模型同步、梯度 checkpoint 策略、分布式通信</li>
+</ul>
+<p>ORPO 的核心突破：<strong>彻底消除参考模型</strong>，通过将 SFT（监督微调）和偏好对齐合并在单个统一损失函数中完成。</p>
+
+<h3>8.4.2 核心洞察：SFT 本身就是正则化</h3>
+<div class="card">
+<p>为什么 DPO 需要参考模型？因为纯偏好损失（只最大化 chosen 与 rejected 的差距）可能让模型"忘记"如何生成正常文本——模型可能退化为只会分辨好坏、但不会实际生成好回答的状态。</p>
+<p>ORPO 的洞察：如果我们<strong>同时做 SFT</strong>（让模型学会生成 chosen 回答），这个 SFT 目标本身就起到了"锚定"作用——它迫使模型保持正常的语言生成能力，无需额外的 KL 正则化。</p>
+</div>
+
+<h3>8.4.3 核心公式</h3>
+<div class="formula-block">
+$$\mathcal{L}_{\text{ORPO}}(\theta) = \underbrace{-\mathbb{E}\!\left[\log P_\theta(y_w|x)\right]}_{\text{SFT 损失：学会生成好回答}} - \lambda \cdot \underbrace{\mathbb{E}\!\left[\log\sigma\!\left(\log\frac{\text{odds}_\theta(y_w|x)}{\text{odds}_\theta(y_l|x)}\right)\right]}_{\text{偏好对齐：赔率比}}$$
+</div>
+<div class="formula-explain">
+<strong>第一项（SFT 损失）</strong>：标准的负对数似然，让模型学会生成高质量的 chosen 回答。这同时扮演了"参考模型"的角色——锚定模型行为。<br>
+<strong>第二项（赔率比损失）</strong>：通过赔率比让模型对 chosen 回答的"偏好度"高于 rejected 回答。<br>
+<strong>$\lambda$</strong>：平衡两项的超参数（通常 $\lambda \approx 0.1 \sim 1.0$）。
+</div>
+
+<p>赔率（odds）的定义：</p>
+<div class="formula-block">
+$$\text{odds}_\theta(y|x) = \frac{P_\theta(y|x)}{1 - P_\theta(y|x)}$$
+</div>
+<div class="formula-explain">
+赔率表示"生成 $y$ 的概率"与"不生成 $y$ 的概率"之比。赔率比（odds ratio）= chosen 的赔率 / rejected 的赔率，衡量模型对好回答的相对偏好程度。使用赔率而非直接概率的好处是：它对概率的绝对大小不敏感，只关注相对偏好——即使两个回答的概率都很低（长文本场景），只要赔率比大就说明偏好正确。
+</div>
+
+<h3>8.4.4 为什么能节省 50% 显存</h3>
+<div class="highlight-box">
+<strong>显存对比：</strong>
+<ul>
+  <li><strong>DPO</strong>：加载策略模型（70B）+ 参考模型（70B）= 140B 参数的显存</li>
+  <li><strong>ORPO</strong>：只加载策略模型（70B）= 70B 参数的显存</li>
+</ul>
+<p>对于 70B 模型，这意味着节省 70-140 GB 显存。在 8×A100（80GB）集群上，可能决定了"能否跑起来"和"完全跑不动"的区别。</p>
+</div>
+
+<h3>8.4.5 ORPO 的训练流程简化</h3>
+<div class="card">
+<p><strong>传统流程（3步）：</strong></p>
+<ol>
+  <li>SFT：在高质量数据上做监督微调</li>
+  <li>准备参考模型：冻结 SFT 模型作为 reference</li>
+  <li>DPO：在偏好数据上对齐</li>
+</ol>
+<p><strong>ORPO 流程（1步）：</strong></p>
+<ol>
+  <li>直接在偏好数据上训练——SFT + 对齐一步到位</li>
+</ol>
+<p>从 base model 出发即可，跳过了独立的 SFT 阶段。</p>
+</div>
+
+<h3>8.4.6 适用场景与局限性</h3>
+<div class="success-box">
+<strong>适用场景：</strong>GPU 显存受限（无法同时加载两个大模型）；从 base model 直接开始（尚未做 SFT）；追求最简训练流程；中小规模模型（7B-13B）的快速对齐。
+</div>
+<div class="info-box">
+<strong>局限性：</strong>在 70B+ 超大模型上缺乏成熟的实验验证；需要高质量的 chosen 数据（SFT 部分依赖它）；$\lambda$ 的调节影响 SFT 与偏好两个目标的平衡，调试可能困难；两个损失分量可能存在梯度冲突（SFT 想让所有 token 概率高，偏好损失想让 rejected 概率低）。
+</div>
+
+<!-- ============================================ -->
+<h2 id="s85">8.5 Best-of-N Sampling（Rejection Sampling）</h2>
+
+<h3>8.5.1 动机：最简单的对齐方法</h3>
+<p>有时候最简单的方法就是最好的方法。Best-of-N 的核心思想极其朴素：<strong>多生成几条，选最好的那条</strong>。它不需要任何额外训练，不改变模型权重，只需要一个奖励模型来打分。</p>
+
+<h3>8.5.2 算法</h3>
+<div class="card">
+<ol>
+  <li>对每个 prompt $x$，从策略 $\pi_\theta$ 独立采样 $N$ 条候选回答：$y_1, y_2, \ldots, y_N \sim \pi_\theta(\cdot|x)$</li>
+  <li>用奖励模型对所有候选打分：$r_\phi(x, y_i)$，$i = 1, \ldots, N$</li>
+  <li>选择得分最高的回答作为最终输出</li>
+</ol>
+</div>
+
+<div class="formula-block">
+$$y^* = \arg\max_{i \in \{1,\ldots,N\}} r_\phi(x, y_i), \quad y_i \sim \pi_\theta(\cdot|x)$$
+</div>
+<div class="formula-explain">
+即从策略独立采样 $N$ 条回答，选奖励最高的一条输出。整个过程不涉及任何梯度更新。
+</div>
+
+<h3>8.5.3 两种使用方式</h3>
+<div class="card">
+<h3>方式一：推理时使用（Inference-time）</h3>
+<p>不改变模型权重，纯粹在部署时多生成多选。效果：N=64 时 win-rate 可提升 10-20%，有时能匹配 PPO 训练后的效果。代价：推理计算量线性增长 N 倍。</p>
+
+<h3>方式二：训练时使用 — RFT（Rejection Sampling Fine-Tuning）</h3>
+<p>将 Best-of-N 作为<strong>数据生成策略</strong>，迭代式地训练模型：</p>
+<ol>
+  <li><strong>生成</strong>：对大量 prompt 生成 N 条候选</li>
+  <li><strong>筛选</strong>：用奖励模型选出最优回答</li>
+  <li><strong>SFT</strong>：在筛选出的高质量回答上做监督微调</li>
+  <li><strong>重复</strong>：用更新后的模型回到第 1 步</li>
+</ol>
+<p>这就是很多<strong>生产级模型的实际训练方式</strong>——比 PPO 简单得多，完全稳定，效果接近。</p>
+</div>
+
+<h3>8.5.4 理论连接：Best-of-N 的隐式策略</h3>
+<div class="formula-block">
+$$\pi_{\text{BoN}}(y|x) \propto \pi_\theta(y|x)^{1-1/N} \cdot r(x,y)^{1/N}$$
+</div>
+<div class="formula-explain">
+这个公式揭示了 Best-of-N 的深层含义：它隐式地实现了一种<strong>KL 约束的策略优化</strong>。产生的分布是原始策略 $\pi_\theta$ 和奖励 $r$ 的几何混合（geometric mixture）。
+<ul>
+  <li>$N \to 1$：退化为原始策略（不做任何选择）</li>
+  <li>$N \to \infty$：趋向纯奖励最大化（完全忽略原始分布）</li>
+  <li>有限 $N$：在质量提升和多样性保持之间自然平衡</li>
+</ul>
+这解释了 Best-of-N 为什么既有效又稳定——它天然包含了 KL 正则化，无需手动设计。
+</div>
+
+<h3>8.5.5 Scaling Laws：N 与质量/成本的关系</h3>
+<table>
+<tr><th>N</th><th>质量提升（win-rate）</th><th>计算成本</th><th>备注</th></tr>
+<tr><td>1</td><td>基准</td><td>1×</td><td>标准采样，无选择</td></tr>
+<tr><td>4</td><td>+5–8%</td><td>4×</td><td>最低有效值，性价比最优区间</td></tr>
+<tr><td>16</td><td>+10–15%</td><td>16×</td><td>效果强，常可匹配 PPO</td></tr>
+<tr><td>64</td><td>+15–20%</td><td>64×</td><td>边际递减开始显著</td></tr>
+<tr><td>256</td><td>+18–22%</td><td>256×</td><td>仅用于极高价值场景</td></tr>
+</table>
+
+<div class="info-box">
+<strong>关键观察</strong>：质量提升大致与 $\log N$ 成正比（对数增长），而计算成本与 $N$ 线性增长。这意味着<strong>边际收益递减</strong>——从 N=4 到 N=16 的提升远大于从 N=64 到 N=256。实践中 N=4~16 通常是性价比最优区间。
+</div>
+
+<h3>8.5.6 Best-of-N 作为万能基准</h3>
+<div class="highlight-box">
+<strong>健全性检查（Sanity Check）原则：</strong>
+<p>任何 RL 对齐方法的"合格线"是：在相同计算预算下，<strong>至少要超过 Best-of-N</strong>。</p>
+<p>逻辑：Best-of-N 是最朴素的"多试几次选最好的"——不改变权重，不学习。如果你花了 64 GPU-hours 做 PPO 训练，结果还不如用同样计算量做 Best-of-N（多生成多选），那说明 PPO 训练有 bug（超参数错误、奖励模型质量差、训练不稳定等），需要排查。</p>
+</div>
+
+<h3>8.5.7 适用场景与局限性</h3>
+<div class="success-box">
+<strong>适用场景：</strong>快速建立对齐基准（不需要任何训练代码）；推理时提升质量（延迟不敏感场景）；作为 RFT 训练策略（生产级方案）；为其他方法提供 sanity check 基准线。
+</div>
+<div class="info-box">
+<strong>局限性：</strong>推理时计算成本线性增长（延迟敏感场景不适用）；依赖奖励模型质量（reward hacking 风险）；不改变模型本身能力——只是更好地利用现有能力；训练时（RFT）需要多轮迭代才能接近 PPO。
+</div>
+
+<!-- ============================================ -->
+<h2 id="s86">8.6 Summary: Choosing an Alignment Method</h2>
+
+<h3>8.6.1 综合对比表</h3>
+<table>
+<tr><th>方法</th><th>模型数量</th><th>数据类型</th><th>计算开销</th><th>稳定性</th><th>最适场景</th></tr>
+<tr><td><strong>PPO</strong></td><td>4</td><td>在线生成</td><td>非常高</td><td>低</td><td>最高质量，复杂推理</td></tr>
+<tr><td><strong>GRPO</strong></td><td>2</td><td>在线生成</td><td>高</td><td>中</td><td>可验证奖励（数学/代码）</td></tr>
+<tr><td><strong>DPO</strong></td><td>2</td><td>离线配对</td><td>低</td><td>高</td><td>风格/安全对齐，计算受限</td></tr>
+<tr><td><strong>Online DPO</strong></td><td>3</td><td>在线生成</td><td>中</td><td>中高</td><td>DPO 遇瓶颈，需要探索</td></tr>
+<tr><td><strong>KTO</strong></td><td>2</td><td>非配对二元</td><td>低</td><td>高</td><td>生产反馈（点赞/踩）</td></tr>
+<tr><td><strong>IPO</strong></td><td>2</td><td>离线配对</td><td>低</td><td>非常高</td><td>噪声标签，防过拟合</td></tr>
+<tr><td><strong>ORPO</strong></td><td>1</td><td>离线配对</td><td>非常低</td><td>高</td><td>显存受限，SFT+对齐合一</td></tr>
+<tr><td><strong>Best-of-N</strong></td><td>1+RM</td><td>在线生成</td><td>中（推理时）</td><td>完美</td><td>万能基准，数据生成</td></tr>
+</table>
+
+<h3>8.6.2 决策树：如何选择对齐方法</h3>
+<div class="card">
+<p>按照以下顺序逐步判断：</p>
+<ol>
+  <li><strong>有可验证的奖励信号吗？</strong>（数学答案可验证、代码可执行测试）<br>→ 是：使用 <strong>GRPO</strong>（专为此设计，无需 critic）</li>
+  <li><strong>需要在复杂开放任务上追求极限质量吗？</strong>（对话、创意写作、复杂推理）<br>→ 是：使用 <strong>PPO</strong>（最强但最复杂）</li>
+  <li><strong>有高质量的配对偏好数据吗？</strong><br>→ 是 + 数据干净：使用 <strong>DPO</strong><br>→ 是 + 数据有噪声：使用 <strong>IPO</strong></li>
+  <li><strong>只有非配对的二元反馈？</strong>（独立的 👍/👎）<br>→ 是：使用 <strong>KTO</strong></li>
+  <li><strong>GPU 显存严重受限？</strong>（无法加载两个模型）<br>→ 是：使用 <strong>ORPO</strong>（单模型搞定一切）</li>
+  <li><strong>DPO/离线方法效果到达瓶颈？</strong><br>→ 是：使用 <strong>Online DPO</strong>（引入在线探索）</li>
+  <li><strong>需要快速建立基准 / 生成高质量训练数据？</strong><br>→ 是：使用 <strong>Best-of-N / RFT</strong></li>
+</ol>
+</div>
+
+<h3>8.6.3 实践建议</h3>
+<div class="card">
+<p><strong>推荐的渐进式策略：</strong></p>
+<ol>
+  <li><strong>起步阶段</strong>：用 DPO 快速验证（最简单、最快）</li>
+  <li><strong>遇到过拟合</strong>：切换到 IPO（改一个参数）</li>
+  <li><strong>数据是非配对的</strong>：使用 KTO</li>
+  <li><strong>显存不够</strong>：切换到 ORPO</li>
+  <li><strong>DPO 效果到天花板</strong>：升级到 Online DPO</li>
+  <li><strong>追求极限</strong>：PPO / GRPO</li>
+  <li><strong>全程</strong>：用 Best-of-N 作为对照基准</li>
+</ol>
+</div>
+
+<!-- ============================================ -->
+<div class="takeaway">
+<h2>关键要点总结</h2>
+<ol>
+  <li><strong>没有银弹</strong>：每种方法解决 DPO 的一个特定痛点——分布偏移（Online DPO）、配对需求（KTO）、过拟合（IPO）、显存开销（ORPO）、复杂度（Best-of-N）。选择取决于你的具体约束。</li>
+  <li><strong>数据形式决定方法</strong>：有配对 → DPO/IPO；无配对只有二元 → KTO；能在线生成 → Online DPO / PPO / GRPO。</li>
+  <li><strong>显存是硬约束</strong>：ORPO 只需 1 个模型（节省 50%+ 显存），对资源受限场景极为友好。</li>
+  <li><strong>Best-of-N 是万能基准</strong>：任何 RL 方法的合格线是超过同等计算量的 Best-of-N；RFT 本身也是强大的生产级训练策略。</li>
+  <li><strong>IPO 是 DPO 的安全网</strong>：担心噪声或多 epoch 退化？切 IPO，零成本（TRL 改一个参数），有数学保证。</li>
+  <li><strong>Online DPO 是折中之选</strong>：比 PPO 简单（无价值头），比离线 DPO 强（无分布偏移），适合中等预算团队。</li>
+  <li><strong>前景理论 × ML</strong>：KTO 展示了跨学科思维的力量——行为经济学的"损失厌恶"转化为有效的非配对对齐算法。</li>
+</ol>
+</div>
+
+<!-- ============================================ -->
+<h2>Q&A（常见问题）</h2>
+
+<details>
+<summary>Q1：Online DPO 和 GRPO 都是在线生成数据，本质区别是什么？</summary>
+<div class="answer">
+<p><strong>损失函数形式</strong>：Online DPO 使用成对对比损失（chosen vs rejected 的 log-sigmoid），GRPO 使用单样本优势加权损失（类似 PPO，但用组内相对奖励作为 baseline）。<strong>配对需求</strong>：Online DPO 需要构造好/坏对，GRPO 对每个样本独立计算优势。<strong>适用奖励</strong>：GRPO 专为可验证奖励设计（数学正确性 0/1），Online DPO 对连续奖励模型更通用。</p>
+</div>
+</details>
+
+<details>
+<summary>Q2：KTO 为什么对数据不平衡（如 90% 好 / 10% 坏）比 DPO 鲁棒？</summary>
+<div class="answer">
+<p>KTO 的样本是<strong>独立</strong>处理的——每条好/坏回答单独计算损失。可以通过 $\lambda_w$ 和 $\lambda_l$ 的比值直接控制类别权重。而 DPO 需要配对，少量坏样本只能组成少量训练对，严重限制了有效训练数据量。此外，KTO 的损失厌恶设计让每个坏样本自然获得更大的梯度权重。</p>
+</div>
+</details>
+
+<details>
+<summary>Q3：IPO 只改了损失形状，为什么就能防过拟合？</summary>
+<div class="answer">
+<p>DPO 的 log-sigmoid 损失在 margin→∞ 时趋向零，<strong>没有自然停止点</strong>。IPO 的平方损失设定了目标值 $\frac{1}{2\beta}$——margin 偏离目标（无论偏大还是偏小）都受惩罚。这意味着：① 模型不会无限拉大 chosen/rejected 差距；② 错标样本的影响被限制在有限范围（bounded influence）；③ 多 epoch 训练时有稳定的平衡点，不会持续退化。</p>
+</div>
+</details>
+
+<details>
+<summary>Q4：ORPO 不需要参考模型，那它如何防止模型坍塌？</summary>
+<div class="answer">
+<p>参考模型的作用是"锚定"防止策略偏离太远。ORPO 中这个角色由 <strong>SFT 损失项</strong>承担——标准 NLL 要求模型好好生成 chosen 回答，这本身就是强正则化：① 阻止模型退化为只会回避坏回答的简并策略；② 维持正常的语言生成能力；③ 与偏好项形成自然平衡。类比：SFT 项 ≈ KL 正则化的隐式替代。</p>
+</div>
+</details>
+
+<details>
+<summary>Q5：Best-of-N 的理论公式 $\pi_{\text{BoN}} \propto \pi_\theta^{1-1/N} \cdot r^{1/N}$ 的含义？</summary>
+<div class="answer">
+<p>这表明 Best-of-N 隐式实现了<strong>KL 约束的策略优化</strong>：产生的分布是原始策略和奖励的几何混合。N 越大，越偏向高奖励区域，同时 $1-1/N$ 接近 1 保证不偏离原策略太远——天然包含 KL 正则化。这也解释了 Best-of-N 的稳定性：不像 PPO 需要手动设 KL 惩罚系数，Best-of-N 的"正则化强度"由 N 自然控制。</p>
+</div>
+</details>
+
+<details>
+<summary>Q6：偏好数据噪声大，选 IPO 还是 KTO？</summary>
+<div class="answer">
+<p>取决于<strong>数据格式</strong>：① 有配对数据（同一 prompt 的好/坏回答）→ 用 IPO，平方损失限制了错标样本影响；② 只有非配对二元标签 → 只能用 KTO。如果两种格式都可构造，且噪声来自标注者不一致，IPO 通常更优（有 bounded influence 的数学保证）。如果噪声来自好坏分布不平衡，KTO 的 $\lambda$ 调节更有针对性。</p>
+</div>
+</details>
+
+<details>
+<summary>Q7：生产中 RFT（迭代 Best-of-N + SFT）和 PPO 哪个更常用？</summary>
+<div class="answer">
+<p><strong>RFT 在生产中更常用</strong>。原因：① 完全稳定，无需调 PPO 的众多超参；② 实现极简（生成 + 奖励打分 + SFT）；③ 与现有 SFT 基础设施兼容；④ 迭代多轮后效果逼近 PPO。PPO 主要在拥有专门 RL 团队且追求极限性能时使用（如 ChatGPT 级别产品）。中小团队更倾向 RFT 的简单和可控。</p>
+</div>
+</details>
+
+<details>
+<summary>Q8："同等计算量的 PPO 打不过 Best-of-N 就有 bug"——如何理解？</summary>
+<div class="answer">
+<p>Best-of-N 是最"笨"的方法——纯粹多生成多选，不学习任何东西。PPO 通过梯度更新<strong>内化</strong>了奖励信号，理论上应该比暴力搜索更高效。如果 PPO 在同样计算预算下还不如 Best-of-N，说明训练出了问题：超参数错误、奖励模型质量差、训练不稳定（模式坍塌/reward hacking）等。这是一个低成本的 <strong>sanity check</strong>。</p>
+</div>
+</details>
+
+<details>
+<summary>Q9：这些方法可以组合使用吗？</summary>
+<div class="answer">
+<p>可以，且常见的组合策略包括：① <strong>RFT → DPO</strong>：先用 Best-of-N 生成高质量数据做 SFT，再用 DPO 精细对齐；② <strong>DPO → Online DPO</strong>：先用离线 DPO 快速热启动，再切换到在线模式突破瓶颈；③ <strong>ORPO + Best-of-N</strong>：ORPO 训练后，推理时再用 Best-of-N 进一步提升；④ <strong>IPO 替换 DPO</strong>：在任何使用 DPO 的流程中，直接替换为 IPO 来增强鲁棒性。</p>
+</div>
+</details>
+
+<hr style="margin-top:3rem; border: none; border-top: 1px solid var(--border);">
+<p style="text-align:center; color:var(--text-secondary); font-size:0.85rem; margin-top:1rem;">
+  笔记生成自 <em>The Hitchhiker's Guide to Agentic AI</em> Chapter 8 (pp. 174–181) · 2025
+</p>
+
+</body>
+</html>

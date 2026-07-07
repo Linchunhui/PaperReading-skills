@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第28章 阅读笔记：Quick Reference</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]})"></script>
+<style>
+:root {
+  --primary: #2c3e50;
+  --accent: #3498db;
+  --bg: #fafbfc;
+  --card-bg: #ffffff;
+  --border: #e1e4e8;
+  --text: #24292e;
+  --text-secondary: #586069;
+  --code-bg: #f6f8fa;
+  --highlight: #fff3cd;
+  --success: #d4edda;
+  --info: #d1ecf1;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; line-height: 1.8; color: var(--text); background: var(--bg); padding: 2rem; max-width: 900px; margin: 0 auto; }
+h1 { font-size: 1.8rem; color: var(--primary); border-bottom: 3px solid var(--accent); padding-bottom: 0.5rem; margin-bottom: 1rem; }
+h2 { font-size: 1.4rem; color: var(--primary); margin-top: 2.5rem; margin-bottom: 1rem; padding-left: 0.8rem; border-left: 4px solid var(--accent); }
+h3 { font-size: 1.15rem; color: var(--primary); margin-top: 1.8rem; margin-bottom: 0.8rem; }
+p { margin-bottom: 1rem; text-align: justify; }
+ul, ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+li { margin-bottom: 0.5rem; }
+code { background: var(--code-bg); padding: 0.15rem 0.4rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: var(--code-bg); padding: 1rem; border-radius: 6px; overflow-x: auto; margin-bottom: 1.5rem; border: 1px solid var(--border); }
+pre code { background: none; padding: 0; }
+blockquote { border-left: 4px solid var(--accent); padding: 0.8rem 1.2rem; margin: 1.5rem 0; background: var(--info); border-radius: 0 6px 6px 0; }
+.card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+.formula-block { background: var(--code-bg); border: 1px solid var(--border); border-radius: 6px; padding: 1rem; margin: 1rem 0; overflow-x: auto; }
+.formula-explain { color: var(--text-secondary); font-size: 0.92em; margin-top: 0.5rem; padding-left: 1rem; border-left: 3px solid #ddd; }
+.highlight-box { background: var(--highlight); border: 1px solid #ffc107; border-radius: 6px; padding: 1rem; margin: 1rem 0; }
+.info-box { background: var(--info); border: 1px solid #bee5eb; border-radius: 6px; padding: 1rem; margin: 1rem 0; }
+.success-box { background: var(--success); border: 1px solid #c3e6cb; border-radius: 6px; padding: 1rem; margin: 1rem 0; }
+.subtitle { color: var(--text-secondary); font-size: 1rem; margin-bottom: 0.3rem; }
+.meta { color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 2rem; }
+table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; }
+th, td { border: 1px solid var(--border); padding: 0.6rem 0.8rem; text-align: left; }
+th { background: var(--code-bg); font-weight: 600; }
+details { margin-bottom: 1rem; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+summary { padding: 0.8rem 1.2rem; background: var(--code-bg); cursor: pointer; font-weight: 500; }
+details[open] summary { border-bottom: 1px solid var(--border); }
+details .answer { padding: 1rem 1.2rem; }
+svg { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; }
+.takeaway { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 8px; padding: 1.5rem; margin: 2rem 0; }
+.takeaway h2 { color: white; border-left-color: rgba(255,255,255,0.5); }
+.takeaway li { color: rgba(255,255,255,0.95); }
+</style>
+</head>
+<body>
+
+<h1>第28章：Quick Reference</h1>
+<p class="subtitle">全书核心公式、系统参数与Agentic AI速查手册</p>
+<p class="meta">来源：Agentic AI · 第28章（pp. 565–572） · 阅读笔记</p>
+
+<div class="card">
+<h3>章节摘要</h3>
+<p>本章是全书的浓缩速查手册，将前27章的核心公式、系统配置、API参考、设计模式和评估指标汇集为23个主题卡片。适合在实际开发中快速查阅，每个主题自成一体，覆盖RL数学基础、Transformer公式、解码策略、分布式系统、GPU规格、超参数配置、RAG检索、Agentic模式、协议规范、安全清单与评估基准等方方面面。</p>
+</div>
+
+<!-- Topic 1 -->
+<h2>28.1 Core RL Equations</h2>
+<div class="card">
+<h3>策略梯度（Policy Gradient）</h3>
+<div class="formula-block">
+$$\nabla_\theta J(\theta) = \mathbb{E}_{\tau \sim \pi_\theta}\left[\sum_{t=0}^{T} \nabla_\theta \log \pi_\theta(a_t|s_t) \cdot \hat{A}_t\right]$$
+<p class="formula-explain">策略梯度定理：沿着优势函数加权的对数概率梯度方向更新策略参数。$\hat{A}_t$ 为优势估计。</p>
+</div>
+
+<h3>PPO Clipped Objective</h3>
+<div class="formula-block">
+$$L^{CLIP}(\theta) = \mathbb{E}_t\left[\min\left(r_t(\theta)\hat{A}_t,\; \text{clip}(r_t(\theta), 1-\epsilon, 1+\epsilon)\hat{A}_t\right)\right]$$
+<p class="formula-explain">PPO通过裁剪比率 $r_t(\theta) = \frac{\pi_\theta(a_t|s_t)}{\pi_{\theta_{old}}(a_t|s_t)}$ 限制策略更新幅度，$\epsilon$ 通常取0.1–0.2。</p>
+</div>
+
+<h3>GRPO Objective</h3>
+<div class="formula-block">
+$$L^{GRPO}(\theta) = \mathbb{E}_{q}\left[\frac{1}{G}\sum_{i=1}^{G} \min\left(r_i\hat{A}_i,\; \text{clip}(r_i, 1-\epsilon, 1+\epsilon)\hat{A}_i\right) - \beta \cdot D_{KL}(\pi_\theta \| \pi_{ref})\right]$$
+<p class="formula-explain">GRPO将组内采样的奖励归一化为优势：$\hat{A}_i = \frac{r_i - \mu_G}{\sigma_G}$，无需价值网络。$G$ 为组大小（通常8–64）。</p>
+</div>
+
+<h3>GAE（Generalized Advantage Estimation）</h3>
+<div class="formula-block">
+$$\hat{A}_t^{GAE(\gamma,\lambda)} = \sum_{l=0}^{\infty}(\gamma\lambda)^l \delta_{t+l}, \quad \delta_t = r_t + \gamma V(s_{t+1}) - V(s_t)$$
+<p class="formula-explain">$\gamma$ 为折扣因子（0.99–1.0），$\lambda$ 控制bias-variance权衡（0.95–0.99）。$\lambda=1$ 为MC，$\lambda=0$ 为TD(0)。</p>
+</div>
+</div>
+
+<!-- Topic 2 -->
+<h2>28.2 Transformer Formulas</h2>
+<div class="card">
+<h3>Scaled Dot-Product Attention</h3>
+<div class="formula-block">
+$$\text{Attention}(Q, K, V) = \text{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right)V$$
+<p class="formula-explain">$d_k$ 为key维度，缩放因子防止点积过大导致softmax梯度消失。</p>
+</div>
+
+<h3>Multi-Head Attention</h3>
+<div class="formula-block">
+$$\text{MHA}(Q,K,V) = \text{Concat}(\text{head}_1, \ldots, \text{head}_h)W^O, \quad \text{head}_i = \text{Attention}(QW_i^Q, KW_i^K, VW_i^V)$$
+<p class="formula-explain">$h$ 个头各关注不同子空间，$W^O \in \mathbb{R}^{hd_v \times d_{model}}$。GQA变体中多个query头共享同一组KV头。</p>
+</div>
+
+<h3>RoPE（Rotary Position Embedding）</h3>
+<div class="formula-block">
+$$f(x_m, m) = \begin{pmatrix} x_m^{(1)} \\ x_m^{(2)} \\ \vdots \end{pmatrix} \otimes \begin{pmatrix} \cos m\theta_1 \\ \cos m\theta_2 \\ \vdots \end{pmatrix} + \begin{pmatrix} -x_m^{(2)} \\ x_m^{(1)} \\ \vdots \end{pmatrix} \otimes \begin{pmatrix} \sin m\theta_1 \\ \sin m\theta_2 \\ \vdots \end{pmatrix}$$
+<p class="formula-explain">旋转位置编码使注意力分数仅依赖相对位置差 $m-n$，$\theta_i = 10000^{-2i/d}$。</p>
+</div>
+
+<h3>RMSNorm</h3>
+<div class="formula-block">
+$$\text{RMSNorm}(x) = \frac{x}{\sqrt{\frac{1}{d}\sum_{i=1}^{d}x_i^2 + \epsilon}} \cdot \gamma$$
+<p class="formula-explain">相比LayerNorm省去均值中心化步骤，计算更快且效果相当，现代LLM（LLaMA等）标准选择。</p>
+</div>
+
+<h3>SwiGLU FFN</h3>
+<div class="formula-block">
+$$\text{SwiGLU}(x) = (\text{Swish}(xW_1) \odot xW_3)W_2, \quad \text{Swish}(x) = x \cdot \sigma(\beta x)$$
+<p class="formula-explain">门控线性单元变体，引入额外矩阵 $W_3$ 作为门控，$\beta$ 通常取1。FFN隐层维度约 $\frac{8}{3}d_{model}$。</p>
+</div>
+</div>
+
+<!-- Topic 3 -->
+<h2>28.3 Decoding Strategies</h2>
+<div class="card">
+<table>
+<tr><th>策略</th><th>公式/参数</th><th>适用场景</th></tr>
+<tr><td>Greedy</td><td>$x_t = \arg\max P(x|x_{&lt;t})$</td><td>确定性任务（代码、数学）</td></tr>
+<tr><td>Temperature</td><td>$P'(x) = \frac{\exp(z_x / T)}{\sum \exp(z_i / T)}$</td><td>$T&lt;1$ 集中，$T&gt;1$ 多样</td></tr>
+<tr><td>Top-k</td><td>保留概率最高的 $k$ 个token重归一化</td><td>$k=50$ 平衡质量/多样性</td></tr>
+<tr><td>Top-p (Nucleus)</td><td>最小集合使 $\sum P(x_i) \geq p$</td><td>$p=0.9$–$0.95$ 动态截断</td></tr>
+<tr><td>Min-p</td><td>过滤 $P(x) < p_{min} \cdot P(x_{top})$</td><td>自适应阈值，鲁棒性更好</td></tr>
+<tr><td>Beam Search</td><td>保留 $B$ 条最高累积概率路径</td><td>翻译、摘要（$B=4$–$8$）</td></tr>
+<tr><td>Speculative</td><td>draft model生成 $k$ tokens，target验证</td><td>推理加速2–3×</td></tr>
+</table>
+<p class="formula-explain">实践中通常组合使用：temperature + top-p 是最常见搭配。RL采样通常设 $T=0.7$–$1.0$, top-p=0.95。</p>
+</div>
+
+<!-- Topic 4 -->
+<h2>28.4 Systems & Parallelism</h2>
+<div class="card">
+<table>
+<tr><th>并行策略</th><th>切分对象</th><th>通信开销</th><th>典型使用</th></tr>
+<tr><td>Data Parallel (DP)</td><td>数据批次</td><td>AllReduce梯度</td><td>基础扩展</td></tr>
+<tr><td>Tensor Parallel (TP)</td><td>权重矩阵（列/行切分）</td><td>AllReduce激活值</td><td>单节点内多GPU</td></tr>
+<tr><td>Pipeline Parallel (PP)</td><td>模型层</td><td>点对点激活值</td><td>跨节点</td></tr>
+<tr><td>ZeRO Stage 1</td><td>Optimizer states</td><td>AllGather参数</td><td>内存优化</td></tr>
+<tr><td>ZeRO Stage 2</td><td>+ Gradients</td><td>ReduceScatter</td><td>进一步节省</td></tr>
+<tr><td>ZeRO Stage 3</td><td>+ Parameters</td><td>AllGather per op</td><td>最大内存优化</td></tr>
+<tr><td>Expert Parallel (EP)</td><td>MoE专家</td><td>All-to-All</td><td>MoE模型</td></tr>
+</table>
+<div class="formula-block">
+$$\text{Total GPUs} = DP \times TP \times PP \times EP$$
+<p class="formula-explain">实践配置示例：70B模型用 TP=8（节点内）× PP=4（跨节点）× DP=16 = 512 GPUs。</p>
+</div>
+</div>
+
+<!-- Topic 5 -->
+<h2>28.5 GPU Specs</h2>
+<div class="card">
+<table>
+<tr><th>GPU</th><th>HBM</th><th>BF16 TFLOPS</th><th>带宽</th><th>NVLink</th></tr>
+<tr><td>A100 80GB</td><td>80GB HBM2e</td><td>312</td><td>2.0 TB/s</td><td>600 GB/s</td></tr>
+<tr><td>H100 SXM</td><td>80GB HBM3</td><td>989</td><td>3.35 TB/s</td><td>900 GB/s</td></tr>
+<tr><td>H200</td><td>141GB HBM3e</td><td>989</td><td>4.8 TB/s</td><td>900 GB/s</td></tr>
+<tr><td>B200</td><td>192GB HBM3e</td><td>2250</td><td>8.0 TB/s</td><td>1800 GB/s</td></tr>
+<tr><td>GB200 (Grace+2×B200)</td><td>384GB</td><td>4500</td><td>16 TB/s</td><td>1800 GB/s</td></tr>
+</table>
+<div class="info-box">
+<p><strong>Memory估算</strong>：模型参数内存 ≈ $2P$ bytes（BF16），Adam optimizer ≈ $12P$ bytes，梯度 ≈ $2P$，激活值取决于序列长度和batch。训练总需 ≈ $16P$–$20P$ bytes。</p>
+</div>
+</div>
+
+<!-- Topic 6 -->
+<h2>28.6 Hyperparameters</h2>
+<div class="card">
+<table>
+<tr><th>阶段</th><th>参数</th><th>推荐范围</th></tr>
+<tr><td rowspan="4">SFT</td><td>Learning Rate</td><td>1e-5 – 5e-5</td></tr>
+<tr><td>Batch Size</td><td>128 – 512 samples</td></tr>
+<tr><td>Epochs</td><td>2 – 5（防止过拟合）</td></tr>
+<tr><td>Max Seq Length</td><td>2048 – 8192</td></tr>
+<tr><td rowspan="5">RLHF/GRPO</td><td>Learning Rate</td><td>1e-6 – 5e-6</td></tr>
+<tr><td>KL Penalty β</td><td>0.01 – 0.1</td></tr>
+<tr><td>Clip ε</td><td>0.1 – 0.2</td></tr>
+<tr><td>Group Size G</td><td>8 – 64</td></tr>
+<tr><td>Temperature</td><td>0.7 – 1.0</td></tr>
+<tr><td rowspan="3">LoRA</td><td>Rank r</td><td>8 – 64</td></tr>
+<tr><td>Alpha α</td><td>16 – 128（通常 = 2r）</td></tr>
+<tr><td>Target Modules</td><td>q_proj, k_proj, v_proj, o_proj</td></tr>
+</table>
+</div>
+
+<!-- Topic 7 -->
+<h2>28.7 TRL API Quick Reference</h2>
+<div class="card">
+<pre><code># SFT Training
+from trl import SFTTrainer, SFTConfig
+config = SFTConfig(
+    output_dir="./sft_output",
+    per_device_train_batch_size=4,
+    gradient_accumulation_steps=8,
+    learning_rate=2e-5,
+    num_train_epochs=3,
+    max_seq_length=4096,
+)
+trainer = SFTTrainer(model=model, args=config,
+    train_dataset=dataset, tokenizer=tokenizer)
+
+# GRPO Training
+from trl import GRPOTrainer, GRPOConfig
+config = GRPOConfig(
+    output_dir="./grpo_output",
+    per_device_train_batch_size=2,
+    num_generations=8,          # Group size G
+    max_completion_length=1024,
+    temperature=0.9,
+    beta=0.04,                  # KL penalty
+)
+trainer = GRPOTrainer(model=model, args=config,
+    train_dataset=prompts, reward_funcs=[reward_fn])
+
+# DPO Training
+from trl import DPOTrainer, DPOConfig
+config = DPOConfig(
+    output_dir="./dpo_output",
+    beta=0.1,                   # Temperature
+    learning_rate=5e-7,
+    loss_type="sigmoid",        # or "ipo", "hinge"
+)
+trainer = DPOTrainer(model=model, ref_model=ref_model,
+    args=config, train_dataset=preference_data)</code></pre>
+</div>
+
+<!-- Topic 8 -->
+<h2>28.8 RAG Formulas</h2>
+<div class="card">
+<h3>Cosine Similarity（检索评分）</h3>
+<div class="formula-block">
+$$\text{sim}(q, d) = \frac{q \cdot d}{\|q\| \cdot \|d\|} = \frac{\sum_{i=1}^{n} q_i d_i}{\sqrt{\sum q_i^2} \cdot \sqrt{\sum d_i^2}}$$
+<p class="formula-explain">向量检索核心度量，$q$ 为query embedding，$d$ 为document embedding，值域 $[-1, 1]$。</p>
+</div>
+
+<h3>Chunking策略</h3>
+<table>
+<tr><th>方法</th><th>Chunk Size</th><th>Overlap</th><th>适用</th></tr>
+<tr><td>Fixed-size</td><td>512 tokens</td><td>50–100</td><td>通用文档</td></tr>
+<tr><td>Semantic</td><td>可变</td><td>按语义边界</td><td>结构化文档</td></tr>
+<tr><td>Recursive</td><td>1000 chars</td><td>200 chars</td><td>代码/长文</td></tr>
+</table>
+
+<h3>Retrieval Metrics</h3>
+<div class="formula-block">
+$$\text{Recall@K} = \frac{|\text{Retrieved}_K \cap \text{Relevant}|}{|\text{Relevant}|}, \quad \text{MRR} = \frac{1}{|Q|}\sum_{i=1}^{|Q|}\frac{1}{\text{rank}_i}$$
+<p class="formula-explain">Recall@K衡量Top-K检索覆盖相关文档的比例；MRR关注首个正确结果的排名倒数。</p>
+</div>
+</div>
+
+<!-- Topic 9 -->
+<h2>28.9 Agentic Patterns</h2>
+<div class="card">
+<table>
+<tr><th>模式</th><th>描述</th><th>适用场景</th></tr>
+<tr><td><strong>ReAct</strong></td><td>Reasoning + Acting交替：Think → Act → Observe → Think…</td><td>工具调用、搜索</td></tr>
+<tr><td><strong>Plan-and-Execute</strong></td><td>先制定完整计划，再逐步执行</td><td>复杂多步任务</td></tr>
+<tr><td><strong>Reflection</strong></td><td>执行后自我评估并修正</td><td>代码生成、写作</td></tr>
+<tr><td><strong>Multi-Agent</strong></td><td>多个专业Agent协作</td><td>复杂系统、角色分工</td></tr>
+<tr><td><strong>Tool-Use</strong></td><td>LLM选择并调用外部工具</td><td>计算、API调用</td></tr>
+<tr><td><strong>Hierarchical</strong></td><td>Orchestrator分配子任务给Specialist</td><td>企业级工作流</td></tr>
+<tr><td><strong>Verify-then-Act</strong></td><td>先验证条件/权限再执行</td><td>高风险操作</td></tr>
+</table>
+<div class="info-box">
+<p><strong>选择指南</strong>：简单单步 → Tool-Use；多步推理 → ReAct；长规划 → Plan-and-Execute；质量敏感 → Reflection；规模化 → Multi-Agent + Hierarchical。</p>
+</div>
+</div>
+
+<!-- Topic 10 -->
+<h2>28.10 Agent-to-Agent (A2A) Overview</h2>
+<div class="card">
+<p>A2A（Agent-to-Agent）是Google提出的开放协议，允许不同框架构建的Agent互相发现、通信和协作。</p>
+<table>
+<tr><th>概念</th><th>说明</th></tr>
+<tr><td>Agent Card</td><td>JSON描述文件，声明Agent能力、端点、认证方式</td></tr>
+<tr><td>Task</td><td>A2A基本工作单元，包含状态机（submitted → working → completed/failed）</td></tr>
+<tr><td>Message</td><td>Agent间通信载体，包含Parts（text/file/data）</td></tr>
+<tr><td>Artifact</td><td>Task产出物，可被后续Task引用</td></tr>
+</table>
+</div>
+
+<!-- Topic 11 -->
+<h2>28.11 Context Budget Management</h2>
+<div class="card">
+<div class="formula-block">
+$$\text{Context Budget} = \text{Max Context} - \text{System Prompt} - \text{Reserve (Output)}$$
+$$\text{Available for RAG} = \text{Context Budget} - \text{Conversation History} - \text{Tool Results}$$
+<p class="formula-explain">典型分配：System 1–2K，History 保留最近4–8轮（~2K），RAG chunks 3–5K，输出预留 2–4K。总计适配 8K–128K上下文窗口。</p>
+</div>
+<table>
+<tr><th>策略</th><th>方法</th></tr>
+<tr><td>Sliding Window</td><td>只保留最近N轮对话</td></tr>
+<tr><td>Summarization</td><td>定期压缩历史为摘要</td></tr>
+<tr><td>Importance Scoring</td><td>按相关性评分保留/丢弃</td></tr>
+<tr><td>Hierarchical</td><td>短期精确 + 长期摘要双层结构</td></tr>
+</table>
+</div>
+
+<!-- Topic 12 -->
+<h2>28.12 Failure Modes & Fixes</h2>
+<div class="card">
+<table>
+<tr><th>故障模式</th><th>症状</th><th>修复方案</th></tr>
+<tr><td>Reward Hacking</td><td>高奖励但输出无意义</td><td>增大KL penalty，多维奖励</td></tr>
+<tr><td>Mode Collapse</td><td>输出单一模板化</td><td>增大温度，diversity bonus</td></tr>
+<tr><td>Hallucination</td><td>生成不存在的事实</td><td>RAG grounding，citation要求</td></tr>
+<tr><td>Infinite Loop</td><td>Agent反复调用同一工具</td><td>Max iterations，loop detection</td></tr>
+<tr><td>Context Overflow</td><td>超出上下文窗口</td><td>Summarization，sliding window</td></tr>
+<tr><td>Tool Misuse</td><td>错误选择/调用工具</td><td>Few-shot examples，schema validation</td></tr>
+<tr><td>Reward Collapse</td><td>RL训练奖励突然归零</td><td>降低LR，warm restart，检查reward fn</td></tr>
+<tr><td>KL Divergence Explosion</td><td>策略偏离ref过远</td><td>增大β，gradient clipping</td></tr>
+</table>
+</div>
+
+<!-- Topic 13 -->
+<h2>28.13 Decision Tree: When to Use What</h2>
+<div class="card">
+<div class="highlight-box">
+<p><strong>任务类型 → 训练方法选择：</strong></p>
+<ul>
+<li>有标注数据 + 单轮 → <strong>SFT</strong></li>
+<li>有偏好对 → <strong>DPO</strong>（离线）或 <strong>RLHF</strong>（在线）</li>
+<li>有可验证奖励（代码/数学） → <strong>GRPO</strong></li>
+<li>多目标奖励 → <strong>GDPO</strong></li>
+<li>主观评分 → <strong>GOPO</strong></li>
+<li>需要推理链 → <strong>GRPO + CoT reward</strong></li>
+<li>Agent行为优化 → <strong>Agentic RL</strong>（环境奖励）</li>
+</ul>
+</div>
+<div class="info-box">
+<p><strong>模型规模选择</strong>：&lt;1B参数 → 特定任务微调；1–7B → 通用助手SFT+DPO；7–70B → RL训练获得推理能力；&gt;70B → 基础模型直接用或轻量对齐。</p>
+</div>
+</div>
+
+<!-- Topic 14 -->
+<h2>28.14 Evaluation Metrics</h2>
+<div class="card">
+<h3>语言生成指标</h3>
+<div class="formula-block">
+$$\text{BLEU} = BP \cdot \exp\left(\sum_{n=1}^{N} w_n \log p_n\right), \quad BP = \min\left(1, e^{1-r/c}\right)$$
+<p class="formula-explain">$p_n$ 为n-gram精确率，$BP$ 为长度惩罚，$r$ 参考长度，$c$ 候选长度。</p>
+</div>
+
+<h3>分类/检索指标</h3>
+<table>
+<tr><th>指标</th><th>公式</th><th>说明</th></tr>
+<tr><td>Precision</td><td>$\frac{TP}{TP+FP}$</td><td>预测正确的比例</td></tr>
+<tr><td>Recall</td><td>$\frac{TP}{TP+FN}$</td><td>正样本被找到的比例</td></tr>
+<tr><td>F1</td><td>$\frac{2 \cdot P \cdot R}{P+R}$</td><td>精确率与召回率调和平均</td></tr>
+<tr><td>Pass@k</td><td>$1 - \frac{\binom{n-c}{k}}{\binom{n}{k}}$</td><td>代码生成：$n$次采样中$c$次正确，$k$次至少1次对</td></tr>
+</table>
+
+<h3>LLM-as-Judge</h3>
+<div class="info-box">
+<p>使用强模型（GPT-4/Claude）对输出评分。关键配置：提供清晰评分标准（rubric）、使用pairwise comparison减少偏差、多次采样取平均。相关性与人类评分 $r > 0.85$。</p>
+</div>
+</div>
+
+<!-- Topic 15 -->
+<h2>28.15 Reasoning & Test-Time Compute</h2>
+<div class="card">
+<table>
+<tr><th>方法</th><th>机制</th><th>计算开销</th></tr>
+<tr><td>Chain-of-Thought (CoT)</td><td>分步推理，生成中间步骤</td><td>1.5–3× tokens</td></tr>
+<tr><td>Self-Consistency</td><td>采样多条CoT路径，多数投票</td><td>$k$× 生成（$k$=5–40）</td></tr>
+<tr><td>Tree-of-Thought (ToT)</td><td>树搜索+回溯</td><td>$b^d$× 评估</td></tr>
+<tr><td>Best-of-N</td><td>生成N个回答，用RM选最优</td><td>$N$× 生成 + $N$× 评分</td></tr>
+<tr><td>Beam Search (reasoning)</td><td>step级beam搜索</td><td>$B × T$ 评估</td></tr>
+<tr><td>Budget Forcing</td><td>强制使用所有推理预算</td><td>固定token预算</td></tr>
+</table>
+<div class="formula-block">
+$$\text{Self-Consistency: } \hat{y} = \arg\max_y \sum_{i=1}^{k} \mathbb{1}[y_i = y]$$
+<p class="formula-explain">从$k$条独立CoT链中提取最终答案，选择出现次数最多的答案。对数学/逻辑题提升5–20%。</p>
+</div>
+</div>
+
+<!-- Topic 16 -->
+<h2>28.16 Memory Types</h2>
+<div class="card">
+<table>
+<tr><th>类型</th><th>持久性</th><th>实现方式</th><th>容量</th></tr>
+<tr><td><strong>Working Memory</strong></td><td>当前对话</td><td>Context window</td><td>有限（4K–128K tokens）</td></tr>
+<tr><td><strong>Short-term Memory</strong></td><td>会话级</td><td>对话历史 + 摘要</td><td>可压缩</td></tr>
+<tr><td><strong>Long-term Memory</strong></td><td>跨会话</td><td>向量数据库 + KV store</td><td>无限</td></tr>
+<tr><td><strong>Episodic Memory</strong></td><td>永久</td><td>经历存储与检索</td><td>增长型</td></tr>
+<tr><td><strong>Semantic Memory</strong></td><td>永久</td><td>知识图谱 / embeddings</td><td>结构化</td></tr>
+<tr><td><strong>Procedural Memory</strong></td><td>永久</td><td>学到的技能/工具使用</td><td>可泛化</td></tr>
+</table>
+<div class="info-box">
+<p><strong>记忆管理策略</strong>：写入（何时保存）→ 检索（相关性排序）→ 遗忘（过期/低重要度淘汰）→ 整合（去重合并）。</p>
+</div>
+</div>
+
+<!-- Topic 17 -->
+<h2>28.17 MCP (Model Context Protocol)</h2>
+<div class="card">
+<p>MCP是Anthropic推出的开放协议，标准化LLM与外部数据源/工具的连接方式。</p>
+<table>
+<tr><th>组件</th><th>角色</th><th>说明</th></tr>
+<tr><td>Host</td><td>LLM应用</td><td>发起请求的客户端（如IDE、聊天界面）</td></tr>
+<tr><td>Client</td><td>连接器</td><td>每个Client连接一个Server，管理生命周期</td></tr>
+<tr><td>Server</td><td>能力提供者</td><td>暴露Resources、Tools、Prompts三类能力</td></tr>
+</table>
+<h3>MCP能力类型</h3>
+<ul>
+<li><strong>Resources</strong>：只读数据源（文件、DB查询结果）—— 类似GET</li>
+<li><strong>Tools</strong>：可执行操作（API调用、计算）—— 类似POST</li>
+<li><strong>Prompts</strong>：预定义模板，可参数化</li>
+</ul>
+<div class="info-box">
+<p><strong>传输方式</strong>：stdio（本地进程）、HTTP+SSE（远程服务）。协议使用JSON-RPC 2.0。</p>
+</div>
+</div>
+
+<!-- Topic 18 -->
+<h2>28.18 A2A Protocol Details</h2>
+<div class="card">
+<h3>Agent Card结构</h3>
+<pre><code>{
+  "name": "Research Agent",
+  "description": "Performs web research and summarization",
+  "url": "https://agent.example.com",
+  "capabilities": {
+    "streaming": true,
+    "pushNotifications": true
+  },
+  "skills": [
+    {"id": "web-search", "name": "Web Search"},
+    {"id": "summarize", "name": "Summarization"}
+  ],
+  "authentication": {"schemes": ["OAuth2"]}
+}</code></pre>
+
+<h3>Task状态机</h3>
+<p><code>submitted</code> → <code>working</code> → <code>input-required</code> | <code>completed</code> | <code>failed</code> | <code>canceled</code></p>
+
+<h3>A2A vs MCP</h3>
+<table>
+<tr><th>维度</th><th>MCP</th><th>A2A</th></tr>
+<tr><td>连接对象</td><td>LLM ↔ 工具/数据</td><td>Agent ↔ Agent</td></tr>
+<tr><td>粒度</td><td>单次工具调用</td><td>完整任务委派</td></tr>
+<tr><td>状态</td><td>无状态</td><td>有状态（Task生命周期）</td></tr>
+<tr><td>发现</td><td>配置文件</td><td>Agent Card（/.well-known/agent.json）</td></tr>
+</table>
+</div>
+
+<!-- Topic 19 -->
+<h2>28.19 Framework Comparison</h2>
+<div class="card">
+<table>
+<tr><th>框架</th><th>核心特点</th><th>适用场景</th><th>语言</th></tr>
+<tr><td><strong>LangChain</strong></td><td>Chain抽象，丰富生态</td><td>RAG、工具链</td><td>Python/JS</td></tr>
+<tr><td><strong>LangGraph</strong></td><td>图状态机，循环支持</td><td>复杂多步Agent</td><td>Python</td></tr>
+<tr><td><strong>CrewAI</strong></td><td>角色定义，团队协作</td><td>多Agent协作</td><td>Python</td></tr>
+<tr><td><strong>AutoGen</strong></td><td>对话式多Agent</td><td>研究/原型</td><td>Python</td></tr>
+<tr><td><strong>Semantic Kernel</strong></td><td>企业级，微软生态</td><td>.NET集成</td><td>C#/Python</td></tr>
+<tr><td><strong>Haystack</strong></td><td>Pipeline设计</td><td>生产RAG</td><td>Python</td></tr>
+<tr><td><strong>OpenAI Agents SDK</strong></td><td>轻量、Handoff机制</td><td>OpenAI模型</td><td>Python</td></tr>
+<tr><td><strong>ADK (Google)</strong></td><td>A2A原生支持</td><td>多Agent+Google云</td><td>Python</td></tr>
+</table>
+</div>
+
+<!-- Topic 20 -->
+<h2>28.20 Agentic RL</h2>
+<div class="card">
+<p>将RL应用于Agent的工具使用和多步决策优化，奖励来自环境交互结果而非人类偏好。</p>
+<div class="formula-block">
+$$R_{\text{agent}} = \alpha \cdot R_{\text{task}} + \beta \cdot R_{\text{efficiency}} + \gamma \cdot R_{\text{safety}}$$
+<p class="formula-explain">Agent奖励通常是多目标组合：任务完成度、步骤效率（负的步数惩罚）、安全约束。</p>
+</div>
+<h3>关键设计</h3>
+<ul>
+<li><strong>Environment</strong>：模拟环境（sandbox）或真实API（带安全护栏）</li>
+<li><strong>Trajectory</strong>：一个episode = query → [think, act, observe]* → final answer</li>
+<li><strong>Reward Signal</strong>：延迟奖励（最终结果）+ 过程奖励（中间步骤）</li>
+<li><strong>训练策略</strong>：先SFT bootstrap → 再GRPO/PPO微调工具使用行为</li>
+</ul>
+</div>
+
+<!-- Topic 21 -->
+<h2>28.21 Security Checklist</h2>
+<div class="card">
+<table>
+<tr><th>威胁</th><th>防护措施</th><th>优先级</th></tr>
+<tr><td>Prompt Injection</td><td>输入过滤 + 指令隔离 + 标记边界</td><td>Critical</td></tr>
+<tr><td>Data Exfiltration</td><td>输出过滤 + DLP + 网络隔离</td><td>Critical</td></tr>
+<tr><td>Tool Misuse</td><td>权限最小化 + 审批流程 + sandbox</td><td>High</td></tr>
+<tr><td>Denial of Service</td><td>速率限制 + token预算 + timeout</td><td>High</td></tr>
+<tr><td>Model Poisoning</td><td>数据验证 + 来源追踪</td><td>Medium</td></tr>
+<tr><td>Indirect Injection</td><td>数据消毒 + 上下文标记</td><td>High</td></tr>
+<tr><td>Privilege Escalation</td><td>RBAC + 最小权限 + 双重确认</td><td>Critical</td></tr>
+</table>
+<div class="highlight-box">
+<p><strong>安全原则</strong>：Defense-in-Depth（纵深防御）、Least Privilege（最小权限）、Fail-Safe（安全失败）、Human-in-the-Loop（关键操作需人工确认）。</p>
+</div>
+</div>
+
+<!-- Topic 22 -->
+<h2>28.22 Agent Evaluation</h2>
+<div class="card">
+<table>
+<tr><th>维度</th><th>指标</th><th>说明</th></tr>
+<tr><td>Task Success</td><td>Completion Rate</td><td>最终是否完成目标</td></tr>
+<tr><td>Efficiency</td><td>Steps / Tokens / Time</td><td>完成任务的代价</td></tr>
+<tr><td>Tool Use</td><td>Tool Accuracy, Selection F1</td><td>工具选择和调用正确率</td></tr>
+<tr><td>Robustness</td><td>Error Recovery Rate</td><td>遇到错误后恢复能力</td></tr>
+<tr><td>Safety</td><td>Violation Rate</td><td>违反安全约束的频率</td></tr>
+<tr><td>Grounding</td><td>Faithfulness, Citation</td><td>输出是否有依据</td></tr>
+</table>
+<div class="formula-block">
+$$\text{Agent Score} = w_1 \cdot \text{Success} + w_2 \cdot \frac{1}{\text{Steps}} + w_3 \cdot \text{Safety} + w_4 \cdot \text{Quality}$$
+<p class="formula-explain">综合评分需要平衡成功率、效率、安全性和输出质量，权重根据应用场景调整。</p>
+</div>
+</div>
+
+<!-- Topic 23 -->
+<h2>28.23 Key Benchmarks</h2>
+<div class="card">
+<table>
+<tr><th>Benchmark</th><th>测试能力</th><th>指标</th></tr>
+<tr><td><strong>SWE-bench</strong></td><td>代码修复（真实GitHub issues）</td><td>Resolve Rate %</td></tr>
+<tr><td><strong>HumanEval / MBPP</strong></td><td>代码生成</td><td>Pass@1, Pass@10</td></tr>
+<tr><td><strong>MATH / GSM8K</strong></td><td>数学推理</td><td>Accuracy %</td></tr>
+<tr><td><strong>MMLU / MMLU-Pro</strong></td><td>知识广度</td><td>Accuracy %</td></tr>
+<tr><td><strong>GPQA</strong></td><td>研究级科学问答</td><td>Accuracy %</td></tr>
+<tr><td><strong>AgentBench</strong></td><td>Agent多环境任务</td><td>Success Rate</td></tr>
+<tr><td><strong>WebArena</strong></td><td>网页操作</td><td>Task Success %</td></tr>
+<tr><td><strong>GAIA</strong></td><td>通用AI助手</td><td>Accuracy (3 levels)</td></tr>
+<tr><td><strong>τ-bench</strong></td><td>工具使用Agent</td><td>Pass Rate %</td></tr>
+<tr><td><strong>ARC-AGI</strong></td><td>抽象推理</td><td>Accuracy %</td></tr>
+</table>
+<div class="info-box">
+<p><strong>趋势</strong>：评测从静态知识（MMLU）→ 推理能力（MATH/GPQA）→ Agent能力（SWE-bench/WebArena）→ 真实世界交互（GAIA），复杂度和现实性不断提升。</p>
+</div>
+</div>
+
+<!-- Takeaway -->
+<div class="takeaway">
+<h2>Key Takeaways</h2>
+<ul>
+<li>RL核心三公式：Policy Gradient提供方向，PPO/GRPO提供稳定性，GAE提供准确的优势估计</li>
+<li>系统设计的核心权衡：内存 vs 计算 vs 通信——并行策略选择取决于硬件拓扑</li>
+<li>Agent开发先选模式（ReAct/Plan-Execute），再选框架，最后选协议（MCP/A2A）</li>
+<li>安全性是Agent系统的一等公民：纵深防御 + 最小权限 + 人机协同</li>
+<li>评估Agent不能只看成功率，效率、安全、鲁棒性同样关键</li>
+</ul>
+</div>
+
+<!-- Q&A -->
+<h2>Q&A 自测</h2>
+
+<details>
+<summary>Q1：PPO和GRPO在优势估计上有什么本质区别？</summary>
+<div class="answer">
+<p><strong>PPO</strong> 使用价值网络 $V(s)$ 通过GAE计算优势：$\hat{A}_t = \sum (\gamma\lambda)^l \delta_{t+l}$，需要额外训练一个critic模型。<strong>GRPO</strong> 完全移除价值网络，通过组内采样的奖励均值/标准差直接归一化：$\hat{A}_i = (r_i - \mu_G)/\sigma_G$，更简单但需要较大的组大小 $G$ 来获得稳定估计。GRPO特别适合LLM场景，因为避免了为超大模型训练额外的critic。</p>
+</div>
+</details>
+
+<details>
+<summary>Q2：MCP和A2A协议的设计目标有何不同？分别解决什么问题？</summary>
+<div class="answer">
+<p><strong>MCP</strong> 解决的是 LLM ↔ 外部工具/数据 的连接问题，是"给模型装上手和眼"——标准化工具调用接口，让任何LLM都能访问任何数据源。<strong>A2A</strong> 解决的是 Agent ↔ Agent 的协作问题，是"让Agent组队"——标准化Agent的发现、任务委派和状态追踪。MCP是单次调用级别（无状态），A2A是完整任务级别（有状态生命周期）。两者互补：一个Agent内部用MCP访问工具，Agent之间用A2A协作。</p>
+</div>
+</details>
+
+<details>
+<summary>Q3：在RL训练中遇到Reward Hacking，有哪些系统性解决方案？</summary>
+<div class="answer">
+<p>系统性解决方案包括：(1) <strong>增大KL penalty</strong>（$\beta$从0.01提到0.1），限制策略偏离参考模型的程度；(2) <strong>多维奖励</strong>，不仅看任务完成还看格式、安全等（GDPO式独立归一化）；(3) <strong>奖励模型集成</strong>，用多个RM投票避免单个RM的缺陷；(4) <strong>对抗训练</strong>，用红队样本增强RM鲁棒性；(5) <strong>过程奖励</strong>（PRM），不仅看最终结果还看推理过程的正确性。根本原因是Goodhart's Law——当指标成为目标时就不再是好指标。</p>
+</div>
+</details>
+
+<details>
+<summary>Q4：如何为一个复杂Agent系统选择合适的并行策略？</summary>
+<div class="answer">
+<p>选择逻辑：(1) 先确定模型能否fit进单GPU——不能则需要模型并行；(2) 单节点内（NVLink高带宽）优先用<strong>TP</strong>切分权重矩阵；(3) 跨节点（网络带宽有限）用<strong>PP</strong>切分层；(4) 在TP×PP确定后，剩余GPU用<strong>DP</strong>扩展吞吐；(5) MoE模型额外加<strong>EP</strong>分发专家。具体例子：70B模型在64×H100上，典型配置 TP=8 × PP=2 × DP=4 = 64 GPUs。Agent推理（inference）通常只需TP=2–4即可。</p>
+</div>
+</details>
+
+<details>
+<summary>Q5：Test-Time Compute中，Self-Consistency和Best-of-N的本质区别是什么？</summary>
+<div class="answer">
+<p><strong>Self-Consistency</strong> 是"民主投票"——采样$k$条推理路径，提取最终答案，选多数投票的结果。它不需要额外的评分模型，依赖的是"正确答案更容易被多次独立发现"的概率假设。<strong>Best-of-N</strong> 是"专家评审"——生成$N$个完整回答，用Reward Model逐一评分，选最高分。它需要额外的RM但能捕捉更细粒度的质量差异。适用场景：Self-Consistency适合有唯一正确答案的问题（数学、代码），Best-of-N适合开放式生成（写作、对话）。两者计算开销相似但信号来源不同。</p>
+</div>
+</details>
+
+</body>
+</html>

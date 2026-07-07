@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第13章 阅读笔记：RL for Large Reasoning Models</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]})"></script>
+<style>
+:root { --primary: #2c3e50; --accent: #3498db; --bg: #fafbfc; --card-bg: #ffffff; --border: #e1e4e8; --text: #24292e; --text-secondary: #586069; --code-bg: #f6f8fa; --highlight: #fff3cd; --success: #d4edda; --info: #d1ecf1; }
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; line-height: 1.8; color: var(--text); background: var(--bg); padding: 2rem; max-width: 900px; margin: 0 auto; }
+h1 { font-size: 1.8rem; color: var(--primary); border-bottom: 3px solid var(--accent); padding-bottom: 0.5rem; margin-bottom: 1rem; }
+h2 { font-size: 1.4rem; color: var(--primary); margin-top: 2.5rem; margin-bottom: 1rem; padding-left: 0.8rem; border-left: 4px solid var(--accent); }
+h3 { font-size: 1.15rem; color: var(--primary); margin-top: 1.8rem; margin-bottom: 0.8rem; }
+p { margin-bottom: 1rem; text-align: justify; }
+ul, ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+li { margin-bottom: 0.5rem; }
+code { background: var(--code-bg); padding: 0.15rem 0.4rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: var(--code-bg); padding: 1rem; border-radius: 6px; overflow-x: auto; margin-bottom: 1.5rem; border: 1px solid var(--border); }
+pre code { background: none; padding: 0; }
+blockquote { border-left: 4px solid var(--accent); padding: 0.8rem 1.2rem; margin: 1.5rem 0; background: var(--info); border-radius: 0 6px 6px 0; }
+.card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+.formula-block { background: var(--code-bg); border: 1px solid var(--border); border-radius: 6px; padding: 1rem; margin: 1rem 0; overflow-x: auto; }
+.formula-explain { color: var(--text-secondary); font-size: 0.92em; margin-top: 0.5rem; padding-left: 1rem; border-left: 3px solid #ddd; }
+.highlight-box { background: var(--highlight); border: 1px solid #ffc107; border-radius: 6px; padding: 1rem; margin: 1rem 0; }
+.info-box { background: var(--info); border: 1px solid #bee5eb; border-radius: 6px; padding: 1rem; margin: 1rem 0; }
+.success-box { background: var(--success); border: 1px solid #c3e6cb; border-radius: 6px; padding: 1rem; margin: 1rem 0; }
+.subtitle { color: var(--text-secondary); font-size: 1rem; margin-bottom: 0.3rem; }
+.meta { color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 2rem; }
+table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; }
+th, td { border: 1px solid var(--border); padding: 0.6rem 0.8rem; text-align: left; }
+th { background: var(--code-bg); font-weight: 600; }
+details { margin-bottom: 1rem; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+summary { padding: 0.8rem 1.2rem; background: var(--code-bg); cursor: pointer; font-weight: 500; }
+details[open] summary { border-bottom: 1px solid var(--border); }
+details .answer { padding: 1rem 1.2rem; }
+svg { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; }
+.takeaway { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 8px; padding: 1.5rem; margin: 2rem 0; }
+.takeaway h2 { color: white; border-left-color: rgba(255,255,255,0.5); }
+.takeaway li { color: rgba(255,255,255,0.95); }
+</style>
+</head>
+<body>
+
+<h1>第13章 阅读笔记：RL for Large Reasoning Models</h1>
+<p class="subtitle">来源：<em>The Hitchhiker's Guide to Agentic AI</em>, H. Roitman</p>
+<p class="meta">页码 251–271 | 核心主题：推理模型的RL训练方法、Test-Time Scaling、DeepSeek-R1/OpenAI o1/QwQ对比</p>
+
+<blockquote>
+<strong>章节摘要</strong>：本章系统阐述面向大型推理模型（Large Reasoning Models, LRMs）的强化学习方法论。推理模型的核心范式是"先思考再回答"——在推理阶段分配额外计算以探索、验证和优化中间步骤。章节覆盖了Test-Time Scaling的全谱方法（从CoT到MCTS共9种），深入剖析三大推理模型——DeepSeek-R1、OpenAI o1/o3、QwQ/Qwen3——的训练方法与核心创新，并建立训练计算与推理计算之间的Scaling Law数学框架。<strong>关键洞察</strong>：推理可被视为搜索问题，RL教会模型在解空间树上高效导航；小模型通过蒸馏大推理模型的能力，往往优于直接RL训练。
+</blockquote>
+
+<!-- ============ 13.1 ============ -->
+<h2 id="s1">13.1 Motivation：为什么推理需要不同的RL</h2>
+
+<h3>13.1.1 传统RLHF的局限性</h3>
+<p>标准RLHF对一个完整回复打单一标量奖励（Outcome-Level Reward），但对多步推理任务（数学证明、代码生成、形式化验证）而言，这种方式面临四个根本挑战：</p>
+<div class="card">
+<ul>
+<li><strong>稀疏奖励（Sparse Rewards）</strong>：一道数学题可能需要20步推理，但只有最终答案的正确性能获得奖励信号。中间哪步出错完全没有梯度指引——模型无法区分"第3步犯了逻辑错误"和"第19步计算失误"。</li>
+<li><strong>长时间跨度（Long Horizons）</strong>：推理链跨越数百到数千个token，造成严重的<em>信用分配问题（Credit Assignment Problem）</em>。对"1000个token前的某个推理选择"进行有效的梯度反传几乎不可能。</li>
+<li><strong>组合搜索（Combinatorial Search）</strong>：有效推理路径的空间是指数级的（每步若有$b$种选择、共$d$步，则搜索空间为$b^d$），模型必须学会高效搜索而非穷举。</li>
+<li><strong>可验证性（Verifiability）</strong>：数学/逻辑正确性可以客观验证（SymPy、Lean4、代码单测），无需人工标注就能自动计算奖励——这为RL提供了几乎无限的训练信号。</li>
+</ul>
+</div>
+
+<div class="highlight-box">
+<strong>核心洞察：推理即搜索（Reasoning as Search）</strong><br>
+多步推理可被建模为在"部分解"树上的搜索问题。树中每个节点是一个推理状态（CoT前缀），每条边是一个推理步骤，叶子节点是最终答案。RL的目标是教模型高效地在这棵树上导航——探索有希望的分支、从死胡同回溯、在关键处集中计算资源。这解释了为什么AlphaGo/AlphaZero的方法（MCTS+RL）可以被迁移到LLM推理。
+</div>
+
+<h3>13.1.2 Chain-of-Thought：涌现行为 vs. 训练能力</h3>
+<p>CoT（Chain-of-Thought，思维链）推理最初被观察为大模型（≥100B参数）的<strong>涌现能力（emergent ability）</strong>——只需在prompt中附加"Let's think step by step"，模型就能自发产生中间推理步骤。关键问题是：CoT是规模的涌现属性，还是可以被显式训练出来？</p>
+<p>答案是<strong>两者兼有</strong>：</p>
+<ul>
+<li><strong>涌现提供基础</strong>：大规模预训练中，模型从数学教材、代码调试日志等序列数据中隐式学会了"分步思考"的模式</li>
+<li><strong>RL极大增强</strong>：显式RL训练可以将这种能力从"偶尔能用"变为"稳定且高效"（如DeepSeek-R1从纯RL中发现了自我验证、回溯等高级推理模式）</li>
+<li><strong>蒸馏可传递</strong>：大模型的推理能力可蒸馏给小模型，说明CoT不仅是规模的产物，也是可学习的技能</li>
+</ul>
+
+<h3>13.1.3 Test-Time Compute Scaling Laws</h3>
+<p>驱动推理模型研究的核心经验发现：<strong>测试时计算量与性能可预测地缩放（scale）</strong>。这建立了一个全新的"性能=f(训练计算, 推理计算)"的框架。</p>
+<div class="formula-block">
+$$\text{Accuracy}(C_{\text{train}}, C_{\text{test}}) \approx f\!\left(\alpha \log C_{\text{train}} + \beta \log C_{\text{test}}\right)$$
+<div class="formula-explain">准确率可近似为训练计算量$C_{\text{train}}$和推理计算量$C_{\text{test}}$的对数线性函数。核心含义：<strong>较小模型 + 更多推理计算，可以匹配较大模型 + 较少推理计算</strong>。这是计算-性能权衡的根本性转变——传统上只有训练时计算一个维度，现在有两个可替代的维度。</div>
+</div>
+
+<!-- ============ 13.2 ============ -->
+<h2 id="s2">13.2 Test-Time Scaling方法</h2>
+<p>以下9种方法构成一个"用推理时计算换准确率"的频谱，从简单到复杂递进。它们的核心区别在于<strong>搜索结构</strong>（线性/树/图）和<strong>是否需要奖励模型</strong>。</p>
+
+<h3>13.2.1 Chain-of-Thought (CoT)</h3>
+<div class="card">
+<p>CoT是所有test-time scaling方法的基础。模型不直接输出答案，而是生成中间推理步骤序列。</p>
+<ul>
+<li><strong>Zero-Shot CoT</strong>：只需附加"Let's think step by step"即可激活推理能力，无需示例</li>
+<li><strong>Few-Shot CoT</strong>：提供2-5个带推理链的示例作为上下文学习</li>
+</ul>
+<div class="formula-block">
+$$p(y|x) = \sum_z p(y|x,z) \cdot p(z|x) \approx p(y|x,z^*) \quad \text{where } z^* = \arg\max_z p(z|x)$$
+<div class="formula-explain">CoT将一步预测$p(y|x)$转化为对中间推理链$z$的边缘化。由于全链求和不可行（指数空间），通常只用贪心采样$z^*$近似。</div>
+</div>
+<p><strong>局限</strong>：单链CoT极其脆弱——若早期步骤出错，后续所有步骤都建立在错误基础上，且没有任何恢复机制。这正是后续方法要解决的问题。</p>
+</div>
+
+<h3>13.2.2 Self-Consistency（自一致性/多数投票）</h3>
+<div class="card">
+<p>通过独立采样N条推理链，对最终答案进行多数投票（majority voting）。核心思想：正确答案集中在一个值上，错误答案分散在多个值上。</p>
+<div class="formula-block">
+$$\hat{y} = \arg\max_y \sum_{i=1}^N \mathbb{1}[y_i = y], \quad (z_i, y_i) \sim p(\cdot|x; T), \quad T > 0$$
+<div class="formula-explain">用温度$T>0$采样生成多样化的推理链，取出现次数最多的答案。链之间完全独立，可100%并行。实证效果显著：GSM8K上CoT=56.5% → SC(N=40)=74.4%（+18%绝对提升）。</div>
+</div>
+<p><strong>为什么有效</strong>：即使单次正确率只有$p=0.3$，只要正确答案集中度高于任何单一错误答案，多数投票仍能恢复正确答案。理论上，成功率为$1-(1-p)^N$乘以集中度因子。</p>
+<p><strong>局限</strong>：(1) 对开放式生成无效（答案空间连续）；(2) 计算量线性增长但收益递减；(3) 所有链独立，无法利用其他链的发现。</p>
+</div>
+
+<h3>13.2.3 Tree-of-Thoughts (ToT)</h3>
+<div class="card">
+<p>将CoT从线性链推广到<strong>树结构</strong>，允许模型在每一步探索多条推理路径、评估中间状态、从无望分支回溯。</p>
+<div class="formula-block">
+$$\text{ToT} = \left(G_\theta,\; E_\theta,\; V_\phi,\; \text{Search}(\text{BFS}|\text{DFS})\right)$$
+<div class="formula-explain">$G_\theta$=思维生成器（产生$b$个候选下一步），$E_\theta$=状态评估器（打分sure/maybe/impossible），$V_\phi$=价值函数，Search=BFS或DFS搜索策略。</div>
+</div>
+<p><strong>搜索策略</strong>：BFS模式保留最有希望的$k$个前缀扩展下一层；DFS模式深度优先直到遇到"impossible"评估后回溯。BFS模式下LLM调用次数 = $2kbd$（$b$=分支因子，$k$=beam宽度，$d$=深度）。</p>
+<p><strong>实证</strong>：24-Game实验中，ToT 74% vs CoT仅4%——对需要回溯的组合问题有巨大优势。</p>
+</div>
+
+<h3>13.2.4 Graph-of-Thoughts (GoT)</h3>
+<div class="card">
+<p>将ToT从树扩展为<strong>有向无环图（DAG）</strong>，引入关键新能力：<strong>合并不同分支的部分解</strong>。</p>
+<p>三种核心操作：</p>
+<ul>
+<li><strong>Generate</strong>：扩展当前思维为多个候选后继</li>
+<li><strong>Aggregate/Merge</strong>：将多个独立思维<strong>合并</strong>为一个精炼结果（树结构不可能做到）</li>
+<li><strong>Refine</strong>：基于反馈迭代改进某个思维节点</li>
+</ul>
+<p>DAG结构使得分治推理（拆分问题→独立解决子问题→合并答案）、集成推理（多方案取精华）、迭代精化成为可能。特别适合可分解问题（排序、文档摘要、代码模块化）。</p>
+</div>
+
+<h3>13.2.5 Best-of-N (BoN)</h3>
+<div class="card">
+<p>最简单的利用奖励模型（Reward Model）进行test-time scaling的方法：生成N个完整候选解，用RM打分选最高的。</p>
+<div class="formula-block">
+$$\hat{y} = \arg\max_{y_i, i \in \{1,\ldots,N\}} R_\phi(x, y_i), \quad y_i \sim \pi_\theta(\cdot|x)$$
+$$P(\text{至少一个正确}) = 1 - (1-p)^N$$
+<div class="formula-explain">单次正确率$p$，采样$N$次至少有一个正确的概率。$p=0.3, N=10$时成功率97%；$p=0.1, N=50$时成功率99.5%。但imperfect RM会导致$N \approx 64$-$256$后准确率停滞甚至下降（reward hacking）。</div>
+</div>
+<p><strong>变体</strong>：BoN+ORM（完整方案打分）、BoN+PRM（逐步打分，选最低步分最高的链）、Weighted BoN（用softmax加权而非取max）。</p>
+</div>
+
+<h3>13.2.6 MCTS（蒙特卡洛树搜索）</h3>
+<div class="card">
+<p>源自AlphaGo的MCTS被适配用于LLM推理，结合结构化探索与学习价值估计。四个阶段循环执行：<strong>选择→扩展→模拟→反向传播</strong>。</p>
+<div class="formula-block">
+$$a^* = \arg\max_a \left[ Q(s,a) + c_{\text{puct}} \cdot P(s,a) \cdot \frac{\sqrt{\sum_b N(s,b)}}{1 + N(s,a)} \right]$$
+<div class="formula-explain"><strong>PUCT公式</strong>（Predictor + UCB applied to Trees）：$Q(s,a)$是动作$a$在状态$s$下的平均价值估计（exploitation利用项），$P(s,a) = \pi_\theta(a|s)$是LLM的先验概率（偏向模型认为有希望的步骤），$N(s,a)$是访问次数，$c_{\text{puct}}$是探索常数。第二项是UCB探索项——对访问不足的动作给予奖励bonus，确保不会遗漏有潜力的分支。</div>
+</div>
+<p><strong>适配LLM的关键</strong>：(1) "步骤"的粒度——可以是一行、一段或一个推理单元；(2) 用LLM本身作为rollout策略和先验；(3) 用训练的PRM/ORM作为价值估计；(4) 反向传播更新所有祖先节点的$Q$值。</p>
+<p><strong>代表方法</strong>：AlphaProof（数学证明）、rStar-Math（自博弈MCTS）。计算开销：每个MCTS迭代=4次LLM调用，总计约$4 \times \text{iters}$次。</p>
+</div>
+
+<h3>13.2.7 Beam Search over Reasoning Steps</h3>
+<div class="card">
+<p>将beam search应用在<strong>推理步骤级别</strong>（而非token级别），跟踪top-$k$最有希望的推理前缀：</p>
+<div class="formula-block">
+$$B_d = \text{top-}k\left\{(s_1,\ldots,s_d) : \sum_{i=1}^d \log\pi_\theta(s_i|s_{&lt;i}) + \lambda \cdot V_\phi(s_1,\ldots,s_d)\right\}$$
+<div class="formula-explain">对推理前缀的评分结合LLM对数概率（流畅性/可行性）和训练价值模型$V_\phi$的估计（预测最终正确的概率）。参数$\lambda$平衡两者。本质是带学习价值函数的ToT-BFS。</div>
+</div>
+<p><strong>与token-level beam search的区别</strong>：操作粒度是整个推理步骤（可能数十到数百token），而非单个token。这使得搜索在语义层面进行，计算效率更高。</p>
+</div>
+
+<h3>13.2.8 Iterative Refinement（迭代精化与自我纠正）</h3>
+<div class="card">
+<p>不拓展宽度（多条链），而是投资<strong>深度</strong>——反复改进单一解：</p>
+<div class="formula-block">
+$$y^{(t+1)} = \text{LLM}\!\left(\text{"Improve this solution:"}, y^{(t)}, \text{"Errors found:"}, e^{(t)}\right)$$
+<div class="formula-explain">错误信号$e^{(t)}$可来自自我验证（模型检查自己的解）、外部验证（运行代码看是否通过测试）或评论模型（critic model）。代表性方法：Self-Refine、Reflexion、LATS。</div>
+</div>
+<p><strong>关键问题</strong>：纯自我验证的效果有争议——模型可能无法发现自身的盲点。外部反馈（如代码执行结果）是更可靠的error signal。最新研究表明RL训练可以显著改善自我纠正能力。</p>
+</div>
+
+<h3>13.2.9 方法对比与选择指南</h3>
+<div class="card">
+<table>
+<tr><th>方法</th><th>搜索结构</th><th>LLM调用</th><th>可并行</th><th>需要RM</th><th>最佳场景</th></tr>
+<tr><td>CoT</td><td>线性链</td><td>1</td><td>N/A</td><td>否</td><td>简单推理</td></tr>
+<tr><td>Self-Consistency</td><td>N条独立链</td><td>N</td><td>完全</td><td>否</td><td>有标准答案、中等难度</td></tr>
+<tr><td>Best-of-N + ORM</td><td>N条+ORM选择</td><td>N+1</td><td>完全</td><td>是(ORM)</td><td>有结果级RM</td></tr>
+<tr><td>Best-of-N + PRM</td><td>N条+PRM逐步评估</td><td>N+N·K</td><td>完全</td><td>是(PRM)</td><td>需逐步验证(数学证明)</td></tr>
+<tr><td>ToT-BFS</td><td>树(宽优先)</td><td>$2kbd$</td><td>部分</td><td>否(LLM评估)</td><td>需回溯的组合问题</td></tr>
+<tr><td>GoT</td><td>DAG</td><td>可变</td><td>完全</td><td>否</td><td>可分解/合并的问题</td></tr>
+<tr><td>MCTS</td><td>树+统计</td><td>$4 \times \text{iters}$</td><td>部分</td><td>是(Value)</td><td>高难度证明/代码</td></tr>
+<tr><td>Beam Search</td><td>top-k前缀</td><td>$k \times d$</td><td>部分</td><td>是(Value)</td><td>开放式多步生成</td></tr>
+<tr><td>Iterative Refine</td><td>序列(深度)</td><td>T轮</td><td>否</td><td>可选</td><td>有外部反馈(代码执行)</td></tr>
+</table>
+</div>
+
+<div class="success-box">
+<strong>隐式 vs 显式 Test-Time Scaling</strong>：现代推理模型（R1, o1）通过长CoT生成实现<em>隐式</em> test-time scaling。它们的"思考token"功能类似MCTS rollout：模型在单次生成中探索多种方法、回溯（"Wait, let me reconsider..."）、验证中间步骤。RL教会模型在单次自回归生成中执行隐式搜索，消除了对外部编排的需求。<strong>模型自身成为了搜索算法。</strong>
+</div>
+
+<!-- ============ 13.3 ============ -->
+<h2 id="s3">13.3 DeepSeek-R1</h2>
+<p>DeepSeek-R1是第一个<strong>完全开源</strong>的大型推理模型，在主要基准上匹配或超越OpenAI o1。基座为DeepSeek-V3（671B MoE，37B活跃参数）。其训练流程技术透明，已成为RL推理训练的事实参考实现。</p>
+
+<h3>13.3.1 六阶段训练Pipeline</h3>
+<div class="card">
+<ol>
+<li><strong>基座模型</strong>：DeepSeek-V3（671B MoE），强预训练数学/代码能力</li>
+<li><strong>Cold-Start SFT</strong>：用少量精选（~千级）长CoT样本微调，学会<code>&lt;think&gt;...&lt;/think&gt;</code>格式和基本推理流程。样本量故意很小，避免过度约束后续RL发现的推理风格</li>
+<li><strong>GRPO强化学习</strong>：大规模RL训练，仅使用可验证奖励（数学+代码）。这是核心阶段——模型在此涌现出自我验证、回溯、长链推理等能力</li>
+<li><strong>Rejection Sampling</strong>：用RL后的模型对大量题目生成多个解，保留通过验证的正确解</li>
+<li><strong>SFT on RL outputs</strong>：在高质量RL生成的推理链上做SFT，稳定策略并扩展到通用任务</li>
+<li><strong>Final RL</strong>：最终RL阶段，加入对齐（helpfulness、safety）和通用指令遵循的奖励</li>
+</ol>
+<div class="highlight-box">
+<strong>R1-Zero实验</strong>：跳过Cold-Start SFT，直接从V3基座开始GRPO训练。结果：(1) 纯RL确实能涌现推理能力，但不稳定；(2) 出现语言混杂（中英混用）、重复循环、格式退化等问题；(3) Cold-Start SFT提供格式引导和训练稳定性，是必要的"点火"步骤。
+</div>
+</div>
+
+<h3>13.3.2 Reward设计：极简但有效</h3>
+<div class="card">
+<div class="formula-block">
+$$r_{\text{acc}}(y, y^*) = \begin{cases} 1 & \text{if } \texttt{verify}(y, y^*) = \text{True} \\ 0 & \text{otherwise} \end{cases}$$
+$$r_{\text{fmt}}(y) = \begin{cases} 1 & y \text{ 包含合法的} \langle\text{think}\rangle \text{和} \langle\text{answer}\rangle \text{标签} \\ 0 & \text{otherwise} \end{cases}$$
+$$r(y, y^*) = r_{\text{acc}}(y, y^*) + \lambda_{\text{fmt}} \cdot r_{\text{fmt}}(y), \quad \lambda_{\text{fmt}} = 0.1$$
+<div class="formula-explain"><strong>仅两种简单的自动可计算奖励</strong>：准确率奖励（通过SymPy做符号等价验证或代码跑测试用例）+ 格式奖励（确保有think标签）。格式权重0.1足够防止格式退化但不会主导训练。验证器是确定性的——没有reward model误差，不存在reward hacking。</div>
+</div>
+<div class="info-box">
+<strong>惊人发现：不需要PRM！</strong> 尽管推理链很长（可达数千token），纯结果奖励（ORM）就足以让RL发现高质量推理策略。作者论证：(1) 可验证的数学/代码奖励信号足够强；(2) GRPO的组采样机制自然解决了信用分配——当G个样本中只有部分正确时，正确和错误链的对比提供了丰富的学习信号；(3) PRM会引入步骤级reward hacking的新风险。
+</div>
+</div>
+
+<h3>13.3.3 GRPO公式（Group Relative Policy Optimization）</h3>
+<div class="card">
+<p>GRPO是一种<strong>无需训练单独价值网络</strong>的策略梯度方法，通过组内相对比较估计优势函数：</p>
+<div class="formula-block">
+$$\hat{A}_i = \frac{r_i - \mu_r}{\sigma_r + \epsilon}, \quad \mu_r = \frac{1}{G}\sum_{j=1}^G r_j, \quad \sigma_r = \sqrt{\frac{1}{G}\sum_{j=1}^G (r_j - \mu_r)^2}$$
+<div class="formula-explain">对问题$q$采样$G$个回复$\{y_1, \ldots, y_G\}$，计算各自奖励$r_i$，用组内均值$\mu_r$和标准差$\sigma_r$归一化得到优势估计。"群体相对"的含义——不需要单独的价值网络作baseline，组均值就是baseline。</div>
+</div>
+<div class="formula-block">
+$$\mathcal{L}_{\text{GRPO}}(\theta) = -\mathbb{E}_{q \sim \mathcal{D}}\left[\frac{1}{G}\sum_{i=1}^G \frac{1}{|y_i|}\sum_{t=1}^{|y_i|} \min\!\left(\rho_{i,t}\hat{A}_i,\; \text{clip}(\rho_{i,t}, 1{-}\varepsilon, 1{+}\varepsilon)\hat{A}_i\right) - \beta D_{\text{KL}}\!\left[\pi_\theta \| \pi_{\text{ref}}\right]\right]$$
+<div class="formula-explain">其中$\rho_{i,t} = \frac{\pi_\theta(y_{i,t}|q, y_{i,&lt;t})}{\pi_{\text{old}}(y_{i,t}|q, y_{i,&lt;t})}$是逐token重要性比率。核心特点：(1) PPO式clip防止策略更新过大；(2) KL惩罚$\beta$防止偏离参考策略太远；(3) 长度归一化$1/|y_i|$防止偏向短回复；(4) 当所有$G$个回复全对或全错时$\sigma_r = 0$，梯度为零——自然形成<strong>课程学习</strong>，聚焦模型能力边界的问题。</div>
+</div>
+<p><strong>实践细节</strong>：$G=8$（每题采8个回复）。太小($G=2$)方差太高不稳定；太大($G=32$)计算浪费且梯度被稀释。$G=8$平衡了方差降低和计算成本。</p>
+</div>
+
+<h3>13.3.4 蒸馏：R1-Distill系列</h3>
+<div class="card">
+<p>R1的重大实践贡献：推理能力可通过SFT蒸馏到小模型（1.5B~70B）。方法非常直接：</p>
+<ol>
+<li>用R1(671B)为大量题目生成长CoT解答</li>
+<li>过滤保留正确解（通过验证器）</li>
+<li>在更小的基座模型（Qwen2.5, Llama-3）上做标准SFT</li>
+</ol>
+<div class="highlight-box">
+<strong>关键发现：蒸馏 &gt; 直接RL（对小模型而言）</strong><br>
+R1-Distill-Qwen-7B的MATH分数高于直接用GRPO训练的7B模型。原因：小模型缺乏通过RL<strong>探索</strong>发现推理策略的能力（搜索空间太大，7B模型的随机探索几乎不可能发现高效策略），但有足够的<strong>表示能力</strong>来模仿大模型已经发现的策略。瓶颈在exploration而非representation。
+</div>
+</div>
+
+<!-- ============ 13.4 ============ -->
+<h2 id="s4">13.4 OpenAI o1/o3系列</h2>
+
+<h3>13.4.1 Hidden Reasoning Tokens（隐藏推理Token）</h3>
+<div class="card">
+<p>o1的标志性设计：模型生成内部CoT（"reasoning trace"/"thinking tokens"），但<strong>不展示给用户</strong>，只返回最终答案。这是与R1（公开推理过程）的核心设计差异。</p>
+<p><strong>设计优势</strong>：</p>
+<ul>
+<li><strong>无格式约束</strong>：隐藏推理可使用任何格式（草稿纸记号、伪代码、内部缩写、甚至混合语言），不需要"看起来好"</li>
+<li><strong>无风格Reward Hacking</strong>：用户不看推理过程，不会压力驱使模型产出"漂亮但无用"的推理——可以专注有效性</li>
+<li><strong>知识产权保护</strong>：推理过程不暴露，防止竞争对手通过API蒸馏其推理能力</li>
+<li><strong>安全控制</strong>：可以在hidden reasoning中实施额外的安全过滤，而不影响用户体验</li>
+</ul>
+<p><strong>训练方式</strong>：RL目标应用在完整序列（隐藏推理 + 最终答案）上，但奖励<strong>仅基于最终答案质量</strong>给出。模型学会用隐藏推理来最大化最终答案的正确性。</p>
+</div>
+
+<h3>13.4.2 PRM vs ORM：数学定义与对比</h3>
+<div class="card">
+<div class="formula-block">
+$$R_{\text{ORM}}(q, y) = P_\phi(\text{correct} \mid q, y) \in [0, 1]$$
+<div class="formula-explain"><strong>ORM（Outcome Reward Model）</strong>：对完整解$y$打单一分数，预测给定问题$q$和解答$y$后答案正确的概率。信号清晰但信用分配差——50步中哪步错了？不知道。</div>
+</div>
+<div class="formula-block">
+$$R_{\text{PRM}}(q, s_1, \ldots, s_K) = \prod_{k=1}^K r_k(q, s_1, \ldots, s_k)$$
+$$r_k = P_\psi\!\left(\text{step } k \text{ correct} \mid q, s_1, \ldots, s_k\right)$$
+<div class="formula-explain"><strong>PRM（Process Reward Model）</strong>：对每个推理步骤$s_k$独立打分。完整解的分数为所有步骤分数的乘积（或取最小值）。优点：精确定位错误步骤，改善信用分配。缺点：(1) 需要昂贵的步骤级标注数据；(2) 步骤定义模糊（什么是"一步"？）；(3) 步骤级reward hacking风险。</div>
+</div>
+<p><strong>实证结论</strong>：PRM对<strong>搜索/选择</strong>（test-time时选最佳解）有益，但对<strong>RL训练</strong>的好处不明确。R1证明了纯ORM足以训练高水平推理模型。</p>
+</div>
+
+<h3>13.4.3 Inference-Time Compute Scaling</h3>
+<div class="card">
+<p>o1技术报告展示清晰的scaling law：更多思考token单调地提升难推理任务的性能。</p>
+<div class="formula-block">
+$$\text{Pass@1}(T) \approx a - b \cdot T^{-c}$$
+<div class="formula-explain">$T$=思考token预算（或推理时间），$a$=渐近精度上限，$b$=初始差距，$c$=改善速率。AIME 2024上：o1完整思考≈83%，GPT-4o(无扩展)≈13%。</div>
+</div>
+<div class="formula-block">
+$$\text{Performance}(C_{\text{train}}, C_{\text{test}}) = g\!\left(\alpha \cdot C_{\text{train}}^p + \beta \cdot C_{\text{test}}^q\right)$$
+<div class="formula-explain"><strong>计算等价原则</strong>：训练计算$C_{\text{train}}$和推理计算$C_{\text{test}}$大致可替代（$p \approx q$）。含义：较小+便宜的模型通过延长思考，可以在难题上匹配更大模型，代价是更高延迟和推理成本。</div>
+</div>
+</div>
+
+<h3>13.4.4 o3/o4-mini</h3>
+<div class="card">
+<ul>
+<li><strong>o3</strong>：大幅增加思考预算和搜索深度；ARC-AGI达87.5%（高计算模式），接近人类水平；使用更复杂的推理搜索策略（推测含MCTS或类似机制）</li>
+<li><strong>o4-mini</strong>：证明<strong>小模型+RL推理训练</strong>可极具竞争力。AIME 2025达93.4%，在推理基准上全面超越o3——说明模型大小不如推理训练质量重要</li>
+<li><strong>Tool Use集成</strong>：o3/o4-mini将工具使用（代码执行、网络搜索、计算器）集成到推理过程中，可在推理链中途程序化验证中间步骤（如执行代码验算数学结果）</li>
+</ul>
+</div>
+
+<!-- ============ 13.5 ============ -->
+<h2 id="s5">13.5 QwQ与Qwen推理模型</h2>
+
+<h3>13.5.1 多阶段RL Pipeline</h3>
+<div class="card">
+<p>Qwen的方法比R1更精细，采用多阶段渐进Pipeline：</p>
+<ol>
+<li><strong>基座预训练</strong>：Qwen2.5（32B/72B），在预训练中加强数学和代码语料占比</li>
+<li><strong>多样推理SFT</strong>：在广泛推理任务上微调——数学（竞赛/应用）、代码（生成/调试）、科学推理、逻辑推理、常识推理</li>
+<li><strong>RFT（Rejection Fine-Tuning）</strong>：对每题生成$N$个解（$N$=64-256），保留正确解做SFT。这比Cold-Start SFT提供更多高质量训练数据</li>
+<li><strong>RL阶段1（可验证域）</strong>：GRPO on 数学+代码（可验证奖励），聚焦推理能力提升</li>
+<li><strong>RL阶段2（通用对齐）</strong>：更广泛的RL，包含指令遵循、安全性、多语言对齐</li>
+</ol>
+</div>
+
+<h3>13.5.2 RFT + RL迭代组合</h3>
+<div class="card">
+<p>Qwen的关键创新：<strong>交替执行RFT和RL</strong>（而非一次性Pipeline）：</p>
+<div class="formula-block">
+$$\text{For } k = 1, \ldots, K: \quad \pi^{(k)} = \text{RL}\!\left(\text{SFT}\!\left(\pi^{(k-1)}, \mathcal{D}_{\text{correct}}^{(k-1)}\right)\right)$$
+<div class="formula-explain">第$k$轮：用当前策略$\pi^{(k-1)}$采样$\to$保留正确解$\mathcal{D}_{\text{correct}}^{(k-1)}$ $\to$ SFT更新 $\to$ RL探索 $\to$ 得到$\pi^{(k)}$ $\to$ 重复。</div>
+</div>
+<p><strong>为什么有效</strong>：RFT提供高质量正样本"锚定"策略（exploitation），防止策略退化或遗忘；RL探索当前分布之外的空间（exploration），发现新策略。组合比纯RL更稳定（小模型上纯RL容易不稳定），比纯SFT/RFT更强（SFT无法超越采样质量的上限）。</p>
+</div>
+
+<h3>13.5.3 Tool-Integrated Reasoning（工具集成推理）</h3>
+<div class="card">
+<p>QwQ-32B和Qwen3支持在推理链中<strong>动态调用外部工具</strong>（Python解释器、搜索引擎、计算器）：</p>
+<ul>
+<li>通过特殊token <code>&lt;tool_call&gt;</code> / <code>&lt;tool_response&gt;</code> 实现工具调用和结果注入</li>
+<li>RL奖励仍基于最终答案正确性，但模型自主学会<strong>策略性地使用工具</strong>——因为工具使用提高了到达正确答案的概率，RL自然强化了这种行为</li>
+<li>典型模式：遇到复杂计算→调用Python验算→基于结果继续推理；遇到事实性问题→搜索引擎获取信息</li>
+</ul>
+<p><strong>与o3的对比</strong>：两者都支持tool-integrated reasoning，但Qwen是开源的，训练方法可复现。o3的工具集成细节未公开。</p>
+</div>
+
+<!-- ============ 13.6 ============ -->
+<h2 id="s6">13.6 关键方法的数学基础</h2>
+
+<h3>13.6.1 MCTS价值函数与UCB推导</h3>
+<div class="card">
+<div class="formula-block">
+$$V(s_k) = P(\text{correct} \mid s_k) \approx \frac{1}{M}\sum_{m=1}^M R\!\left(\text{rollout}_m(s_k)\right)$$
+<div class="formula-explain">节点$s_k$的价值通过$M$次随机rollout估计：从$s_k$出发用LLM续写完整解，检查正确性，取平均。随着访问次数增加，估计更准确。</div>
+</div>
+<div class="formula-block">
+$$\text{UCB}(s_k, a) = \underbrace{Q(s_k, a)}_{\text{exploitation}} + \underbrace{c_{\text{puct}} \cdot \pi_\theta(a|s_k) \cdot \frac{\sqrt{N(s_k)}}{1 + N(s_k, a)}}_{\text{exploration}}$$
+<div class="formula-explain">UCB平衡利用（已知好的步骤，$Q$值高）和探索（访问不足的步骤，$N(s_k,a)$小时bonus大）。LLM先验$\pi_\theta(a|s_k)$引导探索——即使某步访问少，如果先验概率也低，探索bonus也不大。</div>
+</div>
+</div>
+
+<h3>13.6.2 PRM训练：Math-Shepherd自动标注</h3>
+<div class="card">
+<p>无需人工逐步标注PRM。Math-Shepherd的核心思想：如果从步骤$s_k$出发<strong>存在</strong>能到达正确答案的续写，则该步被标为正确。</p>
+<div class="formula-block">
+$$\hat{r}_k = \mathbb{1}\!\left[\frac{1}{M}\sum_{m=1}^M \texttt{verify}\!\left(\texttt{complete}_m(s_1,\ldots,s_k),\, y^*\right) > 0\right]$$
+<div class="formula-explain">从前缀$(s_1,\ldots,s_k)$采样$M$次完整续写，检查是否有任何一个到达正确答案$y^*$。若有则$\hat{r}_k=1$（该步骤可行），否则$\hat{r}_k=0$（该步骤是死路）。用此二元标签训练PRM（二元交叉熵损失）。</div>
+</div>
+<p><strong>训练PRM的损失函数</strong>：</p>
+<div class="formula-block">
+$$\mathcal{L}_{\text{PRM}}(\psi) = -\sum_{k=1}^K \left[\hat{r}_k \log r_\psi(s_k) + (1 - \hat{r}_k)\log(1 - r_\psi(s_k))\right]$$
+<div class="formula-explain">标准二元交叉熵，$r_\psi(s_k) = P_\psi(\text{step correct} | q, s_1, \ldots, s_k)$是PRM在步骤$k$的预测。</div>
+</div>
+</div>
+
+<h3>13.6.3 Self-Play：STaR（Self-Taught Reasoner）</h3>
+<div class="card">
+<p>STaR是迭代自举（bootstrapping）推理能力的方法：</p>
+<div class="formula-block">
+$$\pi^{(t+1)} = \text{SFT}\!\left(\pi^{(t)},\; \{(q, z, y) : z \sim \pi^{(t)}(\cdot|q), \texttt{verify}(y, y^*)\}\right)$$
+<div class="formula-explain">每轮：用当前策略$\pi^{(t)}$生成推理链$\to$保留正确的$\to$微调得到$\pi^{(t+1)}$ $\to$ 重复。额外技巧：<strong>合理化（rationalization）</strong>——对模型解不出的题，给出正确答案让模型生成事后推理链作为训练数据。</div>
+</div>
+<p><strong>关键洞察</strong>：模型可以"合理化"正确答案——即使无法从零解题，给出答案后可以生成合理推理链。这扩大了有效训练数据量。</p>
+</div>
+
+<h3>13.6.4 RLVR（Reinforcement Learning from Verifiable Rewards）</h3>
+<div class="card">
+<div class="formula-block">
+$$\mathcal{L}_{\text{RLVR}}(\theta) = -\mathbb{E}_{q \sim \mathcal{D}, y \sim \pi_\theta}\!\left[\texttt{verify}(y, y^*)\right] + \beta \cdot D_{\text{KL}}\!\left[\pi_\theta \| \pi_{\text{ref}}\right]$$
+<div class="formula-explain">使用确定性验证器作为奖励（数学: SymPy/Lean4、代码: 单元测试、逻辑: 证明检查器）。相比RLHF：无reward model近似误差，不存在针对有缺陷RM的reward hacking。唯一风险：模型可能利用验证器/测试用例的弱点（如构造只通过特定测试但逻辑错误的代码）。</div>
+</div>
+<p><strong>适用条件</strong>：问题必须有自动可验证的正确性标准。R1证明了RLVR在数学和代码领域极其有效。开放挑战：如何将RLVR扩展到无明确验证器的领域（如创意写作、开放式推理）。</p>
+</div>
+
+<h3>13.6.5 Journey Learning（旅程学习）</h3>
+<div class="card">
+<p>主张在<strong>完整推理轨迹</strong>（包括失败尝试和纠正过程）上训练，而非只用成功的最终解。</p>
+<div class="formula-block">
+$$\mathcal{L}_{\text{journey}}(\theta) = -\sum_{t=0}^T w_t \cdot \log \pi_\theta(a_t | s_t)$$
+<div class="formula-explain">权重$w_t$的差异化设计：通向最终成功的步骤($w_t > 1$, 正强化)、错误后的纠正步骤($w_t \gg 1$, 特别重要——教模型"如何恢复")、失败分支的步骤($0 < w_t < 1$, 轻度负强化但不完全丢弃)。失败尝试包含宝贵信息：什么方法不行、如何识别错误、如何回溯。</div>
+</div>
+<p><strong>与标准rejection sampling的对比</strong>：标准方法只保留成功链（丢弃所有失败尝试），Journey Learning保留并利用整个"旅程"——包括死胡同和恢复过程。这训练模型不仅会做对，还会"知道何时做错了以及如何纠正"。</p>
+</div>
+
+<h3>13.6.6 Quiet-STaR</h3>
+<div class="card">
+<p>将推理范式扩展到<strong>每个token位置</strong>：在生成每个token时，先产生一段隐藏的"thought"，再基于thought预测下一个token。</p>
+<div class="formula-block">
+$$P(x_{t+1}|x_{\leq t}) = \alpha_t \cdot \pi_\theta(x_{t+1}|x_{\leq t}, z_t) + (1-\alpha_t) \cdot \pi_\theta(x_{t+1}|x_{\leq t})$$
+<div class="formula-explain">混合"有思考"和"无思考"的预测，$\alpha_t$是学习的混合权重，$z_t$是位置$t$的隐藏thought（离散token序列）。用REINFORCE训练离散隐变量$z_t$。代价：推理成本增加$(L_z+1)\times$（thought长度8时=9×FLOPs），对长序列不实际。</div>
+</div>
+<p><strong>意义</strong>：概念上优美——将"思考"嵌入每个预测步骤，但实践中计算成本过高。启发了后续研究将思考聚焦在关键位置（而非每个token）。</p>
+</div>
+
+<!-- ============ 13.7 ============ -->
+<h2 id="s7">13.7 Scaling Laws：训练 vs 推理计算</h2>
+
+<h3>13.7.1 双维度Scaling框架</h3>
+<div class="card">
+<p>核心问题：给定固定总预算$C_{\text{total}} = C_{\text{train}} + N \cdot C_{\text{test}}$（$N$=部署后总查询数），如何最优分配？</p>
+<div class="formula-block">
+$$A(C_{\text{train}}, C_{\text{test}}) \approx 1 - \exp\!\left(-a \cdot C_{\text{train}}^\alpha \cdot C_{\text{test}}^\beta\right)$$
+<div class="formula-explain">准确率$A$随训练计算$C_{\text{train}}$和推理计算$C_{\text{test}}$的幂律增长，但有渐近上限（趋向1）。$\alpha$和$\beta$分别描述两个计算维度的收益率。</div>
+</div>
+<div class="formula-block">
+$$\frac{\partial A}{\partial C_{\text{train}}} = \frac{\partial A}{\partial C_{\text{test}}} \quad \Longrightarrow \quad \frac{C_{\text{train}}^*}{C_{\text{total}}} \approx \frac{\alpha}{\alpha + \beta/N}$$
+<div class="formula-explain"><strong>最优分配条件</strong>：训练和推理的边际收益相等。关键洞察：训练投入被$N$个查询<strong>摊销</strong>（训练一次惠及所有查询），推理投入只惠及当前查询。因此：高频部署(大$N$) $\to$ 偏向训练投入；低频高价值查询(小$N$) $\to$ 偏向推理计算。</div>
+</div>
+</div>
+
+<h3>13.7.2 推理链长度 vs 模型容量</h3>
+<div class="card">
+<div class="formula-block">
+$$L^* \propto \frac{D}{C^\gamma}$$
+<div class="formula-explain">最优推理链长度$L^*$与问题难度$D$成正比、与模型容量$C$的$\gamma$次方成反比。更强的模型需要更短的推理链解决同一问题；更简单的问题需要更少思考步骤。</div>
+</div>
+<p><strong>"过度思考"（Overthinking）现象</strong>：推理链过长时性能反而下降！原因分析：</p>
+<ul>
+<li>错误累积：链越长，中间步骤出错的概率越高</li>
+<li>偏离主路径：过多探索导致远离正确解的方向</li>
+<li>对错误中间结论过度自信：长链中前面步骤的错误被后续步骤"巩固"</li>
+<li>注意力稀释：上下文越长，关键信息的注意力权重越低</li>
+</ul>
+</div>
+
+<h3>13.7.3 最优Token预算分配</h3>
+<div class="card">
+<p>固定token预算$B$时，"思考token"和"回答token"如何分配？经验规律：</p>
+<table>
+<tr><th>问题难度</th><th>推荐思考占比</th><th>示例</th></tr>
+<tr><td>简单</td><td>~30%</td><td>基础算术、简单逻辑</td></tr>
+<tr><td>中等</td><td>~60%</td><td>高中数学、标准代码题</td></tr>
+<tr><td>困难</td><td>~80%</td><td>竞赛数学、复杂算法</td></tr>
+<tr><td>极难</td><td>~95%</td><td>IMO级证明、研究级问题</td></tr>
+</table>
+<p><strong>自适应思考预算</strong>：理想方案是根据每个query的难度动态分配——可通过模型对初始解尝试的不确定性（如采样一致性、logit entropy）来估计难度。o1/o3通过可调的"reasoning effort"参数（low/medium/high）实现用户侧控制。</p>
+</div>
+
+<!-- ============ 13.8 ============ -->
+<h2 id="s8">13.8 推理模型对比总结</h2>
+
+<div class="card">
+<table>
+<tr><th>维度</th><th>DeepSeek-R1</th><th>OpenAI o1/o3</th><th>QwQ / Qwen3</th></tr>
+<tr><td>开源程度</td><td>完全开源（权重+方法）</td><td>闭源API</td><td>开源（权重+部分方法）</td></tr>
+<tr><td>基座模型</td><td>DeepSeek-V3 (671B MoE, 37B active)</td><td>未公开（推测GPT-4级别）</td><td>Qwen2.5 (32B / 72B)</td></tr>
+<tr><td>推理可见性</td><td>公开（&lt;think&gt;标签）</td><td>隐藏（Hidden Reasoning）</td><td>公开（&lt;think&gt;标签）</td></tr>
+<tr><td>PRM使用</td><td>不使用</td><td>使用</td><td>部分使用</td></tr>
+<tr><td>核心RL算法</td><td>GRPO</td><td>未公开（推测PPO变体）</td><td>GRPO</td></tr>
+<tr><td>奖励信号</td><td>纯ORM（准确+格式）</td><td>PRM + ORM组合</td><td>ORM为主，PRM辅助</td></tr>
+<tr><td>蒸馏</td><td>R1-Distill系列(1.5B-70B)</td><td>无公开蒸馏</td><td>无公开蒸馏</td></tr>
+<tr><td>工具集成</td><td>不支持</td><td>支持（代码/搜索）</td><td>支持（Python/搜索/计算器）</td></tr>
+<tr><td>训练特色</td><td>极简奖励 + 冷启动 + 六阶段</td><td>隐藏推理 + PRM + Scaling</td><td>RFT+RL迭代 + Tool-Integrated</td></tr>
+<tr><td>核心创新</td><td>"无PRM也够用"</td><td>"Hidden Reasoning Tokens"</td><td>"RFT+RL+Tool迭代"</td></tr>
+</table>
+</div>
+
+<div class="card">
+<h3>方法使用矩阵</h3>
+<table>
+<tr><th>方法/模型</th><th>PRM</th><th>ORM</th><th>MCTS</th><th>Distill</th><th>Tool</th><th>Open</th></tr>
+<tr><td>OpenAI o1/o3/o4-mini</td><td>✓</td><td>✓</td><td>未知</td><td>—</td><td>✓</td><td>✗</td></tr>
+<tr><td>DeepSeek-R1</td><td>✗</td><td>✓</td><td>✗</td><td>✓</td><td>✗</td><td>✓</td></tr>
+<tr><td>QwQ / Qwen3</td><td>部分</td><td>✓</td><td>✗</td><td>✗</td><td>✓</td><td>✓</td></tr>
+<tr><td>AlphaProof (DeepMind)</td><td>✓</td><td>✓</td><td>✓</td><td>—</td><td>✓(Lean4)</td><td>✗</td></tr>
+<tr><td>Math-Shepherd</td><td>✓(自动)</td><td>✓</td><td>✗</td><td>—</td><td>✗</td><td>✓</td></tr>
+<tr><td>STaR / Quiet-STaR</td><td>✗</td><td>✓</td><td>✗</td><td>—</td><td>✗</td><td>✓</td></tr>
+</table>
+</div>
+
+<!-- ============ 13.9 ============ -->
+<h2 id="s9">13.9 总结与开放问题</h2>
+
+<div class="takeaway">
+<h2>四大关键教训</h2>
+<ol>
+<li><strong>可验证奖励即足够</strong>：对有ground-truth验证的领域（数学、代码），仅outcome奖励就足以让RL发现复杂推理策略，无需PRM。</li>
+<li><strong>Test-time compute是新的scaling维度</strong>：推理模型引入新的计算轴——推理计算，与训练计算在难推理任务上大致可替代。</li>
+<li><strong>蒸馏高度有效</strong>：大推理模型可通过SFT将能力转移给小模型，往往优于直接RL训练小模型（瓶颈在exploration而非representation）。</li>
+<li><strong>涌现元认知</strong>：RL训练产生涌现的自我纠正、验证和回溯行为——这些并未被显式训练或奖励。</li>
+</ol>
+</div>
+
+<div class="card">
+<h3>开放问题</h3>
+<ul>
+<li><strong>泛化性</strong>：数学/代码上训练的推理能力能否迁移到其他领域（科学推理、社会推理、规划）？初步证据表明迁移有限。</li>
+<li><strong>忠实性（Faithfulness）</strong>：生成的推理链是否因果地负责最终答案？还是"事后合理化"——模型先直觉得到答案再编造推理过程？</li>
+<li><strong>最优搜索策略</strong>：推理时的最优搜索算法是什么？隐式（R1/o1的长CoT）vs 显式（MCTS/Beam）的最优选择取决于什么？</li>
+<li><strong>非可验证域的奖励设计</strong>：对没有ground-truth验证器的领域（创意写作、开放推理），如何设计可靠的推理奖励信号？</li>
+<li><strong>过度思考问题</strong>：模型如何学会分配恰当的思考量——对简单问题不过度思考，对难问题投入足够计算？</li>
+<li><strong>组合推理</strong>：当问题需要组合多种推理技能（数学+代码+常识+规划）时，单一RL训练能否覆盖？</li>
+<li><strong>安全对齐</strong>：推理模型在hidden/visible thinking中可能产生有害的中间推理。如何确保"思考过程"的安全性？</li>
+</ul>
+</div>
+
+<div class="highlight-box">
+<strong>范式转变</strong>：从"知道事情的语言模型"（knowledge retrieval）到"能弄清楚事情的语言模型"（reasoning and discovery）。RL方法是驱动这一转变的核心引擎。推理模型代表了LLM从"信息检索工具"向"思考引擎"的根本性进化。
+</div>
+
+<!-- ============ Q&A ============ -->
+<h2 id="qa">Q&A 深度解析</h2>
+
+<details>
+<summary>Q1：为什么DeepSeek-R1不使用PRM，而OpenAI o1用了？</summary>
+<div class="answer">
+<p>R1发现：对于数学和代码这类有确定性验证器的领域，纯结果奖励（ORM）就足够了。PRM的步骤级奖励虽然理论上更细粒度，但引入三个问题：(1) 需要昂贵的步骤标注数据或自动生成方法（如Math-Shepherd），增加Pipeline复杂度；(2) 模型会学会产出"看起来对"但实际不对的中间步骤——步骤级reward hacking更难检测；(3) PRM在一种推理链分布上训练，当RL改变策略分布后PRM可能失效（分布漂移问题）。R1用GRPO的组采样自然解决了信用分配：组内全对/全错时梯度为零，自动聚焦边界问题。o1可能因为需要处理更多非可验证领域（如科学推理），保留了PRM作为更精细的信号源。</p>
+</div>
+</details>
+
+<details>
+<summary>Q2：GRPO相比PPO的核心优势是什么？</summary>
+<div class="answer">
+<p>PPO需要训练一个独立的Critic（价值网络），参数量通常与Policy相当（671B级别的Critic代价极高），且Critic的准确性直接影响训练质量。GRPO用"组内相对比较"替代Critic：对每个问题采样$G$个回复，用组均值/标准差归一化奖励得到优势估计。优点：(1) 无需额外价值网络，节省一半GPU显存和训练计算；(2) 组归一化自然适应reward scale变化，不需要reward normalization；(3) 内置课程学习——随模型变强，$\sigma_r$在多数问题上下降，只有边界难度的问题仍有梯度；(4) 实现简单，工程复杂度低。代价是每个问题需要$G$次采样（$G=8$意味着8×生成成本），但这可通过vLLM等高效推理框架缓解。</p>
+</div>
+</details>
+
+<details>
+<summary>Q3：小模型应该直接RL训练还是蒸馏？</summary>
+<div class="answer">
+<p>蒸馏几乎总是更优（对≤70B模型）。R1-Distill-Qwen-7B在MATH上超过了直接用GRPO从头训练的7B模型。根本原因：小模型缺乏<strong>探索能力</strong>。RL需要模型在指数级搜索空间中发现有效推理策略，但7B模型的策略分布太"窄"，随机探索几乎不可能碰到高质量推理模式。相比之下，671B模型有足够的参数多样性来探索和发现这些模式。一旦大模型发现了有效策略（体现为高质量推理链），小模型完全有足够的<strong>表示能力</strong>通过SFT模仿。蒸馏后模型对新题型也有泛化能力——不是纯记忆，而是学到了"推理风格"。例外：如果没有大推理模型可用，或任务域太独特大模型也没见过，直接RL可能是唯一选择。</p>
+</div>
+</details>
+
+<details>
+<summary>Q4：Test-Time Compute Scaling有上限吗？</summary>
+<div class="answer">
+<p>有多层上限：(1) <strong>RM质量上限</strong>：BoN方法中imperfect RM导致$N \approx 64$-$256$后reward hacking占主导，准确率反而下降。(2) <strong>过度思考上限</strong>：推理链太长时错误累积、注意力稀释、对错误中间结论过度自信，性能反降。(3) <strong>模型知识上限</strong>：无论多少思考时间，如果模型不具备解题所需的基础知识/技能，推理计算无法弥补。公式$\text{Pass@1}(T) \approx a - b \cdot T^{-c}$中$a$就是这个渐近上限。(4) <strong>经济上限</strong>：推理成本线性增长但收益递减，边际成本终将超过边际收益。实践建议：对每个模型-任务组合，实证确定"甜蜜点"——超过该点的额外推理计算得不偿失。</p>
+</div>
+</details>
+
+<details>
+<summary>Q5：隐式搜索（R1/o1的长CoT）vs 显式搜索（MCTS），哪种更好？</summary>
+<div class="answer">
+<p>各有优劣：<strong>隐式搜索</strong>（R1/o1）：模型在单次自回归生成中执行内部搜索——探索多种方法、回溯、验证。优点：无需外部基础设施、延迟低、自然语言生成。缺点：搜索效率依赖模型内化的策略质量、无法精确控制搜索预算、难以保证最优性。<strong>显式搜索</strong>（MCTS/AlphaProof）：外部编排的结构化搜索。优点：可证明的探索-利用平衡（UCB理论保证）、可精确控制计算预算、对非常难的问题更系统化。缺点：工程复杂、需要训练价值模型、延迟高、每步需多次LLM调用。当前趋势：简单-中等问题用隐式搜索（R1/o1），极难问题（IMO级数学证明）用显式MCTS。未来可能融合两者。</p>
+</div>
+</details>
+
+<details>
+<summary>Q6：QwQ的"RFT+RL迭代"比R1的纯RL好在哪？</summary>
+<div class="answer">
+<p>QwQ的方法更稳定，尤其对中等规模模型（32B）。纯RL（R1的GRPO）是完全在线学习，策略在探索中可能跑偏（尤其模型小时探索噪声大）。RFT+RL迭代的好处：(1) RFT每轮提供"锚点"——保留当前策略能生成的最佳解做SFT，防止策略退化；(2) SFT稳定步骤相当于"exploitation确认"，然后RL步骤做"exploration推进"；(3) 交替执行形成渐进改善——每轮RFT的数据质量因上一轮RL而提升，每轮RL的起点因RFT而更稳定。代价是Pipeline更复杂（需管理多轮数据生成和筛选）、总训练时间更长。R1之所以能用纯RL，很大程度因为671B基座足够强——大模型的探索稳定性天然更好。</p>
+</div>
+</details>
+
+<details>
+<summary>Q7：Journey Learning vs 只训练成功案例，有什么独特价值？</summary>
+<div class="answer">
+<p>标准rejection sampling只用最终成功的推理链训练，丢弃所有失败尝试。但失败中包含三类宝贵信息：(1) <strong>什么方法不行</strong>（负面示例，避免重复犯同类错误）；(2) <strong>如何识别和恢复错误</strong>（纠正模式，教模型回溯能力——这是推理模型最重要的能力之一）；(3) <strong>问题空间的结构</strong>（探索数据，理解哪些路径通向何处）。Journey Learning通过差异化权重同时利用成功和失败：成功步骤$w>1$（正强化）、纠正步骤$w \gg 1$（特别强化——教模型"发现错误并修正"这个关键技能）、失败步骤$0<w<1$（轻度负强化但不完全忽略）。这训练出的模型不仅会做对，还具备"自我纠错"的元能力。</p>
+</div>
+</details>
+
+<details>
+<summary>Q8：训练计算 vs 推理计算的最优分配策略？</summary>
+<div class="answer">
+<p>取决于<strong>部署场景</strong>：(1) <strong>高频部署</strong>（大$N$，如搜索引擎、聊天机器人）：训练投入被$N$个查询摊销，即使微小的base model改进在累积上也极有价值$\to$偏向训练投入、用大模型。(2) <strong>低频高价值</strong>（小$N$，如科研/竞赛/关键决策）：推理计算只服务当前query，但每个query的价值极高$\to$偏向test-time计算、让模型多想。(3) <strong>实时性约束</strong>：如果延迟是硬约束（如自动驾驶），推理计算被严格限制$\to$必须通过训练压缩推理能力。最优策略是<strong>自适应</strong>：根据每个query的(a)难度估计、(b)重要性、(c)延迟要求，动态分配思考预算。o1/o3通过"reasoning effort"参数(low/medium/high)提供了初步的用户侧控制。</p>
+</div>
+</details>
+
+</body>
+</html>

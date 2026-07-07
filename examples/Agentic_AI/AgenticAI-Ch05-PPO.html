@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第5章 阅读笔记：PPO — Proximal Policy Optimization</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]})"></script>
+<style>
+:root { --primary: #2c3e50; --accent: #3498db; --bg: #fafbfc; --card-bg: #ffffff; --border: #e1e4e8; --text: #24292e; --text-secondary: #586069; --code-bg: #f6f8fa; --highlight: #fff3cd; --success: #d4edda; --info: #d1ecf1; }
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; line-height: 1.8; color: var(--text); background: var(--bg); padding: 2rem; max-width: 900px; margin: 0 auto; }
+h1 { font-size: 1.8rem; color: var(--primary); border-bottom: 3px solid var(--accent); padding-bottom: 0.5rem; margin-bottom: 1rem; }
+h2 { font-size: 1.4rem; color: var(--primary); margin-top: 2.5rem; margin-bottom: 1rem; padding-left: 0.8rem; border-left: 4px solid var(--accent); }
+h3 { font-size: 1.15rem; color: var(--primary); margin-top: 1.8rem; margin-bottom: 0.8rem; }
+p { margin-bottom: 1rem; text-align: justify; }
+ul, ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+li { margin-bottom: 0.5rem; }
+code { background: var(--code-bg); padding: 0.15rem 0.4rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: var(--code-bg); padding: 1rem; border-radius: 6px; overflow-x: auto; margin-bottom: 1.5rem; border: 1px solid var(--border); }
+pre code { background: none; padding: 0; }
+blockquote { border-left: 4px solid var(--accent); padding: 0.8rem 1.2rem; margin: 1.5rem 0; background: var(--info); border-radius: 0 6px 6px 0; }
+.card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+.formula-block { background: var(--code-bg); border: 1px solid var(--border); border-radius: 6px; padding: 1rem; margin: 1rem 0; overflow-x: auto; }
+.formula-explain { color: var(--text-secondary); font-size: 0.92em; margin-top: 0.5rem; padding-left: 1rem; border-left: 3px solid #ddd; }
+.highlight-box { background: var(--highlight); border: 1px solid #ffc107; border-radius: 6px; padding: 1rem; margin: 1rem 0; }
+.info-box { background: var(--info); border: 1px solid #bee5eb; border-radius: 6px; padding: 1rem; margin: 1rem 0; }
+.success-box { background: var(--success); border: 1px solid #c3e6cb; border-radius: 6px; padding: 1rem; margin: 1rem 0; }
+.subtitle { color: var(--text-secondary); font-size: 1rem; margin-bottom: 0.3rem; }
+.meta { color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 2rem; }
+table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; }
+th, td { border: 1px solid var(--border); padding: 0.6rem 0.8rem; text-align: left; }
+th { background: var(--code-bg); font-weight: 600; }
+details { margin-bottom: 1rem; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+summary { padding: 0.8rem 1.2rem; background: var(--code-bg); cursor: pointer; font-weight: 500; }
+details[open] summary { border-bottom: 1px solid var(--border); }
+details .answer { padding: 1rem 1.2rem; }
+svg { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; }
+.takeaway { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 8px; padding: 1.5rem; margin: 2rem 0; }
+.takeaway h2 { color: white; border-left-color: rgba(255,255,255,0.5); }
+.takeaway li { color: rgba(255,255,255,0.95); }
+</style>
+</head>
+<body>
+
+<h1>第5章 阅读笔记：PPO — Proximal Policy Optimization</h1>
+<p class="subtitle">Agentic AI · Chapter 5 · 近端策略优化</p>
+<p class="meta">来源：Agentic AI.pdf · 页码 136–144 · 笔记生成于 2026-06-25</p>
+
+<!-- ===== 摘要 ===== -->
+<div class="card">
+<h3>本章摘要</h3>
+<p><strong>PPO（Proximal Policy Optimization，近端策略优化）</strong>是当前大模型强化学习对齐（RLHF）中最核心的策略优化算法，由 OpenAI 的 John Schulman 于 2017 年提出。PPO 的核心创新在于：通过一个简单的 <strong>clip（裁剪）</strong>操作来限制新旧策略之间的变化幅度，以极低的工程复杂度实现了与 TRPO（Trust Region Policy Optimization）相当的训练稳定性。本章从 Policy Gradient 的历史问题出发，经由 TRPO 的信赖域思想，引出 PPO 的 Clipped Objective；然后展示完整的 PPO 损失函数（策略损失 + 价值损失 + 熵正则项），并通过严格的 6 步数学推导梳理从目标函数到参数更新规则的完整逻辑链路。随后详细描述 Rollout Buffer 的数据结构与生命周期、两阶段训练流程（数据收集 + Mini-Batch 优化）、从模型 logits 到概率比的实现细节，以及权重在训练过程中的同步机制。最后将算法扩展到连续动作空间（机器人控制场景），展示 PPO 的通用性。</p>
+</div>
+
+<!-- ===== 5.1 ===== -->
+<h2>5.1 Motivation and History — 动机与历史</h2>
+
+<h3>策略梯度的根本困境</h3>
+<p>策略梯度（Policy Gradient）方法面临一个核心矛盾：<strong>步长太大则策略崩溃，步长太小则学习极慢</strong>。这不是一个简单的超参数调优问题，而是策略空间的几何性质决定的。在参数空间中一个"小"的更新，可能导致策略分布发生剧烈变化（特别是在概率接近 0 或 1 的区域），从而使后续采样的数据全部失效——这就是所谓的 <em>catastrophic policy collapse</em>（灾难性策略崩溃）。</p>
+
+<h3>REINFORCE 的问题</h3>
+<p><strong>REINFORCE</strong>（Williams, 1992）是最基础的策略梯度算法，其更新规则为：</p>
+<div class="formula-block">
+$$\theta \leftarrow \theta + \alpha \sum_{t} \nabla_\theta \log \pi_\theta(a_t|s_t) \cdot G_t$$
+<p class="formula-explain">其中 $G_t = \sum_{k=t}^T r_k$ 是从时间步 $t$ 开始的累积回报。问题在于：$G_t$ 的方差极大（因为它依赖整条轨迹），导致梯度估计极不稳定；同时没有任何机制限制策略的变化幅度。</p>
+</div>
+
+<h3>TRPO：信赖域方法</h3>
+<p><strong>TRPO（Trust Region Policy Optimization，2015, Schulman et al.）</strong>提出了优雅的解决思路：不直接限制参数步长，而是限制策略分布本身的变化。具体来说，它在优化目标上加入了 KL 散度约束：</p>
+<div class="formula-block">
+$$\max_{\theta} \; \mathbb{E}_t \left[ \frac{\pi_\theta(a_t|s_t)}{\pi_{\theta_{\text{old}}}(a_t|s_t)} \hat{A}_t \right] \quad \text{s.t.} \quad \mathbb{E}_t \left[ D_{\text{KL}}\big(\pi_{\theta_{\text{old}}}(\cdot|s_t) \,\|\, \pi_\theta(\cdot|s_t)\big) \right] \leq \delta$$
+<p class="formula-explain"><strong>直觉</strong>：最大化预期收益改进，但约束"新策略与旧策略的分布距离"不超过阈值 $\delta$。这保证了每次更新都在一个"信赖域"（trust region）内进行。</p>
+</div>
+
+<p>TRPO 效果显著，但工程实现复杂：需要计算 Fisher 信息矩阵（二阶导数）、使用共轭梯度法求解约束优化问题、还需要线搜索确定步长。这使得 TRPO 难以 scale 到大模型。</p>
+
+<h3>PPO：用 Clip 代替 KL 约束</h3>
+<p><strong>PPO（2017，OpenAI, John Schulman）</strong>的核心洞察是：与其用硬性的 KL 约束（需要二阶优化求解器），不如直接在目标函数里"削掉"那些策略变化太大的部分。用<strong>一行 clip 操作</strong>替代了 TRPO 整套复杂的信赖域求解过程。</p>
+
+<div class="highlight-box">
+<strong>类比理解</strong>：TRPO 像是在高速公路上设置限速摄像头——你必须时刻监测 KL 散度是否超标，超了就要回退。PPO 则像给方向盘加装了物理限位器——你根本<em>转不了</em>超过某个角度，连监测都不需要。实现简单、效果相当，这就是 PPO 在 2017 年之后迅速成为事实标准的原因。
+</div>
+
+<div class="info-box">
+<strong>历史地位</strong>：PPO 是 OpenAI 训练 ChatGPT/GPT-4 的核心算法，也是 Anthropic 训练 Claude 的基础方法。在 RLHF pipeline 中，PPO 负责"根据奖励模型的反馈，让 LLM 学会生成人类偏好的回复"。
+</div>
+
+<!-- ===== 5.2 ===== -->
+<h2>5.2 The Clipped Objective — 裁剪目标函数</h2>
+
+<h3>概率比（Probability Ratio）的定义</h3>
+<p>PPO 的核心构建块是<strong>概率比</strong> $r_t(\theta)$，它衡量新策略相对于旧策略在同一个 (state, action) 对上的变化：</p>
+<div class="formula-block">
+$$r_t(\theta) = \frac{\pi_\theta(a_t | s_t)}{\pi_{\theta_{\text{old}}}(a_t | s_t)}$$
+<p class="formula-explain"><strong>语义</strong>：$r_t = 1$ 表示新旧策略完全一致；$r_t > 1$ 表示新策略更倾向于选择动作 $a_t$（概率变大了）；$r_t < 1$ 表示新策略更不倾向选择 $a_t$（概率变小了）。训练刚开始时 $r_t \approx 1$（因为 $\theta$ 刚从 $\theta_{\text{old}}$ 复制而来），随着优化推进逐渐偏离。</p>
+</div>
+
+<h3>Clipped Surrogate Objective 的完整形式</h3>
+<div class="formula-block">
+$$L^{\text{CLIP}}(\theta) = \mathbb{E}_t \left[ \min \Big( r_t(\theta) \, \hat{A}_t, \;\; \text{clip}\big(r_t(\theta),\; 1-\epsilon,\; 1+\epsilon\big) \cdot \hat{A}_t \Big) \right]$$
+<p class="formula-explain"><strong>逐项解释</strong>：<br>
+• $r_t(\theta) \hat{A}_t$ — <strong>未裁剪项</strong>（unclipped term），就是标准的 importance-sampled surrogate objective。<br>
+• $\text{clip}(r_t(\theta), 1-\epsilon, 1+\epsilon)$ — 将概率比强制截断到 $[1-\epsilon, 1+\epsilon]$ 区间（典型值 $\epsilon = 0.2$）。<br>
+• $\hat{A}_t$ — <strong>优势函数</strong>（Advantage），衡量"在状态 $s_t$ 下选择动作 $a_t$ 比平均水平好多少"。正值 = 好动作，负值 = 差动作。<br>
+• $\min(\cdot, \cdot)$ — 取两项中较小的值，构造一个<strong>悲观下界</strong>（pessimistic lower bound）。</p>
+</div>
+
+<h3>Clip 机制的直觉：分情况讨论</h3>
+<div class="card">
+<h3>情况一：$\hat{A}_t > 0$（好动作，想鼓励）</h3>
+<p>此时 $r_t \cdot \hat{A}_t$ 越大越好。优化器会试图增大 $r_t$（即增大新策略选择该动作的概率）。但 clip 将 $r_t$ 封顶在 $1+\epsilon$：</p>
+<ul>
+<li>当 $r_t \leq 1+\epsilon$ 时：$\min$ 取 $r_t \hat{A}_t$（正常梯度，继续鼓励）</li>
+<li>当 $r_t > 1+\epsilon$ 时：clipped 项 = $(1+\epsilon)\hat{A}_t$ 小于 $r_t \hat{A}_t$，$\min$ 取 clipped 项（梯度为零，停止鼓励）</li>
+</ul>
+<p><strong>效果</strong>：即使新策略极度喜欢这个好动作，收益也被封顶在 $(1+\epsilon)\hat{A}_t$。防止"一步到位"式的贪心更新。</p>
+
+<h3>情况二：$\hat{A}_t < 0$（差动作，想抑制）</h3>
+<p>此时 $r_t \cdot \hat{A}_t$ 越负越好。优化器会试图减小 $r_t$（降低选择该动作的概率）。但 clip 将 $r_t$ 的下界设为 $1-\epsilon$：</p>
+<ul>
+<li>当 $r_t \geq 1-\epsilon$ 时：$\min$ 取 $r_t \hat{A}_t$（正常梯度，继续抑制）</li>
+<li>当 $r_t < 1-\epsilon$ 时：clipped 项 = $(1-\epsilon)\hat{A}_t$，由于 $\hat{A}_t < 0$，$(1-\epsilon)\hat{A}_t > r_t \hat{A}_t$，$\min$ 取 $r_t \hat{A}_t$... </li>
+</ul>
+<p>实际上需要更仔细地分析：当 $\hat{A}_t < 0$ 且 $r_t < 1-\epsilon$ 时，unclipped = $r_t \hat{A}_t$（正值，因为负×负=正），clipped = $(1-\epsilon)\hat{A}_t$（负值）。$\min$ 取 clipped = $(1-\epsilon)\hat{A}_t$，梯度为零。</p>
+<p><strong>效果</strong>：已经大幅降低了差动作概率后，惩罚被封底，防止策略分布塌缩为 0。</p>
+</div>
+
+<h3>Clip 函数可视化</h3>
+<svg viewBox="0 0 620 300" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,sans-serif">
+  <defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#6b7280"/></marker></defs>
+  <line x1="80" y1="250" x2="580" y2="250" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arr)"/>
+  <line x1="80" y1="280" x2="80" y2="30" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="590" y="255" font-size="12" fill="#4b5563">r_t(θ)</text>
+  <text x="55" y="25" font-size="12" fill="#4b5563">L</text>
+  <text x="200" y="270" text-anchor="middle" font-size="11" fill="#6b7280">1−ε</text>
+  <text x="330" y="270" text-anchor="middle" font-size="11" fill="#6b7280">1.0</text>
+  <text x="460" y="270" text-anchor="middle" font-size="11" fill="#6b7280">1+ε</text>
+  <line x1="200" y1="45" x2="200" y2="250" stroke="#cbd5e1" stroke-width="1" stroke-dasharray="4,3"/>
+  <line x1="330" y1="45" x2="330" y2="250" stroke="#cbd5e1" stroke-width="1" stroke-dasharray="4,3"/>
+  <line x1="460" y1="45" x2="460" y2="250" stroke="#cbd5e1" stroke-width="1" stroke-dasharray="4,3"/>
+  <text x="540" y="75" font-size="12" fill="#2563eb" font-weight="600">Â > 0</text>
+  <line x1="80" y1="220" x2="460" y2="80" stroke="#2563eb" stroke-width="2.5"/>
+  <line x1="460" y1="80" x2="580" y2="80" stroke="#2563eb" stroke-width="2.5" stroke-dasharray="6,3"/>
+  <text x="540" y="225" font-size="12" fill="#dc2626" font-weight="600">Â &lt; 0</text>
+  <line x1="200" y1="180" x2="580" y2="235" stroke="#dc2626" stroke-width="2.5"/>
+  <line x1="80" y1="180" x2="200" y2="180" stroke="#dc2626" stroke-width="2.5" stroke-dasharray="6,3"/>
+  <rect x="200" y="75" width="260" height="165" fill="#3498db" fill-opacity="0.05" rx="4"/>
+  <text x="330" y="165" text-anchor="middle" font-size="11" fill="#6b7280">有效更新区间</text>
+  <circle cx="460" cy="80" r="5" fill="#2563eb"/>
+  <circle cx="200" cy="180" r="5" fill="#dc2626"/>
+</svg>
+<p style="text-align:center; color:var(--text-secondary); font-size:0.88em;">图：Clip 目标函数。蓝线（Â>0）在 r=1+ε 处封顶；红线（Â&lt;0）在 r=1−ε 处封底。虚线段梯度为零。</p>
+
+<div class="highlight-box">
+<strong>一句话总结 Clip 的本质</strong>：好动作可以鼓励但不能过度鼓励，差动作可以抑制但不能过度抑制。每次更新的"力度"被限制在 $\pm\epsilon$ 范围内。这种"温和教学"策略是 PPO 稳定性的核心来源。
+</div>
+
+<!-- ===== 5.3 ===== -->
+<h2>5.3 Full PPO Loss — 完整 PPO 损失函数</h2>
+
+<p>PPO 的总损失由<strong>三个组件</strong>加权组成：</p>
+
+<div class="formula-block">
+$$L^{\text{PPO}}(\theta) = \mathbb{E}_t \Big[ L_t^{\text{CLIP}}(\theta) \;-\; c_1 \cdot L_t^{\text{VF}}(\theta) \;+\; c_2 \cdot S[\pi_\theta](s_t) \Big]$$
+<p class="formula-explain"><strong>三项的含义</strong>：<br>
+① <strong>$L^{\text{CLIP}}$</strong>（策略损失）：Clipped Surrogate Objective，驱动策略朝高 Advantage 的方向更新。<br>
+② <strong>$L^{\text{VF}}$</strong>（价值函数损失）：训练 Critic 网络准确估计状态价值，通常为均方误差 $L^{\text{VF}}_t = \big(V_\theta(s_t) - V_t^{\text{target}}\big)^2$。<br>
+③ <strong>$S[\pi_\theta]$</strong>（熵奖励）：策略分布的熵 $H(\pi_\theta(\cdot|s_t)) = -\sum_a \pi_\theta(a|s_t)\log\pi_\theta(a|s_t)$，鼓励探索。<br><br>
+$c_1 \approx 0.5$（价值损失权重），$c_2 \approx 0.01$（熵系数）。注意 $L^{\text{VF}}$ 前为负号（最小化误差），$S$ 前为正号（最大化熵）。</p>
+</div>
+
+<h3>三个组件的协同作用</h3>
+<div class="card">
+<table>
+<tr><th>组件</th><th>作用</th><th>缺失的后果</th></tr>
+<tr><td>$L^{\text{CLIP}}$（策略损失）</td><td>让策略学会选择高 Advantage 的动作</td><td>策略不更新或方向错误</td></tr>
+<tr><td>$L^{\text{VF}}$（价值损失）</td><td>让 Critic 准确估值，为 Advantage 计算提供低方差基线</td><td>Advantage 估计有偏，梯度噪声大</td></tr>
+<tr><td>$S[\pi_\theta]$（熵正则）</td><td>维持策略的随机性，鼓励探索多样性</td><td>模式坍塌（mode collapse），策略退化为确定性</td></tr>
+</table>
+</div>
+
+<h3>Value Function Loss 的 Clip 变体</h3>
+<p>在某些 PPO 实现中（如 OpenAI baselines），价值函数损失也会使用 clip：</p>
+<div class="formula-block">
+$$L^{\text{VF,clip}}_t = \max\Big[\big(V_\theta(s_t) - V_t^{\text{target}}\big)^2, \;\big(\text{clip}(V_\theta(s_t),\, V_{\text{old}}(s_t) \pm \epsilon_v) - V_t^{\text{target}}\big)^2\Big]$$
+<p class="formula-explain">这里对 Critic 的预测值也做 clip，防止价值函数更新幅度过大。实践中发现此变体对稳定性帮助有限，部分实现会省略。</p>
+</div>
+
+<div class="info-box">
+<strong>LLM 对齐场景的特殊处理</strong>：在 RLHF 中，Actor 和 Critic 通常是两个独立的模型（Critic 可能是与 Actor 同架构但独立训练的网络）。熵项有时被替换为 KL penalty：$\beta \cdot D_{\text{KL}}(\pi_\theta \| \pi_{\text{ref}})$，其中 $\pi_{\text{ref}}$ 是 SFT 参考模型，防止生成偏离参考策略太远。
+</div>
+
+<!-- ===== 5.4 ===== -->
+<h2>5.4 Derivation — PPO 梯度推导（6 步）</h2>
+
+<p>以下从最基础的 RL 目标函数出发，经过 6 个严格的步骤，推导出 PPO 的实际参数更新规则。每一步都不跳跃。</p>
+
+<div class="card">
+<h3>Step 1：定义 RL 优化目标</h3>
+<p>强化学习的根本目标是最大化策略的期望累积回报：</p>
+$$J(\theta) = \mathbb{E}_{\tau \sim \pi_\theta}\left[\sum_{t=0}^T r_t\right]$$
+<p>其中 $\tau = (s_0, a_0, r_0, s_1, a_1, r_1, \ldots)$ 是一条完整轨迹。直接优化这个目标需要新策略的采样（on-policy），数据效率低。</p>
+<p><strong>代理目标</strong>（Surrogate Objective）：为了复用旧策略 $\pi_{\theta_{\text{old}}}$ 采集的数据，引入 importance sampling：</p>
+$$L(\theta) = \mathbb{E}_{t \sim \pi_{\theta_{\text{old}}}} \left[ \frac{\pi_\theta(a_t|s_t)}{\pi_{\theta_{\text{old}}}(a_t|s_t)} \cdot \hat{A}_t \right] = \mathbb{E}_t\left[ r_t(\theta) \cdot \hat{A}_t \right]$$
+<p class="formula-explain">这就是"surrogate objective"——用旧策略采的数据来估计新策略的期望改进。当 $\theta = \theta_{\text{old}}$ 时，$r_t = 1$，$L = \mathbb{E}_t[\hat{A}_t]$。</p>
+</div>
+
+<div class="card">
+<h3>Step 2：策略梯度 — 对 $\theta$ 求导</h3>
+<p>对 $L(\theta) = \mathbb{E}_t[r_t(\theta) \cdot \hat{A}_t]$ 求关于 $\theta$ 的梯度。注意 $\pi_{\theta_{\text{old}}}$ 是常数（旧策略已冻结），$\hat{A}_t$ 也是常数（用旧策略计算好的）：</p>
+$$\nabla_\theta L(\theta) = \mathbb{E}_t \left[ \frac{\nabla_\theta \pi_\theta(a_t|s_t)}{\pi_{\theta_{\text{old}}}(a_t|s_t)} \cdot \hat{A}_t \right]$$
+<p class="formula-explain">求导只作用于分子 $\pi_\theta(a_t|s_t)$，分母 $\pi_{\theta_{\text{old}}}$ 是常数直接保留。</p>
+</div>
+
+<div class="card">
+<h3>Step 3：Log-Derivative Trick（重要性采样形式）</h3>
+<p>利用恒等式 $\nabla_\theta \pi_\theta = \pi_\theta \cdot \nabla_\theta \log \pi_\theta$（两边对 $\log \pi$ 用链式法则即可验证），代入 Step 2：</p>
+$$\nabla_\theta L(\theta) = \mathbb{E}_t \left[ \frac{\pi_\theta(a_t|s_t) \cdot \nabla_\theta \log \pi_\theta(a_t|s_t)}{\pi_{\theta_{\text{old}}}(a_t|s_t)} \cdot \hat{A}_t \right]$$
+$$= \mathbb{E}_t \left[ r_t(\theta) \cdot \nabla_\theta \log \pi_\theta(a_t|s_t) \cdot \hat{A}_t \right]$$
+<p class="formula-explain"><strong>关键</strong>：这给出了代理目标的梯度形式——概率比 $r_t(\theta)$ 乘以 log 概率的梯度乘以 Advantage。当 $\theta = \theta_{\text{old}}$ 时，$r_t = 1$，退化为标准策略梯度 $\nabla_\theta \log \pi_\theta \cdot \hat{A}_t$。</p>
+</div>
+
+<div class="card">
+<h3>Step 4：无约束优化的问题 → 引入 Clip</h3>
+<p>Step 1-3 给出的是无约束的 surrogate objective。问题在于：如果 $r_t(\theta)$ 偏离 1 太远，importance sampling 的方差会爆炸，更新可能导致策略崩溃。</p>
+<p><strong>PPO 的解决方案</strong>：将目标函数修改为 clipped 版本：</p>
+$$L^{\text{CLIP}}(\theta) = \mathbb{E}_t\left[\min\big(r_t(\theta)\hat{A}_t,\;\text{clip}(r_t(\theta), 1-\epsilon, 1+\epsilon)\hat{A}_t\big)\right]$$
+<p>其梯度变为<strong>分段函数</strong>：</p>
+$$\nabla_\theta L^{\text{CLIP}} = \mathbb{E}_t \left[ \begin{cases} r_t(\theta) \cdot \nabla_\theta \log \pi_\theta(a_t|s_t) \cdot \hat{A}_t & \text{if } r_t(\theta) \in [1-\epsilon,\; 1+\epsilon] \\ 0 & \text{otherwise (被 clip 区域)} \end{cases} \right]$$
+<p class="formula-explain"><strong>核心洞察</strong>：当 $r_t$ 落在 $[1-\epsilon, 1+\epsilon]$ 范围内时，正常计算梯度进行更新；一旦超出此范围，梯度<strong>被强制归零</strong>——策略变化已经够大了，不再继续更新。这就是 PPO 稳定性的数学来源：<strong>clip 相当于一个自适应的"紧急刹车"</strong>。</p>
+</div>
+
+<div class="card">
+<h3>Step 5：Mini-Batch 经验近似</h3>
+<p>在实践中，期望 $\mathbb{E}_t[\cdot]$ 无法精确计算，用从 Rollout Buffer 中采样的 mini-batch $B$ 来近似：</p>
+$$\nabla_\theta L^{\text{CLIP}} \approx \frac{1}{|B|} \sum_{t \in B} \mathbb{1}\big[r_t(\theta) \in [1-\epsilon, 1+\epsilon]\big] \cdot r_t(\theta) \cdot \nabla_\theta \log \pi_\theta(a_t|s_t) \cdot \hat{A}_t$$
+<p class="formula-explain">$\mathbb{1}[\cdot]$ 是指示函数。实际实现中不需要显式计算指示函数——PyTorch/JAX 的自动微分会在 clip 区域自动产生零梯度。<br><br>
+<strong>实现细节</strong>：在代码中通常写成 <code>loss = -torch.min(ratio * adv, clipped_ratio * adv).mean()</code>，取负号是因为优化器默认做梯度下降（minimize），而我们要最大化目标。</p>
+</div>
+
+<div class="card">
+<h3>Step 6：完整参数更新规则</h3>
+<p>合并三项损失，最终的参数更新为：</p>
+$$\theta \leftarrow \theta + \alpha \cdot \nabla_\theta \left[ L^{\text{CLIP}}(\theta) - c_1 L^{\text{VF}}(\theta) + c_2 S[\pi_\theta] \right]$$
+<p>在实际实现中使用 Adam 优化器：</p>
+$$\theta \leftarrow \text{Adam}\Big(\theta,\; -\nabla_\theta\big[ L^{\text{CLIP}} - c_1 L^{\text{VF}} + c_2 S \big],\; \text{lr}=\alpha\Big)$$
+<p class="formula-explain"><strong>总结推导链路</strong>：RL目标 → 代理目标（importance sampling） → 策略梯度（log trick） → Clip 约束（分段梯度归零） → Mini-batch 近似 → Adam 更新。整条链路的核心创新在 <strong>Step 4</strong>——用 clip 将"trust region"思想内化到目标函数中，无需任何二阶优化。</p>
+</div>
+
+<!-- ===== 5.5 ===== -->
+<h2>5.5 Rollout Buffer — 经验缓冲区</h2>
+
+<h3>什么是 Rollout？</h3>
+<p><strong>Rollout</strong>（展开）指的是让 Actor 用当前策略 $\pi_{\theta_{\text{old}}}$ 与环境交互，收集一段完整的经验轨迹。在 LLM 场景中，一次 rollout 就是：给模型一个 prompt，让它生成一段完整回复（直到 EOS token 或达到最大长度），同时记录每一步的 token、log 概率和奖励。</p>
+
+<h3>Buffer 的数据结构</h3>
+<div class="card">
+<table>
+<tr><th>字段</th><th>含义</th><th>来源</th><th>维度</th></tr>
+<tr><td>$s_t$</td><td>状态（prompt + 已生成 token）</td><td>环境观测</td><td>序列长度变化</td></tr>
+<tr><td>$a_t$</td><td>动作（选择的 token ID）</td><td>Actor 采样</td><td>标量</td></tr>
+<tr><td>$r_t$</td><td>奖励</td><td>奖励模型 / 规则验证器</td><td>标量</td></tr>
+<tr><td>$\log \pi_{\theta_{\text{old}}}(a_t|s_t)$</td><td>旧策略对该动作的 log 概率</td><td>Actor 推理时记录</td><td>标量</td></tr>
+<tr><td>$V_{\text{old}}(s_t)$</td><td>状态价值估计</td><td>Critic 推理</td><td>标量</td></tr>
+<tr><td>$\hat{A}_t$</td><td>优势估计（GAE 计算）</td><td>后处理</td><td>标量</td></tr>
+<tr><td>$V_t^{\text{target}}$</td><td>价值函数的回归目标</td><td>后处理</td><td>标量</td></tr>
+<tr><td>done</td><td>回合是否结束</td><td>环境信号</td><td>布尔</td></tr>
+</table>
+</div>
+
+<h3>Rollout Buffer 的生命周期</h3>
+<ol>
+<li><strong>初始化</strong>：清空 buffer，将当前策略快照为 $\theta_{\text{old}}$。</li>
+<li><strong>数据收集</strong>：Actor 用 $\pi_{\theta_{\text{old}}}$（推理模式，不计算梯度）与环境交互 $T$ 步（或 $N$ 条完整轨迹），逐步填充 buffer。</li>
+<li><strong>后处理（GAE 计算）</strong>：收集完成后，利用 Critic 的 $V(s_t)$ 和实际奖励 $r_t$，从后向前递推计算每个时间步的 $\hat{A}_t$ 和 $V_t^{\text{target}}$。</li>
+<li><strong>优化阶段</strong>：从 buffer 中随机打散采样 mini-batch，执行 $K$ 个 epoch 的梯度更新（每个 epoch 遍历整个 buffer）。</li>
+<li><strong>清空 & 重置</strong>：优化完成后，buffer 被清空丢弃。$\theta_{\text{old}} \leftarrow \theta$，回到步骤 1。</li>
+</ol>
+
+<h3>GAE（Generalized Advantage Estimation）</h3>
+<div class="formula-block">
+$$\hat{A}_t = \sum_{l=0}^{T-t-1} (\gamma \lambda)^l \, \delta_{t+l}$$
+$$\delta_t = r_t + \gamma V(s_{t+1}) - V(s_t)$$
+<p class="formula-explain"><strong>$\delta_t$</strong> 是 TD 残差（Temporal Difference residual），衡量"实际一步收益 + 下一状态价值" vs "当前状态价值"的差距。<br>
+<strong>$\lambda$</strong> 控制偏差-方差权衡：$\lambda = 0$ 时退化为 1-step TD（$\hat{A}_t = \delta_t$，低方差高偏差）；$\lambda = 1$ 时退化为 Monte Carlo 回报（低偏差高方差）。典型值 $\lambda = 0.95$。<br>
+<strong>递推实现</strong>：$\hat{A}_T = 0$，$\hat{A}_t = \delta_t + \gamma\lambda \cdot \hat{A}_{t+1}$（从后向前计算，时间复杂度 $O(T)$）。</p>
+</div>
+
+<div class="highlight-box">
+<strong>On-Policy 本质</strong>：PPO 是 on-policy 算法——buffer 中的数据是用 $\pi_{\theta_{\text{old}}}$ 采集的，一旦 $\theta$ 偏离 $\theta_{\text{old}}$ 太远，这些数据就"过期"了。Clip 机制保证了即使多次复用数据（多个 epoch），策略也不会偏移太远。但 epoch 数量 $K$ 也不能太大——通常 3-10 个就是极限。
+</div>
+
+<!-- ===== 5.6 ===== -->
+<h2>5.6 Training Phases — PPO 训练阶段</h2>
+
+<p>PPO 的训练是一个清晰的<strong>两阶段循环</strong>（交替执行直到收敛）：</p>
+
+<h3>阶段一：数据收集（Rollout Phase）</h3>
+<div class="card">
+<ol>
+<li>冻结当前策略为 $\pi_{\theta_{\text{old}}}$</li>
+<li>用 $\pi_{\theta_{\text{old}}}$ 与环境交互，收集 $T$ 步经验（或 batch_size 条完整轨迹）</li>
+<li>同时用 Critic $V_\phi$ 记录每个状态的价值估计</li>
+<li>收集完毕后，用 GAE 后处理计算所有 $\hat{A}_t$ 和 $V_t^{\text{target}}$</li>
+</ol>
+<p><strong>关键点</strong>：此阶段纯推理，不计算梯度，可以大 batch 并行加速。</p>
+</div>
+
+<h3>阶段二：Mini-Batch 优化（Optimization Phase）</h3>
+<div class="card">
+<ol>
+<li><strong>外层循环</strong>：for epoch = 1 to $K$</li>
+<li>将 buffer 中的数据随机打散（shuffle）</li>
+<li><strong>内层循环</strong>：将 buffer 切分为若干 mini-batch，对每个 mini-batch：
+  <ul>
+  <li>用当前 $\pi_\theta$ 对 mini-batch 中的 $(s_t, a_t)$ 重新前向传播，得到 $\log\pi_\theta(a_t|s_t)$</li>
+  <li>计算概率比：$r_t = \exp(\log\pi_\theta - \log\pi_{\theta_{\text{old}}})$</li>
+  <li>计算 $L^{\text{CLIP}}$、$L^{\text{VF}}$、$S[\pi_\theta]$</li>
+  <li>反向传播，用 Adam 更新 $\theta$ 和 $\phi$（Critic）</li>
+  </ul>
+</li>
+</ol>
+<p><strong>关键点</strong>：$\log\pi_{\theta_{\text{old}}}$ 是在阶段一记录下来的常数，不需要重新计算。每个 mini-batch 的更新会改变 $\theta$，使得 $r_t$ 逐渐偏离 1。</p>
+</div>
+
+<h3>训练超参数</h3>
+<table>
+<tr><th>参数</th><th>典型值</th><th>说明</th></tr>
+<tr><td>Rollout length $T$</td><td>2048 / 512（LLM）</td><td>每次收集多少步经验</td></tr>
+<tr><td>Mini-batch size $|B|$</td><td>64 / 256</td><td>每次梯度更新用多少样本</td></tr>
+<tr><td>Epochs $K$</td><td>3–10（经典）/ 1–4（LLM）</td><td>对同一 buffer 优化几轮</td></tr>
+<tr><td>Clip $\epsilon$</td><td>0.1–0.2</td><td>概率比裁剪范围</td></tr>
+<tr><td>Learning rate $\alpha$</td><td>3e-4（经典）/ 1e-5–5e-6（LLM）</td><td>Adam 学习率</td></tr>
+<tr><td>$\gamma$（折扣因子）</td><td>0.99 / 1.0（LLM）</td><td>未来奖励的折扣</td></tr>
+<tr><td>$\lambda$（GAE）</td><td>0.95</td><td>Advantage 估计的衰减因子</td></tr>
+<tr><td>$c_1$（VF 系数）</td><td>0.5</td><td>价值损失权重</td></tr>
+<tr><td>$c_2$（Entropy 系数）</td><td>0.01</td><td>熵奖励权重</td></tr>
+</table>
+
+<svg viewBox="0 0 700 200" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,sans-serif">
+  <defs><marker id="ar2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#475569"/></marker></defs>
+  <rect x="20" y="40" width="180" height="120" rx="10" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5"/>
+  <text x="110" y="65" text-anchor="middle" font-size="12" font-weight="700" fill="#1d4ed8">阶段一：Rollout</text>
+  <text x="110" y="90" text-anchor="middle" font-size="10" fill="#475569">Actor π_old 采样</text>
+  <text x="110" y="110" text-anchor="middle" font-size="10" fill="#475569">Critic V(s) 估值</text>
+  <text x="110" y="130" text-anchor="middle" font-size="10" fill="#475569">GAE → Â_t</text>
+  <text x="110" y="150" text-anchor="middle" font-size="10" fill="#475569">填充 Buffer</text>
+  <path d="M 200 100 L 260 100" stroke="#475569" stroke-width="2" fill="none" marker-end="url(#ar2)"/>
+  <text x="230" y="90" text-anchor="middle" font-size="9" fill="#6b7280">data</text>
+  <rect x="260" y="40" width="220" height="120" rx="10" fill="#dcfce7" stroke="#22c55e" stroke-width="1.5"/>
+  <text x="370" y="65" text-anchor="middle" font-size="12" font-weight="700" fill="#166534">阶段二：优化</text>
+  <text x="370" y="90" text-anchor="middle" font-size="10" fill="#475569">for epoch in 1..K:</text>
+  <text x="370" y="110" text-anchor="middle" font-size="10" fill="#475569">  shuffle → mini-batch</text>
+  <text x="370" y="130" text-anchor="middle" font-size="10" fill="#475569">  r_t → L^CLIP → ∇θ</text>
+  <text x="370" y="150" text-anchor="middle" font-size="10" fill="#475569">  Adam update θ, ϕ</text>
+  <path d="M 480 100 L 540 100" stroke="#475569" stroke-width="2" fill="none" marker-end="url(#ar2)"/>
+  <rect x="540" y="60" width="140" height="80" rx="10" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5"/>
+  <text x="610" y="90" text-anchor="middle" font-size="11" font-weight="600" fill="#92400e">θ_old ← θ</text>
+  <text x="610" y="112" text-anchor="middle" font-size="10" fill="#475569">清空 Buffer</text>
+  <text x="610" y="130" text-anchor="middle" font-size="10" fill="#475569">→ 回到阶段一</text>
+  <path d="M 610 140 C 610 185 110 185 110 160" stroke="#6b7280" stroke-width="1.5" fill="none" marker-end="url(#ar2)" stroke-dasharray="5,3"/>
+</svg>
+<p style="text-align:center; color:var(--text-secondary); font-size:0.88em;">图：PPO 两阶段训练循环。阶段一收集数据，阶段二多轮优化，然后同步权重、清空 buffer，循环往复。</p>
+
+<!-- ===== 5.7 ===== -->
+<h2>5.7 From Logits to Probability Ratio — 从 Logits 到概率比</h2>
+
+<p>在实际实现中（特别是 LLM 场景），模型输出的是 <strong>logits</strong>（最后一层的未归一化分数），需要经过一系列转换才能得到 PPO 需要的概率比 $r_t(\theta)$。</p>
+
+<h3>计算流程（4步）</h3>
+<div class="card">
+<ol>
+<li><strong>前向传播</strong>：模型接收状态 $s_t$（即 prompt + 已生成的 token 序列），输出 logits 向量 $z \in \mathbb{R}^{|V|}$（$|V|$ 为词表大小，通常 32K-128K）。</li>
+<li><strong>Log-Softmax</strong>：计算 log 概率（数值稳定版本）：
+$$\log \pi_\theta(a_t|s_t) = z_{a_t} - \log\sum_{a'=1}^{|V|} e^{z_{a'}}$$
+这等价于先 softmax 再取 log，但用 log-sum-exp trick 避免了数值溢出。</li>
+<li><strong>概率比的 log 空间计算</strong>：
+$$\log r_t(\theta) = \log \pi_\theta(a_t|s_t) - \log \pi_{\theta_{\text{old}}}(a_t|s_t)$$</li>
+<li><strong>Exp 还原</strong>：
+$$r_t(\theta) = \exp\big(\log r_t(\theta)\big)$$</li>
+</ol>
+</div>
+
+<div class="formula-block">
+$$r_t(\theta) = \exp\Big( \log \pi_\theta(a_t|s_t) - \log \pi_{\theta_{\text{old}}}(a_t|s_t) \Big)$$
+<p class="formula-explain"><strong>为什么在 log 空间计算？</strong>概率值可能极小（如 $10^{-30}$），直接做除法会导致浮点溢出或下溢。在 log 空间中，减法代替除法，数值始终在合理范围内。<br><br>
+<strong>代码实现</strong>：<code>ratio = torch.exp(new_log_probs - old_log_probs)</code>。其中 <code>old_log_probs</code> 在 rollout 阶段记录并存入 buffer（常数），<code>new_log_probs</code> 用更新后的模型重新前向传播计算。</p>
+</div>
+
+<h3>LLM 中的 Token 级处理</h3>
+<div class="info-box">
+<p>在 LLM-RLHF 场景中，每个 token 被视为一个独立的"动作"。对于长度为 $L$ 的生成序列：</p>
+<ul>
+<li>对每个位置 $t \in \{1, \ldots, L\}$，独立计算 $r_t(\theta) = \exp(\log p_\theta(y_t | x, y_{<t}) - \log p_{\theta_{\text{old}}}(y_t | x, y_{<t}))$</li>
+<li>每个 token 有自己的 Advantage $\hat{A}_t$（通常通过 GAE 或 token-level reward shaping 得到）</li>
+<li>PPO loss 对所有 token 的 clip loss 取平均：$L^{\text{CLIP}} = \frac{1}{L}\sum_{t=1}^L \min(r_t \hat{A}_t, \text{clip}(r_t)\hat{A}_t)$</li>
+</ul>
+</div>
+
+<h3>5.7.1 Phase 1: Rollout — 推理阶段的数据收集</h3>
+
+<p>Rollout 阶段是 PPO 的"数据工厂"，Actor 以<strong>纯推理模式</strong>（无梯度追踪）运行，逐 token 自回归生成并记录所有必要信息。以下是单个 token 位置 $t$ 的完整计算流程：</p>
+
+<div class="card">
+<h3>Step A：前向传播获取 Logits</h3>
+<p>模型接收当前上下文 $s_t = (x, y_1, \ldots, y_{t-1})$（prompt + 已生成 token），输出最后一层未归一化的得分向量：</p>
+$$z = f_\theta(s_t) \in \mathbb{R}^{|V|}$$
+<p class="formula-explain">$|V|$ 为词表大小（通常 32K–128K）。$z_i$ 表示模型对 token $i$ 的"原始偏好强度"，越大表示越偏好该 token。此时尚不是概率分布。</p>
+</div>
+
+<div class="card">
+<h3>Step B：Softmax → 概率分布</h3>
+<p>将 logits 归一化为有效概率分布：</p>
+<div class="formula-block">
+$$\pi_{\theta}(a|s_t) = \text{softmax}(z)_a = \frac{e^{z_a}}{\sum_{a'=1}^{|V|} e^{z_{a'}}}$$
+<p class="formula-explain"><strong>数值稳定实现</strong>：实际代码中先减去最大值 $m = \max_i z_i$，即 $\text{softmax}(z)_a = \frac{e^{z_a - m}}{\sum_{a'} e^{z_{a'} - m}}$，防止 $e^{z_i}$ 溢出。</p>
+</div>
+</div>
+
+<div class="card">
+<h3>Step C：Token 采样</h3>
+<p>从概率分布中随机采样一个 token 作为当前步的"动作"：</p>
+$$a_t \sim \text{Categorical}\big(\pi_\theta(\cdot|s_t)\big)$$
+<p class="formula-explain"><strong>采样 vs Greedy</strong>：Rollout 阶段必须使用随机采样（而非 argmax），因为 PPO 需要策略的随机性来探索不同生成路径。温度参数 $\tau$ 可调控探索强度：$p_i \propto e^{z_i / \tau}$，$\tau > 1$ 增加随机性，$\tau < 1$ 趋向贪心。</p>
+</div>
+
+<div class="card">
+<h3>Step D：Log 概率存储</h3>
+<p>记录旧策略对已采样 token 的 log 概率，存入 Rollout Buffer：</p>
+<div class="formula-block">
+$$\log \pi_{\theta_{\text{old}}}(a_t|s_t) = \log\left(\frac{e^{z_{a_t}}}{\sum_{a'} e^{z_{a'}}}\right) = z_{a_t} - \log\sum_{a'=1}^{|V|} e^{z_{a'}}$$
+<p class="formula-explain"><strong>关键</strong>：这个值在整个优化阶段中都作为<strong>常数</strong>使用（分母中 $\pi_{\theta_{\text{old}}}$ 的贡献）。存储的是标量值（只针对被选中的 $a_t$），不需要存整个词表的概率——这是内存效率的关键设计。<br><br>
+<strong>数据流小结</strong>：每个位置 $t$ 存入 Buffer 的信息为 $(s_t, a_t, r_t, \log\pi_{\theta_{\text{old}}}(a_t|s_t), V_{\text{old}}(s_t))$。</p>
+</div>
+</div>
+
+<div class="info-box">
+<strong>Rollout 阶段的计算特征</strong>：
+<ul>
+<li><strong>无梯度</strong>：整个阶段在 <code>torch.no_grad()</code> 下运行，不构建计算图，显存开销仅为推理模式</li>
+<li><strong>可并行</strong>：多条 prompt 可以 batch 并行生成，充分利用 GPU 吞吐</li>
+<li><strong>使用 Softmax</strong>（非 LogSoftmax）：因为需要真实概率来采样，log 概率作为副产品一并计算</li>
+</ul>
+</div>
+
+<h3>5.7.2 Phase 2: Optimization Loop — 优化阶段的新旧策略对比</h3>
+
+<p>优化阶段是 PPO 的核心：用<strong>当前策略 $\theta$</strong>（不断被更新）重新评估 Rollout 阶段收集的数据，并与<strong>冻结的旧策略 $\theta_{\text{old}}$</strong>对比，计算概率比 $r_t(\theta)$。</p>
+
+<div class="card">
+<h3>旧策略评估（已完成，直接读取）</h3>
+<p>来自 Rollout Buffer 的存储值，在优化阶段作为<strong>冻结常数</strong>使用：</p>
+<div class="formula-block">
+$$\log \pi_{\theta_{\text{old}}}(a_t|s_t) = \text{[从 Buffer 读取的标量常数]}$$
+<p class="formula-explain">不需要重新计算——这正是 PPO 的效率所在。旧策略的前向传播已在 Rollout 阶段完成，优化阶段只需读取存储结果。</p>
+</div>
+</div>
+
+<div class="card">
+<h3>新策略评估（每次 mini-batch 重新计算）</h3>
+<p>用<strong>当前正在被优化的 $\theta$</strong> 对同一组 $(s_t, a_t)$ 重新做前向传播：</p>
+<div class="formula-block">
+$$z^{\text{new}} = f_\theta(s_t) \quad \text{（当前策略的 logits，需要梯度追踪）}$$
+$$\log\pi_\theta(a_t|s_t) = \text{LogSoftmax}(z^{\text{new}})_{a_t} = z^{\text{new}}_{a_t} - \log\sum_{a'} e^{z^{\text{new}}_{a'}}$$
+<p class="formula-explain"><strong>关键区别</strong>：这里使用 <strong>LogSoftmax</strong>（而非 Softmax），因为：<br>
+① 优化阶段不需要真实概率来采样（采样在 Rollout 阶段已完成）<br>
+② 直接输出 log 概率，避免先算 softmax 再取 log 的精度损失<br>
+③ LogSoftmax 的梯度计算更数值稳定（分母的 log-sum-exp 梯度不涉及除法）<br><br>
+<strong>梯度追踪</strong>：此计算在 <code>torch.enable_grad()</code> 下进行，构建完整计算图以支持反向传播。</p>
+</div>
+</div>
+
+<div class="card">
+<h3>概率比计算与 Clip</h3>
+<div class="formula-block">
+$$\log r_t(\theta) = \underbrace{\log\pi_\theta(a_t|s_t)}_{\text{新策略（可微）}} - \underbrace{\log\pi_{\theta_{\text{old}}}(a_t|s_t)}_{\text{旧策略（常数）}}$$
+$$r_t(\theta) = \exp\big(\log r_t(\theta)\big)$$
+<p class="formula-explain"><strong>初始状态</strong>：优化刚开始时 $\theta = \theta_{\text{old}}$，因此 $\log r_t = 0$，$r_t = 1.0$。<br>
+<strong>演化过程</strong>：随着 Adam 更新 $\theta$，$\log\pi_\theta(a_t|s_t)$ 不断变化，$r_t$ 逐渐偏离 1.0——向 $1+\epsilon$ 或 $1-\epsilon$ 方向移动。<br>
+<strong>Clip 触发</strong>：当 $r_t$ 超出 $[1-\epsilon, 1+\epsilon]$ 时，clip 生效，梯度归零，该样本"退役"。</p>
+</div>
+</div>
+
+<div class="highlight-box">
+<strong>Phase 1 vs Phase 2 的核心对比</strong>：
+<table>
+<tr><th>维度</th><th>Phase 1: Rollout</th><th>Phase 2: Optimization</th></tr>
+<tr><td>模式</td><td>推理（<code>no_grad</code>）</td><td>训练（<code>enable_grad</code>）</td></tr>
+<tr><td>Softmax 类型</td><td><strong>Softmax</strong>（需要概率来采样）</td><td><strong>LogSoftmax</strong>（只需 log 概率算 ratio）</td></tr>
+<tr><td>策略参数</td><td>$\theta_{\text{old}}$（冻结快照）</td><td>$\theta$（持续更新中）</td></tr>
+<tr><td>输出用途</td><td>采样 token + 存储 $\log\pi_{\text{old}}$</td><td>计算 $r_t(\theta)$ → Clip Loss → 梯度</td></tr>
+<tr><td>执行频率</td><td>每轮训练执行 1 次</td><td>每轮执行 $K \times M$ 次（epochs × batches）</td></tr>
+</table>
+</div>
+
+<h3>5.7.4 The PPO Weight Lifecycle — 权重演化全景（表 5.1）</h3>
+
+<p>下表追踪 $\theta$ 和 $\theta_{\text{old}}$ 在一轮完整 PPO 训练中的演化过程，重点展示<strong>概率比 $r_t$ 如何从 1.0 开始、逐步偏离、最终触发 clip</strong>。</p>
+
+<div class="card">
+<p style="font-weight:600; margin-bottom:0.8rem;">表 5.1：PPO 权重生命周期 — 一轮训练的时间线</p>
+<table>
+<tr><th>阶段</th><th>$\theta_{\text{old}}$</th><th>$\theta$（Actor）</th><th>$r_t(\theta)$</th><th>说明</th></tr>
+<tr><td><strong>0. 同步</strong></td><td>$\theta_{\text{old}} \leftarrow \theta$</td><td>不变</td><td>—</td><td>从上一轮末尾的 $\theta$ 快照</td></tr>
+<tr><td><strong>1. Rollout</strong></td><td>冻结，用于推理生成</td><td>不变（= $\theta_{\text{old}}$）</td><td>$r_t = 1.0$（恒等）</td><td>$\theta$ 尚未被更新，新旧一致</td></tr>
+<tr><td><strong>2. Epoch 1, Batch 1</strong></td><td>冻结</td><td>Adam 更新 → $\theta^{(1)}$</td><td>$r_t \approx 1.0 \pm \delta_1$<br>（微小偏移）</td><td>第一次梯度更新，ratio 刚开始偏离</td></tr>
+<tr><td><strong>3. Epoch 1, Batch M</strong></td><td>冻结</td><td>继续更新 → $\theta^{(M)}$</td><td>$r_t \approx 1.0 \pm \delta_M$<br>（偏移增大）</td><td>一轮 epoch 结束时，部分样本 ratio 开始接近 clip 边界</td></tr>
+<tr><td><strong>4. Epoch K, Batch M</strong></td><td>冻结</td><td>$\theta^{(K \cdot M)}$</td><td>部分 $r_t$ 触发 clip：<br>$r_t \geq 1+\epsilon$ 或 $r_t \leq 1-\epsilon$</td><td>大量样本被 clip，有效梯度信号减弱，应停止优化</td></tr>
+<tr><td><strong>5. 清空 & 重置</strong></td><td>即将被覆盖</td><td>$\theta^{\text{final}}$（本轮成果）</td><td>—</td><td>Buffer 清空，回到阶段 0</td></tr>
+</table>
+</div>
+
+<div class="formula-block">
+<p><strong>Ratio 偏移的数学解释：</strong></p>
+$$r_t^{(k)} = \exp\Big(\log\pi_{\theta^{(k)}}(a_t|s_t) - \log\pi_{\theta_{\text{old}}}(a_t|s_t)\Big)$$
+<p class="formula-explain">
+• 在同步点（阶段 0）：$\theta^{(0)} = \theta_{\text{old}}$ → $\log r_t = 0$ → $r_t = 1.0$<br>
+• 经过 $k$ 次梯度更新后：$\theta^{(k)} \neq \theta_{\text{old}}$ → $\log r_t \neq 0$ → $r_t$ 偏离 1<br>
+• 偏移量 $|r_t - 1|$ 大致与梯度步数 $k$、学习率 $\alpha$、Advantage 幅度 $|\hat{A}_t|$ 正相关<br>
+• <strong>Clip 触发条件</strong>：当 $|\log r_t| \geq \log(1+\epsilon) \approx \epsilon$（小 $\epsilon$ 近似）时，该样本被 clip，梯度归零
+</p>
+</div>
+
+<div class="info-box">
+<strong>Clip Fraction 的监控意义</strong>：
+<p>定义 <em>clip fraction</em> = 被 clip 的样本数 / 总样本数。典型训练中的演化：</p>
+<ul>
+<li><strong>Epoch 1 开始</strong>：clip fraction ≈ 0（所有 $r_t \approx 1$，无 clip）</li>
+<li><strong>Epoch 1 结束</strong>：clip fraction ≈ 0.05–0.15（少部分极端样本被 clip）</li>
+<li><strong>Epoch 3–4</strong>：clip fraction ≈ 0.2–0.4（大量样本被 clip，继续优化收益递减）</li>
+<li><strong>Epoch 10+</strong>：clip fraction > 0.5（多数样本无有效梯度，应终止）</li>
+</ul>
+<p><strong>Early Stopping 策略</strong>：当 clip fraction 超过阈值（通常 0.3）或 KL 散度超过目标值时，提前终止内层优化循环。</p>
+</div>
+
+<!-- ===== 5.8 ===== -->
+<h2>5.8 PPO Weight Lifecycle — PPO 权重生命周期</h2>
+
+<p>PPO 训练涉及<strong>多套权重</strong>，理解它们各自的角色和同步时机至关重要：</p>
+
+<div class="card">
+<table>
+<tr><th>权重</th><th>角色</th><th>何时更新</th></tr>
+<tr><td>$\theta_{\text{old}}$（旧策略）</td><td>用于 rollout 收集数据；计算概率比的分母 $\pi_{\theta_{\text{old}}}$</td><td>每轮 rollout 开始时同步自 $\theta$</td></tr>
+<tr><td>$\theta$（当前策略 / Actor）</td><td>正在被 PPO 优化的策略参数</td><td>每个 mini-batch 更新一次</td></tr>
+<tr><td>$\phi$（Critic / Value Network）</td><td>估计 $V(s)$，为 GAE 提供基线</td><td>与 $\theta$ 同步优化（可能共享底层）</td></tr>
+<tr><td>$\theta_{\text{ref}}$（参考策略）</td><td>LLM 场景专用：SFT 模型，用于 KL penalty 的锚点</td><td><strong>冻结不更新</strong></td></tr>
+</table>
+</div>
+
+<h3>完整生命周期时序</h3>
+<ol>
+<li><strong>初始化</strong>：
+  <ul>
+  <li>$\theta \leftarrow \theta_{\text{SFT}}$（从 SFT 模型开始）</li>
+  <li>$\theta_{\text{ref}} \leftarrow \theta_{\text{SFT}}$（冻结参考副本）</li>
+  <li>$\phi$ 随机初始化或从预训练模型初始化</li>
+  </ul>
+</li>
+<li><strong>外层循环开始</strong>：$\theta_{\text{old}} \leftarrow \theta$（快照当前策略）</li>
+<li><strong>Rollout</strong>：用 $\theta_{\text{old}}$ 推理（无梯度），生成轨迹并记录 $\log\pi_{\theta_{\text{old}}}(a_t|s_t)$</li>
+<li><strong>Critic 估值</strong>：用 $\phi$ 计算 $V(s_t)$，后处理得到 GAE</li>
+<li><strong>内层循环（K epochs × M mini-batches）</strong>：
+  <ul>
+  <li>用 $\theta$ 重新前向传播，得到 $\log\pi_\theta(a_t|s_t)$</li>
+  <li>$r_t = \exp(\log\pi_\theta - \log\pi_{\theta_{\text{old}}})$</li>
+  <li>计算 $L^{\text{CLIP}} + L^{\text{VF}} + S$，反向传播</li>
+  <li>Adam 更新 $\theta$ 和 $\phi$</li>
+  </ul>
+</li>
+<li><strong>回到步骤 2</strong>：清空 buffer，同步权重，开始下一轮</li>
+</ol>
+
+<div class="highlight-box">
+<strong>关键细节</strong>：在步骤 5 的多个 epoch 中，$\theta_{\text{old}}$（和 buffer 中的 $\log\pi_{\theta_{\text{old}}}$）保持不变，而 $\theta$ 在不断被更新。因此随着 epoch 增多，$r_t(\theta)$ 可能越来越偏离 1。当许多样本的 $r_t$ 超出 clip 范围时，有效梯度信号会大幅减少——这是 epoch 数不能太大的根本原因。
+</div>
+
+<div class="info-box">
+<strong>分布式训练中的权重同步</strong>：在大规模 LLM 训练中，Rollout 阶段和优化阶段可能在不同的 GPU 集群上执行（生成-训练解耦架构，如 vLLM + DeepSpeed）。此时 $\theta_{\text{old}}$ 的同步涉及跨节点的参数广播，是系统工程的关键瓶颈之一。
+</div>
+
+<!-- ===== 5.9 ===== -->
+<h2>5.9 Continuous Action Spaces — 连续动作空间扩展</h2>
+
+<p>PPO 最初就是为<strong>连续动作空间</strong>设计的（机器人关节角度、物理模拟等）。与离散动作空间（如 LLM token 选择）的核心区别在于策略分布的参数化方式。</p>
+
+<h3>策略分布：从 Categorical 到 Gaussian</h3>
+<div class="card">
+<table>
+<tr><th>方面</th><th>离散空间（LLM / Atari）</th><th>连续空间（机器人 / MuJoCo）</th></tr>
+<tr><td>策略输出</td><td>Categorical 分布的 logits $z \in \mathbb{R}^{|V|}$</td><td>高斯分布的参数 $\mu, \sigma \in \mathbb{R}^d$</td></tr>
+<tr><td>采样</td><td>$a \sim \text{Categorical}(\text{softmax}(z))$</td><td>$a \sim \mathcal{N}(\mu_\theta(s), \text{diag}(\sigma_\theta(s))^2)$</td></tr>
+<tr><td>Log 概率</td><td>$\log\text{softmax}(z)_{a}$</td><td>$-\frac{1}{2}\sum_i\left[\frac{(a_i-\mu_i)^2}{\sigma_i^2} + 2\log\sigma_i + \log 2\pi\right]$</td></tr>
+<tr><td>熵</td><td>$-\sum_a p_a \log p_a$</td><td>$\frac{d}{2}\log(2\pi e) + \sum_i \log\sigma_i$</td></tr>
+<tr><td>典型维度</td><td>$|V| \in [32\text{K}, 128\text{K}]$</td><td>$d \in [2, 100]$（关节自由度）</td></tr>
+</table>
+</div>
+
+<h3>连续策略的概率密度</h3>
+<div class="formula-block">
+$$\pi_\theta(a|s) = \prod_{i=1}^d \frac{1}{\sigma_{\theta,i}(s)\sqrt{2\pi}} \exp\left(-\frac{(a_i - \mu_{\theta,i}(s))^2}{2\sigma_{\theta,i}(s)^2}\right)$$
+<p class="formula-explain"><strong>对角高斯假设</strong>：假设各维度独立（协方差矩阵为对角矩阵），将 $d$ 维联合分布分解为 $d$ 个一维高斯的乘积。这使得 log 概率可以简洁地写为各维度的求和：<br>
+$$\log\pi_\theta(a|s) = -\frac{1}{2}\sum_{i=1}^d \left[\frac{(a_i - \mu_i)^2}{\sigma_i^2} + 2\log\sigma_i + \log(2\pi)\right]$$</p>
+</div>
+
+<h3>$\sigma$ 的参数化选择</h3>
+<ul>
+<li><strong>State-independent</strong>（更常见）：$\log\sigma$ 作为可学习参数，不依赖状态 $s$。所有状态共享同一探索强度。</li>
+<li><strong>State-dependent</strong>：网络同时输出 $\mu(s)$ 和 $\sigma(s)$。可以在不同状态自适应探索，但训练更难稳定。</li>
+</ul>
+
+<div class="success-box">
+<strong>PPO 的通用性</strong>：Clip 机制和优化流程完全不依赖于动作空间的类型。无论离散还是连续，概率比的计算公式都是 $r_t = \exp(\log\pi_\theta - \log\pi_{\theta_{\text{old}}})$——只是 $\log\pi$ 的具体形式不同。这使得同一套 PPO 代码（修改策略分布模块即可）既可以训练 LLM，也可以控制机械臂。
+</div>
+
+<!-- ===== 关键要点 ===== -->
+<div class="takeaway">
+<h2>关键要点总结</h2>
+<ol>
+<li><strong>PPO 的核心创新</strong>：用一个简单的 min + clip 操作替代 TRPO 的二阶 KL 约束，以一阶方法实现了"限制策略更新幅度"，工程复杂度降低一个数量级。</li>
+<li><strong>Clip 的双向保护机制</strong>：好动作的概率增加被封顶（$r_t \leq 1+\epsilon$），差动作的概率降低被封底（$r_t \geq 1-\epsilon$）。超出范围时梯度自动归零。</li>
+<li><strong>完整推导链路</strong>：RL 目标 → importance sampling 代理目标 → log-derivative trick → clip 约束（梯度分段归零）→ mini-batch 近似 → Adam 更新。核心创新在 clip 那一步。</li>
+<li><strong>三合一损失</strong>：策略 loss + 价值 loss + 熵 bonus 缺一不可——分别负责方向正确、基线准确、持续探索。</li>
+<li><strong>On-Policy + 有限重用</strong>：PPO 是 on-policy 的，但 clip 允许对同一 buffer 进行 $K$ 个 epoch 的多轮优化，在数据效率和稳定性间取平衡。</li>
+<li><strong>Log 空间是实现关键</strong>：所有概率比计算都在 log 空间完成（减法代替除法），确保数值稳定。</li>
+<li><strong>权重生命周期</strong>：$\theta_{\text{old}}$（冻结的快照，用于采样和概率比分母）、$\theta$（正在优化的策略）、$\phi$（Critic）、$\theta_{\text{ref}}$（冻结的SFT参考）各司其职。</li>
+<li><strong>通用性</strong>：同一算法框架覆盖离散（token 选择）和连续（机器人控制）动作空间，只需替换策略分布的参数化方式。</li>
+</ol>
+</div>
+
+<!-- ===== Q&A ===== -->
+<h2>Q&A — 深入理解</h2>
+
+<details>
+<summary>Q1：为什么用 clip 而不是直接用 KL 散度约束？</summary>
+<div class="answer">
+<p><strong>工程复杂度</strong>：KL 约束（TRPO）需要：(1) 计算 Fisher 信息矩阵（Hessian 的期望，二阶导）；(2) 共轭梯度法求解约束优化；(3) 线搜索确定满足约束的最大步长。这在大模型上代价极高。PPO 的 clip 是纯一阶方法，直接修改目标函数即可用标准 Adam 优化。</p>
+<p><strong>实际效果</strong>：虽然 clip 不能精确控制 KL（它只是近似地限制了策略变化），但大量实验表明效果与 TRPO 相当甚至更好，因为 clip 的梯度行为更"干净"——要么正常更新，要么完全停止，没有中间的模糊地带。</p>
+<p><strong>注</strong>：PPO 原文还提出了一个 KL penalty 变体（PPO-Penalty），用自适应 $\beta$ 来惩罚 KL 散度，但实践中 clip 版本更受欢迎。</p>
+</div>
+</details>
+
+<details>
+<summary>Q2：$\epsilon$ 该设多大？太大或太小分别有什么后果？</summary>
+<div class="answer">
+<p>经验值：$\epsilon \in [0.1, 0.3]$，最常见 0.2（经典RL）或 0.1-0.2（LLM RLHF）。</p>
+<p><strong>$\epsilon$ 太大</strong>（如 0.5）：clip 几乎不起作用，退化为无约束的 surrogate objective，训练不稳定，可能导致策略崩溃。</p>
+<p><strong>$\epsilon$ 太小</strong>（如 0.01）：每次更新的幅度被严格限制，学习极慢，需要更多 rollout 轮次才能收敛。在 LLM 场景中可能陷入局部最优。</p>
+<p><strong>直觉</strong>：$\epsilon = 0.2$ 意味着"每次优化迭代，允许任何一个 token 的概率最多变化 ±20%"。</p>
+</div>
+</details>
+
+<details>
+<summary>Q3：PPO 中 Critic 的作用是什么？为什么 GRPO 可以去掉它？</summary>
+<div class="answer">
+<p><strong>Critic 的作用</strong>：估计状态价值 $V(s_t)$，用于计算 Advantage $\hat{A}_t = R_t - V(s_t)$。这提供了一个 baseline，大幅降低梯度方差。没有 Critic，只能用 Monte Carlo return，方差极大。</p>
+<p><strong>Critic 的代价</strong>：在 LLM 场景中，Critic 网络通常与 Actor 同等规模（70B 参数的 Actor 对应 70B 的 Critic），显存和计算开销翻倍。</p>
+<p><strong>GRPO 如何去掉 Critic</strong>：对同一个 prompt 采样一组（group）回复 $\{y_1, \ldots, y_G\}$，用组内奖励的均值和标准差归一化：$\hat{A}_i = (R_i - \mu_G) / \sigma_G$。用"组内相对排名"替代了绝对价值估计，完全无需 Critic。</p>
+</div>
+</details>
+
+<details>
+<summary>Q4：为什么 PPO 可以对同一 batch 数据多次优化（多个 epoch）而不崩溃？</summary>
+<div class="answer">
+<p>严格说来，PPO 是 on-policy 的——数据只对采集时的策略"有效"。但 clip 提供了安全保障：只要 $r_t(\theta) \in [1-\epsilon, 1+\epsilon]$，数据仍有效；一旦超出，clip 自动切断梯度。</p>
+<p>所以 PPO 的哲学是：<em>"数据只有一份，但我在安全范围内尽量榨干它的价值。"</em> 前 1-2 个 epoch 通常最有效（大多数样本在 clip 范围内），后续 epoch 的有效梯度信号逐渐减少（越来越多样本被 clip 了）。</p>
+<p><strong>Early stopping 信号</strong>：监控 clip fraction（被 clip 的样本比例），如果超过阈值（如 0.3），可以提前终止优化。</p>
+</div>
+</details>
+
+<details>
+<summary>Q5：PPO 在 LLM RLHF 中的具体工作流是什么？</summary>
+<div class="answer">
+<p>(1) <strong>Rollout</strong>：用当前策略 $\pi_\theta$ 对一批 prompt 生成回复（batch generation）</p>
+<p>(2) <strong>Reward scoring</strong>：奖励模型 $R_\phi$ 对每条完整回复打分（通常是序列末尾给出一个标量分数）</p>
+<p>(3) <strong>KL penalty</strong>：计算 $\text{KL}(\pi_\theta \| \pi_{\text{ref}})$ 作为每个 token 的惩罚</p>
+<p>(4) <strong>Token-level reward shaping</strong>：将序列级奖励分配到各 token（常用方法：只在最后一个 token 给奖励，前面 token 只有 KL penalty）</p>
+<p>(5) <strong>GAE 计算</strong>：用 Critic 的 $V(s_t)$ 计算每个 token 位置的 Advantage</p>
+<p>(6) <strong>PPO 优化</strong>：对所有 token 的 clip loss 取平均，多 epoch 更新</p>
+</div>
+</details>
+
+<details>
+<summary>Q6：$\min$ 操作为什么能构造"悲观下界"？</summary>
+<div class="answer">
+<p>$\min(r_t\hat{A}_t, \text{clip}(r_t)\hat{A}_t)$ 的设计保证了：<strong>无论是好动作还是差动作，算法都只能得到"更保守的收益估计"</strong>。</p>
+<p><strong>好动作（$\hat{A}_t > 0$）</strong>：$r_t$ 越大，$r_t\hat{A}_t$ 越大，但 clipped 项封顶在 $(1+\epsilon)\hat{A}_t$。$\min$ 取封顶值 = 你得到的奖励有上限。</p>
+<p><strong>差动作（$\hat{A}_t < 0$）</strong>：$r_t$ 越小，$r_t\hat{A}_t$ 越小（更负），但当 $r_t < 1-\epsilon$ 时，clipped 项 = $(1-\epsilon)\hat{A}_t$（固定负值），$\min$ 取 unclipped 更负的值...实际上更精确的分析是：$\min$ 确保对差动作的惩罚不会超过你"走"的距离应得的惩罚。</p>
+<p>总之，$\min$ 的哲学是<strong>"只相信保守估计"</strong>——宁可少优化一点，也不要因为过度自信而崩溃。</p>
+</div>
+</details>
+
+<details>
+<summary>Q7：Entropy Bonus 的作用和调参策略？</summary>
+<div class="answer">
+<p><strong>作用</strong>：防止策略过早收敛到确定性分布（即某个动作概率趋近 1，其他趋近 0）。没有熵正则，策略容易陷入"信息茧房"——只做最早发现的那种好动作，错过可能更优的探索路径。</p>
+<p><strong>调参</strong>：$c_2$ 通常从 0.01 开始。监控训练过程中的 policy entropy：</p>
+<ul>
+<li>如果 entropy 快速下降（策略过早锁定） → 增大 $c_2$</li>
+<li>如果 entropy 居高不下（策略不收敛） → 减小 $c_2$</li>
+<li>也可以使用 entropy 的线性衰减（annealing）：初期大探索，后期精细化</li>
+</ul>
+<p><strong>LLM 场景</strong>：熵 bonus 通常被 KL penalty $\beta \cdot D_{\text{KL}}(\pi_\theta \| \pi_{\text{ref}})$ 替代——后者不仅鼓励多样性（因为参考策略本身是高熵的 SFT 模型），还确保不偏离太远。</p>
+</div>
+</details>
+
+<details>
+<summary>Q8：PPO vs. GRPO 的核心区别和适用场景？</summary>
+<div class="answer">
+<p><strong>最大区别</strong>：GRPO 去掉了 Critic 网络。</p>
+<ul>
+<li>PPO Advantage = $R_t - V_\phi(s_t)$（需要 Critic 估计 $V$）</li>
+<li>GRPO Advantage = $(R_i - \mu_G) / \sigma_G$（同 prompt 的组内归一化，无需 Critic）</li>
+</ul>
+<p><strong>GRPO 的优势</strong>：显存和计算降低约 40-50%（省掉了一个与 Actor 同等规模的 Critic）。更适合超大规模 LLM（如 DeepSeek-R1 的 671B MoE 模型）。</p>
+<p><strong>PPO 的优势</strong>：Advantage 估计更精确（Critic 提供 per-token level 的价值基线），训练信号更稳定。适合需要精细 credit assignment 的复杂任务。</p>
+<p><strong>趋势</strong>：在推理模型训练中，GRPO 已成为主流（DeepSeek-R1、Qwen 系列）；在精细对齐任务中，PPO 仍有优势。</p>
+</div>
+</details>
+
+</body>
+</html>

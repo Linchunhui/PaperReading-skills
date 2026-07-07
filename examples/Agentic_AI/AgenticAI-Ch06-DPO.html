@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第6章 阅读笔记：DPO — Direct Preference Optimization</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]})"></script>
+<style>
+:root { --primary: #2c3e50; --accent: #3498db; --bg: #fafbfc; --card-bg: #ffffff; --border: #e1e4e8; --text: #24292e; --text-secondary: #586069; --code-bg: #f6f8fa; --highlight: #fff3cd; --success: #d4edda; --info: #d1ecf1; }
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; line-height: 1.8; color: var(--text); background: var(--bg); padding: 2rem; max-width: 900px; margin: 0 auto; }
+h1 { font-size: 1.8rem; color: var(--primary); border-bottom: 3px solid var(--accent); padding-bottom: 0.5rem; margin-bottom: 1rem; }
+h2 { font-size: 1.4rem; color: var(--primary); margin-top: 2.5rem; margin-bottom: 1rem; padding-left: 0.8rem; border-left: 4px solid var(--accent); }
+h3 { font-size: 1.15rem; color: var(--primary); margin-top: 1.8rem; margin-bottom: 0.8rem; }
+p { margin-bottom: 1rem; text-align: justify; }
+ul, ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+li { margin-bottom: 0.5rem; }
+code { background: var(--code-bg); padding: 0.15rem 0.4rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: var(--code-bg); padding: 1rem; border-radius: 6px; overflow-x: auto; margin-bottom: 1.5rem; border: 1px solid var(--border); }
+pre code { background: none; padding: 0; }
+blockquote { border-left: 4px solid var(--accent); padding: 0.8rem 1.2rem; margin: 1.5rem 0; background: var(--info); border-radius: 0 6px 6px 0; }
+.card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+.formula-block { background: var(--code-bg); border: 1px solid var(--border); border-radius: 6px; padding: 1rem; margin: 1rem 0; overflow-x: auto; }
+.formula-explain { color: var(--text-secondary); font-size: 0.92em; margin-top: 0.5rem; padding-left: 1rem; border-left: 3px solid #ddd; }
+.highlight-box { background: var(--highlight); border: 1px solid #ffc107; border-radius: 6px; padding: 1rem; margin: 1rem 0; }
+.info-box { background: var(--info); border: 1px solid #bee5eb; border-radius: 6px; padding: 1rem; margin: 1rem 0; }
+.success-box { background: var(--success); border: 1px solid #c3e6cb; border-radius: 6px; padding: 1rem; margin: 1rem 0; }
+.subtitle { color: var(--text-secondary); font-size: 1rem; margin-bottom: 0.3rem; }
+.meta { color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 2rem; }
+table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; }
+th, td { border: 1px solid var(--border); padding: 0.6rem 0.8rem; text-align: left; }
+th { background: var(--code-bg); font-weight: 600; }
+details { margin-bottom: 1rem; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+summary { padding: 0.8rem 1.2rem; background: var(--code-bg); cursor: pointer; font-weight: 500; }
+details[open] summary { border-bottom: 1px solid var(--border); }
+details .answer { padding: 1rem 1.2rem; }
+svg { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; }
+.takeaway { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 8px; padding: 1.5rem; margin: 2rem 0; }
+.takeaway h2 { color: white; border-left-color: rgba(255,255,255,0.5); }
+.takeaway li { color: rgba(255,255,255,0.95); }
+</style>
+</head>
+<body>
+
+<h1>第6章 阅读笔记：DPO — Direct Preference Optimization</h1>
+<p class="subtitle">Direct Preference Optimization: Your Language Model is Secretly a Reward Model</p>
+<p class="meta">来源：<em>The Hitchhiker's Guide to Agentic AI</em> by H. Roitman · 第145–157页 · 笔记生成：2026-06-25</p>
+
+<blockquote>
+<strong>核心思想</strong>：DPO 将 RLHF 的"训练奖励模型 → 强化学习优化策略"两阶段流程，压缩为单阶段的监督学习问题。关键洞见是：在 KL 约束奖励最大化目标下，最优策略有<strong>闭式解</strong>——将其代入 Bradley-Terry 偏好模型后，可以推导出一个直接作用于偏好数据对的损失函数，完全绕过显式奖励模型和 RL 循环。
+</blockquote>
+
+<!-- ===================== 6.1 ===================== -->
+<h2>6.1 Motivation（动机）</h2>
+
+<div class="card">
+<h3>RLHF/PPO 的四大痛点</h3>
+<ol>
+<li><strong>显存开销巨大</strong>：需要同时加载策略模型（Policy $\pi_\theta$）、参考模型（Reference $\pi_{\text{ref}}$）、奖励模型（Reward Model $r_\phi$）、价值头（Value Head $V_\psi$）共 4 个模型。对 7B 参数模型来说，FP16 下仅模型参数就需要 $4 \times 14\text{GB} = 56\text{GB}$，加上优化器状态和激活值，单节点 80GB GPU 无法训练。</li>
+<li><strong>工程复杂</strong>：需要完整的 RL 基础设施——rollout 采样、GAE 优势估计、PPO clip 目标、KL 惩罚系数自适应等，代码量是标准 SFT 的 3-5 倍。</li>
+<li><strong>训练不稳定</strong>：Reward Hacking（模型找到奖励模型的 OOD 漏洞获得虚高奖励）、KL 爆炸（策略偏离参考太远后无法回收）、PPO 特有的 value loss 抖动等问题频发。</li>
+<li><strong>超参敏感</strong>：PPO 的 clip 范围 $\epsilon$、GAE $\lambda$、KL 惩罚系数 $\beta_{\text{KL}}$、mini-batch 大小、rollout 长度等超参之间相互耦合，调参成本极高。</li>
+</ol>
+</div>
+
+<div class="card">
+<h3>DPO 的解题思路</h3>
+<p>既然 RLHF 的目标是"让策略在 KL 约束下最大化奖励"，而这个约束优化问题有<strong>解析解</strong>，那为什么不直接用解析解来构造损失函数，跳过 RL？</p>
+<p>DPO 的关键洞见：</p>
+<ul>
+<li>最优策略 $\pi^*$ 与奖励函数 $r$ 之间存在<strong>一一对应</strong>的映射关系</li>
+<li>将这个映射代入 Bradley-Terry 偏好模型后，配分函数 $Z(x)$ 在 chosen/rejected 做差时被<strong>完美消去</strong></li>
+<li>最终得到的损失函数只需要策略模型和参考模型的 log 概率，无需显式奖励模型</li>
+</ul>
+<p><strong>结果</strong>：从 4 个模型简化为 2 个模型（策略 + 参考），从复杂 RL 循环简化为标准监督训练。</p>
+</div>
+
+<!-- SVG: DPO vs PPO -->
+<svg viewBox="0 0 720 220" xmlns="http://www.w3.org/2000/svg" style="width:100%;margin:1.5rem 0;">
+  <rect x="20" y="10" width="320" height="200" rx="8" fill="#fee2e2" stroke="#dc2626" stroke-width="1.5"/>
+  <text x="180" y="35" text-anchor="middle" font-size="13" font-weight="bold" fill="#dc2626">PPO 流程（4 模型 + RL 循环）</text>
+  <rect x="40" y="50" width="90" height="30" rx="4" fill="#fff" stroke="#999"/>
+  <text x="85" y="70" text-anchor="middle" font-size="10">策略模型 π_θ</text>
+  <rect x="145" y="50" width="90" height="30" rx="4" fill="#fff" stroke="#999"/>
+  <text x="190" y="70" text-anchor="middle" font-size="10">参考模型 π_ref</text>
+  <rect x="40" y="100" width="90" height="30" rx="4" fill="#fff" stroke="#999"/>
+  <text x="85" y="120" text-anchor="middle" font-size="10">奖励模型 r_φ</text>
+  <rect x="145" y="100" width="90" height="30" rx="4" fill="#fff" stroke="#999"/>
+  <text x="190" y="120" text-anchor="middle" font-size="10">价值头 V_ψ</text>
+  <rect x="40" y="150" width="195" height="30" rx="4" fill="#fff" stroke="#999"/>
+  <text x="137" y="170" text-anchor="middle" font-size="10">Rollout + GAE + PPO Clip + KL</text>
+  <text x="180" y="200" text-anchor="middle" font-size="9" fill="#dc2626">工程复杂、训练不稳定、超参敏感</text>
+
+  <rect x="380" y="10" width="320" height="200" rx="8" fill="#d4edda" stroke="#28a745" stroke-width="1.5"/>
+  <text x="540" y="35" text-anchor="middle" font-size="13" font-weight="bold" fill="#28a745">DPO 流程（2 模型 + 监督学习）</text>
+  <rect x="410" y="60" width="110" height="30" rx="4" fill="#fff" stroke="#999"/>
+  <text x="465" y="80" text-anchor="middle" font-size="10">策略模型 π_θ</text>
+  <rect x="550" y="60" width="120" height="30" rx="4" fill="#fff" stroke="#999"/>
+  <text x="610" y="80" text-anchor="middle" font-size="10">参考模型 π_ref (冻结)</text>
+  <rect x="410" y="120" width="260" height="35" rx="4" fill="#fff" stroke="#999"/>
+  <text x="540" y="142" text-anchor="middle" font-size="10">偏好数据 (x, y_w, y_l) → 监督损失 L_DPO</text>
+  <text x="540" y="185" text-anchor="middle" font-size="9" fill="#28a745">标准 SFT 框架，稳定收敛，无需 RL 基础设施</text>
+</svg>
+
+<!-- ===================== 6.2 ===================== -->
+<h2>6.2 Mathematical Derivation（数学推导）</h2>
+
+<p>以下是从 RLHF 目标出发，经由最优策略闭式解、奖励重参数化、Bradley-Terry 消元，最终得到 DPO 损失函数的完整推导。</p>
+
+<h3>Step 1：RLHF 目标函数</h3>
+<div class="formula-block">
+$$\max_{\pi_\theta} \; \mathbb{E}_{x \sim \mathcal{D},\, y \sim \pi_\theta(\cdot|x)}\big[r(x,y)\big] - \beta \, D_{\mathrm{KL}}\big[\pi_\theta(\cdot|x) \,\|\, \pi_{\mathrm{ref}}(\cdot|x)\big]$$
+</div>
+<div class="formula-explain">
+<strong>含义</strong>：在给定 prompt $x$ 下，让策略 $\pi_\theta$ 生成的回复获得尽可能高的奖励 $r(x,y)$，同时通过 KL 散度惩罚项确保策略不会偏离参考模型 $\pi_{\text{ref}}$ 太远。超参数 $\beta > 0$ 控制惩罚强度——$\beta$ 越大，策略被"拴"在参考模型附近越紧。
+</div>
+
+<h3>Step 2：展开 KL 散度</h3>
+<p>将 KL 散度展开为对数概率比的期望：</p>
+<div class="formula-block">
+$$D_{\mathrm{KL}}\big[\pi_\theta \| \pi_{\mathrm{ref}}\big] = \mathbb{E}_{y \sim \pi_\theta}\bigg[\log\frac{\pi_\theta(y|x)}{\pi_{\mathrm{ref}}(y|x)}\bigg]$$
+</div>
+<p>将其代入 Step 1，目标变为：</p>
+<div class="formula-block">
+$$\max_{\pi_\theta} \; \mathbb{E}_{y \sim \pi_\theta}\bigg[r(x,y) - \beta\log\frac{\pi_\theta(y|x)}{\pi_{\mathrm{ref}}(y|x)}\bigg]$$
+</div>
+
+<h3>Step 3：推导最优策略（闭式解）</h3>
+<p>这是一个函数空间上的变分问题。对 $\pi_\theta(y|x)$ 取变分导数并令其为零，同时施加归一化约束 $\sum_y \pi(y|x) = 1$，可以得到最优策略的解析形式：</p>
+<div class="formula-block">
+$$\pi^*(y|x) = \frac{1}{Z(x)} \cdot \pi_{\mathrm{ref}}(y|x) \cdot \exp\!\left(\frac{r(x,y)}{\beta}\right)$$
+</div>
+<div class="formula-explain">
+其中 $Z(x) = \sum_y \pi_{\mathrm{ref}}(y|x) \exp\!\left(\frac{r(x,y)}{\beta}\right)$ 是配分函数（partition function），确保概率归一化。<br>
+<strong>直觉</strong>：最优策略就是参考模型按照奖励值做指数"加权倾斜"——奖励越高的回复，概率被提升得越多。
+</div>
+
+<h3>Step 4：用策略重参数化奖励（关键！）</h3>
+<p>将 Step 3 的公式两边取对数并反解出 $r(x,y)$：</p>
+<div class="formula-block">
+$$r(x,y) = \beta\log\frac{\pi^*(y|x)}{\pi_{\mathrm{ref}}(y|x)} + \beta\log Z(x)$$
+</div>
+<div class="formula-explain">
+<strong>核心洞见</strong>：奖励函数可以用"最优策略相对于参考模型的对数概率比"来表达。$\beta\log Z(x)$ 是一个只依赖于 prompt $x$ 的常数，与具体回复 $y$ 无关。
+</div>
+
+<h3>Step 5：代入 Bradley-Terry 偏好模型</h3>
+<p>Bradley-Terry 模型描述了人类偏好的概率：</p>
+<div class="formula-block">
+$$P(y_w \succ y_l \,|\, x) = \sigma\big(r(x,y_w) - r(x,y_l)\big)$$
+</div>
+<div class="formula-explain">
+其中 $\sigma(z) = 1/(1+e^{-z})$ 是 sigmoid 函数。人类选择 $y_w$ 而非 $y_l$ 的概率，由两者奖励差的 sigmoid 决定。
+</div>
+
+<p>将 Step 4 的奖励表达式代入：</p>
+<div class="formula-block">
+$$r(x,y_w) - r(x,y_l) = \beta\log\frac{\pi^*(y_w|x)}{\pi_{\mathrm{ref}}(y_w|x)} + \cancel{\beta\log Z(x)} - \beta\log\frac{\pi^*(y_l|x)}{\pi_{\mathrm{ref}}(y_l|x)} - \cancel{\beta\log Z(x)}$$
+</div>
+<div class="highlight-box">
+<strong>关键消元</strong>：$\beta\log Z(x)$ 在做差时完美抵消！这正是 DPO 能绕过难以计算的配分函数的数学巧妙之处。DPO 不需要知道 $Z(x)$，只需要两个回复之间的相对奖励差。
+</div>
+
+<h3>Step 6：得到 DPO 损失函数</h3>
+<p>用可训练的 $\pi_\theta$ 替代最优 $\pi^*$，构造最大似然目标：</p>
+<div class="formula-block">
+$$\mathcal{L}_{\text{DPO}}(\pi_\theta;\pi_{\text{ref}}) = -\mathbb{E}_{(x,y_w,y_l)\sim\mathcal{D}}\left[\log\sigma\left(\beta\log\frac{\pi_\theta(y_w|x)}{\pi_{\text{ref}}(y_w|x)} - \beta\log\frac{\pi_\theta(y_l|x)}{\pi_{\text{ref}}(y_l|x)}\right)\right]$$
+</div>
+<div class="formula-explain">
+<strong>大白话</strong>：DPO 损失要求模型对 chosen 回复 $y_w$ 的"隐式奖励"（相对参考模型的提升幅度）严格大于对 rejected 回复 $y_l$ 的。margin 越大，sigmoid 值越接近 1，$\log\sigma$ 越接近 0，loss 越小。
+</div>
+
+<h3>隐式奖励（Implicit Reward）</h3>
+<p>定义隐式奖励函数：</p>
+<div class="formula-block">
+$$\hat{r}_\theta(x,y) = \beta\log\frac{\pi_\theta(y|x)}{\pi_{\text{ref}}(y|x)}$$
+</div>
+<div class="formula-explain">
+这是模型学到的"内在奖励信号"——衡量当前策略相比参考模型"更看好"某回复多少。策略提升了某回复的概率 → 隐式奖励为正；降低了 → 为负。DPO 损失等价于让 $\hat{r}_\theta(x,y_w) > \hat{r}_\theta(x,y_l)$。
+</div>
+
+<div class="info-box">
+<strong>推导总结路径</strong>：RLHF 目标 → KL 展开 → 最优策略闭式解 → 奖励重参数化 → 代入 Bradley-Terry → $Z(x)$ 消去 → DPO Loss
+</div>
+
+<!-- ===================== 6.3 ===================== -->
+<h2>6.3 Gradient Analysis（梯度分析）</h2>
+
+<p>对 DPO 损失求梯度，可以深入理解其训练动态：</p>
+<div class="formula-block">
+$$\nabla_\theta \mathcal{L}_{\text{DPO}} = -\beta \cdot \underbrace{\sigma\big(-\hat{r}_\theta(x,y_w) + \hat{r}_\theta(x,y_l)\big)}_{\text{自适应权重 } w} \cdot \Big[\underbrace{\nabla_\theta\log\pi_\theta(y_w|x)}_{\text{推高 chosen}} - \underbrace{\nabla_\theta\log\pi_\theta(y_l|x)}_{\text{压低 rejected}}\Big]$$
+</div>
+
+<div class="card">
+<h3>梯度三要素解析</h3>
+<ol>
+<li><strong>方向</strong>：$\nabla_\theta\log\pi_\theta(y_w|x) - \nabla_\theta\log\pi_\theta(y_l|x)$——同时做两件事：增大 chosen 概率、减小 rejected 概率。这是一个"对比方向"。</li>
+<li><strong>自适应权重</strong> $w = \sigma(-\hat{r}_w + \hat{r}_l)$：
+  <ul>
+    <li>当模型目前更偏好 rejected（$\hat{r}_l > \hat{r}_w$）→ $w$ 接近 1 → 学习信号最强</li>
+    <li>当模型已经正确偏好 chosen（$\hat{r}_w \gg \hat{r}_l$）→ $w$ 接近 0 → 几乎无梯度</li>
+  </ul>
+</li>
+<li><strong>缩放因子</strong> $\beta$：控制整体梯度幅度。$\beta$ 越大，要求更大的 margin 才能让 $w$ 衰减，训练更保守。</li>
+</ol>
+<p><strong>核心直觉</strong>：DPO 自动将学习精力集中在"还没搞清楚"的数据对上，对已经正确分类的对自动降低权重，类似 focal loss 的思想。</p>
+</div>
+
+<div class="card">
+<h3>数值示例</h3>
+<p><strong>Prompt</strong>："向10岁小孩解释量子纠缠"</p>
+<p><strong>Chosen</strong> $y_w$：用"两个魔法硬币"类比（生动易懂）<br>
+<strong>Rejected</strong> $y_l$：用学术语言（正确但晦涩）</p>
+
+<table>
+<tr><th>阶段</th><th>$\hat{r}_w$</th><th>$\hat{r}_l$</th><th>权重 $w$</th><th>Loss</th></tr>
+<tr><td>训练初期</td><td>0.08</td><td>-0.03</td><td>$\sigma(-0.11) = 0.47$</td><td>$-\log\sigma(0.11) = 0.64$</td></tr>
+<tr><td>训练中期</td><td>0.45</td><td>-0.30</td><td>$\sigma(-0.75) = 0.32$</td><td>$-\log\sigma(0.75) = 0.37$</td></tr>
+<tr><td>训练后期</td><td>1.20</td><td>-0.80</td><td>$\sigma(-2.0) = 0.12$</td><td>$-\log\sigma(2.0) = 0.13$</td></tr>
+</table>
+<div class="formula-explain">
+可以看到：随着训练进行，margin 增大 → 权重 $w$ 下降 → 梯度自然衰减，模型不会在已学好的对上过拟合。
+</div>
+</div>
+
+<!-- ===================== 6.4 ===================== -->
+<h2>6.4 TRL Implementation（TRL 实现）</h2>
+
+<div class="card">
+<p>基于 HuggingFace TRL 库的最小可运行 DPO 训练示例（Llama-3.1-8B + LoRA）：</p>
+<pre><code>import torch
+from trl import DPOConfig, DPOTrainer
+from transformers import AutoModelForCausalLM, AutoTokenizer
+from peft import LoraConfig
+from datasets import load_dataset
+
+# 1. 加载模型
+model = AutoModelForCausalLM.from_pretrained(
+    "meta-llama/Llama-3.1-8B-Instruct",
+    torch_dtype=torch.bfloat16,
+    attn_implementation="flash_attention_2",
+)
+tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.1-8B-Instruct")
+
+# 2. LoRA 配置（使用 LoRA 时，ref_model 自动为基础权重）
+lora_config = LoraConfig(
+    r=16, lora_alpha=32, lora_dropout=0.05,
+    target_modules=["q_proj","k_proj","v_proj","o_proj"],
+    task_type="CAUSAL_LM",
+)
+
+# 3. DPO 训练配置
+dpo_config = DPOConfig(
+    beta=0.1,                        # KL 正则强度（核心超参）
+    loss_type="sigmoid",             # 标准 DPO sigmoid loss
+    learning_rate=5e-7,              # 极低学习率，防止过拟合
+    max_length=2048,                 # 最大序列长度
+    max_prompt_length=1024,          # prompt 截断长度
+    per_device_train_batch_size=2,   # 受限于显存
+    gradient_accumulation_steps=8,   # 有效 batch = 2×1×8 = 16
+    num_train_epochs=1,              # DPO 极易过拟合，只训 1 epoch！
+    warmup_ratio=0.1,               # 10% warmup
+    bf16=True,
+    logging_steps=10,
+    precompute_ref_log_probs=True,   # 预计算 ref log-prob，节省显存
+    output_dir="./dpo-llama3.1-8b",
+)
+
+# 4. 加载偏好数据集（标准格式：prompt, chosen, rejected）
+dataset = load_dataset("HuggingFaceH4/ultrafeedback_binarized", split="train_prefs")
+
+# 5. 创建 Trainer 并训练
+trainer = DPOTrainer(
+    model=model,
+    ref_model=None,        # LoRA 时无需单独 ref_model
+    args=dpo_config,
+    peft_config=lora_config,
+    train_dataset=dataset,
+    tokenizer=tokenizer,
+)
+trainer.train()</code></pre>
+</div>
+
+<div class="highlight-box">
+<strong>关键监控指标</strong>：
+<ul>
+<li><code>train/rewards/chosen</code> — 应持续上升（chosen 隐式奖励增加）</li>
+<li><code>train/rewards/rejected</code> — 应持续下降（rejected 隐式奖励减少）</li>
+<li><code>train/rewards/margins</code> — 应稳步增大但不爆炸（过大意味着 sigmoid 饱和）</li>
+<li><code>train/rewards/accuracies</code> — 模型正确排序 chosen > rejected 的比例</li>
+</ul>
+<strong>异常信号</strong>：如果 <code>rewards/chosen</code> 也在下降 → likelihood collapse → 需切换到 NCA 或 RPO。
+</div>
+
+<!-- ===================== 6.5 ===================== -->
+<h2>6.5 How DPO Works: Full Mechanics（完整训练机制）</h2>
+
+<h3>6.5.1 序列级对数概率</h3>
+<div class="formula-block">
+$$\log\pi_\theta(y|x) = \sum_{t=1}^{T}\log\pi_\theta(y_t \mid x, y_{&lt;t})$$
+</div>
+<div class="formula-explain">
+整条回复的 log 概率 = 每个 token 位置条件 log 概率之和（自回归分解）。<br>
+<strong>注意</strong>：这是<strong>求和</strong>而非平均，意味着更长的序列天然有更低的 log 概率（负值累加）。这是长度偏差的来源。
+</div>
+
+<h3>6.5.2 损失分解与隐式奖励差</h3>
+<p>定义"隐式奖励差"（implicit reward margin）$h_\theta$：</p>
+<div class="formula-block">
+$$h_\theta(x,y_w,y_l) = \underbrace{\log\frac{\pi_\theta(y_w|x)}{\pi_{\text{ref}}(y_w|x)}}_{\text{chosen log-ratio}} - \underbrace{\log\frac{\pi_\theta(y_l|x)}{\pi_{\text{ref}}(y_l|x)}}_{\text{rejected log-ratio}}$$
+</div>
+<p>则 DPO 损失可以简洁地写为：</p>
+<div class="formula-block">
+$$\mathcal{L}_{\text{DPO}} = -\log\sigma(\beta \cdot h_\theta)$$
+</div>
+<div class="formula-explain">
+每一条训练样本贡献一个标量 $h_\theta$，乘以 $\beta$ 后过 sigmoid 再取 log。$h_\theta > 0$ 意味着模型正确偏好 chosen，越大 loss 越小。
+</div>
+
+<h3>6.5.3 Forward Pass 详细步骤</h3>
+<div class="card">
+<ol>
+<li><strong>数据拼接</strong>：将 prompt+chosen 拼成 $[x; y_w]$，prompt+rejected 拼成 $[x; y_l]$，各自作为完整序列</li>
+<li><strong>策略模型前向</strong>：分别对两条序列计算每个位置的 logits $\in \mathbb{R}^{T \times V}$</li>
+<li><strong>提取 log-probs</strong>：在每个 response 位置 $t$，计算 $\log\text{softmax}(\text{logits}_t)[y_t]$</li>
+<li><strong>Label Masking</strong>：只保留 response token 的 log-probs，prompt token 和 padding token 被 mask 掉</li>
+<li><strong>Token 求和</strong>：$\log\pi_\theta(y_w|x) = \sum_{t \in \text{response}} \log p(y_t^w | \cdot)$，rejected 同理</li>
+<li><strong>减去参考 log-probs</strong>：得到 $\text{ratio}_w = \log\pi_\theta(y_w|x) - \log\pi_{\text{ref}}(y_w|x)$，$\text{ratio}_l$ 同理</li>
+<li><strong>计算损失</strong>：$L = -\log\sigma\big(\beta \cdot (\text{ratio}_w - \text{ratio}_l)\big)$</li>
+<li><strong>反向传播</strong>：梯度从 loss → ratio → token 级 logits → 模型参数</li>
+</ol>
+</div>
+
+<h3>6.5.4 Token 级梯度流</h3>
+<div class="formula-block">
+$$\frac{\partial \mathcal{L}}{\partial \text{logits}_t^{(w)}} = -\underbrace{\sigma(-\beta \cdot h_\theta)}_{\text{全序列共享的缩放因子}} \cdot \beta \cdot \frac{\partial \log\pi_\theta(y_t^w | \cdot)}{\partial \text{logits}_t^{(w)}}$$
+</div>
+<div class="formula-explain">
+<strong>关键观察</strong>：<br>
+• 缩放因子 $\sigma(-\beta h_\theta)$ 是一个<strong>全序列共享</strong>的标量，作为自适应学习率<br>
+• $h_\theta$ 小（模型分不清好坏）→ 缩放 ≈ 0.5 → 每个 token 都受到强梯度推动<br>
+• $h_\theta$ 大（已经判断正确）→ 缩放 ≈ 0 → 几乎无梯度，自动停止学习<br>
+• 对 chosen tokens：$\log\pi$ 的梯度方向为增大概率<br>
+• 对 rejected tokens：梯度方向为减小概率（前面有负号）
+</div>
+
+<h3>6.5.5 长度归一化（Length Normalization）</h3>
+<div class="card">
+<p><strong>问题根源</strong>：$\log\pi(y|x) = \sum_t \log p(y_t|\cdot)$，每个 token 的 log 概率 $\in (-\infty, 0]$，加得越多（序列越长），总和越负。如果 chosen 远长于 rejected，其 log-prob 天然更低，模型可能无法正确排序。</p>
+
+<table>
+<tr><th>策略</th><th>公式</th><th>特点</th><th>使用者</th></tr>
+<tr><td>标准 DPO</td><td>$\sum_t \log\pi(y_t|\cdot)$</td><td>隐式惩罚冗长，实际部署更常用</td><td>原版 DPO</td></tr>
+<tr><td>长度归一化</td><td>$\frac{1}{|y|}\sum_t \log\pi(y_t|\cdot)$</td><td>公平对待不同长度的回复</td><td>SimPO</td></tr>
+<tr><td>长度加权</td><td>$\frac{1}{|y|^\alpha}\sum_t \log\pi(y_t|\cdot)$</td><td>$\alpha \in (0,1)$ 提供连续调节</td><td>ORPO 变体</td></tr>
+</table>
+<div class="formula-explain">
+实践建议：如果偏好数据中 chosen 和 rejected 长度相近（差异 < 2×），标准 DPO 即可；若长度差异大，考虑使用 SimPO 或手动裁剪数据。
+</div>
+</div>
+
+<h3>6.5.6 Label Masking（标签遮盖）</h3>
+<div class="card">
+<table>
+<tr><th>Token 类型</th><th>参与 log-prob 计算？</th><th>有梯度？</th><th>说明</th></tr>
+<tr><td>Prompt tokens ($x$)</td><td>❌</td><td>❌</td><td>只提供上下文，不计入序列 log-prob</td></tr>
+<tr><td>Chosen response ($y_w$)</td><td>✅</td><td>✅</td><td>梯度方向：推高概率</td></tr>
+<tr><td>Rejected response ($y_l$)</td><td>✅</td><td>✅</td><td>梯度方向：压低概率</td></tr>
+<tr><td>Padding tokens</td><td>❌</td><td>❌</td><td>attention mask 遮盖</td></tr>
+<tr><td>Special tokens (BOS/EOS)</td><td>视实现而定</td><td>视实现而定</td><td>TRL 默认包含 EOS</td></tr>
+</table>
+</div>
+
+<h3>6.5.7 参考模型的角色与管理</h3>
+<div class="card">
+<p>$\pi_{\text{ref}}$ 在 DPO 中的作用：</p>
+<ul>
+<li><strong>锚点</strong>：提供"基线"log 概率，隐式奖励 $\hat{r} = \beta\log(\pi_\theta/\pi_{\text{ref}})$ 衡量策略相对锚点的偏移</li>
+<li><strong>正则化</strong>：防止策略跑得太远导致语言能力退化</li>
+<li><strong>最佳选择</strong>：用 SFT checkpoint（而非 base model）作为 $\pi_{\text{ref}}$，确保初始 KL ≈ 0</li>
+</ul>
+<p><strong>管理策略</strong>：</p>
+<ul>
+<li><strong>静态参考</strong>（默认）：$\pi_{\text{ref}}$ 全程冻结，可预计算 log-probs</li>
+<li><strong>EMA 更新</strong>（TR-DPO）：定期用策略 EMA 更新参考，适合长训练</li>
+<li><strong>去除参考</strong>（SimPO）：用长度归一化 log-prob 替代，节省显存</li>
+</ul>
+</div>
+
+<h3>6.5.8 常见陷阱与解决方案</h3>
+<div class="card">
+<ol>
+<li><strong>忘记遮盖 prompt</strong>：如果 prompt token 也参与 log-prob 求和，模型会优化 prompt 似然（无意义），且等效 $\beta$ 出错。<em>解决：严格用 label mask。</em></li>
+<li><strong>mean vs sum 不一致</strong>：$\pi_\theta$ 用 mean 而 $\pi_{\text{ref}}$ 用 sum（或反之），导致隐式长度惩罚不匹配。<em>解决：保持完全一致。</em></li>
+<li><strong>参考模型过时</strong>：若用 base model 而非 SFT checkpoint 作 $\pi_{\text{ref}}$，初始 KL 过大 → sigmoid 饱和 → 梯度消失。<em>解决：始终用 SFT checkpoint。</em></li>
+<li><strong>$\beta$ 太大</strong>：放大 log-prob 差异 → sigmoid 饱和 → 梯度接近零。<em>解决：从 0.1 开始调。</em></li>
+<li><strong>$\beta$ 太小</strong>：梯度 $\propto \beta \cdot \sigma(\cdot)$ 本身极小 → loss 平坦 → 收敛极慢。<em>解决：不低于 0.01。</em></li>
+<li><strong>训练过多 epoch</strong>：DPO 容易在 1 epoch 后过拟合偏好数据。<em>解决：默认 1 epoch，监控 eval loss。</em></li>
+<li><strong>数据长度失衡</strong>：chosen 和 rejected 长度差异 > 3× 时，标准 DPO 的隐式长度偏差会主导梯度。<em>解决：数据预处理裁剪或使用 SimPO。</em></li>
+</ol>
+</div>
+
+<!-- ===================== 6.6 ===================== -->
+<h2>6.6 DPO Variants and When Each Fails（变体与失效场景）</h2>
+
+<div class="card">
+<h3>DPO 的五大失效模式</h3>
+<ol>
+<li><strong>分布偏移（Distribution Shift）</strong>：偏好数据来自旧模型（或人类），当前策略生成的文本分布已经大不相同 → 在"无关"样本上优化 → 策略漂移到未覆盖区域。</li>
+<li><strong>无探索（No Exploration）</strong>：DPO 是纯离线方法，无法发现训练数据集中不存在的行为。如果最优回复不在数据集中，DPO 永远学不到。PPO 通过在线采样可以探索新区域。</li>
+<li><strong>Likelihood Collapse</strong>：DPO 只关心 chosen 与 rejected 的隐式奖励<strong>差值</strong>。模型可以通过同时降低两者的绝对概率（但让 rejected 降得更多）来满足 loss——chosen 的生成质量也在退化。</li>
+<li><strong>参考模型不匹配</strong>：$\pi_{\text{ref}}$ 太强（如 RLHF 后的模型）→ 策略无法移动；$\pi_{\text{ref}}$ 太弱（如 base model）→ 初始 KL 过大，失去正则化效果。</li>
+<li><strong>数据质量依赖</strong>：噪声标签直接毒害训练。DPO 逐对记忆数据，不像 PPO 可以跨样本平均奖励信号来平滑噪声。</li>
+</ol>
+</div>
+
+<div class="info-box">
+<strong>什么时候应该用 PPO 而非 DPO？</strong>当需要在线探索（如代码生成中发现新的解题路径）、数据极少但环境反馈丰富（如 RLHF 中可以动态调用奖励模型评分）、或任务本质需要试错学习时，PPO 仍有不可替代的优势。
+</div>
+
+<!-- ===================== 6.7 ===================== -->
+<h2>6.7 β Selection Guide（β 选择指南）</h2>
+
+<div class="card">
+<p>$\beta$ 是 DPO 最重要的超参数，控制 KL 惩罚强度。它直接影响模型允许偏离参考的程度。</p>
+<table>
+<tr><th>$\beta$ 值</th><th>体制</th><th>适用场景</th><th>风险</th></tr>
+<tr><td>0.01</td><td>极激进</td><td>数据极干净 + 需要大幅偏离参考</td><td>可能破坏语言能力</td></tr>
+<tr><td>0.05</td><td>激进</td><td>数据质量高，希望明显优于 SFT baseline</td><td>过拟合噪声标签</td></tr>
+<tr><td>0.1</td><td><strong>标准（推荐起点）</strong></td><td>质量与稳定性的平衡，大多数场景首选</td><td>相对安全</td></tr>
+<tr><td>0.2</td><td>保守</td><td>数据有噪声，或模型已接近目标行为</td><td>学习缓慢</td></tr>
+<tr><td>0.5</td><td>极保守</td><td>安全微调，绝不能破坏已有能力</td><td>几乎不变化</td></tr>
+</table>
+
+<h3>$\beta$ 对训练动态的影响</h3>
+<ul>
+<li><strong>梯度幅度</strong>：$|\nabla_\theta \mathcal{L}| \propto \beta \cdot \sigma(-\beta h_\theta)$。$\beta$ 太小 → 梯度本身小；$\beta$ 太大 → $h_\theta$ 被放大使 sigmoid 饱和 → 梯度也小。存在最优区间。</li>
+<li><strong>隐式奖励量纲</strong>：$\hat{r} = \beta \cdot \text{log-ratio}$，$\beta$ 决定了 margin 的绝对数值尺度</li>
+<li><strong>收敛行为</strong>：小 $\beta$ → 收敛快但不稳定；大 $\beta$ → 收敛慢但平稳</li>
+</ul>
+
+<h3>动态调节策略</h3>
+<p>实践中可以使用 $\beta$ schedule：</p>
+<ul>
+<li>训练初期用较小 $\beta$（如 0.05）快速建立 margin</li>
+<li>中后期提升到 0.1-0.2 防止过拟合</li>
+<li>或监控 KL 散度，当 $D_{\text{KL}} > $ 阈值时自动增大 $\beta$</li>
+</ul>
+</div>
+
+<!-- ===================== 6.8 ===================== -->
+<h2>6.8 Batch Size Configuration（批大小配置）</h2>
+
+<p>DPO 训练中，批大小（batch size）的配置直接影响梯度估计质量、训练稳定性和硬件利用率。由于 DPO 每条数据包含一个 preference pair（chosen + rejected），其显存需求天然高于标准 SFT，因此需要更精细的配置策略。</p>
+
+<!-- 6.8.1 -->
+<h3>6.8.1 Global Batch Size Target（全局批大小目标）</h3>
+
+<div class="card">
+<p>DPO 的全局批大小 $B_{\text{global}}$ 存在一个经验最优区间：</p>
+
+<div class="formula-block">
+$$B_{\text{global}} \in [32, 128] \quad \text{(preference pairs per update)} \tag{6.12}$$
+</div>
+
+<div class="formula-explain">
+$B_{\text{global}}$ 的单位是 preference pairs —— 即每次梯度更新所使用的偏好对数量。每个 pair 包含同一 prompt 的 chosen 和 rejected 两条回复。
+</div>
+
+<h3>理论依据</h3>
+<p><strong>下界 $B_{\text{global}} \geq 32$ 的原因</strong>：</p>
+<ul>
+<li><strong>梯度噪声</strong>：DPO 的梯度来自 $\sigma(-\beta h_\theta)$ 这一 sigmoid 函数的输出。当 batch 过小时，个别"异常"pair（如标注噪声、chosen/rejected 质量相近的困难样本）会导致梯度方向剧烈波动。</li>
+<li><strong>多目标平衡</strong>：实际偏好数据通常包含 helpfulness、safety、honesty 等多维度信号。小 batch 中这些维度的梯度可能相互冲突，导致策略在不同维度之间震荡（oscillation between helpfulness and safety objectives）。</li>
+<li><strong>经验验证</strong>：Anthropic 和 Meta 的实验表明，$B < 32$ 时训练 reward accuracy 的方差增大 2-4 倍，且最终模型质量不稳定。</li>
+</ul>
+
+<p><strong>上界 $B_{\text{global}} \leq 128$ 的原因</strong>：</p>
+<ul>
+<li><strong>收敛效率递减</strong>：批大小与收敛速度的关系近似 $\text{speedup} \propto \sqrt{B}$（线性扩展仅在小 batch 区间成立）。从 128 增大到 256 带来的收敛加速仅约 $\sqrt{2} \approx 1.4$ 倍，但通信/显存开销翻倍。</li>
+<li><strong>分布式通信开销</strong>：更大的 $B_{\text{global}}$ 意味着更多 GPU 参与 AllReduce，通信延迟占比上升。</li>
+<li><strong>数据效率</strong>：偏好数据通常较为稀缺（几千到几万对），过大 batch 意味着每 epoch 的更新步数过少，模型无法充分学习。</li>
+</ul>
+
+<div class="highlight-box">
+<strong>经验法则</strong>：对于 7B-70B 规模模型的标准 DPO 训练，$B_{\text{global}} = 128$ 通常是最佳甜点（sweet spot）。这一配置提供了足够的梯度平滑，同时保持合理的更新频率和硬件利用率。对于数据量 < 10k 的小规模训练，可降至 $B_{\text{global}} = 64$ 以增加更新步数。
+</div>
+</div>
+
+<!-- 6.8.2 -->
+<h3>6.8.2 Mathematical Decomposition（数学分解）</h3>
+
+<div class="card">
+<p>全局批大小由三个可配置因子乘积构成：</p>
+
+<div class="formula-block">
+$$B_{\text{global}} = B_{\text{micro}} \times N_{\text{GPUs}} \times K_{\text{accum}} \tag{6.13}$$
+</div>
+<div class="formula-explain">
+• $B_{\text{micro}}$：单 GPU 单次前向/反向的 micro-batch 大小（受 VRAM 物理约束）<br>
+• $N_{\text{GPUs}}$：数据并行 GPU 数量（DDP/FSDP 横向扩展）<br>
+• $K_{\text{accum}}$：梯度累积步数（gradient accumulation steps）
+</div>
+
+<p><strong>DPO 的配对倍数效应</strong>：DPO 中每个 preference pair 会产生两条前向序列（chosen + rejected），因此实际送入 GPU 的序列数量为：</p>
+
+<div class="formula-block">
+$$T_{\text{sequences}} = 2 \times B_{\text{micro}} \tag{6.14}$$
+</div>
+<div class="formula-explain">
+这意味着 DPO 的显存消耗约为同等 $B_{\text{micro}}$ 下 SFT 的 <strong>2 倍</strong>。配置批大小时必须考虑这个乘数效应：如果 SFT 在同一硬件上能跑 $B_{\text{micro}} = 4$，DPO 通常只能跑 $B_{\text{micro}} = 2$。
+</div>
+
+<h3>物理约束与推荐值</h3>
+<table>
+<tr><th>模型规模</th><th>GPU 类型</th><th>精度</th><th>$B_{\text{micro}}$ 物理上限</th><th>说明</th></tr>
+<tr><td>7B</td><td>A100-80GB</td><td>BF16</td><td>2（全参）/ 4（LoRA）</td><td>Flash Attention 2 必须开启</td></tr>
+<tr><td>13B</td><td>A100-80GB</td><td>BF16</td><td>1（全参）/ 2（LoRA）</td><td>需要 activation checkpointing</td></tr>
+<tr><td>70B</td><td>8×A100-80GB</td><td>BF16 + FSDP</td><td>1-2（分片后）</td><td>FSDP Full Shard 模式</td></tr>
+<tr><td>7B</td><td>H100-80GB</td><td>BF16</td><td>4（全参）/ 8（LoRA）</td><td>HBM3 带宽更高</td></tr>
+</table>
+
+<div class="info-box">
+<strong>配置公式应用示例</strong>：假设需要 $B_{\text{global}} = 128$，有 8 张 A100，每张最大 $B_{\text{micro}} = 2$：<br>
+$K_{\text{accum}} = \frac{B_{\text{global}}}{B_{\text{micro}} \times N_{\text{GPUs}}} = \frac{128}{2 \times 8} = 8$ 步梯度累积。<br>
+每次梯度更新需要 $8 \times 8 = 64$ 个 micro-batch 前向/反向，每个 micro-batch 实际处理 $T = 2 \times 2 = 4$ 条序列。
+</div>
+</div>
+
+<!-- 6.8.3 -->
+<h3>6.8.3 Distributed Scaling Configurations（分布式扩展配置）</h3>
+
+<div class="card">
+<p>表 6.1 展示了不同硬件规模下达到 $B_{\text{global}} = 64$ 的具体配置方案及其性能特征：</p>
+
+<table>
+<tr><th>配置方案</th><th>$B_{\text{micro}}$</th><th>$N_{\text{GPUs}}$</th><th>$K_{\text{accum}}$</th><th>$B_{\text{global}}$</th><th>每步序列数</th><th>相对吞吐量</th><th>适用场景</th></tr>
+<tr><td>单卡 A100-80G</td><td>2</td><td>1</td><td>32</td><td>64</td><td>4</td><td>1×（基线）</td><td>实验/调试阶段</td></tr>
+<tr><td>单节点 8×A100</td><td>2</td><td>8</td><td>4</td><td>64</td><td>32</td><td>~7.2×</td><td>标准训练（推荐）</td></tr>
+<tr><td>双节点 16×A100</td><td>2</td><td>16</td><td>2</td><td>64</td><td>64</td><td>~13×</td><td>大模型 FSDP 分片</td></tr>
+<tr><td>4×H100（LoRA）</td><td>4</td><td>4</td><td>4</td><td>64</td><td>32</td><td>~9.5×</td><td>高效微调，H100 显存更大</td></tr>
+</table>
+
+<div class="formula-explain">
+<strong>吞吐量说明</strong>：<br>
+• 相对吞吐量以"单卡 A100 无梯度累积"为基准 1×<br>
+• 单节点 8 卡接近线性扩展（效率 ~90%），因 NVLink 带宽充足<br>
+• 跨节点通信（InfiniBand/RoCE）引入 ~10-15% 的同步开销<br>
+• H100 因 HBM3 和 FP8 TensorCore 优势，单卡吞吐约为 A100 的 2.4 倍
+</div>
+
+<h3>配置选型决策树</h3>
+<ol>
+<li><strong>确定 $B_{\text{global}}$ 目标</strong>：默认 64-128，数据量极小时可降至 32</li>
+<li><strong>测定 $B_{\text{micro}}$ 上限</strong>：用目标模型 + 最长序列做 OOM 测试，找到不 OOM 的最大值</li>
+<li><strong>选择 $N_{\text{GPUs}}$</strong>：优先单节点内扩展（避免跨节点通信），不够再加节点</li>
+<li><strong>计算 $K_{\text{accum}}$</strong>：$K = B_{\text{global}} / (B_{\text{micro}} \times N_{\text{GPUs}})$，确保为整数</li>
+<li><strong>验证</strong>：确认总 steps = dataset_size / $B_{\text{global}}$ 在合理范围（通常 200-2000 步）</li>
+</ol>
+
+<div class="highlight-box">
+<strong>实践建议</strong>：对于大多数 7B 模型 DPO 训练，单节点 8×A100-80G + $B_{\text{micro}}=2$ + $K_{\text{accum}}=4-8$ 是性价比最优配置。训练 10k-50k 对偏好数据，1 epoch 约 80-400 步，30 分钟到 2 小时内完成。
+</div>
+</div>
+
+<!-- 6.8.4 -->
+<h3>6.8.4 VRAM Optimization: Pre-computing Reference Log-Probabilities（显存优化：预计算参考 Log-Probs）</h3>
+
+<div class="card">
+<p><strong>核心观察</strong>：在标准 DPO 中，参考模型 $\pi_{\text{ref}}$ 全程冻结（不更新参数），其对任何输入的输出是<strong>确定性的</strong>。这意味着 $\pi_{\text{ref}}$ 不需要在训练期间常驻 GPU 显存——可以预先计算其所有输出并缓存。</p>
+
+<h3>预计算三步策略</h3>
+<p>将参考模型的显存开销从"训练全程占用"转化为"一次性前向推理"：</p>
+
+<div class="formula-block">
+$$\text{Cache}(x, y) = \log\pi_{\text{ref}}(y|x) = \sum_{t=1}^{|y|} \log p_{\text{ref}}(y_t | x, y_{<t}) \tag{6.15}$$
+</div>
+<div class="formula-explain">
+对每条数据 $(x, y_w, y_l)$，预计算并缓存两个标量：$\log\pi_{\text{ref}}(y_w|x)$ 和 $\log\pi_{\text{ref}}(y_l|x)$。
+</div>
+
+<ol>
+<li><strong>Step 1 — 预计算阶段（Pre-compute）</strong>：
+<ul>
+<li>训练前加载 $\pi_{\text{ref}}$ 到 GPU，对全部训练数据逐条做前向推理</li>
+<li>计算每条数据的 $\log\pi_{\text{ref}}(y_w|x)$ 和 $\log\pi_{\text{ref}}(y_l|x)$</li>
+<li>将结果（两个 float32 标量/条）缓存到磁盘（Arrow/Parquet 格式）</li>
+<li>该阶段仅需前向推理（无反向传播），速度约为训练的 3-5 倍</li>
+</ul>
+</li>
+<li><strong>Step 2 — 驱逐参考模型（Evict）</strong>：
+<ul>
+<li>预计算完成后，从 GPU 和 CPU 内存中<strong>完全卸载</strong> $\pi_{\text{ref}}$</li>
+<li>释放的显存可重新分配给策略模型的更大 batch 或更长序列</li>
+</ul>
+</li>
+<li><strong>Step 3 — 缓存训练阶段（Cached Training）</strong>：
+<ul>
+<li>训练循环中，DataLoader 从缓存读取预计算的 ref log-probs</li>
+<li>DPO loss 计算仅需策略模型的在线前向 + 缓存的 ref 值，无需第二个模型</li>
+<li>显存中仅保留<strong>单个模型</strong>（$\pi_\theta$）+ 优化器状态 + 激活值</li>
+</ul>
+</li>
+</ol>
+
+<h3>显存节省量化</h3>
+<table>
+<tr><th>模型规模</th><th>$\pi_{\text{ref}}$ 显存占用（BF16）</th><th>释放后效果</th><th>$B_{\text{micro}}$ 提升</th></tr>
+<tr><td>7B</td><td>~14 GB</td><td>可容纳更大 micro-batch</td><td>2 → 4（约 2× 吞吐提升）</td></tr>
+<tr><td>13B</td><td>~26 GB</td><td>单卡从 OOM 变为可训练</td><td>1 → 3</td></tr>
+<tr><td>70B（FSDP 分片）</td><td>~140 GB 总计（跨 8 GPU）</td><td>每 GPU 释放 ~17.5 GB</td><td>显著减少跨节点通信，可将 FSDP 分片从 Full Shard 降为 Shard Grad Op</td></tr>
+</table>
+
+<div class="info-box">
+<strong>70B 模型的巨大收益</strong>：对于 70B 参数模型（BF16 下参数约 140 GB），预计算策略意味着训练时集群中释放出 ~140 GB 的<strong>总显存</strong>。这不仅允许增大 batch size，还能减少 FSDP 的分片级别（从需要跨节点切分参数变为仅需切分梯度和优化器状态），从而大幅降低通信开销。
+</div>
+
+<p>TRL 框架中的实现（仅需一行配置）：</p>
+<pre><code># TRL DPOTrainer 预计算参考 log-probs
+dpo_config = DPOConfig(
+    precompute_ref_log_probs=True,       # 核心开关：启用预计算
+    ref_model_compute_batch_size=8,      # 预计算阶段的 batch size（可以更大，因为无反向传播）
+    # 启用后训练阶段无需传入 ref_model 参数
+)
+
+# 训练器初始化时无需加载 ref_model
+trainer = DPOTrainer(
+    model=policy_model,
+    ref_model=None,         # 预计算模式下可设为 None
+    args=dpo_config,
+    train_dataset=dataset,
+    tokenizer=tokenizer,
+)</code></pre>
+
+<div class="highlight-box">
+<strong>适用性限制</strong>：<br>
+• <strong>不适用于 TR-DPO</strong>：TR-DPO（Trust Region DPO）会周期性用策略模型的 EMA 更新 $\pi_{\text{ref}}$，使缓存失效。此时必须保留在线参考模型。<br>
+• <strong>不适用于 Online DPO</strong>：在线 DPO 会动态生成新的 preference pairs，预计算只能覆盖静态数据集。<br>
+• <strong>磁盘空间</strong>：缓存开销极小——每条数据仅存储 2 个 float32（8 bytes），100k 条数据仅需 ~800 KB。
+</div>
+</div>
+
+<!-- ===================== 6.9 ===================== -->
+<h2>6.9 DPO Extensions（DPO 扩展变体）</h2>
+
+<p>以下介绍 8 种重要的 DPO 变体，每种都解决了标准 DPO 的某个特定痛点。</p>
+
+<h3>6.9.1 f-DPO — 广义 f-散度 DPO</h3>
+<div class="card">
+<p><strong>动机</strong>：标准 DPO 隐含使用逆向 KL 散度（reverse KL），具有 mode-seeking 特性——倾向于将概率质量集中到少数高奖励回复上，牺牲多样性。f-DPO 将 KL 约束推广到任意 f-散度，允许在<strong>多样性</strong>与<strong>质量集中</strong>之间灵活权衡。</p>
+<div class="formula-block">
+$$\mathcal{L}_{f\text{-DPO}} = -\mathbb{E}_{(x,y_w,y_l)}\left[f'\!\left(\frac{\pi_\theta(y_w|x)}{\pi_{\text{ref}}(y_w|x)}\right) - f'\!\left(\frac{\pi_\theta(y_l|x)}{\pi_{\text{ref}}(y_l|x)}\right)\right]$$
+</div>
+<div class="formula-explain">
+其中 $f'$ 是凸函数 $f$ 的导数。不同的 $f$ 对应不同的散度度量。
+</div>
+<table>
+<tr><th>散度类型</th><th>$f(u)$</th><th>$f'(u)$</th><th>特点</th><th>适用场景</th></tr>
+<tr><td>Reverse KL（标准DPO）</td><td>$u\log u$</td><td>$\log u + 1$</td><td>Mode-seeking</td><td>有明确正确答案（数学、事实QA）</td></tr>
+<tr><td>Forward KL</td><td>$-\log u$</td><td>$-1/u$</td><td>Mode-covering</td><td>创意写作、多样性任务</td></tr>
+<tr><td>Jensen-Shannon</td><td>$u\log\frac{2u}{u+1}$</td><td>$\log\frac{2u}{u+1}$</td><td>对称、平衡</td><td>通用场景</td></tr>
+<tr><td>$\alpha$-Divergence</td><td>$\frac{u^\alpha - 1}{\alpha(\alpha-1)}$</td><td>$\frac{u^{\alpha-1}}{\alpha-1}$</td><td>连续可调</td><td>需要精细控制多样性</td></tr>
+</table>
+<p><strong>实践指导</strong>：对创意任务（故事生成、诗歌创作），使用 Forward KL 的 f-DPO 可保持输出多样性；对精确任务（代码、数学），标准 Reverse KL 更优。</p>
+</div>
+
+<h3>6.9.2 Robust DPO — 抗噪声标签 DPO</h3>
+<div class="card">
+<p><strong>问题</strong>：人类标注不完美——标注员疲劳、主观偏差、任务歧义导致约 5-20% 的偏好标签被翻转。标准 DPO 会忠实地记忆这些噪声标签，导致模型学到错误偏好。</p>
+<p><strong>建模</strong>：假设每条标注以概率 $\epsilon$ 被翻转（chosen 和 rejected 互换）。</p>
+<div class="formula-block">
+$$\mathcal{L}_{\text{Robust}} = \frac{(1-\epsilon)\,\mathcal{L}_{\text{DPO}}(y_w, y_l) - \epsilon\,\mathcal{L}_{\text{DPO}}(y_l, y_w)}{1 - 2\epsilon}$$
+</div>
+<div class="formula-explain">
+<strong>直觉</strong>：如果 $\epsilon$ 比例的标签是反的，那么标准 DPO loss 中有 $\epsilon$ 的部分在"做反方向的优化"。Robust DPO 通过减去翻转方向的 loss 贡献来"对冲"噪声。<br>
+• $\epsilon = 0$：退化为标准 DPO（分子 = $\mathcal{L}_{\text{DPO}}$，分母 = 1）<br>
+• $\epsilon = 0.5$：纯随机噪声，分母为 0，不可学习<br>
+• 实践中 $\epsilon \in [0.05, 0.15]$ 已覆盖大多数标注噪声
+</div>
+<p><strong>TRL 配置</strong>：</p>
+<pre><code>DPOConfig(loss_type="robust", label_smoothing=0.1)  # epsilon = 0.1</code></pre>
+</div>
+
+<h3>6.9.3 TR-DPO — Trust Region DPO</h3>
+<div class="card">
+<p><strong>问题</strong>：标准 DPO 的 $\pi_{\text{ref}}$ 全程固定。随着策略持续优化，$D_{\text{KL}}[\pi_\theta \| \pi_{\text{ref}}]$ 不断增大，KL 惩罚越来越强，最终主导 loss，阻碍进一步优化——表现为 loss 过早进入平台期。</p>
+<p><strong>解决方案</strong>：用指数移动平均（EMA）定期更新参考模型，让"信任域"跟随策略移动：</p>
+<div class="formula-block">
+$$\pi_{\text{ref}}^{(t+1)} \leftarrow \alpha \cdot \pi_\theta^{(t)} + (1-\alpha) \cdot \pi_{\text{ref}}^{(t)}$$
+</div>
+<div class="formula-explain">
+每 $T_{\text{sync}}$ 步执行一次更新。$\alpha$ 越大，参考模型追踪策略越快（信任域越"宽松"）。<br>
+• 推荐：$\alpha \in [0.5, 0.9]$，$T_{\text{sync}} \in [256, 1024]$ 步
+</div>
+<p><strong>TRL 配置</strong>：</p>
+<pre><code>DPOConfig(
+    sync_ref_model=True,
+    ref_model_mixup_alpha=0.6,
+    ref_model_sync_steps=512,
+)</code></pre>
+<p><strong>适用场景</strong>：长训练（多 epoch）、loss 过早平台期、迭代式 DPO 管线。</p>
+<p><strong>注意</strong>：TR-DPO 不兼容 <code>precompute_ref_log_probs=True</code>，因为参考模型在变化。</p>
+</div>
+
+<h3>6.9.4 EXO — Exact Optimisation</h3>
+<div class="card">
+<p><strong>问题</strong>：DPO 的理论推导基于 reverse KL 约束，但实际优化的目标等价于在 reward 空间中做 forward KL 匹配——方向搞反了。这导致 DPO 在某些分布下不是最优的。</p>
+<p><strong>解决方案</strong>：EXO 直接优化正确方向的 KL 散度：</p>
+<div class="formula-block">
+$$\mathcal{L}_{\text{EXO}} = -\mathbb{E}_{(x,y_w,y_l)}\left[\log\sigma\left(\beta\log\frac{\pi_{\text{ref}}(y_w|x)}{\pi_\theta(y_w|x)} - \beta\log\frac{\pi_{\text{ref}}(y_l|x)}{\pi_\theta(y_l|x)}\right)\right]$$
+</div>
+<div class="formula-explain">
+注意 $\pi_\theta$ 和 $\pi_{\text{ref}}$ 在分数中的位置相比标准 DPO <strong>互换</strong>了！<br>
+标准 DPO：$\log(\pi_\theta / \pi_{\text{ref}})$<br>
+EXO：$\log(\pi_{\text{ref}} / \pi_\theta)$<br>
+EXO 实现了理论上正确的 reverse KL 概率匹配目标。
+</div>
+<p><strong>TRL 配置</strong>：<code>DPOConfig(loss_type="exo_pair")</code></p>
+<p><strong>适用场景</strong>：需要理论保证的场景，或标准 DPO 出现异常行为时的替代方案。</p>
+</div>
+
+<h3>6.9.5 NCA — Noise Contrastive Alignment</h3>
+<div class="card">
+<p><strong>问题</strong>：Likelihood Collapse——DPO 的 loss 只关心 $\hat{r}_w - \hat{r}_l$ 的差值。模型可以通过<strong>同时降低</strong>两者的绝对似然（但让 rejected 降得更多）来最小化 loss。结果：chosen 的生成质量也在退化。</p>
+<div class="formula-block">
+$$\mathcal{L}_{\text{NCA}} = -\log\sigma(\hat{r}_w) - \frac{1}{2}\log\sigma(-\hat{r}_w) - \frac{1}{2}\log\sigma(-\hat{r}_l)$$
+</div>
+<div class="formula-explain">
+<strong>三项各有分工</strong>：<br>
+• 第一项 $-\log\sigma(\hat{r}_w)$：鼓励 chosen 有高隐式奖励（推高 $y_w$ 的绝对概率）<br>
+• 第二项 $-\frac{1}{2}\log\sigma(-\hat{r}_w)$：惩罚 chosen 的隐式奖励过高（防止策略在 $y_w$ 上过度自信）<br>
+• 第三项 $-\frac{1}{2}\log\sigma(-\hat{r}_l)$：惩罚 rejected 的隐式奖励过高（压低 $y_l$）<br>
+关键差异：NCA 不仅关心<strong>差值</strong>，还关心<strong>绝对值</strong>，从根本上防止 collapse。
+</div>
+<p><strong>TRL 配置</strong>：<code>DPOConfig(loss_type="nca_pair")</code></p>
+<p><strong>实践建议</strong>：使用较小的 $\beta$（如 0.01-0.05），让绝对似然项占主导。当监控到 <code>train/rewards/chosen</code> 持续下降时，应切换到 NCA。</p>
+</div>
+
+<h3>6.9.6 SLiC-HF — Hinge Loss 替代方案</h3>
+<div class="card">
+<p><strong>动机</strong>：标准 DPO 使用 log-sigmoid，即使 margin 已经足够大，loss 仍然为正且持续给梯度。这导致模型在已经"学会"的样本上继续优化，浪费计算资源并可能过拟合。</p>
+<p><strong>解决方案</strong>：用 Hinge Loss（合页损失）替代——当 margin 超过阈值 $\delta$ 时，loss 直接为 0。</p>
+<div class="formula-block">
+$$\mathcal{L}_{\text{SLiC}} = \max\!\left(0,\; \delta - \beta\log\frac{\pi_\theta(y_w|x)}{\pi_{\text{ref}}(y_w|x)} + \beta\log\frac{\pi_\theta(y_l|x)}{\pi_{\text{ref}}(y_l|x)}\right)$$
+</div>
+<div class="formula-explain">
+• $\delta > 0$：目标 margin 阈值（通常取 1.0）<br>
+• 当隐式 margin 超过 $\delta$ → loss = 0 → 不再更新<br>
+• 更简单、更快收敛，对"容易样本"自动跳过<br>
+• 类比 SVM 的 hinge loss：只有支撑向量（困难样本）贡献梯度
+</div>
+<p><strong>TRL 配置</strong>：<code>DPOConfig(loss_type="hinge")</code></p>
+<p><strong>适用场景</strong>：数据集中有大量"明显"的偏好对（如 safety 数据），希望模型快速学会后聚焦困难样本。</p>
+</div>
+
+<h3>6.9.7 Iterative RPO — 推理偏好优化</h3>
+<div class="card">
+<p><strong>问题</strong>：标准 DPO 训练模型<strong>区分</strong>好坏回复（判别能力），但不保证模型能<strong>生成</strong>好的回复（生成能力）。对推理任务（数学、代码），光能判断对错而不能自己写出正确推理链，在推理阶段毫无用处。</p>
+<div class="formula-block">
+$$\mathcal{L}_{\text{RPO}} = \lambda_1 \cdot \mathcal{L}_{\text{DPO}}(y_w, y_l) + \lambda_2 \cdot \mathcal{L}_{\text{NLL}}(y_w)$$
+</div>
+<div class="formula-explain">
+在 DPO 损失之外，加上标准的负对数似然（NLL）项——即对 chosen response 做 SFT。<br>
+• $\mathcal{L}_{\text{NLL}}(y_w) = -\sum_t \log\pi_\theta(y_t^w | x, y_{&lt;t}^w)$<br>
+• $\lambda_1$ 控制偏好学习强度，$\lambda_2$ 控制生成能力保持<br>
+• 确保模型不仅知道哪个好，还能<strong>生成</strong>好的回复
+</div>
+<p><strong>"Iterative" 含义</strong>：</p>
+<ol>
+<li>用当前策略生成多个 rollouts</li>
+<li>用验证器（如数学答案检查器）标注 win/lose</li>
+<li>用 RPO loss 训练</li>
+<li>重复以上步骤（on-policy 数据刷新）</li>
+</ol>
+<p><strong>TRL 配置</strong>：<code>DPOConfig(rpo_alpha=1.0)</code>（$\lambda_2 = \text{rpo\_alpha}$）</p>
+<p><strong>适用场景</strong>：数学推理、代码生成、逻辑推理；DPO 训练后生成质量/流畅度明显下降时。</p>
+</div>
+
+<h3>6.9.8 SimPO — Simple Preference Optimization（无参考模型）</h3>
+<div class="card">
+<p><strong>核心创新</strong>：<strong>完全去掉参考模型 $\pi_{\text{ref}}$</strong>，用长度归一化的平均 log-prob 作为隐式奖励。</p>
+
+<h3>隐式奖励定义</h3>
+<div class="formula-block">
+$$r_{\text{SimPO}}(y|x) = \frac{\beta}{|y|}\log\pi_\theta(y|x) = \frac{\beta}{|y|}\sum_{t=1}^{|y|}\log\pi_\theta(y_t|x, y_{&lt;t})$$
+</div>
+<div class="formula-explain">
+奖励 = 当前策略的<strong>平均 token log 概率</strong>（乘以 $\beta$）。长度归一化确保不同长度的回复公平比较。
+</div>
+
+<h3>SimPO 损失函数</h3>
+<div class="formula-block">
+$$\mathcal{L}_{\text{SimPO}} = -\mathbb{E}_{(x,y_w,y_l)}\left[\log\sigma\left(\frac{\beta}{|y_w|}\log\pi_\theta(y_w|x) - \frac{\beta}{|y_l|}\log\pi_\theta(y_l|x) - \gamma\right)\right]$$
+</div>
+<div class="formula-explain">
+• $\gamma > 0$：目标 reward margin（超参数），强制 chosen 的奖励严格高于 rejected 至少 $\gamma$<br>
+• 无需 $\pi_{\text{ref}}$ → 显存减半，前向推理次数减半<br>
+• 长度归一化 → 不偏好长回复或短回复
+</div>
+
+<h3>SimPO vs DPO vs ORPO 对比</h3>
+<table>
+<tr><th>维度</th><th>DPO</th><th>ORPO</th><th>SimPO</th></tr>
+<tr><td>参考模型</td><td>需要</td><td>不需要</td><td>不需要</td></tr>
+<tr><td>奖励定义</td><td>$\beta\log(\pi_\theta/\pi_{\text{ref}})$</td><td>odds-ratio + SFT loss</td><td>$(\beta/|y|)\log\pi_\theta$</td></tr>
+<tr><td>长度处理</td><td>隐式惩罚长回复</td><td>无特殊处理</td><td>显式归一化</td></tr>
+<tr><td>显存需求</td><td>2× 模型大小</td><td>1× 模型大小</td><td>1× 模型大小</td></tr>
+<tr><td>理论基础</td><td>KL 约束闭式解</td><td>Odds-ratio 直觉</td><td>长度归一化 log-prob 作为 reward</td></tr>
+<tr><td>推荐 $\beta$</td><td>0.1</td><td>0.1</td><td>2.0-2.5（注意尺度不同）</td></tr>
+</table>
+
+<p><strong>TRL 配置</strong>：</p>
+<pre><code>DPOConfig(
+    loss_type="simpo",
+    simpo_gamma=0.5,   # target margin
+    beta=2.5,          # 注意 SimPO 的 beta 量纲不同，通常需要更大值
+    ref_model=None,    # 无需参考模型
+)</code></pre>
+<p><strong>适用场景</strong>：显存受限、想简化训练管线、数据中 chosen/rejected 长度差异大。</p>
+</div>
+
+<!-- 变体决策图 -->
+<h3>变体选择决策指南</h3>
+<svg viewBox="0 0 720 340" xmlns="http://www.w3.org/2000/svg" style="width:100%;margin:1.5rem 0;">
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M0,0 L10,5 L0,10 Z" fill="#666"/>
+    </marker>
+  </defs>
+  <rect x="270" y="5" width="180" height="34" rx="17" fill="#3498db"/>
+  <text x="360" y="27" text-anchor="middle" fill="#fff" font-size="12" font-weight="bold">选择 DPO 变体</text>
+
+  <line x1="360" y1="39" x2="360" y2="60" stroke="#666" marker-end="url(#arr)"/>
+  <rect x="260" y="62" width="200" height="28" rx="4" fill="#fff3cd" stroke="#ffc107"/>
+  <text x="360" y="81" text-anchor="middle" font-size="10">标注数据有噪声？</text>
+  <line x1="460" y1="76" x2="540" y2="76" stroke="#666" marker-end="url(#arr)"/>
+  <rect x="542" y="62" width="110" height="28" rx="4" fill="#d4edda" stroke="#28a745"/>
+  <text x="597" y="81" text-anchor="middle" font-size="10" font-weight="bold">Robust DPO</text>
+
+  <line x1="360" y1="90" x2="360" y2="111" stroke="#666" marker-end="url(#arr)"/>
+  <rect x="260" y="113" width="200" height="28" rx="4" fill="#fff3cd" stroke="#ffc107"/>
+  <text x="360" y="132" text-anchor="middle" font-size="10">Loss 过早平台期？</text>
+  <line x1="460" y1="127" x2="540" y2="127" stroke="#666" marker-end="url(#arr)"/>
+  <rect x="542" y="113" width="110" height="28" rx="4" fill="#d4edda" stroke="#28a745"/>
+  <text x="597" y="132" text-anchor="middle" font-size="10" font-weight="bold">TR-DPO</text>
+
+  <line x1="360" y1="141" x2="360" y2="162" stroke="#666" marker-end="url(#arr)"/>
+  <rect x="260" y="164" width="200" height="28" rx="4" fill="#fff3cd" stroke="#ffc107"/>
+  <text x="360" y="183" text-anchor="middle" font-size="10">Chosen 绝对概率也在下降？</text>
+  <line x1="460" y1="178" x2="540" y2="178" stroke="#666" marker-end="url(#arr)"/>
+  <rect x="542" y="164" width="110" height="28" rx="4" fill="#d4edda" stroke="#28a745"/>
+  <text x="597" y="183" text-anchor="middle" font-size="10" font-weight="bold">NCA</text>
+
+  <line x1="360" y1="192" x2="360" y2="213" stroke="#666" marker-end="url(#arr)"/>
+  <rect x="260" y="215" width="200" height="28" rx="4" fill="#fff3cd" stroke="#ffc107"/>
+  <text x="360" y="234" text-anchor="middle" font-size="10">推理任务/生成质量下降？</text>
+  <line x1="460" y1="229" x2="540" y2="229" stroke="#666" marker-end="url(#arr)"/>
+  <rect x="542" y="215" width="110" height="28" rx="4" fill="#d4edda" stroke="#28a745"/>
+  <text x="597" y="234" text-anchor="middle" font-size="10" font-weight="bold">Iterative RPO</text>
+
+  <line x1="360" y1="243" x2="360" y2="264" stroke="#666" marker-end="url(#arr)"/>
+  <rect x="260" y="266" width="200" height="28" rx="4" fill="#fff3cd" stroke="#ffc107"/>
+  <text x="360" y="285" text-anchor="middle" font-size="10">显存紧张/想去掉参考？</text>
+  <line x1="460" y1="280" x2="540" y2="280" stroke="#666" marker-end="url(#arr)"/>
+  <rect x="542" y="266" width="110" height="28" rx="4" fill="#d4edda" stroke="#28a745"/>
+  <text x="597" y="285" text-anchor="middle" font-size="10" font-weight="bold">SimPO</text>
+
+  <line x1="360" y1="294" x2="360" y2="315" stroke="#666" marker-end="url(#arr)"/>
+  <rect x="260" y="317" width="200" height="28" rx="4" fill="#fff3cd" stroke="#ffc107"/>
+  <text x="360" y="336" text-anchor="middle" font-size="10">需要更多输出多样性？</text>
+  <line x1="460" y1="331" x2="540" y2="331" stroke="#666" marker-end="url(#arr)"/>
+  <rect x="542" y="317" width="110" height="28" rx="4" fill="#d4edda" stroke="#28a745"/>
+  <text x="597" y="336" text-anchor="middle" font-size="10" font-weight="bold">f-DPO</text>
+
+  <line x1="260" y1="76" x2="180" y2="76" stroke="#666" marker-end="url(#arr)"/>
+  <rect x="60" y="62" width="118" height="28" rx="4" fill="#d1ecf1" stroke="#17a2b8"/>
+  <text x="119" y="81" text-anchor="middle" font-size="10">快速收敛/跳过易样本？</text>
+  <line x1="119" y1="90" x2="119" y2="111" stroke="#666" marker-end="url(#arr)"/>
+  <rect x="64" y="113" width="110" height="28" rx="4" fill="#d4edda" stroke="#28a745"/>
+  <text x="119" y="132" text-anchor="middle" font-size="10" font-weight="bold">SLiC-HF</text>
+
+  <line x1="260" y1="127" x2="180" y2="127" stroke="#666" marker-end="url(#arr)"/>
+  <rect x="60" y="164" width="118" height="28" rx="4" fill="#d1ecf1" stroke="#17a2b8"/>
+  <text x="119" y="183" text-anchor="middle" font-size="10">理论正确性要求高？</text>
+  <line x1="119" y1="192" x2="119" y2="213" stroke="#666" marker-end="url(#arr)"/>
+  <rect x="64" y="215" width="110" height="28" rx="4" fill="#d4edda" stroke="#28a745"/>
+  <text x="119" y="234" text-anchor="middle" font-size="10" font-weight="bold">EXO</text>
+  <line x1="180" y1="178" x2="178" y2="178" stroke="#666" marker-end="url(#arr)"/>
+</svg>
+
+<!-- 变体总览表 -->
+<h3>8 种变体一览表</h3>
+<table>
+<tr><th>变体</th><th>核心改进</th><th>TRL loss_type</th><th>关键超参</th></tr>
+<tr><td>f-DPO</td><td>任意 f-散度替代 KL</td><td>—（需自定义）</td><td>散度函数 $f$ 的选择</td></tr>
+<tr><td>Robust DPO</td><td>对冲标注噪声</td><td><code>"robust"</code></td><td><code>label_smoothing</code> ($\epsilon$)</td></tr>
+<tr><td>TR-DPO</td><td>EMA 动态更新参考</td><td>sigmoid + sync</td><td><code>ref_model_mixup_alpha</code>, <code>sync_steps</code></td></tr>
+<tr><td>EXO</td><td>修正 KL 方向</td><td><code>"exo_pair"</code></td><td>标准 $\beta$</td></tr>
+<tr><td>NCA</td><td>防止 likelihood collapse</td><td><code>"nca_pair"</code></td><td>小 $\beta$（0.01-0.05）</td></tr>
+<tr><td>SLiC-HF</td><td>Hinge loss 跳过易样本</td><td><code>"hinge"</code></td><td>margin $\delta$</td></tr>
+<tr><td>Iterative RPO</td><td>+ NLL 保持生成能力</td><td>sigmoid + rpo</td><td><code>rpo_alpha</code> ($\lambda_2$)</td></tr>
+<tr><td>SimPO</td><td>去掉参考，长度归一化</td><td><code>"simpo"</code></td><td><code>simpo_gamma</code>, 大 $\beta$（2-3）</td></tr>
+</table>
+
+<!-- ===================== Takeaway ===================== -->
+<div class="takeaway">
+<h2>关键要点总结</h2>
+<ol>
+<li><strong>DPO = 无 RL 的偏好对齐</strong>：利用 KL 约束最优策略的闭式解，将 RLHF 转为单阶段监督学习，只需策略 + 参考模型。</li>
+<li><strong>完整推导链</strong>：RLHF 目标 → 最优策略 $\pi^* \propto \pi_{\text{ref}} \exp(r/\beta)$ → 奖励重参数化 → Bradley-Terry 消元（$Z(x)$ 抵消）→ DPO Loss。</li>
+<li><strong>隐式奖励</strong>：$\hat{r}(x,y) = \beta\log(\pi_\theta(y|x)/\pi_{\text{ref}}(y|x))$，策略相对参考的提升即为奖励。</li>
+<li><strong>自适应梯度</strong>：梯度权重 $\sigma(-\beta h_\theta)$ 自动聚焦困难样本，已学好的对自动停止。</li>
+<li><strong>$\beta$ 是核心超参</strong>：控制 KL 约束强度，推荐从 0.1 开始。太大 → sigmoid 饱和；太小 → 梯度微弱。</li>
+<li><strong>DPO 极易过拟合</strong>：通常只训 1 epoch，学习率 5e-7 级别，务必监控 eval loss。</li>
+<li><strong>预计算 ref log-prob</strong>：对静态 $\pi_{\text{ref}}$ 可释放约一半 GPU 显存，大幅提升训练效率。</li>
+<li><strong>Likelihood Collapse 是最常见失效</strong>：监控 chosen reward 趋势，若下降则切换 NCA 或 RPO。</li>
+<li><strong>变体选择口诀</strong>：噪声 → Robust，平台 → TR-DPO，collapse → NCA，推理 → RPO，省显存 → SimPO，多样性 → f-DPO，快收敛 → SLiC-HF。</li>
+</ol>
+</div>
+
+<!-- Q&A -->
+<h2>Q&amp;A（点击展开）</h2>
+
+<details>
+<summary>Q1：DPO 相比 PPO 最核心的优势和劣势分别是什么？</summary>
+<div class="answer">
+<p><strong>优势</strong>：简洁性（2 模型 vs 4 模型）、稳定性（无 reward hacking、KL 爆炸）、工程简单（标准 SFT 框架即可）、超参少（主要就是 $\beta$）。</p>
+<p><strong>劣势</strong>：无探索能力（只能优化已有数据覆盖的行为）、离线方法导致分布偏移、数据质量敏感（逐对记忆噪声标签）、可能出现 likelihood collapse。当需要在线探索或任务有丰富环境反馈时，PPO 仍不可替代。</p>
+</div>
+</details>
+
+<details>
+<summary>Q2：DPO 推导中配分函数 $Z(x)$ 为什么能完美消去？</summary>
+<div class="answer">
+<p>Bradley-Terry 偏好模型 $P(y_w \succ y_l) = \sigma(r_w - r_l)$ 只关心两个回复的奖励<strong>差值</strong>。将闭式解的奖励表达式 $r(x,y) = \beta\log(\pi^*/\pi_{\text{ref}}) + \beta\log Z(x)$ 代入后，$+\beta\log Z(x)$ 在 $r_w$ 和 $r_l$ 中各出现一次，做差后完美抵消：$r_w - r_l = \beta\log(\pi^*(y_w)/\pi_{\text{ref}}(y_w)) - \beta\log(\pi^*(y_l)/\pi_{\text{ref}}(y_l))$。这是 DPO 能绕过 intractable partition function 的核心数学巧妙之处。</p>
+</div>
+</details>
+
+<details>
+<summary>Q3：$\beta$ 具体控制什么？为什么不能太大也不能太小？</summary>
+<div class="answer">
+<p>$\beta$ 控制 KL 惩罚强度：<br>
+• <strong>$\beta$ 太大</strong>：隐式奖励 $\hat{r} = \beta \cdot \text{log-ratio}$ 被放大 → sigmoid $\sigma(\beta h_\theta)$ 快速饱和 → 梯度 $\sigma(-\beta h_\theta) \to 0$ → 训练停滞<br>
+• <strong>$\beta$ 太小</strong>：梯度 $\propto \beta \cdot \sigma(\cdot)$ 本身极小 → loss landscape 平坦 → 收敛极慢，需要极多步才能建立 margin<br>
+最优 $\beta$ 需要让大部分训练样本的 $\beta h_\theta$ 落在 sigmoid 的线性区间 $[-2, 2]$ 内。实践起点 0.1。</p>
+</div>
+</details>
+
+<details>
+<summary>Q4：什么是 Likelihood Collapse？如何检测和解决？</summary>
+<div class="answer">
+<p><strong>定义</strong>：DPO loss 只关心隐式奖励差 $\hat{r}_w - \hat{r}_l$。模型可以通过同时降低两者的<strong>绝对</strong>log 概率来满足 loss——只要 rejected 降得更多即可。结果是 chosen 的生成质量退化。</p>
+<p><strong>检测</strong>：监控 <code>train/rewards/chosen</code>。正常训练中应该上升或持平；若持续下降 → collapse。</p>
+<p><strong>解决方案</strong>：<br>
+• NCA：加入绝对似然项，惩罚 $y_w$ 概率下降<br>
+• RPO：加 NLL 项强制模型学会生成 $y_w$<br>
+• 增大 $\beta$：限制策略偏移幅度<br>
+• 使用更高质量的数据：减少模型需要"大幅调整"的压力</p>
+</div>
+</details>
+
+<details>
+<summary>Q5：SimPO 如何做到无需参考模型？有什么代价？</summary>
+<div class="answer">
+<p>SimPO 将隐式奖励定义为策略本身的长度归一化平均 log-prob：$r = (\beta/|y|)\log\pi_\theta(y|x)$。这完全由当前策略决定，无需与参考对比。为防止优化退化（所有概率趋于均匀），加入 margin $\gamma$ 强制 chosen 奖励高于 rejected 至少 $\gamma$。</p>
+<p><strong>代价</strong>：失去了 KL 约束的理论保证——没有参考模型"锚定"，策略可能偏移得更远。实践中需要更仔细地监控生成质量和多样性。</p>
+</div>
+</details>
+
+<details>
+<summary>Q6：预计算参考 log-prob 有什么限制？</summary>
+<div class="answer">
+<p>• 只适用于 $\pi_{\text{ref}}$ <strong>全程不变</strong>的标准 DPO。TR-DPO（动态更新参考）不能用。<br>
+• 数据增强（如 random prompt augmentation）如果改变了输入序列，缓存会失效。<br>
+• 若数据集更新（新增样本），需要重新跑一遍预计算。<br>
+• 好处极大：70B 模型可节省 ~140GB 显存，$B_{\text{micro}}$ 可提升 2-4 倍。</p>
+</div>
+</details>
+
+<details>
+<summary>Q7：在什么情况下应该使用 RPO 而不是标准 DPO？</summary>
+<div class="answer">
+<p>推理密集型任务（数学、代码、逻辑）。标准 DPO 只训练判别能力（区分好坏），但推理任务需要生成能力（写出正确推理链）。RPO 通过额外的 NLL 项保证模型不仅"知道哪个好"，还"能写出好的"。特别适合 iterative pipeline：生成 rollouts → 验证器标注 → RPO 训练 → 刷新数据 → 重复。</p>
+</div>
+</details>
+
+<details>
+<summary>Q8：DPO 和 RLHF/PPO 在计算效率上具体差多少？</summary>
+<div class="answer">
+<p>对 7B 模型的典型对比：<br>
+• <strong>显存</strong>：PPO 需要 ~56GB（4 模型），DPO 需要 ~28GB（2 模型），SimPO 只需 ~14GB（1 模型）<br>
+• <strong>训练速度</strong>：DPO 比 PPO 快 2-3×（无需 rollout 采样和多次前向）<br>
+• <strong>代码复杂度</strong>：DPO 用 TRL 约 50 行代码即可完成，PPO 需要 200+ 行<br>
+• <strong>超参调优</strong>：DPO 主要调 $\beta$ + lr，PPO 需要调 7-8 个耦合超参</p>
+</div>
+</details>
+
+<hr style="margin:2rem 0;border:none;border-top:1px solid var(--border);">
+<p style="text-align:center;color:var(--text-secondary);font-size:0.85rem;">
+  笔记生成时间：2026-06-25 · 来源：<em>The Hitchhiker's Guide to Agentic AI</em>, Chapter 6, pp.145–157
+</p>
+
+</body>
+</html>

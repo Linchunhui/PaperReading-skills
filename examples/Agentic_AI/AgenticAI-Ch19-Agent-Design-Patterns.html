@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第19章 阅读笔记：Agent Design Patterns</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]})"></script>
+<style>
+:root {
+  --primary: #2c3e50;
+  --accent: #3498db;
+  --bg: #fafbfc;
+  --card-bg: #ffffff;
+  --border: #e1e4e8;
+  --text: #24292e;
+  --text-secondary: #586069;
+  --code-bg: #f6f8fa;
+  --highlight: #fff3cd;
+  --success: #d4edda;
+  --info: #d1ecf1;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; line-height: 1.8; color: var(--text); background: var(--bg); padding: 2rem; max-width: 900px; margin: 0 auto; }
+h1 { font-size: 1.8rem; color: var(--primary); border-bottom: 3px solid var(--accent); padding-bottom: 0.5rem; margin-bottom: 1rem; }
+h2 { font-size: 1.4rem; color: var(--primary); margin-top: 2.5rem; margin-bottom: 1rem; padding-left: 0.8rem; border-left: 4px solid var(--accent); }
+h3 { font-size: 1.15rem; color: var(--primary); margin-top: 1.8rem; margin-bottom: 0.8rem; }
+p { margin-bottom: 1rem; text-align: justify; }
+ul, ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+li { margin-bottom: 0.5rem; }
+code { background: var(--code-bg); padding: 0.15rem 0.4rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: var(--code-bg); padding: 1rem; border-radius: 6px; overflow-x: auto; margin-bottom: 1.5rem; border: 1px solid var(--border); }
+pre code { background: none; padding: 0; }
+blockquote { border-left: 4px solid var(--accent); padding: 0.8rem 1.2rem; margin: 1.5rem 0; background: var(--info); border-radius: 0 6px 6px 0; }
+.card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+.formula-block { background: var(--code-bg); border: 1px solid var(--border); border-radius: 6px; padding: 1rem; margin: 1rem 0; overflow-x: auto; }
+.formula-explain { color: var(--text-secondary); font-size: 0.92em; margin-top: 0.5rem; padding-left: 1rem; border-left: 3px solid #ddd; }
+.highlight-box { background: var(--highlight); border: 1px solid #ffc107; border-radius: 6px; padding: 1rem; margin: 1rem 0; }
+.info-box { background: var(--info); border: 1px solid #bee5eb; border-radius: 6px; padding: 1rem; margin: 1rem 0; }
+.success-box { background: var(--success); border: 1px solid #c3e6cb; border-radius: 6px; padding: 1rem; margin: 1rem 0; }
+.subtitle { color: var(--text-secondary); font-size: 1rem; margin-bottom: 0.3rem; }
+.meta { color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 2rem; }
+table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; }
+th, td { border: 1px solid var(--border); padding: 0.6rem 0.8rem; text-align: left; }
+th { background: var(--code-bg); font-weight: 600; }
+details { margin-bottom: 1rem; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+summary { padding: 0.8rem 1.2rem; background: var(--code-bg); cursor: pointer; font-weight: 500; }
+details[open] summary { border-bottom: 1px solid var(--border); }
+details .answer { padding: 1rem 1.2rem; }
+svg { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; }
+.takeaway { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 8px; padding: 1.5rem; margin: 2rem 0; }
+.takeaway h2 { color: white; border-left-color: rgba(255,255,255,0.5); }
+.takeaway li { color: rgba(255,255,255,0.95); }
+</style>
+</head>
+<body>
+
+<h1>第19章：Agent Design Patterns</h1>
+<p class="subtitle">Agent设计模式——从Workflow到Autonomous Agent的规范架构</p>
+<p class="meta">来源：Agentic AI · 第19章（pp. 369–374） · 阅读笔记</p>
+
+<div class="card">
+<h3>章节摘要</h3>
+<p>构建有效的agent不仅需要强大的模型和工具集。<strong>架构</strong>——LLM如何被编排、任务如何分解、控制流如何在组件间流动——决定了agent是否可靠、可调试和成本可控。本章呈现从Anthropic、OpenAI、Google以及开源社区的生产部署中涌现的规范设计模式。</p>
+</div>
+
+<h2>核心区分：Agents vs. Workflows</h2>
+
+<div class="highlight-box">
+<p><strong>关键决策原则</strong>：不是所有任务都需要自主agent。首先尝试workflow；只有当任务确实需要动态路由或开放式探索时，才升级为agent。</p>
+</div>
+
+<div class="card">
+<table>
+<thead>
+<tr><th>维度</th><th>Workflow</th><th>Agent</th></tr>
+</thead>
+<tbody>
+<tr><td>控制流</td><td>预定义，LLM在特定步骤被调用</td><td>LLM动态决定下一步做什么</td></tr>
+<tr><td>优势</td><td>可预测、可测试、更便宜</td><td>灵活，处理新颖情况</td></tr>
+<tr><td>适用场景</td><td>任务结构已知</td><td>需要自适应决策</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2>19.1 Workflow Patterns</h2>
+
+<p>这些模式改编自Anthropic的agentic构建模块分类法[342]——在预定义控制流中使用LLM。<strong>系统（而非模型）</strong>决定执行顺序。</p>
+
+<h3>19.1.1 Prompt Chaining（提示链）</h3>
+
+<div class="card">
+<p><strong>定义</strong>：最简单的模式——将复杂任务分解为固定序列的LLM调用，将一次调用的结果作为下一次调用的上下文输入。步骤之间的验证门（validation gates）在错误向下游传播之前尽早捕获。</p>
+
+<p><strong>适用场景</strong>：自然顺序性的任务——内容生成、数据转换、多阶段分析。</p>
+
+<p><strong>核心优势</strong>：每一步可以使用不同的prompt、模型或temperature。中间结果可检查、可调试。</p>
+
+<div class="info-box">
+<p><strong>执行流程</strong>：Input → LLM Call 1 → Gate ✓ → LLM Call 2 → Gate ✓ → LLM Call 3 → Output。Gate可以是LLM-based的（让另一个LLM评判质量）或programmatic的（规则检查）。</p>
+</div>
+</div>
+
+<h3>19.1.2 Routing（路由）</h3>
+
+<div class="card">
+<p><strong>定义</strong>：一个分类器（LLM或传统ML）检查输入并分派到专门化的处理器。输入被分类一次，然后由对应的专家处理。</p>
+
+<p><strong>适用场景</strong>：不同任务类型需要不同最优prompt、工具或模型的场景——客户支持分流、多模态输入处理。</p>
+
+<div class="info-box">
+<p><strong>执行流程</strong>：Input → Classifier → Route A / Route B / Route C → 各自用专门化的prompt和工具处理。</p>
+</div>
+</div>
+
+<h3>19.1.3 Parallelization（并行化）</h3>
+
+<div class="card">
+<p><strong>定义</strong>：多个LLM调用并发运行，由程序化层组合其输出。存在两种子模式：</p>
+
+<ul>
+<li><strong>Sectioning（扇出）</strong>：将输入分割为不相交的块并独立处理每一块——例如同时对代码库运行安全检查、性能检查和风格检查。</li>
+<li><strong>Voting（冗余）</strong>：以不同seed或temperature发出相同prompt N次，然后通过多数投票、Reward Model打分或LLM-as-judge选择最佳结果。</li>
+</ul>
+
+<div class="success-box">
+<p><strong>示例：代码审查</strong></p>
+<ol>
+<li>并行调用：Security review ∥ Performance review ∥ Style review</li>
+<li>聚合：合并所有发现，去重，按严重程度排序</li>
+</ol>
+<p><strong>延迟优势</strong>：Latency = $\max(\text{individual calls})$ 而非 $\sum(\text{individual calls})$</p>
+</div>
+</div>
+
+<h3>19.1.4 Orchestrator-Workers（编排器-工作者）</h3>
+
+<div class="card">
+<p><strong>定义</strong>：LLM自身决定如何拆分工作。Orchestrator模型分析任务、产出子任务计划、将每个子任务分派给Worker LLM（可能使用不同的prompt或工具），最终将Worker的输出合并为连贯结果。</p>
+
+<p><strong>与Parallelization的关键区别</strong>：分解逻辑是<strong>模型生成的</strong>（model-generated），而非硬编码的。</p>
+
+<p><strong>适用场景</strong>：开放式问题，子任务的数量和性质在设计时无法枚举——例如"重构这个代码库"需要先理解依赖图才能决定修改哪些文件。</p>
+
+<div class="info-box">
+<p><strong>执行流程</strong>：Task → Orchestrator LLM（生成计划）→ Worker 1 / Worker 2 / Worker N（并行执行）→ Orchestrator（合并结果）→ Final Output</p>
+</div>
+</div>
+
+<h3>19.1.5 Evaluator-Optimizer（评估器-优化器）</h3>
+
+<div class="card">
+<p><strong>定义</strong>：一个双模型反馈循环[240]——Generator产出候选输出，而独立的Evaluator根据明确标准评分。如果分数低于阈值，Evaluator的批评被追加到Generator的上下文中，循环重复直到质量标准满足或重试预算耗尽。</p>
+
+<p><strong>适用场景</strong>：具有明确质量标准的任务——必须通过测试的代码、必须保留语义的翻译、必须匹配风格指南的写作。</p>
+
+<div class="formula-block">
+$$\text{Loop: } \text{Output}_i = \text{Generator}(\text{prompt} + \text{critique}_{i-1}) \;\rightarrow\; \text{Score}_i = \text{Evaluator}(\text{Output}_i, \text{criteria})$$
+<p class="formula-explain">如果 $\text{Score}_i < \text{threshold}$，则将critique反馈给Generator进入下一轮迭代。这实现了无需权重更新的迭代精炼（test-time refinement）。</p>
+</div>
+</div>
+
+<h2>19.2 Autonomous Agent Patterns</h2>
+
+<p>这些模式将执行流的控制权交给LLM本身。</p>
+
+<h3>19.2.1 ReAct（Reason + Act）</h3>
+
+<div class="card">
+<p><strong>定义</strong>：基础性的Agent模式[127]。LLM在<strong>思考</strong>（内部推理）、<strong>行动</strong>（工具调用）和<strong>观察</strong>（处理结果）之间交替循环，直到产出最终答案。</p>
+
+<div class="highlight-box">
+<p><strong>ReAct实现要点</strong>：</p>
+<ul>
+<li><strong>Scratchpad</strong>："Thought"步骤被记录但不展示给用户</li>
+<li><strong>Tool parsing</strong>：Harness从模型输出中提取结构化工具调用</li>
+<li><strong>Max iterations</strong>：始终为循环设上限（典型值：10–25次迭代）</li>
+<li><strong>Termination</strong>：模型输出特殊动作（如 <code>final_answer</code>）或未检测到工具调用</li>
+</ul>
+</div>
+
+<div class="info-box">
+<p><strong>循环结构</strong>：Thought → Action → Observation → Thought → Action → Observation → ... → Final Answer</p>
+</div>
+</div>
+
+<h3>19.2.2 Planning Agents（规划型Agent）</h3>
+
+<div class="card">
+<p><strong>定义</strong>：Agent在执行前生成显式计划，并可在执行过程中修改计划[126]。计划是一个"活文档"——提供结构但适应观察。Harness将依赖关系跟踪为DAG，只执行前驱已完成的步骤。</p>
+
+<table>
+<thead>
+<tr><th>规划策略</th><th>何时重新规划</th><th>特征</th></tr>
+</thead>
+<tbody>
+<tr><td>Plan-then-Execute</td><td>从不</td><td>简单；对意外结果脆弱</td></tr>
+<tr><td>Adaptive</td><td>失败时</td><td>仅在步骤失败时重新规划；适中成本</td></tr>
+<tr><td>Continuous</td><td>每一步</td><td>每次观察后全面重评估；昂贵但健壮</td></tr>
+<tr><td>Hierarchical</td><td>子计划完成时</td><td>高层计划固定；子计划动态生成</td></tr>
+</tbody>
+</table>
+
+<div class="success-box">
+<p><strong>示例：研究报告生成</strong></p>
+<p>用户请求："写一份2页报告，比较用于时间序列预测的Transformer架构。"</p>
+<p><strong>Step 1 — 计划生成</strong>（单次LLM调用）：</p>
+<pre><code>plan = [
+  {"id": 1, "task": "搜索近期transformer时间序列模型(2023-2025)", "tool": "search_web", "deps": []},
+  {"id": 2, "task": "阅读top 5论文，提取关键方法", "tool": "read_papers", "deps": [1]},
+  {"id": 3, "task": "构建对比表（架构、数据集、指标）", "tool": "none", "deps": [2]},
+  {"id": 4, "task": "撰写引言+方法论", "tool": "none", "deps": [2]},
+  {"id": 5, "task": "撰写结果+结论", "tool": "none", "deps": [3, 4]},
+  {"id": 6, "task": "审阅并润色", "tool": "none", "deps": [5]}
+]</code></pre>
+<p><strong>Step 2 — 带自适应重规划的执行</strong>：Agent按依赖顺序执行步骤。步骤1后搜索仅返回3篇相关论文。Agent重新规划：添加子步骤扩展搜索到邻近领域（如PatchTST、iTransformer）。修改后的计划从步骤2继续。</p>
+</div>
+
+<p><strong>关键洞察</strong>：计划是活文档，提供结构但适应观察。Harness将依赖追踪为DAG，只执行前驱已完成的步骤。</p>
+</div>
+
+<h3>19.2.3 Reflection and Self-Critique（反思与自我批评）</h3>
+
+<div class="card">
+<p><strong>定义</strong>：Agent暂停来评估自身轨迹并纠正方向。三个层级：</p>
+
+<ol>
+<li><strong>Output validation</strong>："这是否正确？我是否遗漏了什么？"</li>
+<li><strong>Trajectory review</strong>：回顾最近k步，识别错误或低效。</li>
+<li><strong>Strategy revision</strong>：重新考虑整体方法（"我是否在解决正确的问题？"）</li>
+</ol>
+
+<div class="highlight-box">
+<p><strong>Reflexion模式</strong>[224]：维护一个持久的"反思记忆"。每次失败尝试后，agent写下自然语言反思（"我失败了因为我没有检查边界情况"）。下次尝试时，这些反思被包含在prompt中——实现<strong>无需权重更新的跨episode学习</strong>。</p>
+</div>
+</div>
+
+<h3>19.2.4 Tool-Use Patterns（工具使用模式）</h3>
+
+<div class="card">
+<p><strong>定义</strong>：Agent如何调用工具显著影响其可靠性、延迟和成本。五种规范模式[332]：</p>
+
+<table>
+<thead>
+<tr><th>模式</th><th>描述</th><th>示例</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>Single-turn</strong></td><td>每次LLM响应一个工具调用</td><td>简单的搜索Q&A</td></tr>
+<tr><td><strong>Multi-tool (Parallel)</strong></td><td>一次响应中多个并行工具调用</td><td>Search + Calculate + Format</td></tr>
+<tr><td><strong>Sequential (Pipeline)</strong></td><td>工具输出作为下一个工具的输入</td><td>Search → Read → Extract</td></tr>
+<tr><td><strong>Nested (Agent-as-Tool)</strong></td><td>工具调用触发另一个agent</td><td>代码agent调用test-runner</td></tr>
+<tr><td><strong>Fallback</strong></td><td>首选工具失败；尝试替代方案</td><td>API → Scrape → Cache</td></tr>
+</tbody>
+</table>
+
+<h3>各模式详解</h3>
+
+<p><strong>Single-Turn</strong>：最简单——模型发出一次工具调用，接收结果，产出最终答案。Harness恰好进行两次LLM调用（一次决定工具，一次合成结果）。适用于事实查找、单位转换或单API查询。</p>
+
+<p><strong>Multi-Tool (Parallel)</strong>：现代API（OpenAI、Anthropic）允许模型在单次响应中请求多个工具调用。Harness并发执行并一起返回所有结果。<strong>关键约束</strong>：工具必须独立（无工具的输出作为另一工具的输入）。极大减少需要来自多源独立信息的任务延迟。</p>
+
+<p><strong>Sequential (Pipeline)</strong>：每个工具的输出作为下一个工具的输入，形成数据管线。模型根据前一结果决定下一工具。常见于研究工作流：search → fetch_page → extract_data → analyze。Harness需跟踪增长的上下文，可能需要摘要化中间结果以控制预算。</p>
+
+<p><strong>Nested (Agent-as-Tool)</strong>：工具调用启动一个完全独立的agent——有自己的prompt、工具和上下文。父agent将子agent视为黑盒函数。Swarm模式[336]通过专门化agent间的handoff来泛化此模式。</p>
+
+<p><strong>Fallback (Graceful Degradation)</strong>：Harness按优先级顺序尝试工具：首选工具失败（超时、限速、API错误）→ 自动回退到替代方案。模型无需感知回退逻辑——Harness透明处理。示例：primary search API → backup search → cached results → 通知模型搜索不可用。</p>
+</div>
+
+<h2>19.3 Design Principles</h2>
+
+<p>以下原则摘自Anthropic构建有效agent的指南[342]，适用于所有模式：</p>
+
+<div class="card">
+<ol>
+<li><strong>保持简单（Keep it simple）</strong>：使用最简单的可行架构。只在被证明必要时增加复杂性。能用prompt chain解决的问题，永远优于可能有用的multi-agent系统。</li>
+<li><strong>透明优于聪明（Transparency over cleverness）</strong>：每一步应可检查。避免隐藏状态或隐式推理。当agent失败时你需要理解原因——不透明的架构使调试不可能。</li>
+<li><strong>提供好工具（Provide good tools）</strong>：文档清晰、类型完善、错误信息明确的工具是力量倍增器。模糊描述的工具会被误用；精确schema和使用指导的工具会被正确选择。</li>
+<li><strong>为失败做计划（Plan for failure）</strong>：每次工具调用都可能失败。在harness层构建重试逻辑、回退和优雅降级，使模型无需推理基础设施故障。</li>
+<li><strong>使用结构化输出（Use structured outputs）</strong>：约束生成（JSON schema、function calling）防止解析失败。产出需要regex解析的自由文本的agent是脆弱的；产出经验证的JSON的agent是健壮的。</li>
+<li><strong>用多样输入测试（Test with diverse inputs）</strong>：Agent行为比单轮chat更具变异性。相同prompt可在不同运行中产出不同工具调用序列。用边界案例、歧义请求和畸形输入进行对抗性测试。</li>
+</ol>
+</div>
+
+<h2>19.4 Pattern Selection Guide</h2>
+
+<p>选择正确模式取决于三个因素：(1) 任务结构的可预测性；(2) 延迟和成本预算允许多少LLM调用；(3) 质量是否需要迭代。使用下表作为决策矩阵——从顶部（最简单）开始，只在更简单的模式明显失败时才向下移动。</p>
+
+<table>
+<thead>
+<tr><th>模式</th><th>复杂度</th><th>LLM调用数</th><th>最佳适用</th></tr>
+</thead>
+<tbody>
+<tr><td>Prompt Chaining</td><td>Low</td><td>N（固定）</td><td>顺序任务、内容管线</td></tr>
+<tr><td>Routing</td><td>Low</td><td>1+1</td><td>多类型输入、分流</td></tr>
+<tr><td>Parallelization</td><td>Low</td><td>N（并行）</td><td>独立子任务、投票</td></tr>
+<tr><td>Orchestrator-Workers</td><td>Medium</td><td>可变</td><td>未知分解方式</td></tr>
+<tr><td>Evaluator-Optimizer</td><td>Medium</td><td>2–10（循环）</td><td>质量关键输出</td></tr>
+<tr><td>ReAct</td><td>Medium</td><td>3–25（循环）</td><td>通用工具使用、探索</td></tr>
+<tr><td>Planning Agent</td><td>High</td><td>5–50+</td><td>长时程、多步骤任务</td></tr>
+<tr><td>Reflection</td><td>High</td><td>+50%开销</td><td>首次尝试常失败的任务</td></tr>
+<tr><td>Multi-Agent</td><td>High</td><td>大量</td><td>复杂领域、专门化分工</td></tr>
+</tbody>
+</table>
+
+<div class="success-box">
+<p><strong>模式可组合</strong>：Planning Agent可能在单个步骤中使用Prompt Chaining，在审查阶段使用Evaluator-Optimizer，用Routing将子任务分派给专家。艺术在于知道何时停止添加层次。</p>
+</div>
+
+<div class="takeaway">
+<h2>核心要点</h2>
+<ul>
+<li><strong>Workflow优先</strong>：从最简单的模式开始（Prompt Chaining），只在更简单的模式无法满足需求时才升级复杂度</li>
+<li><strong>5种Workflow模式</strong>：Prompt Chaining → Routing → Parallelization → Orchestrator-Workers → Evaluator-Optimizer（系统控制流）</li>
+<li><strong>4种Autonomous模式</strong>：ReAct → Planning → Reflection → Tool-Use（模型控制流）</li>
+<li><strong>6条设计原则</strong>：简单性、透明性、好工具、容错、结构化输出、多样测试</li>
+<li><strong>模式可组合</strong>：复杂系统由多种模式嵌套构建——关键是知道何时停止叠加</li>
+<li><strong>决策矩阵</strong>：根据任务结构可预测性、成本预算和质量迭代需求选择模式</li>
+</ul>
+</div>
+
+<h2>Q&amp;A 自测</h2>
+
+<details>
+<summary>Q1：Workflow和Agent模式的根本区别是什么？</summary>
+<div class="answer">
+<p>根本区别在于<strong>控制权归属</strong>：Workflow模式中，系统（而非模型）决定执行顺序——LLM在预定义的步骤中被调用；Agent模式中，LLM自身动态决定下一步做什么——执行流的控制权交给了模型。</p>
+</div>
+</details>
+
+<details>
+<summary>Q2：Orchestrator-Workers与Parallelization有什么本质区别？</summary>
+<div class="answer">
+<p>本质区别在于<strong>分解逻辑的来源</strong>：Parallelization的分解是硬编码的（设计时确定如何分割任务），而Orchestrator-Workers的分解是模型生成的（LLM自身分析任务并决定如何拆分）。这使得Orchestrator-Workers适用于开放式问题，其中子任务的数量和性质在设计时无法枚举。</p>
+</div>
+</details>
+
+<details>
+<summary>Q3：Reflexion模式如何实现"无需权重更新的学习"？</summary>
+<div class="answer">
+<p>Reflexion维护一个持久的"反思记忆"：每次失败后，agent将失败原因写为自然语言反思并存储。下次尝试时，这些历史反思被注入prompt——模型通过上下文中的历史教训来避免重复错误。这在效果上等同于"学习"，但无需任何梯度下降或权重更新——纯粹通过上下文工程（in-context learning）实现。</p>
+</div>
+</details>
+
+<details>
+<summary>Q4：为什么"保持简单"是第一条设计原则？</summary>
+<div class="answer">
+<p>因为Agent系统的复杂性带来指数级增长的调试难度、不可预测性和成本。一个能用Prompt Chain解决的问题，如果用Multi-Agent系统来实现，会引入协调开销、通信失败、状态同步等大量新的故障点。更简单的架构更可预测、更容易测试、更便宜运行。只在简单方案被证明无法胜任时，才逐步增加复杂度。</p>
+</div>
+</details>
+
+<details>
+<summary>Q5：如何选择合适的Agent设计模式？</summary>
+<div class="answer">
+<p>根据三个因素判断：(1) <strong>任务结构可预测性</strong>——结构已知用Workflow，需要动态决策用Agent；(2) <strong>LLM调用预算</strong>——延迟和成本约束决定能承受多少次调用；(3) <strong>质量是否需要迭代</strong>——需要反复精炼用Evaluator-Optimizer或Reflection。决策策略是从表的顶部（最简单）开始，只在更简单模式明显失败时才向下移动。</p>
+</div>
+</details>
+
+</body>
+</html>

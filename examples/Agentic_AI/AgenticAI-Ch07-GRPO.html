@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第7章 阅读笔记：GRPO — Group Relative Policy Optimization</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]})"></script>
+<style>
+:root { --primary: #2c3e50; --accent: #3498db; --bg: #fafbfc; --card-bg: #ffffff; --border: #e1e4e8; --text: #24292e; --text-secondary: #586069; --code-bg: #f6f8fa; --highlight: #fff3cd; --success: #d4edda; --info: #d1ecf1; }
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; line-height: 1.8; color: var(--text); background: var(--bg); padding: 2rem; max-width: 900px; margin: 0 auto; }
+h1 { font-size: 1.8rem; color: var(--primary); border-bottom: 3px solid var(--accent); padding-bottom: 0.5rem; margin-bottom: 1rem; }
+h2 { font-size: 1.4rem; color: var(--primary); margin-top: 2.5rem; margin-bottom: 1rem; padding-left: 0.8rem; border-left: 4px solid var(--accent); }
+h3 { font-size: 1.15rem; color: var(--primary); margin-top: 1.8rem; margin-bottom: 0.8rem; }
+p { margin-bottom: 1rem; text-align: justify; }
+ul, ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+li { margin-bottom: 0.5rem; }
+code { background: var(--code-bg); padding: 0.15rem 0.4rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: var(--code-bg); padding: 1rem; border-radius: 6px; overflow-x: auto; margin-bottom: 1.5rem; border: 1px solid var(--border); }
+pre code { background: none; padding: 0; }
+blockquote { border-left: 4px solid var(--accent); padding: 0.8rem 1.2rem; margin: 1.5rem 0; background: var(--info); border-radius: 0 6px 6px 0; }
+.card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+.formula-block { background: var(--code-bg); border: 1px solid var(--border); border-radius: 6px; padding: 1rem; margin: 1rem 0; overflow-x: auto; }
+.formula-explain { color: var(--text-secondary); font-size: 0.92em; margin-top: 0.5rem; padding-left: 1rem; border-left: 3px solid #ddd; }
+.highlight-box { background: var(--highlight); border: 1px solid #ffc107; border-radius: 6px; padding: 1rem; margin: 1rem 0; }
+.info-box { background: var(--info); border: 1px solid #bee5eb; border-radius: 6px; padding: 1rem; margin: 1rem 0; }
+.success-box { background: var(--success); border: 1px solid #c3e6cb; border-radius: 6px; padding: 1rem; margin: 1rem 0; }
+.subtitle { color: var(--text-secondary); font-size: 1rem; margin-bottom: 0.3rem; }
+.meta { color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 2rem; }
+table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; }
+th, td { border: 1px solid var(--border); padding: 0.6rem 0.8rem; text-align: left; }
+th { background: var(--code-bg); font-weight: 600; }
+details { margin-bottom: 1rem; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+summary { padding: 0.8rem 1.2rem; background: var(--code-bg); cursor: pointer; font-weight: 500; }
+details[open] summary { border-bottom: 1px solid var(--border); }
+details .answer { padding: 1rem 1.2rem; }
+svg { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; }
+.takeaway { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 8px; padding: 1.5rem; margin: 2rem 0; }
+.takeaway h2 { color: white; border-left-color: rgba(255,255,255,0.5); }
+.takeaway li { color: rgba(255,255,255,0.95); }
+</style>
+</head>
+<body>
+
+<h1>第7章 阅读笔记：GRPO — Group Relative Policy Optimization</h1>
+<p class="subtitle">组相对策略优化 — DeepSeek 提出的无 Critic 强化学习范式</p>
+<p class="meta">来源：<em>The Hitchhiker's Guide to Agentic AI</em> by H. Roitman &nbsp;|&nbsp; 页码 158–173</p>
+
+<nav class="card" style="padding: 1rem 1.5rem;">
+  <h2 style="margin-top: 0; border-left: none; padding-left: 0;">目录</h2>
+  <ol style="line-height:1.6;">
+    <li><a href="#abstract">摘要</a></li>
+    <li><a href="#motivation">7.1 动机：为什么需要GRPO</a></li>
+    <li><a href="#algorithm">7.2 算法：完整公式推导</a></li>
+    <li><a href="#trl">7.3 TRL实现</a></li>
+    <li><a href="#group-size">7.4 组大小分析</a></li>
+    <li><a href="#variants">7.5 GRPO变体与扩展</a>
+      <ol style="margin-top:0.3rem; margin-bottom:0.3rem; padding-left:1.2rem;">
+        <li>7.5.1 DAPO</li>
+        <li>7.5.2 GSPO</li>
+        <li>7.5.3 Dr. GRPO</li>
+        <li>7.5.4 2-GRPO</li>
+        <li>7.5.5 SAPO</li>
+        <li>7.5.6 Diversity</li>
+        <li>7.5.7 TIS/MIS</li>
+        <li>7.5.8 VESPO</li>
+        <li>7.5.9 DPPO</li>
+        <li>7.5.10 CISPO &amp; ScaleRL</li>
+        <li>7.5.11 GDPO</li>
+        <li>7.5.12 GOPO</li>
+        <li>7.5.13 变体对比总表</li>
+      </ol>
+    </li>
+    <li><a href="#takeaway">关键要点</a></li>
+    <li><a href="#qa">Q&amp;A</a></li>
+  </ol>
+</nav>
+
+<!-- 摘要卡片 -->
+<div id="abstract" class="card">
+<p><strong>核心主张：</strong>GRPO（Group Relative Policy Optimization，组相对策略优化）是 DeepSeek 在 DeepSeek-Math（2024）中提出的一种专为大语言模型设计的强化学习算法。其核心思想极其优雅：对同一个提示（prompt）生成一组回答，用组内奖励的统计量（均值和标准差）作为基线来估计优势函数（advantage），从而<strong>完全省去了 PPO 中需要单独训练的价值网络（critic）</strong>。这不仅节省了约一半的显存开销，还降低了系统工程复杂度。更重要的是，由于经验基线（empirical baseline）比训练不佳的 critic 更准确，GRPO 在数学推理和代码生成任务上的表现往往优于 PPO。本章系统介绍了 GRPO 的动机、完整算法推导、TRL 实现、组大小分析，以及 DAPO、GSPO、Dr. GRPO、2-GRPO、SAPO 等重要变体。</p>
+</div>
+
+<!-- ============================== 7.1 ============================== -->
+<h2 id="motivation">7.1 动机（Motivation）：PPO 的 Critic 问题</h2>
+
+<p>在第5章中我们已经看到，PPO 的标准实现需要四个模型同时驻留 GPU：策略网络（policy）、参考模型（reference）、奖励模型（reward model）、以及<strong>价值网络（critic / value model）</strong>。其中价值网络是估计每个状态期望未来奖励 $V(s)$ 的模型，它的优势估计 $\hat{A}_t = R_t - V(s_t)$ 直接决定了梯度方向。然而，在 LLM 场景下，这个价值网络带来了三个严重问题：</p>
+
+<h3>问题一：显存开销翻倍</h3>
+<p>价值网络通常与策略网络共享同一个 Transformer 主干（加一个额外的 value head），这意味着一个 70B 参数的模型需要约 140GB 显存（FP16）。如果使用独立的 value model，显存直接翻倍。即使共享主干，value head 的反向传播也会占用额外的 activation memory 和 optimizer state。在当前 GPU 显存仍是主要瓶颈的背景下，这是一个实质性限制。</p>
+
+<h3>问题二：优势估计不准确</h3>
+<p>对于语言模型而言，状态空间是所有可能的 token 序列前缀，空间极其巨大。准确预测"从当前位置到序列结束的期望奖励"本身就是一个极其困难的回归问题。实践中 value function 经常出现以下失败模式：</p>
+<ul>
+<li><strong>初期噪声</strong>：训练早期 value function 还没学好，给出的基线是噪声 → 优势方向随机 → policy 更新方向随机 → 学习效率极低</li>
+<li><strong>滞后偏差</strong>：value function 的更新滞后于 policy，导致对"当前策略"的基线估计始终有偏差</li>
+<li><strong>部分可观测</strong>：序列中间位置的 $V(s_t)$ 需要预测整个未来轨迹，这比预测 next token 难得多</li>
+</ul>
+
+<h3>问题三：工程复杂度高</h3>
+<p>训练一个好的 critic 本身需要大量超参数调优：critic 学习率、critic 更新频率、GAE 的 $\lambda$ 参数、value loss 系数、是否做 value clipping 等。每个选择都可能导致训练不稳定。</p>
+
+<div class="info-box">
+<strong>GRPO 的核心洞察：</strong>与其费力训练一个 $V(s)$ 来估计"一个状态的期望奖励"，不如直接从经验数据中"蒙特卡洛估计"它——对同一 prompt 采样 $G$ 个回答、计算它们的奖励均值，这个均值就是 $V(s)$ 的无偏估计。这个想法简单得近乎"显而易见"，但效果惊人地好。
+</div>
+
+<h3>类比理解</h3>
+<p>想象你是一位老师，想评价一道题的"难度"（对应 $V(s)$）：</p>
+<ul>
+<li><strong>PPO 方式</strong>：雇佣一位"难度评估专家"（critic），让他根据题目内容预测分数分布。但这位专家可能不准确，需要看大量数据才能校准。</li>
+<li><strong>GRPO 方式</strong>：让同一组学生（$G$ 个采样）做这道题，取他们的平均分作为"题目难度"。超过平均分的就是"好表现"，低于平均分的就是"差表现"。不需要任何专家，数据自己说话。</li>
+</ul>
+
+<!-- SVG 对比图 -->
+<svg viewBox="0 0 760 220" xmlns="http://www.w3.org/2000/svg" style="max-width:700px">
+  <rect x="20" y="20" width="330" height="180" rx="12" fill="#fff7ed" stroke="#f59e0b" stroke-width="1.5"/>
+  <text x="185" y="48" text-anchor="middle" font-size="14" font-weight="bold" fill="#92400e">PPO 架构（4 个模型）</text>
+  <rect x="50" y="65" width="120" height="40" rx="6" fill="#fef3c7" stroke="#d97706"/>
+  <text x="110" y="90" text-anchor="middle" font-size="11" fill="#78350f">Policy (策略网络)</text>
+  <rect x="200" y="65" width="120" height="40" rx="6" fill="#fef3c7" stroke="#d97706"/>
+  <text x="260" y="90" text-anchor="middle" font-size="11" fill="#78350f">Critic (价值网络)</text>
+  <rect x="50" y="130" width="120" height="40" rx="6" fill="#fef3c7" stroke="#d97706"/>
+  <text x="110" y="155" text-anchor="middle" font-size="11" fill="#78350f">Ref Model (参考)</text>
+  <rect x="200" y="130" width="120" height="40" rx="6" fill="#fef3c7" stroke="#d97706"/>
+  <text x="260" y="155" text-anchor="middle" font-size="11" fill="#78350f">Reward Model</text>
+  <text x="185" y="192" text-anchor="middle" font-size="10" fill="#92400e">显存 ×2~4，需 critic 超参调优</text>
+  <rect x="410" y="20" width="330" height="180" rx="12" fill="#ecfdf5" stroke="#059669" stroke-width="1.5"/>
+  <text x="575" y="48" text-anchor="middle" font-size="14" font-weight="bold" fill="#065f46">GRPO 架构（无 Critic）</text>
+  <rect x="440" y="75" width="120" height="40" rx="6" fill="#d1fae5" stroke="#059669"/>
+  <text x="500" y="100" text-anchor="middle" font-size="11" fill="#064e3b">Policy (策略网络)</text>
+  <rect x="590" y="75" width="120" height="40" rx="6" fill="#d1fae5" stroke="#059669"/>
+  <text x="650" y="100" text-anchor="middle" font-size="11" fill="#064e3b">Reward 函数/模型</text>
+  <rect x="515" y="135" width="120" height="40" rx="6" fill="#d1fae5" stroke="#059669" stroke-dasharray="4"/>
+  <text x="575" y="155" text-anchor="middle" font-size="10" fill="#064e3b">Ref Model (可选KL)</text>
+  <text x="575" y="192" text-anchor="middle" font-size="10" fill="#065f46">去掉 Critic！显存省一半+</text>
+  <path d="M355 110 L405 110" stroke="#6b7280" stroke-width="2" marker-end="url(#arr)"/>
+  <defs><marker id="arr" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#6b7280"/></marker></defs>
+</svg>
+
+<!-- ============================== 7.2 ============================== -->
+<h2 id="algorithm">7.2 算法（Algorithm）：完整公式推导</h2>
+
+<h3>7.2.1 总体流程</h3>
+<p>GRPO 的每一轮训练迭代包含以下步骤：</p>
+<ol>
+<li><strong>采样</strong>：对每个 prompt $q$，从当前策略 $\pi_\theta$ 采样一组（group）回答：$\{o_1, o_2, \ldots, o_G\} \sim \pi_{\theta_{\text{old}}}(\cdot|q)$</li>
+<li><strong>打分</strong>：用奖励函数（或奖励模型）对每个回答计算奖励：$r_i = R(q, o_i), \quad i = 1, \ldots, G$</li>
+<li><strong>组内归一化</strong>：计算组内优势值（advantage）</li>
+<li><strong>策略更新</strong>：用 clip 目标函数 + KL 正则更新策略参数 $\theta$</li>
+</ol>
+
+<h3>7.2.2 组内归一化优势（Group-Normalized Advantage）</h3>
+<p>这是 GRPO 最核心的创新。对组内的 $G$ 个奖励值，计算均值和标准差：</p>
+
+<div class="formula-block">
+$$\mu_G = \frac{1}{G}\sum_{j=1}^{G} r_j, \qquad \sigma_G = \sqrt{\frac{1}{G}\sum_{j=1}^{G}(r_j - \mu_G)^2}$$
+<div class="formula-explain">$\mu_G$ 是组内 $G$ 个奖励的算术平均；$\sigma_G$ 是它们的标准差，用于归一化。</div>
+</div>
+
+<p>然后每个回答的优势值为：</p>
+
+<div class="formula-block">
+$$\hat{A}_i = \frac{r_i - \mu_G}{\sigma_G + \epsilon}$$
+<div class="formula-explain">其中 $\epsilon$ 是一个很小的常数（如 $10^{-8}$）防止除零。直觉：超过组平均的回答获得正优势（被鼓励），低于组平均的回答获得负优势（被抑制）。除以标准差让不同 prompt（奖励量级可能差异很大）的优势具有可比性。</div>
+</div>
+
+<h3>7.2.3 为什么组均值是 $V(s)$ 的好估计？</h3>
+<p>从数学上看：</p>
+<div class="formula-block">
+$$V^{\pi}(q) = \mathbb{E}_{o \sim \pi(\cdot|q)}[R(q, o)] \approx \frac{1}{G}\sum_{i=1}^{G} R(q, o_i) = \mu_G$$
+<div class="formula-explain">当 $G \to \infty$ 时，$\mu_G$ 依大数定律收敛到真实的 $V^{\pi}(q)$。即使 $G$ 较小（如 8），这个蒙特卡洛估计通常也比一个训练不充分的 value network 更准确——因为它是无偏的，而 value network 在训练早期有系统性偏差。</div>
+</div>
+
+<h3>7.2.4 完整目标函数</h3>
+<p>GRPO 的完整优化目标结合了 PPO 风格的 clip 机制和 KL 正则化：</p>
+
+<div class="formula-block">
+$$\mathcal{J}_{\text{GRPO}}(\theta) = \mathbb{E}_{q \sim \mathcal{D}} \left[ \frac{1}{G}\sum_{i=1}^{G} \frac{1}{|o_i|}\sum_{t=1}^{|o_i|} \left( \min\left(\rho_{i,t}\, \hat{A}_i,\; \text{clip}(\rho_{i,t},\, 1-\epsilon,\, 1+\epsilon)\, \hat{A}_i \right) - \beta\, D_{\text{KL}}^{(t)} \right) \right]$$
+<div class="formula-explain">
+其中：<br>
+• $\rho_{i,t} = \frac{\pi_\theta(o_{i,t} | q, o_{i,&lt;t})}{\pi_{\theta_{\text{old}}}(o_{i,t} | q, o_{i,&lt;t})}$ 是第 $i$ 个回答第 $t$ 个 token 的重要性比率（importance ratio）<br>
+• $\text{clip}(\rho, 1-\epsilon, 1+\epsilon)$ 将比率裁剪在 $[1-\epsilon, 1+\epsilon]$ 范围内（通常 $\epsilon=0.2$）<br>
+• $\hat{A}_i$ 是整个回答 $o_i$ 的组归一化优势（注意：同一回答内所有 token 共享同一个优势值）<br>
+• $D_{\text{KL}}^{(t)}$ 是 token 级 KL 散度：$D_{\text{KL}}^{(t)} = \frac{\pi_{\text{ref}}(o_{i,t}|q, o_{i,&lt;t})}{\pi_\theta(o_{i,t}|q, o_{i,&lt;t})} - \log\frac{\pi_{\text{ref}}(o_{i,t}|q, o_{i,&lt;t})}{\pi_\theta(o_{i,t}|q, o_{i,&lt;t})} - 1$<br>
+• $\beta$ 是 KL 惩罚系数，控制策略与参考模型的距离
+</div>
+</div>
+
+<h3>7.2.5 Clip 机制的作用</h3>
+<p>$\min$ 操作的逻辑与 PPO 完全相同：</p>
+<ul>
+<li>当 $\hat{A}_i > 0$（好回答）：策略想增加它的概率（$\rho > 1$），但 clip 限制 $\rho$ 不超过 $1+\epsilon$，防止一步跳太远</li>
+<li>当 $\hat{A}_i < 0$（差回答）：策略想降低它的概率（$\rho < 1$），但 clip 限制 $\rho$ 不低于 $1-\epsilon$，同样保守更新</li>
+</ul>
+<p>本质上，clip 实现了一个"信赖域"（trust region）：每步策略变化有界，保证训练稳定。</p>
+
+<h3>7.2.6 KL 散度项的选择</h3>
+<p>书中指出 GRPO 使用了一种<strong>非对称 KL 近似</strong>（而非标准的 $\text{KL}(\pi_\theta \| \pi_{\text{ref}})$），其表达式为：</p>
+<div class="formula-block">
+$$D_{\text{KL}}^{\text{approx}}(t) = \frac{\pi_{\text{ref}}(o_{i,t}|q, o_{i,&lt;t})}{\pi_\theta(o_{i,t}|q, o_{i,&lt;t})} - \log\frac{\pi_{\text{ref}}(o_{i,t}|q, o_{i,&lt;t})}{\pi_\theta(o_{i,t}|q, o_{i,&lt;t})} - 1$$
+<div class="formula-explain">这等价于 $D_{\text{KL}}(\pi_{\text{ref}} \| \pi_\theta)$ 的单样本估计。之所以用"反向 KL"，是因为它对 $\pi_\theta$ 赋予非零概率但 $\pi_{\text{ref}}$ 赋予低概率的 token 惩罚更重——即阻止策略产生"不像参考模型"的输出。这比正向 KL 更能防止模式坍缩。</div>
+</div>
+
+<div class="highlight-box">
+<strong>DeepSeek-R1 的惊人发现：</strong>使用纯 GRPO + 简单二值奖励（$r=1$ 答案正确 / $r=0$ 答案错误）在数学/代码任务上训练时，模型自发涌现了思维链（Chain-of-Thought）、自我验证和纠错行为，完全无需显式指令或示例！这证明了 GRPO 框架具有极强的"引出推理能力"的潜力。
+</div>
+
+<!-- ============================== 7.3 ============================== -->
+<h2 id="trl">7.3 TRL 实现（TRL Implementation）</h2>
+
+<p>HuggingFace 的 TRL（Transformer Reinforcement Learning）库提供了 GRPO 的标准实现。以下是关键配置参数和实践建议：</p>
+
+<h3>7.3.1 关键配置参数</h3>
+<table>
+<tr><th>参数</th><th>含义</th><th>推荐值</th><th>说明</th></tr>
+<tr><td><code>num_generations</code></td><td>组大小 $G$</td><td>8</td><td>每个 prompt 采样的回答数</td></tr>
+<tr><td><code>temperature</code></td><td>采样温度</td><td>1.0</td><td>高温保证组内多样性</td></tr>
+<tr><td><code>beta</code></td><td>KL 惩罚系数 $\beta$</td><td>0.04</td><td>控制与参考模型的距离</td></tr>
+<tr><td><code>learning_rate</code></td><td>学习率</td><td>1e-6</td><td>RL 阶段通常用小学习率</td></tr>
+<tr><td><code>max_completion_length</code></td><td>最大生成长度</td><td>512–2048</td><td>任务相关</td></tr>
+<tr><td><code>num_train_epochs</code></td><td>每批数据训练轮数</td><td>1</td><td>on-policy 通常只用 1 轮</td></tr>
+<tr><td><code>use_vllm</code></td><td>用 vLLM 加速生成</td><td>True</td><td>显著加速采样阶段</td></tr>
+<tr><td><code>vllm_gpu_utilization</code></td><td>vLLM GPU 利用率</td><td>0.7</td><td>留余量给训练</td></tr>
+</table>
+
+<h3>7.3.2 多目标奖励函数</h3>
+<p>TRL 支持传入多个奖励函数列表，框架会自动将它们的得分求和。典型的多目标设置包括：</p>
+<ul>
+<li><strong>正确性奖励</strong>：答案是否正确（0/1 二值）</li>
+<li><strong>格式奖励</strong>：是否遵循指定格式（如使用 <code>&lt;think&gt;...&lt;/think&gt;</code> 标签）</li>
+<li><strong>长度惩罚</strong>：对过长回答施加负奖励</li>
+<li><strong>安全奖励</strong>：检测是否包含有害内容</li>
+</ul>
+
+<h3>7.3.3 代码骨架</h3>
+<pre><code>from trl import GRPOConfig, GRPOTrainer
+
+config = GRPOConfig(
+    output_dir="grpo-output",
+    num_generations=8,           # 组大小 G
+    temperature=1.0,
+    beta=0.04,                   # KL 系数
+    learning_rate=1e-6,
+    per_device_train_batch_size=1,
+    gradient_accumulation_steps=16,
+    max_completion_length=1024,
+    use_vllm=True,
+    vllm_gpu_utilization=0.7,
+)
+
+def correctness_reward(completions, references):
+    """二值奖励：答案正确得 1 分"""
+    return [1.0 if extract_answer(c) == ref else 0.0
+            for c, ref in zip(completions, references)]
+
+def format_reward(completions, **kwargs):
+    """格式奖励：使用了思考标签得 0.1 分"""
+    return [0.1 if "&lt;think&gt;" in c else 0.0 for c in completions]
+
+trainer = GRPOTrainer(
+    model=model,
+    config=config,
+    train_dataset=dataset,
+    reward_funcs=[correctness_reward, format_reward],
+)
+trainer.train()</code></pre>
+
+<h3>7.3.4 训练流水线</h3>
+<p>每个训练 step 内部的执行流程：</p>
+<ol>
+<li><strong>采样阶段</strong>（Generation）：使用 vLLM 对 batch 内每个 prompt 生成 $G$ 个回答</li>
+<li><strong>打分阶段</strong>（Scoring）：调用所有 reward function，对每个回答求总奖励</li>
+<li><strong>优势计算</strong>（Advantage）：组内 Z-score 归一化</li>
+<li><strong>策略更新</strong>（Policy Update）：前向传播计算 log-prob → 计算 ratio → clip 损失 + KL → 反向传播</li>
+<li><strong>参考模型同步</strong>（可选）：定期将 policy 权重复制到 ref model</li>
+</ol>
+
+<!-- ============================== 7.4 ============================== -->
+<h2 id="group-size">7.4 组大小分析（Group Size Analysis）</h2>
+
+<h3>7.4.1 $G$ 值与估计质量的关系</h3>
+<p>组大小 $G$ 直接影响优势估计的方差。从统计学角度：</p>
+<div class="formula-block">
+$$\text{Var}(\hat{A}_i) \propto \frac{1}{G-1}$$
+<div class="formula-explain">组越大，均值估计越精确，每个样本的优势估计方差越低。但回报是递减的——从 $G=8$ 到 $G=16$ 的提升远小于从 $G=2$ 到 $G=8$ 的提升。</div>
+</div>
+
+<h3>7.4.2 不同 $G$ 值的特征对比</h3>
+<table>
+<tr><th>$G$</th><th>信号质量</th><th>计算量</th><th>适用场景</th><th>注意事项</th></tr>
+<tr><td>2</td><td>高噪声</td><td>最低</td><td>2-GRPO 理论专用</td><td>优势退化为 $\{+1,-1\}$，需特殊处理</td></tr>
+<tr><td>4</td><td>中等</td><td>低</td><td>快速实验、简单任务（通过率 &gt; 50%）</td><td>容易出现全对/全错的"死组"</td></tr>
+<tr><td>8</td><td>好</td><td>中</td><td><strong>默认推荐</strong>——多数任务的性能/成本最优点</td><td>平衡点，实践中最常用</td></tr>
+<tr><td>16</td><td>优秀</td><td>高</td><td>困难任务（通过率 &lt; 20%）</td><td>确保组内有至少几个正确答案</td></tr>
+<tr><td>32–64</td><td>近乎完美</td><td>极高</td><td>超大算力 + 极难任务 + 研究目的</td><td>收益递减明显</td></tr>
+</table>
+
+<h3>7.4.3 Goldilocks 法则：组内必须有好有坏</h3>
+<p>GRPO 的学习信号完全来自<strong>组内对比</strong>。如果一个组的所有回答都正确（奖励全为 1），归一化后：</p>
+<div class="formula-block">
+$$\sigma_G = 0 \implies \hat{A}_i = 0 \quad \forall i$$
+<div class="formula-explain">标准差为 0 时，所有优势值为 0，梯度为 0，这一组数据完全浪费了。同理，如果所有回答都错误，也学不到任何东西。</div>
+</div>
+
+<p>因此，<strong>Goldilocks 法则</strong>至关重要：</p>
+<div class="highlight-box">
+<strong>Goldilocks 法则（金发姑娘原则）：</strong><br>
+1. 筛选训练 prompt 使当前模型的通过率在 <strong>20%–80%</strong> 之间<br>
+2. 每 500–1000 步随模型能力提升<strong>重新评估和筛选</strong>训练集<br>
+3. 可以维护一个"难度梯度"的 prompt 池，训练时动态选择合适难度的题目<br>
+<br>
+这类似于教育学中的"最近发展区"（Zone of Proximal Development）——太简单学不到东西，太难也学不到，要恰好在"够得着但需要努力"的区间。
+</div>
+
+<h3>7.4.4 计算量估算</h3>
+<p>假设模型在每个 prompt 上生成 $G$ 个回答、每个回答平均 $L$ 个 token：</p>
+<ul>
+<li><strong>采样计算量</strong>：$O(G \times L)$ 次 autoregressive forward pass（可被 vLLM 并行化）</li>
+<li><strong>训练计算量</strong>：$O(G \times L)$ 次 full forward + backward pass</li>
+<li><strong>总吞吐量</strong>：相比 PPO 生成 1 个回答，GRPO 生成 $G$ 个但省去了 critic 的 forward/backward，净效果取决于 $G$ 的大小和 vLLM 的加速效率</li>
+</ul>
+
+<!-- ============================== 7.5 ============================== -->
+<h2 id="variants">7.5 GRPO 变体（Variants）</h2>
+
+<p>基础 GRPO 在实践中面临若干问题：训练后期不稳定、模式坍缩、长文本表现差、多目标冲突等。以下变体从不同角度改进了这些问题。</p>
+
+<h3>7.5.1 DAPO — Dynamic Adaptive Policy Optimization</h3>
+<p>DAPO 是对 GRPO 最全面的工程改进集合，提出了 5 项互相独立的修复措施，每一项都可以"即插即用"。</p>
+
+<h3>① Clip-Higher（非对称裁剪）</h3>
+<p><strong>问题</strong>：标准 PPO 的对称裁剪 $[1-\epsilon, 1+\epsilon]$ 对好回答（$A>0$）和坏回答（$A<0$）的约束是对称的。但直觉上，我们更希望模型<strong>积极探索好答案</strong>（上界放宽），同时<strong>保守地避免坏答案</strong>（下界正常）。</p>
+
+<div class="formula-block">
+$$\mathcal{L}_{\text{DAPO}}^{\text{clip}} = \begin{cases} \min\left(\rho\, \hat{A},\; \text{clip}(\rho, 1-\epsilon_{\text{low}}, 1+\epsilon_{\text{high}})\, \hat{A}\right) & \text{if } \hat{A} > 0 \\[6pt] \min\left(\rho\, \hat{A},\; \text{clip}(\rho, 1-\epsilon_{\text{low}}, 1+\epsilon_{\text{low}})\, \hat{A}\right) & \text{if } \hat{A} \leq 0 \end{cases}$$
+<div class="formula-explain">
+推荐参数：$\epsilon_{\text{low}} = 0.2$，$\epsilon_{\text{high}} = 0.28$。<br>
+效果：正优势时允许比率最大到 $1.28$（比标准的 $1.2$ 更宽松），鼓励探索；负优势时上界仍为 $1.2$，保持保守抑制。这个小改动在实验中带来了 1-2% 的稳定提升。
+</div>
+</div>
+
+<h3>② Token-Level Loss（Token 级别 loss 聚合）</h3>
+<p><strong>问题</strong>：标准 GRPO 对每个序列取平均 loss（$\frac{1}{|o_i|}\sum_t$），然后对 $G$ 个序列再取平均（$\frac{1}{G}\sum_i$）。这导致<strong>长序列的梯度贡献与短序列相同</strong>，但长序列包含更多 token，每个 token 的梯度被稀释了。</p>
+<p><strong>解决方案</strong>：改为除以所有序列的 token 总数：</p>
+<div class="formula-block">
+$$\mathcal{L}_{\text{token}} = \frac{1}{\sum_{i=1}^{G}|o_i|}\sum_{i=1}^{G}\sum_{t=1}^{|o_i|} \ell_{i,t}$$
+<div class="formula-explain">这样每个 token 对梯度的贡献是平等的，不会因为所在序列更长就被稀释。特别适合长文本推理任务（如数学证明、长代码生成），其中好答案往往更长。</div>
+</div>
+
+<h3>③ Overlong Filtering（超长序列过滤）</h3>
+<p><strong>问题</strong>：当回答达到最大长度限制被截断时（没有生成 EOS token），这个"不完整"的回答会收到一个奖励分数，但这个分数反映的不是模型的真实能力，而是长度限制的人为约束。用这个奖励去更新策略会引入偏差。</p>
+<p><strong>解决方案</strong>：检测未正常结束（未生成 EOS）的序列，将其 loss mask 全部置零，不参与梯度计算。</p>
+
+<h3>④ Soft Overlong Penalty（软超长惩罚）</h3>
+<p><strong>问题</strong>：硬截断（上一条）直接丢弃了长序列的信息。更好的做法是给"接近最大长度但还没到"的回答一个平滑的提醒信号。</p>
+<div class="formula-block">
+$$r_{\text{penalty}}(o_i) = -\alpha \cdot \max\left(0, \frac{|o_i| - L_{\text{threshold}}}{L_{\text{max}} - L_{\text{threshold}}}\right)$$
+<div class="formula-explain">当长度超过阈值 $L_{\text{threshold}}$ 时开始线性惩罚，到最大长度 $L_{\text{max}}$ 时惩罚为 $-\alpha$。这鼓励模型学会简洁表达，而不是靠"写长"来碰运气。</div>
+</div>
+
+<h3>⑤ Dynamic Sampling（动态采样）</h3>
+<p><strong>问题</strong>：如果一个组的所有回答奖励完全相同（全对或全错），$\sigma_G = 0$，归一化后优势全为 0，梯度为 0。这意味着 effective batch size 缩水了。</p>
+<p><strong>解决方案</strong>：检测到"死组"（$\sigma_G = 0$ 或所有奖励相同）时，用新的 prompt 重新生成一组回答来替代，保持每个 batch 的有效学习样本数稳定。</p>
+
+<div class="success-box">
+<strong>何时用 DAPO：</strong>长文本推理、训练中期奖励方差坍缩、基础 GRPO 训练不稳定时。由于 5 项改进互相独立，可以选择性地启用子集。大多数场景下推荐作为 GRPO 的默认升级版本。
+</div>
+
+<h3>7.5.2 GSPO — Group Sequence Policy Optimization</h3>
+<p><strong>核心动机</strong>：在离线训练（off-policy）场景中，同一批生成数据会被用于多步梯度更新（<code>steps_per_generation > 1</code>，以减少昂贵的生成开销）。此时 GRPO 的 <strong>token 级裁剪存在理论缺陷</strong>：虽然每个 token 的比率被 clip 在 $[1-\epsilon, 1+\epsilon]$，但序列级的比率是所有 token 比率的乘积：</p>
+
+<div class="formula-block">
+$$\frac{\pi_\theta(o_i|q)}{\pi_{\text{old}}(o_i|q)} = \prod_{t=1}^{|o_i|} \frac{\pi_\theta(o_{i,t}|q, o_{i,&lt;t})}{\pi_{\text{old}}(o_{i,t}|q, o_{i,&lt;t})}$$
+<div class="formula-explain">即使每个 token 比率都在 $[0.8, 1.2]$ 内，500 个 token 的乘积可以从 $0.8^{500} \approx 10^{-48}$ 到 $1.2^{500} \approx 10^{39}$——序列级策略变化完全没有约束！</div>
+</div>
+
+<p><strong>GSPO 的解决方案</strong>：定义一个<strong>序列级重要性比率</strong>（几何平均）：</p>
+<div class="formula-block">
+$$s_i(\theta) = \left(\frac{\pi_\theta(o_i|q)}{\pi_{\text{old}}(o_i|q)}\right)^{1/|o_i|} = \exp\left(\frac{1}{|o_i|}\sum_{t=1}^{|o_i|}\log\frac{\pi_\theta(o_{i,t}|q, o_{i,&lt;t})}{\pi_{\text{old}}(o_{i,t}|q, o_{i,&lt;t})}\right)$$
+<div class="formula-explain">对所有 token 的 log 比率取平均再 exp，得到一个标量。这是"每个 token 平均变了多少"的度量。然后对这个标量做 clip：$\text{clip}(s_i, 1-\epsilon, 1+\epsilon)$。</div>
+</div>
+
+<p>GSPO 的损失函数：</p>
+<div class="formula-block">
+$$\mathcal{L}_{\text{GSPO}} = \frac{1}{G}\sum_{i=1}^{G}\min\left(s_i(\theta)\,\hat{A}_i,\; \text{clip}(s_i(\theta), 1-\epsilon, 1+\epsilon)\,\hat{A}_i\right)$$
+<div class="formula-explain">相比 GRPO 在每个 token 上做 clip，GSPO 在序列级做一次 clip。这保证了序列整体策略变化有界——即使做多步更新也不会跑飞。</div>
+</div>
+
+<div class="info-box">
+<strong>适用场景：</strong>当 <code>steps_per_generation > 1</code>（离线/半离线训练）时必选 GSPO。纯在线训练（每步重新生成）时两者差别不大，因为 $\pi_{\text{old}} = \pi_\theta$ 时比率恒为 1。
+</div>
+
+<h3>7.5.3 Dr. GRPO — Debiased Reward GRPO（去偏奖励 GRPO）</h3>
+<p><strong>核心问题</strong>：标准 GRPO 对所有 token 给予相等的梯度权重。但考虑一个数学回答 "The answer is $42$"——"The"、"answer"、"is" 这些词在预训练时就有极高概率，奖励的变化几乎完全归因于 "42"。对公共 token 施加梯度是浪费的，甚至有害的（它引入了一种偏差：让模型以为这些 token 之所以出现是因为 RL 奖励信号，而非预训练分布）。</p>
+
+<p><strong>解决方案</strong>：对每个 token 的梯度乘一个去偏权重：</p>
+<div class="formula-block">
+$$w_{i,t} = \hat{A}_i \cdot \left(1 - \pi_{\text{ref}}(o_{i,t}|q, o_{i,&lt;t})\right)$$
+<div class="formula-explain">
+直觉：<br>
+• 如果参考模型对某 token 概率很高（如 "the" 可能有 $\pi_{\text{ref}} = 0.95$），则权重 $= 0.05$，几乎不更新<br>
+• 如果参考模型对某 token 概率低（如关键答案 "42" 可能只有 $\pi_{\text{ref}} = 0.01$），则权重 $= 0.99$，全力更新<br>
+<br>
+效果：梯度集中在"模型真正需要学习的决策点"上，避免浪费计算在"本来就会生成"的 token 上。
+</div>
+</div>
+
+<p><strong>适用场景</strong>：</p>
+<ul>
+<li>预训练词汇与 RL 任务词汇差异大时</li>
+<li>回答中有大量模板化/样板文本时</li>
+<li>观察到训练后期 loss 下降但任务性能不提升（梯度被公共 token 主导）时</li>
+</ul>
+
+<h3>7.5.4 2-GRPO — 两个回答就够了</h3>
+<p><strong>核心发现</strong>：通过理论分析，2-GRPO 论文证明当 $G=2$ 时，GRPO 的优化目标本质上退化为一个<strong>在线对比学习</strong>目标，结构与 DPO 高度相似。</p>
+
+<p><strong>推导过程</strong>：当 $G=2$，假设两个回答分别是 $o^+$（奖励更高）和 $o^-$（奖励更低），归一化后：</p>
+<div class="formula-block">
+$$\hat{A}^+ = \frac{r^+ - \mu}{\sigma} = +1, \qquad \hat{A}^- = \frac{r^- - \mu}{\sigma} = -1$$
+<div class="formula-explain">当 $G=2$ 时，归一化后优势值<strong>恒为 $+1$ 和 $-1$</strong>，与奖励差值的大小无关！这意味着 GRPO 实际上只利用了"谁更好"的排序信息，而不是"好多少"的数值信息。</div>
+</div>
+
+<p>将此代入 GRPO 目标并忽略 clip（假设在线学习、比率接近 1），可得：</p>
+<div class="formula-block">
+$$\mathcal{L}_{\text{2-GRPO}} \approx -\mathbb{E}_{(o^+, o^-) \sim \pi_\theta}\left[\log\sigma\left(\beta\log\frac{\pi_\theta(o^+|q)}{\pi_{\text{old}}(o^+|q)} - \beta\log\frac{\pi_\theta(o^-|q)}{\pi_{\text{old}}(o^-|q)}\right)\right]$$
+<div class="formula-explain">
+这与 DPO 的损失函数结构几乎一致！区别在于：<br>
+• DPO 使用离线数据（固定的偏好对），2-GRPO 使用在线数据（当前策略实时生成）<br>
+• DPO 的 reference 是固定的 SFT 模型，2-GRPO 的"old policy"在不断更新<br>
+<br>
+<strong>深刻含义</strong>：GRPO 的真正力量不在于"精确估计优势"（那确实需要大 $G$），而在于"对比好坏"——这个信号只需要一对样本就够了。
+</div>
+</div>
+
+<p><strong>实验结果</strong>：</p>
+<ul>
+<li>GSM8K：2-GRPO 与 $G=16$ 的 GRPO 性能持平</li>
+<li>MATH：2-GRPO 略低 0.5%，但计算量减少 8 倍</li>
+<li>端到端训练加速 4-6 倍（采样阶段是主要瓶颈）</li>
+</ul>
+
+<div class="highlight-box">
+<strong>重要限制</strong>：$G=2$ 时优势永远是 $\{+1, -1\}$，梯度大小固定，不反映"好多少/差多少"的程度。对于需要细粒度奖励信号的任务（如连续评分的开放式对话），大 $G$ 可能仍有优势。此外，$G=2$ 时"死组"（两个都对或都错）的概率更高，需要配合 DAPO 的动态采样使用。
+</div>
+
+<h3>7.5.5 SAPO — Soft Adaptive Policy Optimization</h3>
+<p><strong>核心动机</strong>：PPO/GRPO 的 clip 操作是一个硬阶跃函数——比率到达 $1\pm\epsilon$ 边界时梯度<strong>突然变为 0</strong>。这种不连续性带来两个问题：</p>
+<ul>
+<li><strong>梯度震荡</strong>：在边界附近，微小的参数变化会导致梯度在"有值"和"零"之间跳变</li>
+<li><strong>信息浪费</strong>：一旦比率被 clip，该 token 完全不贡献梯度，即使它携带有价值的学习信号</li>
+</ul>
+
+<p><strong>解决方案</strong>：用 sigmoid 函数做"软裁剪"——梯度平滑衰减到 0，而非突变：</p>
+<div class="formula-block">
+$$\mathcal{L}_{\text{SAPO}}(\rho, \hat{A}) = \begin{cases} -\hat{A} \cdot \sigma\!\left(\dfrac{\rho - 1}{\tau_+}\right) \cdot \rho & \text{if } \hat{A} > 0 \\[8pt] -\hat{A} \cdot \sigma\!\left(\dfrac{1 - \rho}{\tau_-}\right) \cdot \rho & \text{if } \hat{A} \leq 0 \end{cases}$$
+<div class="formula-explain">
+其中 $\sigma(\cdot)$ 是 sigmoid 函数，$\tau_+$ 和 $\tau_-$ 是温度参数，控制"软墙"的陡峭程度：<br>
+• $\tau \to 0$：sigmoid 趋近阶跃函数，恢复硬裁剪行为<br>
+• $\tau \to \infty$：sigmoid 恒为 0.5，变成无裁剪的 policy gradient<br>
+• 推荐值：$\tau_+ = 1.0$，$\tau_- = 1.05$（负优势方向稍软，避免对"差但不太差"的回答过度抑制）<br>
+<br>
+<strong>类比</strong>：硬裁剪像一堵砖墙——碰到就完全停住。SAPO 像一个弹簧缓冲垫——越深入阻力越大，但从不完全锁死。
+</div>
+</div>
+
+<p><strong>SAPO 的梯度特性</strong>：</p>
+<ul>
+<li>在 $\rho = 1$ 附近（策略变化小）：sigmoid $\approx 0.5$，梯度正常传播</li>
+<li>随着 $\rho$ 远离 1：sigmoid 平滑衰减，梯度逐渐减小但<strong>永远非零</strong></li>
+<li>消除了训练曲线中的"锯齿"现象，收敛更平滑</li>
+</ul>
+
+<div class="info-box">
+<strong>适用场景：</strong>观察到训练 loss 曲线有明显锯齿/震荡、或梯度 norm 不稳定时。SAPO 可以作为 clip 的直接替代品，不改变其他超参数。
+</div>
+
+<h3>7.5.7 TIS/MIS — Truncated / Masked Importance Sampling（vLLM 概率修正）</h3>
+<p><strong>核心问题（"Silent vLLM Probability Mismatch"）</strong>：当使用 vLLM 加速生成时，vLLM 返回的 log-probabilities 与训练前向 pass 计算的概率存在<strong>系统性差异</strong>——不同的 CUDA kernel、浮点精度（FP16 vs BF16）、FlashAttention 变体都会导致数值不一致。后果是致命的：on-policy 假设被悄悄破坏，importance ratio $\rho_t = \pi_\theta(a_t|s_t) / \pi_{\text{old}}(a_t|s_t)$ 中分母使用了"错误的"旧概率，梯度方向产生偏差。</p>
+
+<p>大白话：你以为用的是"当前策略"生成的数据，但实际上 vLLM 算出来的概率和训练时 forward pass 的概率不一样。这个"暗坑"不报错、不崩溃，但会让训练方向悄悄偏移。</p>
+
+<div class="formula-block">
+$$w_{\text{TIS}}(o_i) = \min\!\left(C,\; \frac{\pi_{\text{train}}(o_i|q)}{\pi_{\text{vLLM}}(o_i|q)}\right)$$
+<div class="formula-explain">
+<strong>TIS（Truncated Importance Sampling）</strong>：用训练前向 pass 的真实概率除以 vLLM 返回的概率，得到修正权重。为防止极端修正导致方差爆炸，将权重截断到上限 $C$（推荐 $C = 5.0$）。温和的 mismatch 被完整保留，极端的被截断。
+</div>
+</div>
+
+<div class="formula-block">
+$$w_{\text{MIS}}(o_i) = \mathbb{1}\!\left[\frac{\pi_{\text{train}}(o_i|q)}{\pi_{\text{vLLM}}(o_i|q)} \leq C\right]$$
+<div class="formula-explain">
+<strong>MIS（Masked Importance Sampling）</strong>：更保守的"一票否决"策略——修正比率超过阈值 $C$（推荐 $C = 3.0$）的样本直接掩掉不用（权重为 0），其余保留。不做部分修正，要么全用要么全不用。
+</div>
+</div>
+
+<p><strong>应用级别选择</strong>：</p>
+<ul>
+<li><strong>Token 级</strong>：对每个 token 单独计算修正权重。灵活，但 token 级乘积 ≠ 序列级比率，存在偏差积累。</li>
+<li><strong>Sequence 级</strong>（推荐）：用几何平均得到序列级修正权重，理论上更正确。</li>
+</ul>
+
+<div class="info-box">
+<strong>使用建议</strong>：只要你在用 vLLM / SGLang 等推理引擎做生成加速，就<strong>强烈建议启用</strong> TIS 或 MIS。TIS 适合 mismatch 较小的情况（同模型不同精度），MIS 适合 mismatch 大或不可预测的情况。优先使用 sequence 级。
+</div>
+
+<h3>7.5.8 VESPO — Variational Sequence-Level Soft Policy Optimization（变分推理视角）</h3>
+<p><strong>核心动机</strong>：标准 GRPO/DAPO 的裁剪机制都是启发式设计——clip 阈值、非对称裁剪、sigmoid 软化等等，缺乏统一的理论根基。VESPO 从<strong>变分推理（Variational Inference）</strong>框架出发，严格推导出一种新的加权策略：将策略优化视为对"最优后验策略"的近似推理问题，自然导出一个光滑、非对称、自动衰减过期轨迹的权重函数。</p>
+
+<p>大白话：之前的 clip 像是"拍脑袋画了条线"，VESPO 则是从概率论第一性原理推导出"应该怎么限制策略更新步长"——答案恰好是一个光滑的、会随轨迹年龄自动衰减的加权核。</p>
+
+<div class="formula-block">
+$$g(\tau) = W(\tau)^k \cdot \exp\!\left(-\lambda\,(1 - W(\tau))\right)$$
+<div class="formula-explain">
+其中 $W(\tau) = \pi_\theta(\tau) / \pi_{\text{old}}(\tau)$ 是序列级重要性权重。<br>
+• $k$（锐度参数，推荐 2.0–3.0）：控制权重对 $W$ 的敏感度，越大越"尖锐"<br>
+• $\lambda$（衰减参数，推荐 2.0–4.0）：控制旧轨迹的衰减速度，越大衰减越快<br>
+• 指数项 $\exp(-\lambda(1-W))$ 自然处理 stale trajectories：$W \ll 1$（策略已大幅变化）时权重指数衰减<br>
+• 整体特性：梯度处处光滑（无断崖）、非对称（好轨迹 $W>1$ 和差轨迹 $W<1$ 不同权衡）
+</div>
+</div>
+
+<p><strong>VESPO vs SAPO 对比</strong>：</p>
+<ul>
+<li><strong>SAPO</strong>：在 clip 边界附近做局部光滑（sigmoid 替代阶跃），但远离边界仍是线性的</li>
+<li><strong>VESPO</strong>：全局光滑 + 有理论推导 + 内建 stale trajectory 处理，更适合半离线场景</li>
+</ul>
+
+<div class="info-box">
+<strong>适用场景</strong>：半离线强化学习（<code>steps_per_generation > 2–4</code>）、轨迹质量跨度大的训练、需要理论保证的研究场景。如果你是纯在线训练（每步重新采样），SAPO 已经够用。
+</div>
+
+<h3>7.5.9 DPPO — Direct Policy Divergence Policy Optimization（直接散度约束）</h3>
+<p><strong>核心问题</strong>：PPO 的比率裁剪 $\text{clip}(\rho, 1\pm\epsilon)$ 本意是近似 KL 约束（限制策略更新幅度），但它对不同概率的 token 约束力度<strong>不等价</strong>：</p>
+<ul>
+<li><strong>低概率 token</strong>：概率从 0.01 变到 0.02（翻倍），比率 $\rho = 2.0$ → 被 clip → 过度惩罚</li>
+<li><strong>高概率 token</strong>：概率从 0.8 变到 0.9（增加 12.5%），比率 $\rho = 1.125$ → 不被 clip → 惩罚不足</li>
+</ul>
+<p>同样的 clip 阈值 $\epsilon$ 对低概率 token"太严"、对高概率 token"太松"。DPPO 的解决方案：<strong>直接用散度度量替代比率裁剪</strong>。</p>
+
+<div class="formula-block">
+$$\text{约束：} D(\pi_\theta \| \pi_{\text{old}}) \leq \delta \quad (\text{在 token 级})$$
+<div class="formula-explain">
+四种实现模式：<br>
+• <strong>binary_tv</strong>：掩膜所有 $|\pi_\theta(a_t) - \pi_{\text{old}}(a_t)| > \delta$ 的 token<br>
+• <strong>binary_kl</strong>：掩膜所有 $\pi_\theta(a_t) \cdot \log(\pi_\theta(a_t)/\pi_{\text{old}}(a_t)) > \delta$ 的 token<br>
+• <strong>topk_tv</strong>：只保留 TV 贡献最大的前 $K$ 个 token（保留最需要更新的）<br>
+• <strong>topk_kl</strong>：只保留 KL 贡献最大的前 $K$ 个 token<br>
+<br>
+核心优势：<strong>Token-adaptive</strong>——每个 token 根据自身概率分布被单独约束，不再"一刀切"。
+</div>
+</div>
+
+<div class="highlight-box">
+<strong>研究前沿</strong>：DPPO 理论上更正确（直接优化 KL 散度而非近似），但当前<strong>尚未集成到 TRL 主线</strong>，需要自定义 GRPOTrainer 子类实现。适用于：token 概率分布高度倾斜的任务、观察到异常梯度 spike、需要理论正确性的研究项目。
+</div>
+
+<h3>7.5.10 CISPO & ScaleRL — 从 Group 级到 Batch 级归一化</h3>
+<p><strong>背景</strong>：ScaleRL 论文系统研究了"什么因素使得 RL 能够规模化"。核心发现是两个独立改进的<strong>协同效应</strong>惊人——单独用一项提升 3-5%，两者结合却提升 8-12%（远超简单相加）。CISPO（Clipped Importance Sampling Policy Optimization）是 ScaleRL 的实现方案。</p>
+
+<h4>A. Batch 级奖励归一化（核心创新）</h4>
+<div class="formula-block">
+$$\text{标准 GRPO：}\quad \hat{A}_i = \frac{r_i - \mu_{\text{group}}}{\sigma_{\text{group}}}$$
+$$\text{CISPO：}\quad \hat{A}_i = \frac{r_i - \mu_{\text{batch}}}{\sigma_{\text{batch}}}$$
+<div class="formula-explain">
+标准 GRPO 在<strong>单个 prompt 的 $G$ 个回答</strong>内计算均值和标准差（group 级）。<br>
+CISPO 在<strong>整个 training batch（所有 prompt 的所有回答）</strong>上计算统计量（batch 级）。<br><br>
+效果：① 更稳定的基线估计（样本量从 $G$ 增加到 $B \times G$）；② 防止单个 prompt 的奖励偏差主导梯度；③ 跨不同难度 prompt 实现更好的归一化——难题和简单题的优势值在同一个尺度上比较。
+</div>
+</div>
+
+<h4>B. Token 级 Loss 聚合 + Clip-Higher</h4>
+<p>结合 DAPO 的两项特性：非对称裁剪（$\epsilon_{\text{high}} = 5.0$，比标准 DAPO 的 0.28 更宽松）和 token 级 loss 聚合（除以 $\sum_i |o_i|$ 而非 $G$）。</p>
+
+<div class="formula-block">
+$$\mathcal{L}_{\text{CISPO}} = -\frac{\sum_i \sum_t m_{it} \cdot \min\!\left(\rho_{it} \hat{A}_i,\; \text{clip}_{\text{DAPO}}(\rho_{it}, \hat{A}_i) \cdot \hat{A}_i\right)}{\sum_i \sum_t m_{it}}$$
+<div class="formula-explain">
+其中 $m_{it}$ 是超长过滤掩膜，$\hat{A}_i$ 使用 batch 级归一化计算。<br>
+关键配置：<code>scale_rewards="batch"</code>、<code>epsilon_high=5.0</code>、<code>mask_truncated_completions=True</code>。
+</div>
+</div>
+
+<p><strong>ScaleRL 的协同效应</strong>：</p>
+<table>
+<tr><th>改进</th><th>单独使用</th><th>结合使用</th></tr>
+<tr><td>Batch 级归一化</td><td>+3–5%</td><td rowspan="2"><strong>+8–12%</strong>（协同 > 相加）</td></tr>
+<tr><td>Token 级 loss 聚合</td><td>+2–3%</td></tr>
+</table>
+
+<div class="success-box">
+<strong>推荐</strong>：CISPO 是当前大规模 RL 训练（>10B 参数）的<strong>新默认方案</strong>。Batch 越大，batch 级缩放收益越大。与 DAPO 的关系：DAPO 适合小规模快速实验（工程层 5 项改进），CISPO 适合大规模扩展训练（理论与工程结合）。
+</div>
+
+<h3>7.5.11 GDPO — Group Reward-Decoupled Policy Optimization（多目标奖励解耦）</h3>
+<p><strong>核心问题（优势坍塌）</strong>：多目标 RL 中，不同奖励维度的<strong>方差差异巨大</strong>时，高方差维度会"淹没"低方差维度。</p>
+
+<p>举例：正确性奖励 $r_{\text{correct}} \in \{0, 1\}$（$\sigma \leq 0.5$），格式奖励 $r_{\text{format}} \in [0, 0.1]$（$\sigma \ll 0.05$）。标准做法 $r = r_{\text{correct}} + r_{\text{format}}$ 然后归一化——此时 $\sigma_{\text{combined}}$ 由 $\sigma_{\text{correct}}$ 主导，格式奖励的变化被完全淹没，对梯度贡献接近零。这就是<strong>"优势坍塌"</strong>。</p>
+
+<div class="formula-block">
+$$\hat{A}_n^{(i)} = \frac{r_n^{(i)} - \mu_n}{\sigma_n + \epsilon} \qquad (\text{维度 } n \text{ 的独立归一化})$$
+$$\hat{A}^{(i)} = \sum_n w_n \cdot \hat{A}_n^{(i)} \qquad (\text{加权组合})$$
+<div class="formula-explain">
+GDPO 的解决方案极其优雅：对每个奖励维度<strong>分别归一化</strong>，然后再加权组合。<br>
+• $n$ 是维度索引（如 $n=1$: correctness, $n=2$: format, $n=3$: safety）<br>
+• $\mu_n, \sigma_n$ 是第 $n$ 维奖励在组内的均值和标准差<br>
+• $w_n$ 是用户指定的权重（如 $[1.0, 0.5, 0.3]$）<br><br>
+<strong>关键区别</strong>：标准 GRPO 是"先求和再归一化"，GDPO 是"分别归一化再求和"——顺序之差，效果天壤之别。
+</div>
+</div>
+
+<table>
+<tr><th>特性</th><th>标准多奖励 GRPO</th><th>GDPO</th></tr>
+<tr><td>归一化顺序</td><td>先求和 $r = \sum r_n$，再归一化</td><td>分别归一化，再加权求和</td></tr>
+<tr><td>高方差维度影响</td><td>主导优势计算</td><td>按权重比例贡献</td></tr>
+<tr><td>低方差维度贡献</td><td>被淹没（梯度 ≈ 0）</td><td>正常（独立发言权）</td></tr>
+<tr><td>适用场景</td><td>各维度量级相近</td><td>各维度异量级、异方差</td></tr>
+</table>
+
+<div class="info-box">
+<strong>何时必用 GDPO</strong>：只要你的奖励函数有多个维度且方差明显不同（如：正确性 + 格式 + 安全性、质量 + 多样性、效能 + 可读性），就应该使用 GDPO。它是多目标 RL 的标准做法。
+</div>
+
+<h3>7.5.12 GOPO — Group Ordinal Policy Optimization（排名替代数值）</h3>
+<p><strong>核心观察</strong>：奖励模型（RM）是用 pairwise preference（"A 比 B 好"）训练的，因此<strong>只有序的关系是可信的</strong>，原始数值大小完全是人造的。RM 输出 $[0.3, 0.5]$ 和另一个 RM 输出 $[0.1, 0.9]$，两者都说 A > B，但"好多少"的数值含义完全不同。</p>
+
+<p>大白话：RM 告诉你"谁排第一"是靠谱的，但告诉你"第一比第二好 0.3 分"是不靠谱的。标准 GRPO 直接拿这些不靠谱的数值去算优势，对非验证型任务引入了大量噪音。</p>
+
+<div class="formula-block">
+$$\hat{A}_{\text{GOPO}}^{(i)} = f\!\left(\frac{\text{rank}(o_i)}{N}\right)$$
+<div class="formula-explain">
+GOPO 完全放弃原始奖励数值，只使用<strong>组内排名</strong>来计算优势：<br>
+• 先对 $G$ 个回答按奖励排序得到 $\text{rank}(o_i) \in \{1, 2, \ldots, N\}$<br>
+• 用单调映射函数 $f$ 将归一化排名转为优势值<br><br>
+映射函数 $f$ 的常见选择：<br>
+• 线性：$f(x) = 2x - 1 \in [-1, 1]$<br>
+• 分位数：$f(x) = \Phi^{-1}(x)$（标准正态逆 CDF）<br>
+• 符号：$f(x) = \text{sign}(x - 0.5) \in \{-1, +1\}$
+</div>
+</div>
+
+<table>
+<tr><th>方面</th><th>GRPO</th><th>GOPO</th></tr>
+<tr><td>优势计算</td><td>$\hat{A}_i = (r_i - \mu)/\sigma$</td><td>$\hat{A}_i = f(\text{rank}(i)/N)$</td></tr>
+<tr><td>基础</td><td>绝对奖励数值</td><td>相对排序</td></tr>
+<tr><td>对 RM 缩放敏感</td><td>高（数值缩放改变 $\sigma$）</td><td>无（排序单调不变）</td></tr>
+<tr><td>对 RM 校准敏感</td><td>高（坏校准 → 噪音）</td><td>低（忽视绝对大小）</td></tr>
+<tr><td>适用</td><td>验证型奖励（0/1 二值）</td><td>非验证型奖励（RM 评分、主观）</td></tr>
+</table>
+
+<div class="highlight-box">
+<strong>关键特性——单调不变性</strong>：对奖励函数做任意单调变换 $g(r)$（如取对数、平方、加常数），只要不改变排序，GOPO 的输出完全不变。RM 噪音越大，GOPO 相对 GRPO 的优势越明显。
+</div>
+
+<div class="info-box">
+<strong>何时选择</strong>：<br>
+• <strong>用 GRPO</strong>：奖励可完全验证且精确——数学正确/错误、代码通过测试/失败、二值 benchmark 分数<br>
+• <strong>用 GOPO</strong>：奖励来自 RM 且有噪音——helpfulness、style、safety、factuality、summarization 质量等主观型任务
+</div>
+
+<!-- 变体对比总表 -->
+<h3>7.5.13 变体对比总结</h3>
+<table>
+<tr><th>变体</th><th>核心改进</th><th>解决的问题</th><th>额外开销</th><th>推荐场景</th></tr>
+<tr><td><strong>DAPO</strong></td><td>5 项独立改进</td><td>训练稳定性、长文本、死组</td><td>几乎无</td><td>通用默认升级</td></tr>
+<tr><td><strong>GSPO</strong></td><td>序列级裁剪</td><td>离线训练中序列比率爆炸</td><td>无</td><td>off-policy / 多步更新</td></tr>
+<tr><td><strong>Dr. GRPO</strong></td><td>Token 去偏权重</td><td>公共 token 主导梯度</td><td>需额外 ref 前向</td><td>模板化输出任务</td></tr>
+<tr><td><strong>2-GRPO</strong></td><td>$G=2$ 对比学习</td><td>计算开销大</td><td>负——减少生成量</td><td>资源受限、快速迭代</td></tr>
+<tr><td><strong>SAPO</strong></td><td>Sigmoid 软裁剪</td><td>梯度不连续/震荡</td><td>无</td><td>训练曲线不稳定时</td></tr>
+<tr><td><strong>TIS/MIS</strong></td><td>截断/掩膜重要性采样</td><td>vLLM 概率 mismatch</td><td>需额外前向 pass</td><td>vLLM/SGLang 加速生成时</td></tr>
+<tr><td><strong>VESPO</strong></td><td>变分推理加权核</td><td>启发式 clip 缺乏理论基础</td><td>无</td><td>半离线训练、理论研究</td></tr>
+<tr><td><strong>DPPO</strong></td><td>直接散度约束</td><td>比率 clip 对不同 token 不等价</td><td>需自定义实现</td><td>研究前沿 / 概率倾斜任务</td></tr>
+<tr><td><strong>CISPO</strong></td><td>Batch 级归一化 + Token loss</td><td>Group 级基线不稳定</td><td>无</td><td>大规模 RL（>10B）新默认</td></tr>
+<tr><td><strong>GDPO</strong></td><td>多维度独立归一化</td><td>高方差维度淹没低方差维度</td><td>无</td><td>多目标奖励（异方差）</td></tr>
+<tr><td><strong>GOPO</strong></td><td>排名替代数值</td><td>RM 数值噪音大、缩放敏感</td><td>无</td><td>非验证型奖励 / 主观任务</td></tr>
+</table>
+
+<!-- 变体关系 SVG -->
+<svg viewBox="0 0 900 370" xmlns="http://www.w3.org/2000/svg" style="max-width:900px" font-family="inherit">
+  <!-- === 第一层：GRPO 主节点 === -->
+  <rect x="360" y="12" width="180" height="48" rx="10" fill="#3498db" stroke="#2471a3" stroke-width="2"/>
+  <text x="450" y="35" text-anchor="middle" font-size="14" font-weight="bold" fill="#fff">GRPO</text>
+  <text x="450" y="51" text-anchor="middle" font-size="9" fill="#d6eaf8">基础算法 · 组归一化优势</text>
+
+  <!-- === 第二层：8 个直接变体 === -->
+  <!-- DAPO -->
+  <rect x="8" y="120" width="100" height="48" rx="8" fill="#fff8e1" stroke="#ffc107" stroke-width="1.5"/>
+  <text x="58" y="141" text-anchor="middle" font-size="10" font-weight="bold" fill="#7b6b00">DAPO</text>
+  <text x="58" y="157" text-anchor="middle" font-size="7.5" fill="#856404">非对称裁剪+动态采样</text>
+  <line x1="380" y1="60" x2="68" y2="120" stroke="#ffc107" stroke-width="1.5"/>
+
+  <!-- GSPO -->
+  <rect x="118" y="120" width="100" height="48" rx="8" fill="#e1f5fe" stroke="#4fc3f7" stroke-width="1.5"/>
+  <text x="168" y="141" text-anchor="middle" font-size="10" font-weight="bold" fill="#01579b">GSPO</text>
+  <text x="168" y="157" text-anchor="middle" font-size="7.5" fill="#0277bd">序列级重要性采样</text>
+  <line x1="400" y1="60" x2="178" y2="120" stroke="#4fc3f7" stroke-width="1.5"/>
+
+  <!-- Dr. GRPO -->
+  <rect x="228" y="120" width="100" height="48" rx="8" fill="#e8f5e9" stroke="#66bb6a" stroke-width="1.5"/>
+  <text x="278" y="141" text-anchor="middle" font-size="10" font-weight="bold" fill="#1b5e20">Dr. GRPO</text>
+  <text x="278" y="157" text-anchor="middle" font-size="7.5" fill="#2e7d32">token 去偏</text>
+  <line x1="420" y1="60" x2="288" y2="120" stroke="#66bb6a" stroke-width="1.5"/>
+
+  <!-- 2-GRPO -->
+  <rect x="338" y="120" width="100" height="48" rx="8" fill="#f3e5f5" stroke="#7c3aed" stroke-width="1.5"/>
+  <text x="388" y="141" text-anchor="middle" font-size="10" font-weight="bold" fill="#4a148c">2-GRPO</text>
+  <text x="388" y="157" text-anchor="middle" font-size="7.5" fill="#6a1b9a">G=2 在线对比</text>
+  <line x1="440" y1="60" x2="398" y2="120" stroke="#7c3aed" stroke-width="1.5"/>
+
+  <!-- SAPO -->
+  <rect x="448" y="120" width="100" height="48" rx="8" fill="#fce4ec" stroke="#db2777" stroke-width="1.5"/>
+  <text x="498" y="141" text-anchor="middle" font-size="10" font-weight="bold" fill="#880e4f">SAPO</text>
+  <text x="498" y="157" text-anchor="middle" font-size="7.5" fill="#ad1457">sigmoid 软裁剪</text>
+  <line x1="460" y1="60" x2="508" y2="120" stroke="#db2777" stroke-width="1.5"/>
+
+  <!-- TIS/MIS -->
+  <rect x="558" y="120" width="100" height="48" rx="8" fill="#fff3e0" stroke="#ff9800" stroke-width="1.5"/>
+  <text x="608" y="141" text-anchor="middle" font-size="10" font-weight="bold" fill="#e65100">TIS/MIS</text>
+  <text x="608" y="157" text-anchor="middle" font-size="7.5" fill="#ef6c00">vLLM 概率修正</text>
+  <line x1="480" y1="60" x2="618" y2="120" stroke="#ff9800" stroke-width="1.5"/>
+
+  <!-- VESPO -->
+  <rect x="668" y="120" width="100" height="48" rx="8" fill="#e0f7fa" stroke="#00acc1" stroke-width="1.5"/>
+  <text x="718" y="141" text-anchor="middle" font-size="10" font-weight="bold" fill="#006064">VESPO</text>
+  <text x="718" y="157" text-anchor="middle" font-size="7.5" fill="#00838f">变分软加权</text>
+  <line x1="500" y1="60" x2="728" y2="120" stroke="#00acc1" stroke-width="1.5"/>
+
+  <!-- DPPO -->
+  <rect x="778" y="120" width="100" height="48" rx="8" fill="#eceff1" stroke="#607d8b" stroke-width="1.5"/>
+  <text x="828" y="141" text-anchor="middle" font-size="10" font-weight="bold" fill="#263238">DPPO</text>
+  <text x="828" y="157" text-anchor="middle" font-size="7.5" fill="#37474f">散度约束</text>
+  <line x1="520" y1="60" x2="838" y2="120" stroke="#607d8b" stroke-width="1.5"/>
+
+  <!-- === 第三层分隔线 === -->
+  <line x1="40" y1="200" x2="860" y2="200" stroke="#e0e0e0" stroke-width="1" stroke-dasharray="6,4"/>
+  <text x="450" y="215" text-anchor="middle" font-size="8" fill="#9e9e9e">▼ 进阶变体 / 独立分支 ▼</text>
+
+  <!-- === 第三层：3 个进阶/独立变体 === -->
+  <!-- CISPO/ScaleRL (从 GSPO 演进) -->
+  <rect x="60" y="240" width="160" height="48" rx="8" fill="#ffebee" stroke="#e53935" stroke-width="1.5"/>
+  <text x="140" y="261" text-anchor="middle" font-size="10" font-weight="bold" fill="#b71c1c">CISPO / ScaleRL</text>
+  <text x="140" y="277" text-anchor="middle" font-size="7.5" fill="#c62828">Batch 级归一化</text>
+  <line x1="168" y1="168" x2="150" y2="240" stroke="#e53935" stroke-width="1.5" stroke-dasharray="5,3"/>
+  <text x="145" y="207" font-size="7" fill="#e53935">演进</text>
+
+  <!-- GDPO (独立分支) -->
+  <rect x="370" y="240" width="160" height="48" rx="8" fill="#e8f5e9" stroke="#2e7d32" stroke-width="1.5"/>
+  <text x="450" y="261" text-anchor="middle" font-size="10" font-weight="bold" fill="#1b5e20">GDPO</text>
+  <text x="450" y="277" text-anchor="middle" font-size="7.5" fill="#2e7d32">多目标解耦归一化</text>
+  <path d="M450,60 L450,95 Q450,100 445,100 L365,100 Q355,100 355,108 L355,200 Q355,210 370,220 L440,240" stroke="#2e7d32" stroke-width="1.2" stroke-dasharray="5,3" fill="none"/>
+  <text x="340" y="182" font-size="7" fill="#2e7d32">独立分支</text>
+
+  <!-- GOPO (独立分支) -->
+  <rect x="680" y="240" width="160" height="48" rx="8" fill="#efebe9" stroke="#795548" stroke-width="1.5"/>
+  <text x="760" y="261" text-anchor="middle" font-size="10" font-weight="bold" fill="#3e2723">GOPO</text>
+  <text x="760" y="277" text-anchor="middle" font-size="7.5" fill="#4e342e">序数排名替代数值</text>
+  <path d="M500,60 L530,95 Q535,100 545,100 L680,100 Q690,100 695,108 L720,200 Q725,210 735,220 L755,240" stroke="#795548" stroke-width="1.2" stroke-dasharray="5,3" fill="none"/>
+  <text x="680" y="182" font-size="7" fill="#795548">独立分支</text>
+
+  <!-- 图例 -->
+  <rect x="30" y="320" width="840" height="36" rx="6" fill="#f5f5f5" stroke="#e0e0e0"/>
+  <line x1="55" y1="338" x2="85" y2="338" stroke="#888" stroke-width="1.5"/>
+  <text x="90" y="342" font-size="8" fill="#666">实线 = 直接继承</text>
+  <line x1="220" y1="338" x2="250" y2="338" stroke="#888" stroke-width="1.2" stroke-dasharray="5,3"/>
+  <text x="255" y="342" font-size="8" fill="#666">虚线 = 思想借鉴 / 独立演化</text>
+  <rect x="450" y="330" width="12" height="12" rx="2" fill="#fff" stroke="#3498db" stroke-width="1.5"/>
+  <text x="468" y="342" font-size="8" fill="#666">第二层 = 直接变体</text>
+  <rect x="620" y="330" width="12" height="12" rx="2" fill="#fff" stroke="#e53935" stroke-width="1.5"/>
+  <text x="638" y="342" font-size="8" fill="#666">第三层 = 进阶 / 独立分支</text>
+</svg>
+
+<!-- ============================== Takeaways ============================== -->
+<div id="takeaway" class="takeaway">
+<h2>关键要点总结</h2>
+<ol>
+<li><strong>GRPO 的核心创新</strong>：用“组内统计量”（均值/标准差）替代“价值网络”估计基线，省掉一整个模型的显存和训练开销，还往往更准确。</li>
+<li><strong>组归一化的本质</strong>：组均值 $\mu_G$ 是 $V(s)$ 的蒙特卡洛无偏估计；除以 $\sigma_G$ 实现跨 prompt 的量级归一化。</li>
+<li><strong>$G=8$ 是默认最佳选择</strong>；困难任务用 16，极简场景 2-GRPO 可 4-6 倍加速且不丢精度。</li>
+<li><strong>DAPO 是最实用的升级</strong>：5 项改进解决了长文本、死组、探索不足等常见问题。</li>
+<li><strong>CISPO 是大规模 RL 新默认</strong>：Batch 级归一化 + Token 级 loss 的协同效应可达 8-12% 提升（远超单独使用）。</li>
+<li><strong>GDPO 解决多目标 RL</strong>：“分别归一化再求和”与“先求和再归一化”顺序之差，效果天壤之别——防止低方差维度被淹没。</li>
+<li><strong>GOPO 适合非验证型奖励</strong>：用排名替代数值，对 RM 噪音和缩放完全免疫。RM 越差，GOPO 相对 GRPO 优势越大。</li>
+<li><strong>TIS/MIS 是 vLLM 用户必备</strong>：概率 mismatch 是隐藏 bug，不报错但会让训练偏移，截断或掩膜修正是必要的工程实践。</li>
+<li><strong>2-GRPO 揭示了本质</strong>：GRPO 的力量来自在线对比信号而非准确优势估计——两个样本就够对比了。</li>
+<li><strong>选择指南</strong>：小规模快速实验→DAPO；大规模训练→CISPO；多目标→GDPO；非验证奖励→GOPO；vLLM生成→TIS/MIS；半离线→VESPO/GSPO。</li>
+</ol>
+</div>
+
+<!-- ============================== Q&A ============================== -->
+<h2 id="qa">Q&A 自测</h2>
+
+<details>
+<summary>Q1：GRPO 和 PPO 最本质的区别是什么？一句话概括。</summary>
+<div class="answer">
+<p>PPO 需要训练一个<strong>价值网络（critic）</strong>来估计 $V(s)$ 作为基线，而 GRPO 直接用同一 prompt 的 $G$ 个回答的平均奖励作为基线（蒙特卡洛估计 $V(s)$），完全省去了 critic。一句话：<strong>"用采样替代学习来估计基线"</strong>。</p>
+</div>
+</details>
+
+<details>
+<summary>Q2：为什么 $G=2$ 就能 work？GRPO 不是需要精确估计优势吗？</summary>
+<div class="answer">
+<p>2-GRPO 论文从理论上证明：$G=2$ 时归一化优势恒为 $\{+1, -1\}$（与奖励差值大小无关），GRPO 退化为一个在线对比学习目标（类似在线 DPO）。这揭示了 GRPO 的有效性<strong>不来自"精确的优势数值"</strong>，而来自<strong>"谁比谁好"的序信号</strong>。对比只需要一对样本，所以 $G=2$ 就够了。但注意：$G=2$ 丢失了"好多少"的程度信息，对需要连续评分的任务可能不够。</p>
+</div>
+</details>
+
+<details>
+<summary>Q3：DAPO 的 5 个改进中，哪些最值得优先采用？</summary>
+<div class="answer">
+<p>按普适性排序：① <strong>动态采样</strong>（几乎 0 成本，直接消除死组问题）→ ② <strong>Clip-Higher</strong>（一行代码修改，稳定提升 1-2%）→ ③ <strong>Token 级 loss</strong>（对长文本任务收益明显）→ ④ <strong>超长过滤</strong>（长文本场景必备）→ ⑤ <strong>软超长惩罚</strong>（进阶调优）。</p>
+</div>
+</details>
+
+<details>
+<summary>Q4：什么时候必须用 GSPO 而不是 GRPO？</summary>
+<div class="answer">
+<p>当你做<strong>离线/半离线训练</strong>时——即 <code>steps_per_generation > 1</code>（同一批采样数据用于多步梯度更新以节省生成成本）。此时策略已经偏离了采样时的"旧策略"，token 级 clip 不能保证序列整体变化有界（500 个 $[0.8, 1.2]$ 的乘积可能是天文数字）。GSPO 用几何平均做序列级 clip，确保序列整体策略变化受控。纯在线训练（$\pi_{\text{old}} \approx \pi_\theta$）时差别不大。</p>
+</div>
+</details>
+
+<details>
+<summary>Q5：Dr. GRPO 的 token 去偏怎么直觉理解？</summary>
+<div class="answer">
+<p>想象模型的回答是 "The answer is 42"。RL 的奖励是因为 "42" 正确才给的，但标准 GRPO 给所有 token 相等的梯度——包括 "The"、"answer"、"is" 这些预训练就已经学好的词。Dr. GRPO 通过乘以 $(1 - \pi_{\text{ref}}(t))$ 来降权这些"本来就会生成"的 token（$\pi_{\text{ref}}$ 高 → 权重接近 0），把学习信号集中在真正决定答案质量的关键 token（$\pi_{\text{ref}}$ 低 → 权重接近 1）上。</p>
+</div>
+</details>
+
+<details>
+<summary>Q6：Goldilocks 法则的 20-80% 通过率要求，实践中怎么实现？</summary>
+<div class="answer">
+<p>常见做法：① 训练前用当前模型对所有 prompt 做一次批量推理，估计每个 prompt 的通过率，只保留 20-80% 区间的；② 训练过程中定期（每 500-1000 步）重新评估，动态更新训练集；③ 维护一个"难度梯度"的 prompt 池，按当前模型能力从中采样合适难度的题目；④ 如果 prompt 量有限，可以用 DAPO 的动态采样作为补充——检测到死组时自动换题。</p>
+</div>
+</details>
+
+<details>
+<summary>Q7：SAPO 的 sigmoid 软裁剪和直接去掉 clip（vanilla policy gradient）有什么区别？</summary>
+<div class="answer">
+<p>去掉 clip 等于完全没有信赖域约束，策略可以一步跳非常远，训练极不稳定（这就是为什么需要 PPO 而不是 REINFORCE）。SAPO 的 sigmoid 仍然提供约束——只是从"硬墙"变成了"弹簧"：比率越远离 1，梯度衰减越强。理论上 SAPO 在 $\tau \to 0$ 时恢复硬 clip，在 $\tau \to \infty$ 时退化为无约束。推荐的 $\tau \approx 1.0$ 在两者之间取得平衡：既有约束又不会产生梯度断崖。</p>
+</div>
+</details>
+
+<details>
+<summary>Q8：如果我只能选一个变体来改进基础 GRPO，应该选哪个？</summary>
+<div class="answer">
+<p><strong>DAPO</strong>。原因：它不是一个"替代方案"而是一组"补丁"，5 项改进中的每一项都直接解决基础 GRPO 的一个具体问题，且互不冲突。你可以选择性启用（如只用 Clip-Higher + 动态采样），也可以全部启用。其他变体（GSPO、Dr. GRPO、SAPO）各自解决特定场景的问题，但 DAPO 的适用面最广。</p>
+</div>
+</details>
+
+<footer style="margin-top:3rem; padding-top:1.5rem; border-top:1px solid var(--border); text-align:center; font-size:0.8rem; color:var(--text-secondary);">
+基于 <em>The Hitchhiker's Guide to Agentic AI</em> 第7章（pp. 158–173）整理 &nbsp;|&nbsp; 2025
+</footer>
+
+</body>
+</html>

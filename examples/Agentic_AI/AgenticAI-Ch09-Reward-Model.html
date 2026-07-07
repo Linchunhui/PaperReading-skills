@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第9章 阅读笔记：Reward Model Training</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]})"></script>
+<style>
+:root { --primary: #2c3e50; --accent: #3498db; --bg: #fafbfc; --card-bg: #ffffff; --border: #e1e4e8; --text: #24292e; --text-secondary: #586069; --code-bg: #f6f8fa; --highlight: #fff3cd; --success: #d4edda; --info: #d1ecf1; }
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; line-height: 1.8; color: var(--text); background: var(--bg); padding: 2rem; max-width: 900px; margin: 0 auto; }
+h1 { font-size: 1.8rem; color: var(--primary); border-bottom: 3px solid var(--accent); padding-bottom: 0.5rem; margin-bottom: 1rem; }
+h2 { font-size: 1.4rem; color: var(--primary); margin-top: 2.5rem; margin-bottom: 1rem; padding-left: 0.8rem; border-left: 4px solid var(--accent); }
+h3 { font-size: 1.15rem; color: var(--primary); margin-top: 1.8rem; margin-bottom: 0.8rem; }
+p { margin-bottom: 1rem; text-align: justify; }
+ul, ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+li { margin-bottom: 0.5rem; }
+code { background: var(--code-bg); padding: 0.15rem 0.4rem; border-radius: 3px; font-size: 0.9em; }
+pre { background: var(--code-bg); padding: 1rem; border-radius: 6px; overflow-x: auto; margin-bottom: 1.5rem; border: 1px solid var(--border); }
+pre code { background: none; padding: 0; }
+blockquote { border-left: 4px solid var(--accent); padding: 0.8rem 1.2rem; margin: 1.5rem 0; background: var(--info); border-radius: 0 6px 6px 0; }
+.card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+.formula-block { background: var(--code-bg); border: 1px solid var(--border); border-radius: 6px; padding: 1rem; margin: 1rem 0; overflow-x: auto; }
+.formula-explain { color: var(--text-secondary); font-size: 0.92em; margin-top: 0.5rem; padding-left: 1rem; border-left: 3px solid #ddd; }
+.highlight-box { background: var(--highlight); border: 1px solid #ffc107; border-radius: 6px; padding: 1rem; margin: 1rem 0; }
+.info-box { background: var(--info); border: 1px solid #bee5eb; border-radius: 6px; padding: 1rem; margin: 1rem 0; }
+.success-box { background: var(--success); border: 1px solid #c3e6cb; border-radius: 6px; padding: 1rem; margin: 1rem 0; }
+.subtitle { color: var(--text-secondary); font-size: 1rem; margin-bottom: 0.3rem; }
+.meta { color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 2rem; }
+table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; }
+th, td { border: 1px solid var(--border); padding: 0.6rem 0.8rem; text-align: left; }
+th { background: var(--code-bg); font-weight: 600; }
+details { margin-bottom: 1rem; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+summary { padding: 0.8rem 1.2rem; background: var(--code-bg); cursor: pointer; font-weight: 500; }
+details[open] summary { border-bottom: 1px solid var(--border); }
+details .answer { padding: 1rem 1.2rem; }
+svg { max-width: 100%; height: auto; display: block; margin: 1.5rem auto; }
+.takeaway { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 8px; padding: 1.5rem; margin: 2rem 0; }
+.takeaway h2 { color: white; border-left-color: rgba(255,255,255,0.5); }
+.takeaway li { color: rgba(255,255,255,0.95); }
+</style>
+</head>
+<body>
+
+<h1>第9章 阅读笔记：Reward Model Training</h1>
+<p class="subtitle">来源：H. Roitman — <em>The Hitchhiker's Guide to Agentic AI</em></p>
+<p class="meta">页码 182–188 · 主题：奖励模型的数学基础、架构设计、训练技巧与前沿方法</p>
+
+<div class="card">
+<h3>章节摘要</h3>
+<p>奖励模型（Reward Model, RM）是 RLHF 管线的核心中间件——它将人类对回答质量的主观偏好转化为可被强化学习优化的标量信号。本章从最基础的 <strong>Bradley-Terry（BT）成对偏好模型</strong>出发，逐步推导了 MLE 训练目标及其梯度；介绍了标准架构（LLM + 标量回归头）以及三大关键训练技巧（奖励居中、长度偏差校正、margin loss）。核心对比了<strong>过程奖励模型（PRM）</strong>与<strong>结果奖励模型（ORM）</strong>的适用场景和数学差异。随后引入了<strong>基于规则的可验证奖励（RLVR）</strong>——DeepSeek-R1 所采用的方法——作为减少 reward hacking 的务实方案。讨论了<strong>多目标奖励</strong>的五种组合策略，最后将 BT 推广到<strong>列表级排序</strong>的 Plackett-Luce 模型，为 GRPO 等算法提供更丰富的训练信号。</p>
+</div>
+
+<!-- ===== 9.1 ===== -->
+<h2>9.1 Bradley-Terry Model — 完整推导</h2>
+
+<h3>直觉与背景</h3>
+<p>Bradley-Terry 模型（1952年）最初用于体育比赛的胜负建模。核心想法极其简洁：每个选手有一个"实力分数"，两人对战时，实力更高者获胜的概率由两者分数差决定。将这一框架迁移到 LLM 对齐场景：每个回答 $y$ 有一个"质量分数" $r(y, q)$（即奖励），两个回答的偏好概率由它们的奖励差决定。</p>
+
+<h3>基本假设</h3>
+<p>BT 模型建立在以下四个假设之上：</p>
+<ol>
+<li><strong>传递性（Transitivity）</strong>：如果 $y_1 \succ y_2$ 且 $y_2 \succ y_3$，则 $y_1 \succ y_3$。偏好关系可以用全序来描述。</li>
+<li><strong>标量奖励假设</strong>：每个回答的"好坏"可以用单一标量 $r(y, q) \in \mathbb{R}$ 完全刻画，不考虑多维度偏好（如"有趣但不安全"）。</li>
+<li><strong>差值决定假设</strong>：偏好概率仅取决于奖励差值 $r(y_1) - r(y_2)$，不取决于绝对值。这意味着奖励可以加任意常数而不改变模型行为。</li>
+<li><strong>独立性假设</strong>：不同偏好判断之间相互独立，不考虑标注者个体差异或上下文效应。</li>
+</ol>
+
+<h3>核心公式推导</h3>
+<p><strong>第一步：定义偏好概率。</strong>给定问题 $q$ 和两个回答 $y_w$（preferred）、$y_l$（rejected），BT 模型定义：</p>
+
+<div class="formula-block">
+$$P(y_w \succ y_l \mid q) = \frac{e^{r(y_w, q)}}{e^{r(y_w, q)} + e^{r(y_l, q)}} = \sigma\big(r(y_w, q) - r(y_l, q)\big)$$
+<div class="formula-explain">其中 $\sigma(x) = \frac{1}{1+e^{-x}}$ 是 sigmoid 函数。偏好概率完全由两个回答的奖励差值决定——差值越大，被偏好的概率越接近 1。</div>
+</div>
+
+<p><strong>第二步：构造似然函数。</strong>给定人类偏好数据集 $\mathcal{D} = \{(q^{(k)}, y_w^{(k)}, y_l^{(k)})\}_{k=1}^N$，假设各偏好判断独立，总似然为：</p>
+
+<div class="formula-block">
+$$\mathcal{L}(\phi) = \prod_{k=1}^{N} P(y_w^{(k)} \succ y_l^{(k)} \mid q^{(k)}) = \prod_{k=1}^{N} \sigma\big(r_\phi(y_w^{(k)}, q^{(k)}) - r_\phi(y_l^{(k)}, q^{(k)})\big)$$
+<div class="formula-explain">将 $N$ 个独立偏好判断的概率相乘，得到整个数据集的联合似然。$\phi$ 为奖励模型参数。</div>
+</div>
+
+<p><strong>第三步：最大似然估计（MLE）目标。</strong>取负对数似然作为损失函数：</p>
+
+<div class="formula-block">
+$$\mathcal{L}_{\text{BT}}(\phi) = -\frac{1}{N}\sum_{k=1}^{N}\log\sigma\big(r_\phi(y_w^{(k)}, q^{(k)}) - r_\phi(y_l^{(k)}, q^{(k)})\big)$$
+<div class="formula-explain">这本质上是一个<strong>二分类交叉熵损失</strong>：每个偏好对都是一个"正样本在前"的分类问题。模型要学会让好回答的分数高于差回答的分数。</div>
+</div>
+
+<p><strong>第四步：梯度分析。</strong>令 $\Delta_k = r_\phi(y_w^{(k)}, q^{(k)}) - r_\phi(y_l^{(k)}, q^{(k)})$，对单个样本求梯度：</p>
+
+<div class="formula-block">
+$$\nabla_\phi \mathcal{L}_k = -\big(1 - \sigma(\Delta_k)\big)\big(\nabla_\phi r_\phi(y_w^{(k)}) - \nabla_\phi r_\phi(y_l^{(k)})\big)$$
+<div class="formula-explain">当 $\Delta_k$ 很大（模型已经正确区分好坏）时，$1-\sigma(\Delta_k) \approx 0$，梯度接近零（不再学习）。当 $\Delta_k$ 接近零或为负时，梯度较大——模型集中精力在"难区分"或"判断错误"的样本上。这与 focal loss 有异曲同工之妙。</div>
+</div>
+
+<h3>Margin Loss 扩展</h3>
+<p>为了让模型学到更有区分度的分数，可以在损失中加入最小间隔 $m$：</p>
+
+<div class="formula-block">
+$$\mathcal{L}_{\text{margin}}(\phi) = -\frac{1}{N}\sum_{k=1}^{N}\log\sigma\big(r_\phi(y_w^{(k)}, q^{(k)}) - r_\phi(y_l^{(k)}, q^{(k)}) - m\big)$$
+<div class="formula-explain">加了间隔 $m$ 后，模型不仅要让好回答分数高于差回答，还要高出至少 $m$ 这么多。在人类标注有"strong preference"和"weak preference"区分时，$m$ 可以动态调整——强偏好要求更大间隔。</div>
+</div>
+
+<div class="highlight-box">
+<strong>BT 模型的核心局限：</strong>传递性假设在实践中经常被违反（人类偏好经常出现 A>B, B>C, C>A 的循环），标量奖励假设也无法捕捉多维偏好。这推动了 Plackett-Luce（§9.7）等扩展模型以及多目标奖励（§9.6）的发展。
+</div>
+
+<!-- ===== 9.2 ===== -->
+<h2>9.2 奖励模型架构</h2>
+
+<h3>标准架构：LLM + Scalar Head</h3>
+<p>奖励模型的架构在预训练 LLM 基础上做"微创手术"，分为三个组件：</p>
+
+<div class="card">
+<ol>
+<li><strong>骨干网络（Backbone）</strong>：一个预训练好的 LLM（如 Llama-3、Mistral、Qwen2），接收拼接后的 <code>[prompt || response]</code> 文本，输出每个位置的隐状态向量序列 $\mathbf{h}_1, \mathbf{h}_2, \ldots, \mathbf{h}_T \in \mathbb{R}^d$。</li>
+<li><strong>池化层（Pooling）</strong>：提取序列的汇总表示。对 decoder-only 模型（主流选择），通常取最后一个 token 的隐状态 $\mathbf{h}_T$；对 encoder 模型，取 <code>[CLS]</code> token。也有方法使用 mean pooling 或加权池化。</li>
+<li><strong>回归头（Regression Head）</strong>：一个线性层 $\mathbf{W} \in \mathbb{R}^{d \times 1}$（无偏置或有偏置），将池化后的 $d$ 维向量映射为标量奖励值 $r = \mathbf{W}^\top \mathbf{h}_T$。</li>
+</ol>
+</div>
+
+<svg width="720" height="140" viewBox="0 0 720 140">
+  <defs>
+    <marker id="arr" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#3498db"/>
+    </marker>
+  </defs>
+  <rect x="10" y="45" width="140" height="50" rx="8" fill="#d1ecf1" stroke="#3498db" stroke-width="1.5"/>
+  <text x="80" y="68" text-anchor="middle" font-size="12" font-weight="600" fill="#2c3e50">Prompt +</text>
+  <text x="80" y="85" text-anchor="middle" font-size="12" font-weight="600" fill="#2c3e50">Response</text>
+  <line x1="155" y1="70" x2="195" y2="70" stroke="#3498db" stroke-width="1.5" marker-end="url(#arr)"/>
+  <rect x="200" y="35" width="170" height="70" rx="8" fill="#e8daef" stroke="#8e44ad" stroke-width="1.5"/>
+  <text x="285" y="65" text-anchor="middle" font-size="12" font-weight="600" fill="#4a235a">预训练 LLM</text>
+  <text x="285" y="85" text-anchor="middle" font-size="10" fill="#586069">(Frozen or Fine-tuned)</text>
+  <line x1="375" y1="70" x2="415" y2="70" stroke="#3498db" stroke-width="1.5" marker-end="url(#arr)"/>
+  <rect x="420" y="45" width="110" height="50" rx="8" fill="#fdebd0" stroke="#e67e22" stroke-width="1.5"/>
+  <text x="475" y="68" text-anchor="middle" font-size="12" font-weight="600" fill="#784212">池化</text>
+  <text x="475" y="85" text-anchor="middle" font-size="10" fill="#586069">Last Token h_T</text>
+  <line x1="535" y1="70" x2="575" y2="70" stroke="#3498db" stroke-width="1.5" marker-end="url(#arr)"/>
+  <rect x="580" y="45" width="125" height="50" rx="8" fill="#d4edda" stroke="#27ae60" stroke-width="1.5"/>
+  <text x="642" y="65" text-anchor="middle" font-size="12" font-weight="600" fill="#1e8449">Linear(d, 1)</text>
+  <text x="642" y="85" text-anchor="middle" font-size="11" fill="#1e8449">→ scalar r</text>
+</svg>
+
+<h3>实现细节</h3>
+<ul>
+<li><strong>初始化</strong>：骨干网络从 SFT 模型初始化（而非 base model），因为 SFT 模型已经理解了指令格式。回归头随机初始化。</li>
+<li><strong>TRL 实现</strong>：使用 <code>AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=1)</code> 即可快速搭建。</li>
+<li><strong>训练策略</strong>：通常全参数微调骨干网络 + 回归头联合训练；对超大模型可用 LoRA 仅微调少量参数。</li>
+<li><strong>数据格式</strong>：每个训练样本是一个三元组 <code>(prompt, chosen_response, rejected_response)</code>，模型分别对 chosen 和 rejected 做前向传播得到两个标量分数，然后计算 BT 损失。</li>
+</ul>
+
+<h3>为什么取最后一个 Token？</h3>
+<div class="info-box">
+在 decoder-only 模型中，由于 causal attention mask 的存在，最后一个 token 的隐状态包含了所有前文的信息（它"看过"了整个输入序列）。因此 $\mathbf{h}_T$ 是整个 prompt+response 的最佳汇总表示。这与分类任务中取 <code>[CLS]</code> 的逻辑一致。
+</div>
+
+<!-- ===== 9.3 ===== -->
+<h2>9.3 奖励模型训练技巧</h2>
+
+<h3>技巧一：奖励居中（Reward Centering）</h3>
+<p>问题：奖励模型的原始输出可能有任意偏移（如所有分数都在 50-60 之间），这会导致 RL 训练中 baseline 估计困难、梯度方向模糊。</p>
+
+<div class="formula-block">
+$$r_{\text{centered}}(y, q) = r_\phi(y, q) - \mathbb{E}_{y' \sim \pi_\theta(\cdot|q)}\big[r_\phi(y', q)\big]$$
+<div class="formula-explain">从每个奖励分数中减去当前策略在同一 prompt 下的期望奖励。居中后，分数围绕零分布：好回答得正分、差回答得负分，RL 梯度方向更清晰。实践中通过维护一个 running mean 来近似期望值。TRL 中通过 <code>center_rewards_coefficient</code> 参数启用。</div>
+</div>
+
+<h3>技巧二：长度偏差校正（Length Bias Correction）</h3>
+<p>现象：奖励模型普遍存在"长度偏差"——倾向于给更长的回答打高分，不论内容质量。这会导致 RL 训练后模型产生冗长、啰嗦的回答。</p>
+
+<p>三种校正策略：</p>
+<ol>
+<li><strong>长度归一化（Length Normalization）</strong>：$r_{\text{norm}}(y) = r(y) / |y|$，直接除以 token 数。简单但可能过度惩罚合理长回答。</li>
+<li><strong>长度回归去偏（Regression Debiasing）</strong>：先在验证集上拟合 $r = \alpha \cdot \text{len}(y) + \beta + \epsilon$，然后用残差 $\epsilon$ 作为去偏后的奖励。这保留了与长度无关的质量信号。</li>
+<li><strong>训练时去偏</strong>：在训练数据中确保 chosen 和 rejected 长度分布相似，或将长度作为额外特征让模型学习长度无关的表示。</li>
+</ol>
+
+<h3>技巧三：Margin Loss（带间隔的损失函数）</h3>
+<p>标准 BT loss 只要求好回答分数高于差回答，不要求高出多少。Margin loss 强制要求一个最小间隔：</p>
+
+<div class="formula-block">
+$$\mathcal{L}_{\text{hinge}} = \frac{1}{N}\sum_{k=1}^{N}\max\big(0,\; m - (r_\phi(y_w^{(k)}) - r_\phi(y_l^{(k)}))\big)$$
+<div class="formula-explain">Hinge loss 形式的 margin：当好坏分差已超过 $m$ 时损失为零，否则线性惩罚。$m$ 可以是固定值（如 $m=1.0$），也可以根据标注者"偏好强度"（strong/weak）动态调整——强偏好用大 $m$，弱偏好用小 $m$。</div>
+</div>
+
+<h3>技巧四：Label Smoothing</h3>
+<p>人类标注不可能 100% 正确。Label smoothing 将"绝对偏好"软化为概率：</p>
+
+<div class="formula-block">
+$$\mathcal{L}_{\text{smooth}} = -\frac{1}{N}\sum_{k}\big[(1-\epsilon)\log\sigma(\Delta_k) + \epsilon\log\sigma(-\Delta_k)\big]$$
+<div class="formula-explain">$\epsilon$ 通常取 0.05-0.1，表示"有 $\epsilon$ 的概率标注是错的"。这防止模型对可能错误的标注过度拟合，提升鲁棒性。</div>
+</div>
+
+<div class="success-box">
+<strong>最佳实践组合：</strong>奖励居中 + 长度回归去偏 + Margin Loss + Label Smoothing，四者联合使用可显著提升奖励模型的质量和 RL 训练稳定性。
+</div>
+
+<!-- ===== 9.4 ===== -->
+<h2>9.4 过程奖励模型（PRM）vs 结果奖励模型（ORM）</h2>
+
+<p>这是本章最重要的对比。<strong>ORM（Outcome Reward Model）</strong>只在最终答案处给出单一奖励信号；<strong>PRM（Process Reward Model）</strong>对推理链的每一步都给出奖励。这一区别对多步推理任务（数学证明、代码生成、逻辑推理）的 RL 训练效果有决定性影响。</p>
+
+<h3>数学定义对比</h3>
+
+<div class="formula-block">
+$$\text{ORM: } R_{\text{outcome}}(y, q) = r_\phi(y_{\text{final}}, q) \quad \text{（单一标量，仅看最终结果）}$$
+$$\text{PRM: } R_{\text{process}}(y, q) = \sum_{t=1}^{T} \gamma^{T-t} \cdot r_\phi(s_t, q) \quad \text{（每步打分，折扣求和）}$$
+<div class="formula-explain">ORM 只在轨迹末尾给一个分数；PRM 对每个推理步骤 $s_t$ 都给分，并用折扣因子 $\gamma$ 加权求和。这种"稠密奖励"极大缓解了信用分配（credit assignment）问题。</div>
+</div>
+
+<h3>全面对比表</h3>
+<table>
+<thead>
+<tr><th>维度</th><th>ORM（结果奖励模型）</th><th>PRM（过程奖励模型）</th></tr>
+</thead>
+<tbody>
+<tr><td>奖励粒度</td><td>仅最终答案（sparse）</td><td>每个推理步骤（dense）</td></tr>
+<tr><td>训练数据格式</td><td><code>(prompt, answer, correct?)</code></td><td><code>(prompt, [step₁, step₂, ...], [label₁, label₂, ...])</code></td></tr>
+<tr><td>标注成本</td><td>低（只需判断最终答案对错）</td><td>高（需逐步标注每步正确性）</td></tr>
+<tr><td>信用分配</td><td>稀疏——无法区分"哪一步出错"</td><td>稠密——精确定位错误步骤</td></tr>
+<tr><td>Reward Hacking</td><td>更容易（模型可走捷径得正确答案）</td><td>更难（过程也被监督）</td></tr>
+<tr><td>适用任务</td><td>简单任务、分类、短回答</td><td>多步推理：数学、代码、逻辑</td></tr>
+<tr><td>推理开销</td><td>低（一次前向传播）</td><td>高（需逐步打分）</td></tr>
+<tr><td>与搜索算法配合</td><td>只能在末尾评估</td><td>可指导 beam search 的逐步决策</td></tr>
+<tr><td>理论基础</td><td>标准 RL 中的 terminal reward</td><td>Potential-Based Reward Shaping (PBRS)</td></tr>
+</tbody>
+</table>
+
+<h3>PRM 的理论基础：基于势函数的奖励塑形</h3>
+<p>PRM 的稠密奖励并非随意设计——它有严格的理论保证。<strong>PBRS（Potential-Based Reward Shaping）</strong>定理（Ng et al., 1999）证明：如果塑形后的奖励可以表示为势函数之差的形式，则最优策略不变。</p>
+
+<div class="formula-block">
+$$F(s, a, s') = \gamma \Phi(s') - \Phi(s)$$
+<div class="formula-explain">$\Phi(s)$ 是势函数，可以理解为"当前状态距离目标还有多远"的估计。PRM 的步骤奖励本质上就是相邻状态的势差——它为模型提供了"方向感"而不改变最终目标。</div>
+</div>
+
+<h3>自动 PRM 标注方法</h3>
+<p>人工逐步标注成本极高。实践中常用以下自动化方法：</p>
+<ol>
+<li><strong>蒙特卡洛展开（MC Rollout）</strong>：对每个中间步骤 $s_t$，从该步开始采样 $M$ 条续写到最终答案。用"到达正确答案的比例"作为该步的奖励估计：$\hat{r}(s_t) = \frac{1}{M}\sum_{m=1}^{M}\mathbb{1}[\text{rollout}_m \text{ correct}]$。这是 OpenAI 的 PRM800K 数据集采用的方法。</li>
+<li><strong>LLM-as-Judge</strong>：用强大的 LLM（如 GPT-4）评估每一步的逻辑正确性。成本较高但质量较好。</li>
+<li><strong>形式化验证</strong>：对数学证明用 Lean/Isabelle 验证器逐步检查；对代码用单元测试逐步验证中间结果。覆盖面窄但 100% 准确。</li>
+<li><strong>自我验证（Self-Verification）</strong>：让同一模型生成推理后自我检查每一步，通过多次采样的一致性判断步骤质量。</li>
+</ol>
+
+<div class="info-box">
+<strong>OpenAI PRM800K 实验结论：</strong>在 MATH 数据集上，PRM 引导的 beam search 比 ORM 引导的 majority voting 准确率高出 10%+ 。但 PRM 的训练数据成本约为 ORM 的 50 倍。
+</div>
+
+<!-- ===== 9.5 ===== -->
+<h2>9.5 基于规则的奖励（Rule-Based Rewards for RLVR）</h2>
+
+<p><strong>RLVR（Reinforcement Learning from Verifiable Rewards）</strong>的核心洞察：如果任务的答案可以被程序化验证（数学答案对不对、代码能不能通过测试），那就完全不需要训练一个神经网络奖励模型——直接用确定性规则判断对错即可。这从根本上消除了学习的奖励模型带来的所有问题：reward hacking、分布偏移、泛化不足等。</p>
+
+<div class="highlight-box">
+<strong>DeepSeek-R1 的成功验证：</strong>DeepSeek-R1 仅使用基于规则的奖励（正确性验证 + 格式检查），通过 GRPO 训练就在数学推理上达到了接近 OpenAI o1 的水平。这证明了 RLVR 的强大潜力——无需昂贵的人类偏好标注和奖励模型训练。
+</div>
+
+<h3>典型的规则奖励函数</h3>
+<table>
+<thead>
+<tr><th>奖励类型</th><th>验证方式</th><th>典型输出</th><th>示例</th></tr>
+</thead>
+<tbody>
+<tr><td>格式奖励</td><td>正则表达式匹配</td><td>0 或 1</td><td>检查 <code>&lt;think&gt;...&lt;/think&gt;&lt;answer&gt;...&lt;/answer&gt;</code></td></tr>
+<tr><td>正确性奖励</td><td>答案提取 + 精确匹配</td><td>0 或 1</td><td>提取数字答案与 ground truth 对比</td></tr>
+<tr><td>代码执行奖励</td><td>运行代码 + 检查测试用例</td><td>[0, 1] 连续</td><td>通过的测试用例比例</td></tr>
+<tr><td>长度惩罚</td><td>token 计数</td><td>负值或 0</td><td>超过阈值时 $r = -\alpha(|y| - L_{\max})$</td></tr>
+<tr><td>语言一致性</td><td>语言检测器</td><td>0 或 1</td><td>回答语言是否与问题一致</td></tr>
+</tbody>
+</table>
+
+<h3>RLVR 的常见陷阱与应对</h3>
+<ul>
+<li><strong>格式欺骗（Format Gaming）</strong>：模型学会产生正确格式但内容错误的回答以获得格式奖励。<em>应对：正确性奖励权重远大于格式奖励，如 $r = r_{\text{correct}} + 0.1 \cdot r_{\text{format}}$。</em></li>
+<li><strong>测试泄露（Test Leakage）</strong>：如果训练数据包含测试题目，模型可能记忆答案。<em>应对：严格的 train/test 去重 + 定期更换验证集。</em></li>
+<li><strong>超时利用（Timeout Gaming）</strong>：对代码任务，模型可能生成无限循环代码来避免"运行结果错误"。<em>应对：严格超时限制，超时视为 $r=0$。</em></li>
+<li><strong>奖励稀疏性</strong>：二值奖励（0/1）在困难任务上极其稀疏，大部分样本得 0 分。<em>应对：部分得分（partial credit）或结合 PRM 提供中间信号。</em></li>
+<li><strong>答案提取脆弱性</strong>：正则表达式匹配可能因格式微小变化而失败（如"3.14"vs"π"）。<em>应对：多模式匹配 + LLM 辅助提取。</em></li>
+</ul>
+
+<h3>RLVR vs 学习的 RM：适用边界</h3>
+<div class="card">
+<p><strong>RLVR 适用</strong>：数学题（精确答案可验证）、代码生成（测试用例）、事实性 QA（有标准答案）、逻辑推理。</p>
+<p><strong>仍需学习 RM</strong>：开放式写作（好文章无法规则定义）、对话质量（"有帮助"是主观的）、创意任务、安全对齐（边界模糊）。</p>
+<p><strong>混合方案</strong>：实践中常结合两者——RLVR 提供正确性信号 + 学习的 RM 提供风格/帮助性信号。</p>
+</div>
+
+<!-- ===== 9.6 ===== -->
+<h2>9.6 多目标奖励 — 组合策略</h2>
+
+<p>实际对齐训练几乎总涉及多个奖励信号：正确性、帮助性、安全性、格式规范、长度控制等。如何将多个目标组合为单一的 RL 训练信号，是一个关键的工程决策。本节详细介绍五种策略。</p>
+
+<h3>策略一：加权求和（Weighted Sum）</h3>
+<div class="formula-block">
+$$r_{\text{combined}} = \sum_{n=1}^{M} w_n \cdot r_n(y, q)$$
+<div class="formula-explain">最简单直接的方法：为每个奖励指定权重 $w_n$，线性组合。例如 $r = 1.0 \cdot r_{\text{correct}} + 0.3 \cdot r_{\text{format}} + 0.1 \cdot r_{\text{length}}$。</div>
+</div>
+<p><strong>优点</strong>：实现简单、直觉清晰。<strong>缺点</strong>：对各奖励的绝对尺度极其敏感。如果 $r_{\text{correct}} \in \{0, 1\}$ 而 $r_{\text{length}} \in [-50, 0]$，那么长度惩罚会压倒正确性奖励，权重的"含义"难以理解。</p>
+
+<h3>策略二：归一化后求和（Normalize-then-Sum, GDPO 风格）</h3>
+<div class="formula-block">
+$$r_{\text{combined}} = \sum_{n=1}^{M} w_n \cdot \frac{r_n - \mu_n}{\sigma_n}$$
+<div class="formula-explain">先将每个奖励在 batch 内标准化为零均值、单位方差，再加权求和。$\mu_n, \sigma_n$ 为奖励 $r_n$ 在当前 batch 中的均值和标准差。</div>
+</div>
+<p><strong>优点</strong>：尺度无关——权重 $w_n$ 真正反映"相对重要性"而非被原始尺度污染。<strong>推荐</strong>：TRL 中设置 <code>reward_aggregation="normalize_then_sum"</code>。这是 GDPO 论文推荐的默认方案。</p>
+
+<h3>策略三：字典序优化（Lexicographic Optimization）</h3>
+<div class="formula-block">
+$$\text{优先级：} r_1 \gg r_2 \gg r_3 \gg \cdots$$
+<div class="formula-explain">按优先级排列多个目标。只有在高优先级目标"满足"时（如 $r_1 \geq \tau_1$），才去优化下一级目标。例如：先确保安全（$r_{\text{safe}} = 1$），在安全的前提下最大化帮助性。</div>
+</div>
+<p><strong>适用场景</strong>：有明确主次关系的目标——安全性是"硬约束"不可妥协，而帮助性是在安全前提下的"软优化"。<strong>缺点</strong>：实现复杂，需要定义每级的"满足阈值"。</p>
+
+<h3>策略四：约束优化（Constrained Optimization）</h3>
+<div class="formula-block">
+$$\max_\theta \; \mathbb{E}[r_{\text{primary}}(y)] \quad \text{s.t.} \quad \mathbb{E}[r_{\text{secondary}}(y)] \geq \tau$$
+<div class="formula-explain">将一个目标作为主目标最大化，其他目标作为约束（必须达到阈值 $\tau$）。通过 Lagrangian 乘子法转化为无约束问题：$\mathcal{L} = -r_{\text{primary}} + \lambda \cdot \max(0, \tau - r_{\text{secondary}})$。</div>
+</div>
+<p><strong>优点</strong>：清晰地表达了"保底 + 优化"的意图。<strong>缺点</strong>：Lagrangian 乘子 $\lambda$ 的调节需要额外的优化循环（如 dual gradient descent），增加训练复杂度。</p>
+
+<h3>策略五：帕累托前沿（Pareto Front）</h3>
+<div class="formula-block">
+$$\text{维护策略集合 } \Pi^* = \{\pi : \nexists \pi' \text{ s.t. } r_n(\pi') \geq r_n(\pi) \; \forall n, \text{ 且严格 } \exists n\}$$
+<div class="formula-explain">同时训练多个策略（或用不同超参数），每个策略代表目标间的不同权衡点。所有"不被其他策略支配"的策略构成帕累托前沿。部署时根据具体需求从前沿上选择。</div>
+</div>
+<p><strong>优点</strong>：最灵活——不预设任何目标间的权衡，保留所有可能的最优选择。<strong>缺点</strong>：计算成本最高（需要训练多个模型或多目标同时优化），实际部署时仍需人为选择。</p>
+
+<div class="card">
+<h3>策略选择建议</h3>
+<table>
+<thead>
+<tr><th>场景</th><th>推荐策略</th><th>理由</th></tr>
+</thead>
+<tbody>
+<tr><td>快速实验、奖励尺度不同</td><td>归一化后求和</td><td>尺度无关，一行代码实现</td></tr>
+<tr><td>有"硬约束"（如安全底线）</td><td>字典序 / 约束优化</td><td>保证底线不被牺牲</td></tr>
+<tr><td>研究目的、探索权衡空间</td><td>帕累托前沿</td><td>全面理解目标间关系</td></tr>
+<tr><td>奖励尺度一致（都是 0-1）</td><td>简单加权和</td><td>最简单，尺度问题不存在</td></tr>
+</tbody>
+</table>
+</div>
+
+<!-- ===== 9.7 ===== -->
+<h2>9.7 列表级排序奖励（Listwise Rank-Based Rewards）</h2>
+
+<p>BT 模型只能处理成对比较（pairwise），但在 GRPO 等算法中，每个 prompt 会生成 $K$ 个回答并需要完整排序。将 BT 推广到列表级排序的自然方式是 <strong>Plackett-Luce（PL）模型</strong>。</p>
+
+<h3>从成对到列表级的动机</h3>
+<ul>
+<li><strong>信息效率</strong>：$K$ 个回答的完整排序包含 $\binom{K}{2}$ 个隐式成对比较，还能捕获"排名间距"信息。例如"第1名远好于第2名，但第2名和第3名差不多"。</li>
+<li><strong>标注效率</strong>：让标注者排序 5 个回答（1次标注），比标注 $\binom{5}{2}=10$ 个成对比较快得多。</li>
+<li><strong>更好的分数校准</strong>：BT 模型只学"差值"，奖励的绝对尺度不确定；列表级模型通过 softmax 归一化，能学到更好校准的绝对分数。</li>
+<li><strong>天然适配 GRPO/REINFORCE</strong>：这些算法每个 prompt 采样多个回答并需要排序——列表级 RM 是最自然的搭配。</li>
+</ul>
+
+<h3>Plackett-Luce 模型</h3>
+<p>给定排列 $\pi = (\pi(1), \pi(2), \ldots, \pi(K))$（其中 $\pi(1)$ 是最好的），PL 模型定义排列的概率为：</p>
+
+<div class="formula-block">
+$$P(\pi \mid q) = \prod_{i=1}^{K} \frac{e^{r_\phi(y_{\pi(i)}, q)}}{\sum_{j=i}^{K} e^{r_\phi(y_{\pi(j)}, q)}}$$
+<div class="formula-explain"><strong>直觉：</strong>想象一个"依次挑选最好的"过程。第一步，从所有 $K$ 个回答中选出最好的（softmax 概率）；第二步，从剩下 $K-1$ 个中选最好的；以此类推。每步选择的概率相乘，就得到整个排序的概率。</div>
+</div>
+
+<h3>PL 模型与 BT 模型的关系</h3>
+<div class="info-box">
+当 $K=2$ 时，PL 模型精确退化为 BT 模型：$P(\pi(1) \succ \pi(2)) = \frac{e^{r(\pi(1))}}{e^{r(\pi(1))} + e^{r(\pi(2))}} = \sigma(r(\pi(1)) - r(\pi(2)))$。因此 <strong>PL 是 BT 的严格推广</strong>。
+</div>
+
+<h3>PL 损失函数（ListMLE）</h3>
+<div class="formula-block">
+$$\mathcal{L}_{\text{PL}}(\phi) = -\frac{1}{|\mathcal{D}|}\sum_{(q,\pi)\in\mathcal{D}}\sum_{i=1}^{K-1}\left[r_\phi(y_{\pi(i)}, q) - \log\sum_{j=i}^{K}e^{r_\phi(y_{\pi(j)}, q)}\right]$$
+<div class="formula-explain">对每个位置 $i$，要求模型在"剩余候选"中给排名第 $i$ 的回答打最高分。内层求和从 $i$ 到 $K$（只看"还没被选走"的），外层对所有位置求和。损失最小化时，模型的排序与人类标注一致。</div>
+</div>
+
+<h3>其他列表级方法</h3>
+<table>
+<thead>
+<tr><th>方法</th><th>核心思想</th><th>特点</th><th>与 PL 的关系</th></tr>
+</thead>
+<tbody>
+<tr><td>ListMLE</td><td>直接最大化 PL 似然</td><td>简单直接、理论清晰</td><td>PL 模型的 MLE</td></tr>
+<tr><td>ListNet</td><td>最小化 top-1 概率分布的交叉熵</td><td>只关注"谁最好"，忽略细粒度排序</td><td>PL 的近似</td></tr>
+<tr><td>LambdaRank</td><td>用排名指标变化（NDCG 差）加权梯度</td><td>对顶部排名质量最敏感</td><td>启发式方法</td></tr>
+<tr><td>RankNet</td><td>对所有成对的 BT 损失求和</td><td>$\binom{K}{2}$ 个 BT loss 的和</td><td>BT 的简单扩展</td></tr>
+<tr><td>SoftmaxRank</td><td>将排序视为多分类</td><td>每个位置一个分类头</td><td>与 PL 等价</td></tr>
+</tbody>
+</table>
+
+<h3>与 GRPO 的集成流程</h3>
+<ol>
+<li><strong>采样阶段</strong>：对每个 prompt $q$，从当前策略 $\pi_\theta$ 采样 $N$ 个回答 $\{y_1, \ldots, y_N\}$（通常 $N=8$）。</li>
+<li><strong>排序阶段</strong>：用列表级 RM 对 $N$ 个回答打分，得到分数 $\{r_1, \ldots, r_N\}$ 和排序 $\pi$。</li>
+<li><strong>优势计算</strong>：GRPO 使用组内归一化优势 $\hat{A}_i = \frac{r_i - \mu}{\sigma}$，其中 $\mu = \frac{1}{N}\sum r_i$, $\sigma = \sqrt{\frac{1}{N}\sum(r_i-\mu)^2}$。</li>
+<li><strong>策略更新</strong>：用归一化优势加权 GRPO 损失函数进行梯度更新。</li>
+</ol>
+
+<h3>实践注意事项</h3>
+<ul>
+<li><strong>列表长度 $K$</strong>：$K=4\text{-}8$ 是最佳平衡点。$K$ 太小信息不足；$K > 16$ 标注噪声增大、收益递减。</li>
+<li><strong>部分排序（Partial Ranking）</strong>：完整排序 $K$ 个回答很困难。实践中常只标注 top-3 和 bottom-2，中间位置用 ties 处理。质量损失不超过 5% 但标注成本大幅降低。</li>
+<li><strong>并列处理（Ties）</strong>：给质量相当的回答分配相等的概率质量。PL 模型可用 Plackett-Luce with ties 扩展。</li>
+<li><strong>位置偏差（Position Bias）</strong>：标注者倾向偏好列表中先展示的回答。必须随机化展示顺序，必要时用 debiasing 技术。</li>
+<li><strong>标注者一致性</strong>：使用 inter-annotator agreement（如 Kendall's $\tau > 0.6$ 或 Cohen's $\kappa > 0.6$）做质量过滤，丢弃不一致的标注。</li>
+</ul>
+
+<!-- ===== 关键要点 ===== -->
+<div class="takeaway">
+<h2>关键要点总结</h2>
+<ol>
+<li><strong>BT 模型核心</strong>：偏好概率 = sigmoid(分差)，训练目标是二分类交叉熵。梯度自动关注"难区分"的样本。</li>
+<li><strong>RM 架构极简</strong>：预训练 LLM + 最后 token 池化 + 线性标量头，从 SFT checkpoint 初始化。</li>
+<li><strong>训练四板斧</strong>：奖励居中 + 长度去偏 + Margin Loss + Label Smoothing，缺一不可。</li>
+<li><strong>PRM vs ORM</strong>：多步推理必须用 PRM（稠密信号 + 精确信用分配）；简单任务用 ORM（便宜高效）。</li>
+<li><strong>RLVR 的力量</strong>：可验证任务直接用规则奖励，从根本上消除 reward hacking。DeepSeek-R1 已验证其有效性。</li>
+<li><strong>多目标推荐方案</strong>："归一化后求和"(GDPO) 是默认选择——尺度无关、实现简单、权重含义清晰。</li>
+<li><strong>Plackett-Luce 推广 BT</strong>：列表级排序提供更丰富信号，天然适配 GRPO 的多样本框架。$K=4\text{-}8$ 为最佳长度。</li>
+<li><strong>工程选择树</strong>：可验证 → RLVR；多步推理 → PRM；多目标 → GDPO 归一化；多样本 → Plackett-Luce。</li>
+</ol>
+</div>
+
+<!-- ===== Q&A ===== -->
+<h2>Q&A — 深度问答</h2>
+
+<details>
+<summary>Q1：Bradley-Terry 模型为什么用 sigmoid 而不是其他映射函数？</summary>
+<div class="answer">
+<p>BT 模型的概率形式 $P(y_w \succ y_l) = \frac{e^{r_w}}{e^{r_w}+e^{r_l}} = \sigma(r_w - r_l)$ 实际上是<strong>指数族分布</strong>中最自然的选择。它等价于假设每个回答的"感知质量"服从 Gumbel 分布（极值分布），两者之差服从 logistic 分布——sigmoid 正是 logistic CDF。这在数学上保证了：(1) 输出严格在 (0,1) 区间内满足概率公理；(2) 对称性：$P(y_w \succ y_l) = 1 - P(y_l \succ y_w)$；(3) 只依赖差值，具有平移不变性。如果用其他映射（如 probit/正态 CDF），计算复杂度更高且梯度不如 sigmoid 好优化。</p>
+</div>
+</details>
+
+<details>
+<summary>Q2：奖励模型的"差值不变性"有什么实际后果？</summary>
+<div class="answer">
+<p>BT 模型中 $\sigma(r_w - r_l)$ 只依赖差值，意味着对所有回答加一个常数 $c$（$r'(y)=r(y)+c$）不改变任何偏好概率。<strong>实际后果</strong>：(1) 奖励的绝对值没有意义——"得了 0.8 分"不代表什么，只有"比另一个高 0.3 分"有意义；(2) 不同 prompt 之间的奖励不可直接比较，因为可能有不同的偏移；(3) 这就是为什么需要"奖励居中"——减去均值让绝对值有意义，使得跨 prompt 的 RL 信号可比较。</p>
+</div>
+</details>
+
+<details>
+<summary>Q3：PRM 标注用蒙特卡洛展开时，采样次数 M 如何选择？</summary>
+<div class="answer">
+<p>OpenAI 在 PRM800K 中使用 $M=100$ 次展开。理论上 $M$ 越大估计越准（方差 $\propto 1/M$），但计算成本也线性增长。实践建议：(1) 简单步骤（成功率 >80% 或 <20%）用 $M=20$ 就够，因为二项比例的置信区间已经很窄；(2) 关键分叉点（成功率 ~50%）用 $M=50$-$100$；(3) 可以用自适应采样：先做 $M=10$ 次初估计，如果置信区间太宽（如 40%-60%）再追加采样。总体而言，$M=50$ 在计算成本和估计质量间是很好的平衡点。</p>
+</div>
+</details>
+
+<details>
+<summary>Q4：为什么"归一化后求和"比"简单加权和"好这么多？</summary>
+<div class="answer">
+<p>考虑一个具体例子：正确性奖励 $r_c \in \{0, 1\}$，长度惩罚 $r_l \in [-30, 0]$。如果用简单加权 $r = r_c + 0.5 \cdot r_l$，那么长度惩罚范围是 $[-15, 0]$，远大于正确性的 $[0, 1]$。即使权重已经是 0.5，长度仍然主导了总奖励——这完全不是设计者的意图。归一化后，两个奖励都变成均值 0、标准差 1，此时权重 1.0 和 0.5 真正表达了"正确性比长度重要两倍"的含义。本质上，归一化解耦了"各奖励的原始尺度"和"它们的相对重要性"。</p>
+</div>
+</details>
+
+<details>
+<summary>Q5：Reward Hacking 的根本原因是什么？有哪些系统性的防御手段？</summary>
+<div class="answer">
+<p><strong>根本原因</strong>：学习的奖励模型是人类真实偏好的<em>不完美近似</em>。RL 训练会疯狂优化这个 proxy，最终策略在 proxy 上得分很高，但在真实偏好上反而下降（Goodhart's Law）。<strong>系统性防御</strong>：(1) <strong>KL 约束</strong>：限制策略偏离参考模型的程度（PPO/DPO 都有）；(2) <strong>奖励模型集成</strong>：用多个 RM 投票，只信任一致的信号；(3) <strong>迭代训练</strong>：定期用当前策略的输出重新收集人类偏好，更新 RM；(4) <strong>RLVR</strong>：可验证任务直接用规则避免近似；(5) <strong>对抗训练</strong>：主动寻找 RM 的弱点并修复。</p>
+</div>
+</details>
+
+<details>
+<summary>Q6：Plackett-Luce 模型有哪些已知的局限性？</summary>
+<div class="answer">
+<p>PL 模型继承了 BT 模型的所有假设，并额外要求 <strong>Luce's Choice Axiom（独立于无关选项, IIA）</strong>：从集合中去掉某个选项后，剩余选项的相对偏好不变。这在实践中经常被违反——例如"诱饵效应"：加入一个明显差的选项 C 可能改变 A 和 B 的相对偏好。此外，PL 的"顺序选择"直觉假设标注者严格从上到下逐一挑选，但实际标注者可能整体比较后直接给出排序。应对方法包括使用混合 PL 模型（Mixture of PL）或 Thurstone 模型等更灵活的排序模型。</p>
+</div>
+</details>
+
+<details>
+<summary>Q7：PRM 和 ORM 能否组合使用？如何设计混合方案？</summary>
+<div class="answer">
+<p>可以，且在实践中效果很好。典型混合方案：(1) <strong>加权混合</strong>：$r = \alpha \cdot r_{\text{PRM}} + (1-\alpha) \cdot r_{\text{ORM}}$，兼顾过程和结果；(2) <strong>门控切换</strong>：简单问题用 ORM，检测到多步推理时自动切换到 PRM（通过推理步数或问题难度判断）；(3) <strong>分阶段训练</strong>：先用 ORM 做粗糙对齐，再用 PRM 精调推理能力——类似 curriculum learning。DeepSeek-Math 就采用了类似策略：先用 ORM 训练基础能力，再用 MC-based PRM 精调数学推理。</p>
+</div>
+</details>
+
+<details>
+<summary>Q8：Label Smoothing 在奖励模型中的最佳 ε 值如何确定？</summary>
+<div class="answer">
+<p>ε 的选择取决于<strong>标注噪声水平</strong>。经验法则：(1) 专家标注（高一致性，κ>0.8）：$\epsilon = 0.02$-$0.05$；(2) 众包标注（中等一致性，κ≈0.6）：$\epsilon = 0.05$-$0.1$；(3) AI 标注（可能有系统性偏差）：$\epsilon = 0.1$-$0.15$。可以用验证集上的<strong>标注者间不一致率</strong>作为 ε 的估计——如果 10% 的样本标注者之间有分歧，那 $\epsilon \approx 0.1$ 是合理的。过大的 ε 会削弱训练信号，过小则起不到正则化效果。</p>
+</div>
+</details>
+
+<details>
+<summary>Q9：列表级训练中使用"部分排序"会损失多少信息？</summary>
+<div class="answer">
+<p>从信息论角度：$K=8$ 的完整排序包含 $\log_2(8!) \approx 15.3$ 比特信息。如果只标注 top-3 + bottom-2（中间 3 个标为 ties），保留约 $\log_2\binom{8}{3} + \log_2\binom{5}{2} + \log_2(3!) + \log_2(2!) \approx 11.5$ 比特，损失约 25% 的信息量。但在实践中，中间排名的标注质量本就很差（标注者对"第4名和第5名"的区分高度随机），所以"丢弃"的信息大部分是噪声而非信号。这就是为什么部分排序实际效果损失通常 < 5%。</p>
+</div>
+</details>
+
+<details>
+<summary>Q10：从工程角度，如何选择奖励模型的规模（参数量）？</summary>
+<div class="answer">
+<p>经验法则：RM 的参数量通常选策略模型的 <strong>50%-100%</strong>。理由：(1) RM 需要足够的容量来理解问题和回答的细微质量差异——太小会欠拟合；(2) 但 RM 不需要生成能力，只需"判断"能力，所以不必和策略模型一样大；(3) 更大的 RM 带来的边际提升递减——8B RM 比 3B RM 好很多，但 70B RM 比 8B RM 可能只好一点点。<strong>实践建议</strong>：如果策略模型是 7B，RM 用 7B（同架构方便加载）；如果策略模型是 70B，RM 用 8B-13B 以节省计算成本。关键是 RM 的训练数据质量远比模型大小重要。</p>
+</div>
+</details>
+
+</body>
+</html>
