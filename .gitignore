@@ -1,0 +1,7 @@
+.DS_Store
+*/.DS_Store
+wechat/
+split_ocr.py
+OCR.md
+__pycache__/
+*.pyc
