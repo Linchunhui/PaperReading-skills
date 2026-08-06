@@ -196,6 +196,8 @@ python3 scripts/embed_images.py "{输出.html}" --in-place
 python3 scripts/validate_html.py "{输出.html}"
 ```
 
+同时按 [`wechat-markdown.md`](./wechat-markdown.md) 生成同周期的 `.wechat.md`：日报突出 3–5 条，周报突出 5–8 条；来源状态压成一句覆盖说明，技术卡只保留“为什么值得看 / 核心机制 / 关键证据 / 边界”。
+
 来源 URL、PDF URL、项目页仍可作为普通 `<a href>`，因为它们是引用，不是图片资源。
 
 ## 日报 / 周报定时任务
