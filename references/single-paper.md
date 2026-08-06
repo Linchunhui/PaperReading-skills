@@ -17,7 +17,7 @@
 
 ## 总目标（单篇特有）
 
-输出一份*可直接当笔记长期保存*的结构化解读 HTML，让一个**不懂这个领域的聪明人**读完能复述三件事：
+输出一份*可直接当笔记长期保存*的结构化解读 HTML，并默认附一份 `{PDF stem}.wechat.md` 精简公众号版，让一个**不懂这个领域的聪明人**读完能复述三件事：
 
 1. 论文在解决什么问题（具体到一个例子）
 2. 作者用什么招数解的（机制 + 设计选择的理由）
@@ -249,6 +249,7 @@ HTML 里 Q&A 推荐做成可折叠（accordion）：点击问题展开答案，�
 4. **生成 HTML** — 直接生成单文件 HTML；如果当前环境提供前端设计技能，可调用它协作。CSS 起手式用 [`../assets/style.css`](../assets/style.css)。保存到 `Path(pdf_path).with_suffix(".html")`
 5. **嵌入图片** — `python3 scripts/embed_images.py "{输出.html}" --in-place`
 6. **硬校验** — `python3 scripts/validate_html.py "{输出.html}" --source-pdf "{源.pdf}"`；失败就修到通过
+7. **公众号版** — 按 [`wechat-markdown.md`](./wechat-markdown.md) 从同一证据生成 `{PDF stem}.wechat.md`；只保留问题、核心机制、关键发现与边界，不照搬十节目录
 
 ## 验收清单（单篇）
 
