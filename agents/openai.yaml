@@ -1,8 +1,8 @@
 interface:
   display_name: PaperStudio
-  short_description: Deep paper reading, series synthesis, digests, and radar
+  short_description: Paper reading, research radar, and WeChat Markdown
   default_prompt: Use $paper-studio to turn this paper into a self-contained HTML
-    reading note.
+    note plus a concise WeChat Markdown article.
   icon_small: assets/icon.svg
   icon_large: assets/icon.svg
 policy:
