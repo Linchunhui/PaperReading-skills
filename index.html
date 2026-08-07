@@ -78,6 +78,7 @@
   .icon-wam  { background: #23883522; color: #3fb950; }
   .icon-vla  { background: #9e6a0322; color: #d29922; }
   .icon-agi  { background: #db6d2822; color: #db6d28; }
+  .icon-radar { background: #2ea04322; color: #56d364; }
   .icon-other { background: #8957e522; color: #bc8cff; }
 
   /* Grid */
@@ -120,7 +121,7 @@
 
   <div class="stats">
     <div class="stat"><div class="num" id="total">0</div><div class="label">篇笔记</div></div>
-    <div class="stat"><div class="num">5</div><div class="label">个分类</div></div>
+    <div class="stat"><div class="num">6</div><div class="label">个分类</div></div>
     <div class="stat"><div class="num">VLM</div><div class="label">视觉语言</div></div>
     <div class="stat"><div class="num">WAM</div><div class="label">世界模型</div></div>
     <div class="stat"><div class="num">AGI</div><div class="label">Agentic AI</div></div>
@@ -217,6 +218,16 @@ const categories = [
       { file: "examples/Agentic_AI/AgenticAI-Ch27-Quiz.html",                 title: "Ch27 Quiz",                  desc: "全章节测验" },
       { file: "examples/Agentic_AI/AgenticAI-Ch28-Quick-Reference.html",      title: "Ch28 Quick Reference",       desc: "快速参考手册" },
       { file: "examples/Agentic_AI/AgenticAI-Ch29-Conclusion.html",           title: "Ch29 Conclusion",            desc: "总结与展望" },
+    ]
+  },
+  {
+    id: "weekly-radar",
+    name: "Weekly Radar — 每周论文速读",
+    desc: "每周筛选并深读值得关注的 AI 论文，按研究方向整理技术增量、证据与边界",
+    icon: "icon-radar",
+    emoji: "📡",
+    papers: [
+      { file: "examples/Weekly-Radar/2026-W32-radar.html", title: "2026-W32 Research Radar", desc: "12 篇全文深读：Diffusion LLM、OPD、VLM、OCR、VLA 与世界模型" },
     ]
   },
   {
