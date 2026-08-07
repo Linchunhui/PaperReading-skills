@@ -1,99 +1,98 @@
-# PaperReading
+# PaperStudio
 
-> 一个把研究论文读成"可长期保存的思想笔记"的 Claude Code skill。
+> 把论文发现、精读、系列梳理和研究雷达统一成可长期保存的自包含 HTML，并同步生成适合公众号编辑器的精简 Markdown。
 
-## 简介
+`PaperStudio` 是 `PaperReading` 的升级版，支持四种模式：
 
-读论文不是做学术，是猎取思想。`PaperReading` 是一个 [Claude Code](https://claude.com/claude-code) skill，它把一篇论文（arxiv URL / PDF 文件 / 论文名称）拆解成一份结构化的 HTML 阅读笔记，让一个**不懂这个领域的聪明人**读完能复述：
+- **单篇 / single**：1 篇论文 → 深度结构化阅读笔记
+- **系列 / series**：2–6 篇同系列论文 → 演进综述
+- **随笔 / digest**：2–12 篇独立论文 → 多篇 digest
+- **雷达 / radar**：主动抓取 HF Daily Papers、arXiv 与配置的中文媒体/RSS → 日报或周报
 
-1. 论文在解决什么问题（具体到一个例子）
-2. 作者用什么招数解的（机制 + 设计选择的理由）
-3. 核心发现是什么（包括最反直觉的副发现）
-4. 你能带走什么洞见 + 能动手的启发
+所有模式默认同时输出两份内容：
 
-## 输出形态
+- `{stem}.html`：完整、自包含的长期阅读笔记。位图全部嵌入 base64，SVG 直接内联。
+- `{stem}.wechat.md`：压缩背景、保留核心方法与关键数字的公众号发布稿；图片释放到 `{stem}.wechat-assets/`，方便上传到公众号素材库。
 
-单文件 HTML（自包含、可独立打开），包含：
+本地 PDF 的单篇 HTML 严格保留 PDF 原文件名，只替换扩展名。
 
-- **朴素 h1**：`{论文简短名} 阅读笔记`
-- **摘要**：200-300 字全景导览
-- **十节结构化笔记**：Motivation → 现存问题 → 相关工作 → 方法详解 → 实验结果 → 总结 → Insight → 启发 → 关键引用 → Q&A
-- **配图**：从 PDF 提取的关键架构图、流程图（边界完整、清晰可读、单张 ≤ 300 KB）
-- **SVG 可视化**：消融对比、训练流程等，数据严格对照论文原表
-- **KaTeX 渲染公式**：每条公式后跟中文白话翻译
-- **双语关键引用**：3-5 处真正定义论文思想的原句 + 大白话翻译
-- **可折叠 Q&A**：5-10 道围绕模型结构 / 训练流程 / 实验细节的开放性问题
+## 使用方式
 
-## 安装
+安装后可直接调用：
 
-把整个目录复制到 Claude Code 的 skills 路径
-
-## 用法
-
-在 Claude Code 里直接调用：
-
-```
-/PaperReading https://arxiv.org/abs/2605.12500
+```text
+使用 $paper-studio 单篇，分析这篇论文：@paper.pdf
+使用 $paper-studio 系列，梳理 V-JEPA 到 V-JEPA 2.1 的演进
+使用 $paper-studio 随笔，把这几篇独立论文整理成 digest
+使用 $paper-studio 雷达，生成本周 VLM、OCR、VLA 与世界模型周报
+使用 $paper-studio，把 existing-note.html 转成精简的公众号 Markdown
 ```
 
-或喂一个本地 PDF：
+未明确指定模式时会自动分流：1 篇走单篇；同系列的 2–6 篇走系列；互相独立的 2–12 篇走随笔；没有给论文、询问今日或本周研究动态时走雷达。
 
-```
-/PaperReading @/path/to/paper.pdf
-```
+## 能力重点
 
-或描述论文：
+- 面向外行的 Motivation、方法机制、实验结果和 Q&A
+- 每条公式紧跟中文白话翻译
+- 架构图、实验图和 SVG 数字均要求可追溯到论文原始证据
+- 单篇、系列、随笔和雷达分别拥有独立结构规范
+- 雷达保留每个来源的成功、失败或未配置状态
+- `embed_images.py` 将图片转为 base64
+- `validate_html.py` 校验文件名和图片自包含规则
+- `html_to_markdown.py` 可独立把既有论文 HTML 转成精简 Markdown，提取图片、简化表格，并把正文链接整理为文末参考资料
 
-```
-读一下 SenseNova-U1 这篇论文，生成阅读笔记
-```
+## 公众号 Markdown
 
-触发词：`读论文`、`分析论文`、`paper`、或分享任何学术论文。
+直接转换一份已有 HTML：
 
-## 输出位置
-
-- **本地 PDF 来源**：HTML 输出到 PDF 同级目录，文件名 `{简短标题}.html`
-- **arxiv URL 来源**：自动下载 PDF 到 `~/Documents/notes/pdf/`，HTML 同级
-- **纯网页来源**：HTML 输出到 `~/Documents/notes/html/`
-- **配图**：统一放 `~/Documents/notes/images/`
-
-## 设计原则
-
-| 原则 | 含义 |
-|------|------|
-| 一个锚点撑全文 | Motivation 立一个具象场景，后续所有章节都回到它 |
-| 推理外显 | 模拟"一个人想明白的过程"，而非"想明白之后的结果" |
-| 变形替代定义 | 解释概念关系时把 A 变形成 B，不要说"A 和 B 是 XX 关系" |
-| 落点在能用 | 启发部分给"你可以 ___"，而非"值得思考 ___" |
-| 公式必翻译 | 每条 LaTeX 后用一句中文说明它在做什么 |
-| 图片必核对 | 配图边界完整、清晰、≤ 300 KB；SVG 数据必须能在论文表里逐项追溯 |
-
-## 文件说明
-
-```
-PaperReading/
-├── SKILL.md         # skill 主文件，所有写作规则和执行流程
-├── README.md        # 你正在看的这个
-├── LICENSE          # MIT
-├── .gitignore       # 排除临时文件
-└── references/      # 预留给参考资料
+```bash
+python3 scripts/html_to_markdown.py "paper.html" --compact
 ```
 
-## 示例
+默认产出 `paper.wechat.md` 和 `paper.wechat-assets/`。确定性转换负责清理目录、Q&A 等长尾内容，最终仍需做一次语义精简，确保开头有钩子、方法讲得清、数字有来源、结尾能带走一个明确结论。
 
-效果示例（生成 `SenseNova-U1` 阅读笔记）：
+输出坚持标准 Markdown，优先兼容 [doocs/md](https://github.com/doocs/md) 与 [Wenyan](https://github.com/caol64/wenyan) 这类公众号排版器；链接脚注、移动端短段落、列表样式等处理也参考了 [wechat-format](https://github.com/lyricat/wechat-format)、[markdown-nice](https://github.com/nicejade/markdown-nice) 和 [md2wechat-skill](https://github.com/geekjourneyx/md2wechat-skill) 的公开设计。
 
-- h1：`SenseNova-U1 阅读笔记`
-- 副标题：`SenseNova-U1: Unifying Multimodal Understanding and Generation with NEO-unify Architecture — Diao et al., 2026`
-- 6 张架构 / 实验配图（每张 ≤ 300 KB）
-- 2 张 SVG 可视化（5 阶段训练时间线 + 重建质量对比）
-- 4 个 KaTeX 公式块 + 全部带中文翻译
-- 5 处双语关键引用
-- 10 题 Q&A 涵盖模型结构 / 训练流程 / 实验细节 / 失效场景
+## 目录
 
-## 贡献
+```text
+PaperReading-skills/
+├── SKILL.md
+├── agents/
+│   └── openai.yaml
+├── assets/
+│   ├── icon.svg
+│   └── style.css
+├── references/
+│   ├── foundation.md
+│   ├── single-paper.md
+│   ├── series.md
+│   ├── digest.md
+│   ├── radar.md
+│   ├── directions.md
+│   ├── wechat-markdown.md
+│   ├── svg-patterns.md
+│   └── layout-patterns.md
+├── scripts/
+│   ├── fetch_content.py
+│   ├── fetch_papers.py
+│   ├── embed_images.py
+│   ├── html_to_markdown.py
+│   └── validate_html.py
+├── example/ 或现有示例目录
+└── index.html
+```
 
-欢迎 PR 改进写作原则、SVG 模板或样式细节。
+现有论文结果、示例目录及 `index.html` 预览页会继续保留。
+
+## 校验
+
+```bash
+python3 scripts/embed_images.py "output.html" --in-place
+python3 scripts/validate_html.py "output.html"
+python3 scripts/validate_html.py "paper.html" --source-pdf "paper.pdf"
+python3 scripts/html_to_markdown.py "output.html" --compact
+```
 
 ## License
 
