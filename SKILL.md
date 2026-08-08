@@ -13,7 +13,7 @@ Choose in this order:
 
 1. For an existing `.html` plus “转 Markdown / 公众号版 / 精简发布”, use **HTML-to-WeChat-Markdown**. Read [references/wechat-markdown.md](references/wechat-markdown.md), run the converter, then perform semantic shortening.
 2. Honor an explicit `single`, `series`, `digest`, or `radar` mode.
-3. Use **radar** for “today/this week, HF Daily Papers, AI daily/weekly report” without supplied papers.
+3. Use **radar** for “today/this week/this month, HF Daily Papers, AI daily/weekly/monthly report” without supplied papers.
 4. Use **single** for one paper.
 5. Use **series** for 2-6 papers with a clear inheritance or evolution line.
 6. Use **digest** for 2-12 independent supplied papers.
@@ -36,8 +36,8 @@ Before drawing visuals, also read the relevant templates:
 ## Execute the shared workflow
 
 1. Resolve every source and record provenance. For a title or URL, browse to find and verify the primary paper/project page. For a local PDF, inspect the PDF directly. Prefer primary sources for technical claims and numbers.
-2. Collect the title, authors, abstract, related-work context, method, formulas, main experiments, ablations, limitations, and the figures that carry understanding.
-3. Draft the route-specific structure. Make reasoning visible: show how the evidence supports each conclusion.
+2. Collect the title, authors, abstract, related-work context, method, key formulas needed to understand the mechanism, main experiments, ablations, limitations, and the figures that carry understanding.
+3. Draft the route-specific structure. Make reasoning visible: show how the evidence supports each conclusion. In a paper deep-read, make the method recoverable rather than listing component names: give an end-to-end route, then 4–7 numbered stages that explain state transformations, design reasons, training signals, and inference behavior; use the selected mode reference's depth gate. Treat a deep monthly radar as a collection of self-sufficient single-paper readings, not a stack of abstract cards; reduce the paper count before compressing away method detail.
 4. Copy [assets/style.css](assets/style.css) into the output `<style>` and adapt only the per-paper palette and route-specific needs. Generate accessible, responsive HTML directly with the available HTML/CSS tools.
 5. Compress retained raster images, then embed all image dependencies:
 
@@ -52,7 +52,7 @@ Before drawing visuals, also read the relevant templates:
    python3 scripts/validate_html.py "{output.html}"                              # other modes
    ```
 
-7. Fix every validation failure. Open the final HTML and visually inspect figures, formula rendering, table of contents, accordion behavior, and mobile layout.
+7. Fix every validation failure. Open the final HTML and visually inspect figures, formula rendering, table of contents, accordion behavior, and mobile layout. For a standalone HTML, formulas must render without a remote runtime dependency: use native MathML or a fully embedded renderer.
 8. Write `{HTML stem}.wechat.md` from the same evidence. Do not mechanically copy all HTML sections. Follow `references/wechat-markdown.md`: shorten the narrative, keep exact numbers and boundaries, retain only 1–3 load-bearing images, and move links to a final reference list.
 9. If starting from an existing HTML, create the deterministic draft first:
 
@@ -62,6 +62,8 @@ Before drawing visuals, also read the relevant templates:
 
    Then rewrite the draft semantically into 4–6 mobile-friendly sections and recheck it against the source HTML.
 10. Deliver the validated HTML and `.wechat.md` companion, plus any `.wechat-assets/` directory. Report absolute paths, file sizes, and source coverage/status. Omit the Markdown only when the user explicitly asks for HTML alone.
+
+For periodic radar runs, compute the report key and target filename before discovery. Reuse an existing same-name HTML unless the user explicitly asks to revise it; revisions update the existing path instead of creating a duplicate. When the user constrains discovery to HF Daily Papers, treat that dated HF set as a hard candidate boundary and use arXiv/PDF/project pages only for verification. If HF date coverage must fall back, disclose the actual covered date or interval in the report subtitle.
 
 ## Preserve deterministic naming
 
@@ -79,6 +81,9 @@ For combined outputs, use:
 - Digest: `{YYYY-MM-DD}-digest.html`
 - Daily radar: `{YYYY-MM-DD}-radar.html` plus same-name `.json`
 - Weekly radar: `{YYYY}-W{WW}-radar.html` plus same-name `.json`
+- Monthly radar: `{YYYY}-M{M}-radar.html` plus same-name `.json`
+
+The `.json` is a working provenance manifest, not a mandatory public artifact. If the user requests HTML only, keep discovery/intermediate manifests in a temporary directory and deliver only the HTML.
 
 For every HTML above, name the companion `{HTML stem}.wechat.md`. When Markdown images are needed, store them in `{HTML stem}.wechat-assets/` beside the Markdown.
 
@@ -99,7 +104,7 @@ The Markdown companion follows a different portability rule: do not embed base64
 7. Delete filler such as “in recent years” and “it is worth noting.”
 8. Trust the reader; do not repeat the same conclusion three ways.
 9. State weaknesses, missing evidence, and uncertainty honestly.
-10. Follow every displayed formula with a Chinese plain-language translation that explains symbols and design intent.
+10. Keep the key formulas that materially improve understanding of the paper's mechanism, objective, state update, routing, or inference rule. Follow every displayed formula immediately with a Chinese plain-language translation that explains symbols, optimization direction, and design intent. Do not add decorative formulas merely for a more technical appearance.
 11. Make the problem, mechanism, and finding recoverable in 30 seconds six months later.
 12. Prefer understanding over brevity; expand prerequisites when the reader needs them.
 
@@ -121,6 +126,7 @@ Run from the skill directory:
 ```bash
 python3 scripts/fetch_content.py --range today -o /tmp/paperstudio-radar.json
 python3 scripts/fetch_content.py --range week --top-k 40 -o /tmp/paperstudio-radar.json
+python3 scripts/fetch_content.py --range month --all-items -o /tmp/paperstudio-radar.json
 ```
 
 Treat `matched_directions` as broad recall only. Apply `references/directions.md` semantically, fill `keep`, `primary_direction`, `secondary_directions`, `why_match`, `why_read`, `evidence_level`, and `drop_reason`, and merge duplicate coverage into one card. Preserve explicit `ok`, `not_configured`, or `error` status for every requested source.
@@ -133,6 +139,7 @@ Before delivery, verify:
 
 - The route-specific structure and optional-section thresholds pass.
 - Every formula renders and has an immediate plain-language translation.
+- Every deep-read card is independently understandable: the reader can recover the input-to-output method route, separate training from inference, locate at least one main result and one ablation/diagnostic result, and understand any key formula without opening the paper first.
 - Every retained screenshot is complete, legible, compressed, and discussed in the text.
 - Every SVG number matches its cited source and every marker ID is unique within the page.
 - `embed_images.py` and `validate_html.py` pass.
