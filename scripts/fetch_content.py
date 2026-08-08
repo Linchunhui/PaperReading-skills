@@ -28,7 +28,7 @@ from datetime import date, datetime, timedelta, timezone
 from typing import Any, Iterable
 
 
-HF_DEFAULT_BASE = "https://hf-mirror.com"
+HF_DEFAULT_BASE = "https://huggingface.co"
 HF_API_PATH = "/api/daily_papers"
 ARXIV_API = "https://export.arxiv.org/api/query"
 QBITAI_RSS = "https://www.qbitai.com/feed"
