@@ -74,6 +74,7 @@
   .category-desc { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem; }
 
   /* Icon themes */
+  .icon-llm  { background: #0f8f9d22; color: #56d4dd; }
   .icon-vlm  { background: #1f6feb22; color: #58a6ff; }
   .icon-wam  { background: #23883522; color: #3fb950; }
   .icon-vla  { background: #9e6a0322; color: #d29922; }
@@ -121,7 +122,7 @@
 
   <div class="stats">
     <div class="stat"><div class="num" id="total">0</div><div class="label">篇笔记</div></div>
-    <div class="stat"><div class="num">7</div><div class="label">个分类</div></div>
+    <div class="stat"><div class="num">8</div><div class="label">个分类</div></div>
     <div class="stat"><div class="num">VLM</div><div class="label">视觉语言</div></div>
     <div class="stat"><div class="num">WAM</div><div class="label">世界模型</div></div>
     <div class="stat"><div class="num">AGI</div><div class="label">Agentic AI</div></div>
@@ -140,6 +141,16 @@
 
 <script>
 const categories = [
+  {
+    id: "llm-foundations",
+    name: "LLM Foundations — 大模型基础",
+    desc: "大语言模型的基础机制：注意力、KV Cache、稀疏与线性架构，以及训练与推理的核心原理",
+    icon: "icon-llm",
+    emoji: "🧠",
+    papers: [
+      { file: "examples/LLM-Foundations/attention-evolution-2026.html", title: "从 MHA 到线性与稀疏注意力", desc: "Attention Evolution 2026：FlashAttention、MLA、DSA、MoBA、NSA、Mamba、DeltaNet、KDA 与混合架构" },
+    ]
+  },
   {
     id: "vlm",
     name: "VLM — Vision-Language Models",
