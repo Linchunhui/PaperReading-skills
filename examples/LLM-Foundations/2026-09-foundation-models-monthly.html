@@ -1,0 +1,758 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>2026 基座模型月报：8 月增量与截至 9 月 20 日累计演进</title>
+  <style>
+    :root {
+      --bg:#fafaf7; --fg:#292b2f; --muted:#6b7078; --accent:#365f91;
+      --rule:#e3e1da; --quote-bg:#f5f5f0; --warm:#bd675c;
+      --p1:#527fd3; --p2:#399c7b; --p3:#dc8741; --p4:#bf5e71;
+      --p5:#8068b5; --p6:#348c9d; --ink:#132238; --soft:#f1efe9;
+      --tech:#285d9b; --launch:#7c5a24; --unknown:#666;
+    }
+    *{box-sizing:border-box} html{scroll-behavior:smooth}
+    html,body{background:var(--bg);color:var(--fg);margin:0}
+    body{font-family:"Noto Serif SC","Source Han Serif SC","Songti SC",serif;font-size:17px;line-height:1.78}
+    main{max-width:920px;margin:0 auto;padding:54px 24px 100px}
+    h1{font-size:38px;line-height:1.24;margin:8px 0 12px;letter-spacing:-.02em}
+    h2{font-size:27px;margin:66px 0 18px;padding:14px 18px;border-radius:8px 8px 0 0;color:#fff}
+    h2.lvl0{background:#30343a} h2.p1{background:var(--p1)} h2.p2{background:var(--p2)}
+    h2.p3{background:var(--p3)} h2.p4{background:var(--p4)} h2.p5{background:var(--p5)} h2.p6{background:var(--p6)}
+    h3{font-size:21px;margin:34px 0 12px;color:var(--accent)} h4{font-size:17px;margin:25px 0 8px;color:#34383e}
+    p,li{font-size:17px} ul,ol{padding-left:24px} li{margin:7px 0}
+    a{color:var(--accent);text-decoration:none;border-bottom:1px dotted var(--accent)}
+    code{font-family:"JetBrains Mono","SF Mono",Menlo,monospace;font-size:.9em;background:#eeece6;padding:2px 6px;border-radius:3px}
+    .eyebrow{font:700 12px/1.2 system-ui,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:var(--p1)}
+    .subtitle{color:var(--muted);font-size:17px;margin:0 0 4px;font-style:italic}
+    .meta{color:var(--muted);font-size:14px;margin:0 0 26px}
+    .lead{font-size:19px;line-height:1.82;color:#35383d}
+    .hero{padding:26px 0 10px;border-bottom:1px solid var(--rule)}
+    .scope{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:22px 0}
+    .scope div{background:#fff;border:1px solid var(--rule);border-radius:7px;padding:12px 14px;font:14px/1.55 system-ui,sans-serif}
+    .scope strong{display:block;color:var(--ink);margin-bottom:3px}
+    blockquote.quote{border-left:4px solid var(--accent);background:var(--quote-bg);padding:12px 18px;margin:16px 0;border-radius:0 4px 4px 0}
+    blockquote.aside{border-left:3px solid var(--warm);background:#fbf3f1;padding:11px 16px;margin:19px 0;border-radius:0 4px 4px 0;font-size:15.5px;color:#3c3c3c}
+    blockquote.anchor{border-left:4px solid #d6a55b;background:#fff8e8;padding:12px 18px;margin:18px 0;border-radius:0 4px 4px 0;font-size:16px}
+    figure{margin:25px 0} figure figcaption{color:var(--muted);font-size:14px;text-align:center;margin-top:8px;padding:0 12px}
+    svg.viz{max-width:100%;height:auto;display:block;margin:25px auto;background:#fff;border:1px solid var(--rule);border-radius:7px;padding:8px}
+    .table-wrap{overflow-x:auto;margin:18px 0;-webkit-overflow-scrolling:touch}
+    table.cmp{width:100%;min-width:760px;border-collapse:collapse;font-size:14px;background:#fff}
+    table.cmp th,table.cmp td{border:1px solid var(--rule);padding:9px 11px;vertical-align:top;text-align:left;line-height:1.5}
+    table.cmp thead th{background:#efede7;font-weight:700;font:13px/1.45 system-ui,sans-serif}
+    table.cmp td:first-child,table.cmp th:first-child{font-weight:700;color:#3d4249}
+    table.compact{min-width:620px} table.compact td,table.compact th{padding:8px 10px}
+    .pill{display:inline-block;padding:2px 9px;border-radius:12px;font:700 12px/1.5 system-ui,sans-serif;margin-right:5px;color:#fff}
+    .pill.p1{background:var(--p1)}.pill.p2{background:var(--p2)}.pill.p3{background:var(--p3)}
+    .pill.p4{background:var(--p4)}.pill.p5{background:var(--p5)}.pill.p6{background:var(--p6)}
+    .badge{display:inline-block;padding:1px 7px;border-radius:4px;font:12px/1.5 system-ui,sans-serif;background:#eaeaea;color:#555;margin:2px 5px 2px 0}
+    .ev{display:inline-block;border-radius:10px;padding:1px 7px;margin-right:4px;font:700 11px/1.5 system-ui,sans-serif;color:#fff}
+    .ev.tech{background:var(--tech)}.ev.launch{background:var(--launch)}.ev.unknown{background:var(--unknown)}
+    .key{background:#fff1a9;padding:1px 5px;border-radius:3px}.note{color:var(--muted);font-size:14.5px}
+    hr.soft{border:none;border-top:1px dashed var(--rule);margin:34px 0}
+    .chapter{border-left:6px solid var(--accent);padding:16px 19px;margin:54px 0 8px;background:#f4f2ec;border-radius:5px}
+    .chapter.p1{border-left-color:var(--p1)}.chapter.p2{border-left-color:var(--p2)}.chapter.p3{border-left-color:var(--p3)}
+    .chapter.p4{border-left-color:var(--p4)}.chapter.p5{border-left-color:var(--p5)}.chapter.p6{border-left-color:var(--p6)}
+    .chapter h2{margin:0;padding:0;background:none;color:#292b2f;font-size:25px;border:none}
+    .chapter .tagline{color:var(--muted);margin:4px 0 0}.field-tag{display:inline-block;padding:1px 9px;border-radius:10px;font:700 12px/1.5 system-ui,sans-serif;color:#fff;vertical-align:middle;margin-left:8px}
+    p.hook{border-left:4px solid #d6a55b;background:#fff8e8;padding:11px 16px;margin:14px 0 18px;border-radius:0 4px 4px 0;font-size:16px;color:#3c3c3c}
+    .overview-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin:17px 0 24px}
+    .overview-card{display:block;border:1px solid var(--rule);border-left:5px solid var(--c,var(--accent));border-radius:7px;padding:14px 16px;background:#fff;color:inherit;text-decoration:none}
+    .overview-card .oc-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px}.overview-card .oc-num{font:800 20px/1 system-ui,sans-serif;color:var(--c,var(--accent))}.overview-card .oc-name{font-weight:700;margin:2px 0 4px}.overview-card .oc-use{font-size:14px;line-height:1.5}.overview-card .oc-hook{font-size:13.5px;color:var(--muted);margin-top:8px;border-top:1px dashed var(--rule);padding-top:7px}
+    .equation{overflow-x:auto;margin:18px 0 6px;padding:15px 18px;background:#172235;color:#f5f7fb;border-radius:7px;font:16px/1.7 "JetBrains Mono","SF Mono",monospace;text-align:center;white-space:nowrap}
+    .eq-note{margin:0 0 19px;padding:9px 13px;background:#edf3f9;border-radius:0 0 6px 6px;color:#4b5968;font-size:14.5px}
+    .source-strip{font-size:13.5px;color:var(--muted);background:#f0eee8;padding:10px 13px;border-radius:5px;margin-top:24px}
+    .stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:18px 0}.stat{background:#fff;border:1px solid var(--rule);border-radius:7px;padding:13px;text-align:center}.stat b{display:block;font:800 24px/1.25 system-ui,sans-serif;color:var(--accent)}.stat span{font-size:13px;color:var(--muted)}
+    .legend{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0;font:13px/1.5 system-ui,sans-serif}
+    .warning{border:1px solid #e5c68c;background:#fff9ec;border-radius:7px;padding:13px 15px;font-size:15px}
+    .sources{columns:2;column-gap:34px;padding-left:20px}.sources li{break-inside:avoid;font-size:14.5px;margin:8px 0}
+    .summary-box{background:var(--ink);color:#f5f6f8;border-radius:9px;padding:22px 24px;margin-top:22px}.summary-box p{margin:0 0 10px}.summary-box p:last-child{margin-bottom:0}
+    .month-banner{margin:24px 0;padding:18px 20px;border:1px solid #cfdae8;border-left:6px solid var(--p1);border-radius:7px;background:#f4f8fc}.month-banner strong{color:var(--ink)}
+    .delta-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:18px 0}.delta-card{background:#fff;border:1px solid var(--rule);border-top:4px solid var(--c,var(--accent));border-radius:7px;padding:14px}.delta-card b{display:block;margin-bottom:5px;color:var(--ink)}.delta-card p{font-size:14.5px;line-height:1.58;margin:0}.delta-card .date{font:700 11.5px/1.5 system-ui,sans-serif;color:var(--c,var(--accent));letter-spacing:.04em}
+    #toc{position:fixed;top:42px;right:20px;width:220px;font:13px/1.5 system-ui,sans-serif;max-height:84vh;overflow-y:auto;color:var(--muted);border-left:1px solid var(--rule);padding-left:15px}
+    #toc a{color:var(--muted);border:none;display:block;padding:3px 0}#toc a:hover{color:var(--accent)}#toc .lvl1{font-weight:700;color:#333;margin-top:7px}#toc .lvl2{padding-left:12px;font-size:12px}
+    @media(max-width:1240px){#toc{display:none}} @media(max-width:720px){main{padding:34px 17px 74px}h1{font-size:31px}h2{font-size:24px;margin-top:54px}.scope,.overview-grid,.stat-grid,.delta-grid{grid-template-columns:1fr}.sources{columns:1}.lead{font-size:18px}svg.viz{padding:3px}.chapter{padding:14px 15px}.equation{text-align:left;font-size:14px}}
+    @media print{#toc{display:none}body{background:#fff}main{max-width:none}.overview-card,.stat,table.cmp{break-inside:avoid}.chapter{break-after:avoid}}
+  </style>
+</head>
+<body>
+  <nav id="toc" aria-label="目录">
+    <a class="lvl1" href="#landscape">全景与读法</a>
+    <a class="lvl2" href="#timeline">年度累计时间轴</a>
+    <a class="lvl2" href="#matrix">十二条主线</a>
+    <a class="lvl1" href="#monthly">本期月度增量</a>
+    <a class="lvl2" href="#august">8 月完整增量</a>
+    <a class="lvl2" href="#september">9 月最新检查点</a>
+    <a class="lvl1" href="#deepseek">01 DeepSeek V4 → V4.1</a>
+    <a class="lvl1" href="#kimi">02 Kimi K2.5 → K3</a>
+    <a class="lvl1" href="#glm">03 GLM-5 → 5.3</a>
+    <a class="lvl1" href="#step">04 Step 3.5 Flash</a>
+    <a class="lvl1" href="#vlm">05 原生 VLM 底座</a>
+    <a class="lvl1" href="#overseas">06 海外路线分化</a>
+    <a class="lvl1" href="#threads">横向主线</a>
+    <a class="lvl2" href="#attention">注意力谱系</a>
+    <a class="lvl2" href="#rl">RL 系统化</a>
+    <a class="lvl2" href="#moe">MoE 活跃预算</a>
+    <a class="lvl1" href="#sources">一手资料</a>
+    <a class="lvl1" href="#summary">三句总结</a>
+  </nav>
+
+  <main>
+    <header class="hero">
+      <div class="eyebrow">PaperStudio · Series Evolution · 2026</div>
+      <h1>2026 基座模型月报</h1>
+      <p class="subtitle">2026 年 8 月增量｜截至 9 月 20 日的 LLM / VLM 系列演进</p>
+      <p class="meta">月度窗口：2026-08-01—08-31 · 年度累计：2026-01-01—09-20 · 仅采用技术报告、模型卡、代码仓库与厂商正式发布页</p>
+      <p class="lead">本期最重要的变化不是又多了几个版本号，而是“成本优化”开始从单一注意力内核扩展到整条 Agent 链路：Qwen 把递归状态、内容稀疏、门控残差和主存参数组合起来；DeepSeek 把运行时 KV、持久化 KV 与 prefill/decode 激活预算分别压缩；GLM 证明不换基座也能靠后训练推进长程 Agent；闭源厂商则把可控推理预算、长时电脑操作和安全边界做成产品能力。本文先给出 8 月完整增量，再用 9 月 1—20 日的正式发布校正全年累计图景。</p>
+      <div class="scope">
+        <div><strong>证据分层</strong><span class="ev tech">技术报告</span>可讨论结构与训练；<span class="ev launch">发布页</span>只陈述公开能力。</div>
+        <div><strong>“开源”口径</strong>全文优先写“开放权重”；只有代码、许可与训练材料都明确时，才使用更宽泛的“开源”。</div>
+        <div><strong>横向比较</strong>不同厂商的自报榜单不直接排总名次；重点比较设计选择、算力路径与可复验证据。</div>
+      </div>
+    </header>
+
+    <section id="landscape">
+      <h2 class="lvl0">全景：截至 9 月 20 日，基座模型换了四个坐标轴</h2>
+      <p>这不是一份“谁赢了”的榜单，而是一条因果链：<span class="key">任务变长</span>，迫使注意力与 KV 缓存改造；<span class="key">工具增多</span>，迫使 RL 从答案奖励转向环境内轨迹；<span class="key">输入变成图像、视频、语音</span>，迫使 VLM 从适配器升级为预训练底座；<span class="key">模型继续放大</span>，又迫使 MoE、推测解码和并行 Agent 共同控制成本。</p>
+
+      <figure id="timeline">
+        <svg class="viz" viewBox="0 0 880 330" role="img" aria-labelledby="tl-title tl-desc">
+          <title id="tl-title">2026 年 1 月至 9 月 20 日基座模型关键发布</title>
+          <desc id="tl-desc">时间轴展示 MiMo、Qwen、GLM、Step、Kimi、ERNIE、OpenAI、MiniMax、DeepSeek、NVIDIA、Google、Claude 与 Grok 的关键节点。</desc>
+          <defs><filter id="shadow"><feDropShadow dx="0" dy="2" stdDeviation="2" flood-opacity=".12"/></filter></defs>
+          <rect x="10" y="10" width="860" height="310" rx="12" fill="#fbfcfd"/>
+          <text x="34" y="42" font-family="system-ui" font-size="18" font-weight="700" fill="#132238">2026 · 从高密度发布到路线分化</text>
+          <line x1="58" y1="170" x2="826" y2="170" stroke="#b8c0ca" stroke-width="3"/>
+          <g font-family="system-ui" text-anchor="middle">
+            <g><circle cx="70" cy="170" r="8" fill="#8068b5"/><text x="70" y="198" font-size="13" fill="#4c5561">1月</text><rect x="25" y="84" width="90" height="55" rx="7" fill="#fff" stroke="#d9dce1" filter="url(#shadow)"/><text x="70" y="106" font-size="12" font-weight="700" fill="#292b2f">MiMo V2</text><text x="70" y="124" font-size="11" fill="#69717b">SWA + MOPD</text></g>
+            <g><circle cx="178" cy="170" r="8" fill="#527fd3"/><text x="178" y="198" font-size="13" fill="#4c5561">2月</text><rect x="126" y="206" width="104" height="78" rx="7" fill="#fff" stroke="#d9dce1" filter="url(#shadow)"/><text x="178" y="228" font-size="12" font-weight="700" fill="#292b2f">发布密集月</text><text x="178" y="246" font-size="10.5" fill="#69717b">Kimi K2.5 · GLM-5</text><text x="178" y="262" font-size="10.5" fill="#69717b">Step 3.5 · Qwen3.5</text><text x="178" y="278" font-size="10.5" fill="#69717b">ERNIE 5.0</text></g>
+            <g><circle cx="286" cy="170" r="8" fill="#dc8741"/><text x="286" y="198" font-size="13" fill="#4c5561">3月</text><rect x="240" y="94" width="92" height="45" rx="7" fill="#fff" stroke="#d9dce1" filter="url(#shadow)"/><text x="286" y="113" font-size="11.5" font-weight="700" fill="#292b2f">GPT-5.4</text><text x="286" y="129" font-size="10.5" fill="#69717b">MiniMax M2.7</text></g>
+            <g><circle cx="394" cy="170" r="8" fill="#bf5e71"/><text x="394" y="198" font-size="13" fill="#4c5561">4月</text><rect x="348" y="211" width="92" height="58" rx="7" fill="#fff" stroke="#d9dce1" filter="url(#shadow)"/><text x="394" y="232" font-size="11.5" font-weight="700" fill="#292b2f">GLM-5.1</text><text x="394" y="248" font-size="10.5" fill="#69717b">Qwen3.6</text><text x="394" y="263" font-size="10.5" fill="#69717b">GPT-5.5</text></g>
+            <g><circle cx="502" cy="170" r="8" fill="#348c9d"/><text x="502" y="198" font-size="13" fill="#4c5561">5月</text><rect x="456" y="94" width="92" height="45" rx="7" fill="#fff" stroke="#d9dce1" filter="url(#shadow)"/><text x="502" y="113" font-size="11.5" font-weight="700" fill="#292b2f">Gemini 3.5</text><text x="502" y="129" font-size="10.5" fill="#69717b">Claude 4.8</text></g>
+            <g><circle cx="610" cy="170" r="8" fill="#399c7b"/><text x="610" y="198" font-size="13" fill="#4c5561">6月</text><rect x="556" y="72" width="108" height="67" rx="7" fill="#fff" stroke="#d9dce1" filter="url(#shadow)"/><text x="610" y="93" font-size="11.5" font-weight="700" fill="#292b2f">系统级跃迁</text><text x="610" y="110" font-size="10.5" fill="#69717b">DeepSeek V4 · M3</text><text x="610" y="125" font-size="10.5" fill="#69717b">GLM-5.2 · Nemotron</text></g>
+            <g><circle cx="718" cy="170" r="8" fill="#527fd3"/><text x="718" y="198" font-size="13" fill="#4c5561">7月</text><rect x="668" y="211" width="100" height="62" rx="7" fill="#fff" stroke="#d9dce1" filter="url(#shadow)"/><text x="718" y="232" font-size="11.5" font-weight="700" fill="#292b2f">Kimi K3</text><text x="718" y="248" font-size="10.5" fill="#69717b">GPT-5.6 · Opus 5</text><text x="718" y="263" font-size="10.5" fill="#69717b">Gemini 3.6</text></g>
+            <g><circle cx="826" cy="170" r="10" fill="#bf5e71"/><text x="826" y="198" font-size="13" fill="#4c5561">8—9月</text><rect x="765" y="55" width="106" height="96" rx="7" fill="#fff" stroke="#d9dce1" filter="url(#shadow)"/><text x="818" y="77" font-size="11.5" font-weight="700" fill="#292b2f">效率与 Agent</text><text x="818" y="94" font-size="10.2" fill="#69717b">Qwen Next · GLM-5.3</text><text x="818" y="110" font-size="10.2" fill="#69717b">Nemotron 3.5</text><text x="818" y="126" font-size="10.2" fill="#69717b">V4.1 · GPT-6</text><text x="818" y="142" font-size="10.2" fill="#69717b">Fable 5.1 · Gemini 3.8</text></g>
+          </g>
+        </svg>
+        <figcaption>时间轴只纳入正式技术报告、模型卡、代码仓库或厂商发布；预告但尚未公开权重/报告的版本不会替代已发布模型进入主比较。</figcaption>
+      </figure>
+
+      <div class="overview-grid">
+        <a class="overview-card" href="#deepseek" style="--c:var(--p1)"><div class="oc-head"><span class="oc-num">01</span><span class="pill p1">长上下文</span></div><div class="oc-name">DeepSeek V4 → V4.1-Flash</div><div class="oc-use">CSA/HCA → CED + CSA2 + FP4 KV</div><div class="oc-hook">关键问题：1M 上下文怎样同时压低 HBM、SSD、prefill 与 decode 成本？</div></a>
+        <a class="overview-card" href="#kimi" style="--c:var(--p2)"><div class="oc-head"><span class="oc-num">02</span><span class="pill p2">Agent / 线性注意力</span></div><div class="oc-name">Kimi K2.5 → K3</div><div class="oc-use">视觉 Agent Swarm → KDA + 2.8T MoE</div><div class="oc-hook">关键问题：任务能否并行，以及百万 token 能否成为可更新状态？</div></a>
+        <a class="overview-card" href="#glm" style="--c:var(--p3)"><div class="oc-head"><span class="oc-num">03</span><span class="pill p3">异步 RL</span></div><div class="oc-name">GLM-5 → 5.3</div><div class="oc-use">DSA + 分阶段 RL + 纯后训练升级</div><div class="oc-hook">关键问题：环境轨迹很慢时，GPU 怎样不停、策略怎样不漂？</div></a>
+        <a class="overview-card" href="#step" style="--c:var(--p4)"><div class="oc-head"><span class="oc-num">04</span><span class="pill p4">稀疏激活</span></div><div class="oc-name">Step 3.5 Flash</div><div class="oc-use">11B 激活 + 3:1 SWA + MTP-3</div><div class="oc-hook">关键问题：为什么明知线性注意力更省，仍选择更易推测解码的 SWA？</div></a>
+        <a class="overview-card" href="#vlm" style="--c:var(--p5)"><div class="oc-head"><span class="oc-num">05</span><span class="pill p5">原生多模态</span></div><div class="oc-name">Qwen / ERNIE / MiniMax / MiMo / Seed</div><div class="oc-use">早期融合、统一生成与电脑操作</div><div class="oc-hook">关键问题：VLM 何时不再是“LLM 加一个视觉塔”？</div></a>
+        <a class="overview-card" href="#overseas" style="--c:var(--p6)"><div class="oc-head"><span class="oc-num">06</span><span class="pill p6">海外分化</span></div><div class="oc-name">GPT / Claude / Gemini / Grok / Nemotron</div><div class="oc-use">闭源 Agent 产品化 vs 开放混合架构</div><div class="oc-hook">关键问题：当架构不披露时，哪些结论仍然可以成立？</div></a>
+      </div>
+
+      <h3 id="matrix">十二条主流路线：同一张表里先看“已知”与“未知”</h3>
+      <div class="legend"><span class="ev tech">技报/模型卡</span> 可核验结构与训练　<span class="ev launch">官方发布</span> 可核验产品能力　<span class="ev unknown">未披露</span> 不做架构推断</div>
+      <div class="table-wrap">
+        <table class="cmp">
+          <thead><tr><th>系列（截至 9/20）</th><th>权重与规模</th><th>上下文</th><th>注意力 / 骨干</th><th>2026 的核心变化</th></tr></thead>
+          <tbody>
+            <tr><td>DeepSeek V4 → V4.1‑Flash</td><td><span class="ev tech">开放权重</span> 1.6T/49B；V4.1 为 552B、prefill 8B / decode 16B</td><td>1M</td><td>CSA/HCA → CED + CSA2 + SWA；FP4 KV</td><td>从减少注意力 FLOPs 继续推进到跨层 KV 复用、持久化缓存与多 Agent RL</td></tr>
+            <tr><td>Kimi K2.5 → K3</td><td><span class="ev tech">开放权重</span> 1.04T / 32B → 2.8T / 104B</td><td>约 256K → 1M</td><td>K2.5 MLA；K3 以 KDA 为主、MLA 提供精确全局层</td><td>原生视觉 Agent、Agent Swarm；再扩大到线性/递归状态与百万 token Agent RL</td></tr>
+            <tr><td>GLM-5 → 5.3</td><td><span class="ev tech">开放权重</span> 5.3 复用 5.2 基座；约 753B checkpoint</td><td>200K → 1M</td><td>DSA 内容稀疏注意力</td><td>5.3 不换基座，完全依靠后训练提升复杂编码、长程 Agent 与网络安全</td></tr>
+            <tr><td>Step 3.5 Flash</td><td><span class="ev tech">开放权重</span> 196B / 11B</td><td>256K</td><td>3:1 SWA / 全局注意力；窗口 512</td><td>MTP-3 推测解码；MIS-PO 用样本掩码稳定 MoE 的 off-policy RL</td></tr>
+            <tr><td>Qwen3.5 → 3.8 / Flash‑Next</td><td><span class="ev tech">开放权重</span> 397B/17B → 2.4T/95B；Next 125B/6B + 51B 主存表</td><td>262K；可扩至约 1M</td><td>GDN 与全局/QSA 3:1；门控残差</td><td>旗舰扩容与轻量结构并行；Next 用约 1/9 训练 FLOPs 接近前代旗舰</td></tr>
+            <tr><td>ERNIE 5.0 → 5.1</td><td><span class="ev unknown">权重未公开</span> 官方称 2.4T；激活率 &lt;3%</td><td>未统一披露</td><td>超稀疏、模态无关 MoE</td><td>文本/图像/视频/音频的统一自回归理解与生成；UMRL / AHRL</td></tr>
+            <tr><td>MiniMax M3</td><td><span class="ev tech">开放权重</span> 428B / 23B</td><td>1M</td><td>MiniMax Sparse Attention</td><td>从 M2 的全注意力转向 M3 稀疏注意力，原生多模态与桌面电脑操作</td></tr>
+            <tr><td>MiMo V2.5 Pro</td><td><span class="ev tech">开放权重</span> 1.02T / 42B</td><td>1M</td><td>SWA / 全注意力混合</td><td>多教师 on-policy distillation、视觉/音频原生化与低激活推理</td></tr>
+            <tr><td>Seed 2.1</td><td><span class="ev launch">闭源服务</span> 参数未披露</td><td>未披露</td><td>未披露</td><td>Pro / Turbo 面向真实生产力 Agent；强调多模态操作与低延迟</td></tr>
+            <tr><td>GPT‑6 Astra / Claude Fable 5.1</td><td><span class="ev launch">闭源服务</span> 参数未披露</td><td>产品侧 1M 级长上下文</td><td>未披露</td><td>长时电脑操作、科学/安全与专业工作；effort、缓存定价和安全策略成为产品接口</td></tr>
+            <tr><td>Gemini 3.8 / Grok 4.6</td><td><span class="ev launch">闭源服务</span> 参数未披露</td><td>产品侧长上下文</td><td>未披露</td><td>多模态、交互视觉、网络安全和长时间 Agent；继续强化速度/成本梯度</td></tr>
+            <tr><td>Nemotron 3 Ultra / 3.5 Lightning</td><td><span class="ev tech">开放权重</span> 550B/55B；Lightning 30B/3B</td><td>1M</td><td>Mamba‑2 / 全局注意力混合；LatentMoE</td><td>从可审计旗舰扩展到单机执行层，连同量化、评测与推测解码 recipe 交付</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <blockquote class="anchor"><strong>共同底座：</strong>2026 年的“基座模型”已经不只是预训练 checkpoint，而是 <code>预训练骨干 × 后训练策略 × 长上下文内核 × Agent runtime</code> 的乘积；任何一项短板，都会在长任务里被重复放大。</blockquote>
+    </section>
+
+    <section id="monthly">
+      <h2 class="lvl0">本期月度增量：8 月发生了什么，9 月又改写了什么</h2>
+      <div class="month-banner"><strong>先给判断：</strong>2026 年 8 月是“效率配方落地月”，真正有结构信息的新发布主要来自 Qwen 与 NVIDIA，GLM 代表后训练升级，Grok 与 DeepSeek V4-Pro 则代表闭源/服务侧迭代。9 月 1—20 日的正式发布更密集：DeepSeek 把 KV 缓存压缩推进到系统级，OpenAI、Anthropic 与 Google 同时把长程 Agent、安全边界和可控推理预算推向新一代产品。</div>
+
+      <h3 id="august">8 月完整增量：三条开放路线与两条服务路线</h3>
+      <div class="delta-grid">
+        <div class="delta-card" style="--c:var(--p5)"><span class="date">08-11 · 开放权重</span><b>NVIDIA Nemotron 3.5 Lightning</b><p>30B 总参数、3B 激活，Mamba‑2 + MoE + 少量 Attention，1M 上下文；同时交付 NVFP4、MTP、DFlash 与 DSpark，目标是高频 Agent 的单机执行层。</p></div>
+        <div class="delta-card" style="--c:var(--p6)"><span class="date">08-14 · 闭源服务</span><b>xAI Grok 4.6</b><p>强化长时 Agent、交互视觉和工程执行；官方只披露补充训练、模型生成数据、SFT 与 RL 方向，参数和骨干仍未知。</p></div>
+        <div class="delta-card" style="--c:var(--p1)"><span class="date">08-13 · API 正式版</span><b>DeepSeek V4-Pro-0813 GA</b><p>V4 Pro 转正式 API 服务，能力与价格档位被明确；基座结构仍以 6 月 V4 技术报告为准，这次不算新架构。</p></div>
+        <div class="delta-card" style="--c:var(--p5)"><span class="date">08-26 · 技术报告</span><b>Qwen3.8‑Flash‑Next</b><p>125B/6B 激活，另有 51B n‑gram 表驻留主存；以 1/9 训练 FLOPs 接近 397B‑A17B 前代，核心是 GDN、QSA、门控残差与 Muon 的联合设计。</p></div>
+        <div class="delta-card" style="--c:var(--p3)"><span class="date">08-27 · 开放权重</span><b>GLM‑5.3</b><p>沿用 GLM‑5.2 基座，收益全部来自后训练。官方模型卡强调复杂编码、长程任务和网络安全，说明“训练环境与轨迹”已能单独构成一个代际。</p></div>
+        <div class="delta-card" style="--c:var(--unknown)"><span class="date">08 月 · 无重大基座更新</span><b>Kimi / Step / ERNIE / MiniMax / MiMo / Seed</b><p>本月未检索到足以替换既有主线的正式新基座技术报告或开放权重；继续沿用 K3、Step 3.5、ERNIE 5.x、M3、MiMo V2.5 与 Seed 2.1。</p></div>
+      </div>
+
+      <h4>① Qwen3.8‑Flash‑Next：不是单点“线性注意力”，而是四层联合设计</h4>
+      <p>这份 8 月 26 日技术报告最值得看的是评估方法：每项架构变更都同时检查下游能力、训练/prefill/decode 成本，以及最优超参数和稳定性。最终模型为 125B MoE、每 token 激活 6B，另把 51B n‑gram embedding 表放在加速器外的主存中预取。报告称，它在 14 个预训练基准中有 8 个超过 397B‑A17B 前代，其余最多落后 2.6 分，但只使用约 1/3 激活参数、1/3 训练 token 和约 1/9 训练 FLOPs。</p>
+      <p>Token mixing 仍是 3:1 的 Gated DeltaNet 与全局层混合；持续预训练阶段再把全局层替换为 Qwen Sparse Attention（QSA）。QSA 先用压缩的轻量索引器按微块筛历史，再做精确注意力，因此它属于<span class="key">内容稀疏</span>，不是线性注意力。Gated Residual 把残差流扩成四个分支，并用逐元素门决定怎么读；Muon 用于二维线性权重，embedding、输出头、MoE router 与低秩门控仍留在 AdamW。报告还指出，批量 warmup 最终效果没有更好，却多花 18.8% optimizer steps，因此直接从目标 batch 开始。</p>
+
+      <h4>② Nemotron 3.5 Lightning：把“子 Agent 执行层”做成一张卡可跑的开放模型</h4>
+      <p>NVIDIA 选择了另一种效率路线：30B 总参数、3B 激活，Mamba‑2、MoE 与少量 Attention 混合，预训练超过 20T token，支持 1M context。NVFP4 模型卡明确给出单个 DGX Spark 或 H100 的部署路径，并同时提供 DSpark、DFlash 与 MTP 三种推测解码选项。后训练使用多环境 GRPO，覆盖数学、代码、科学、指令、工具、多轮与结构化输出；异步 RL 将训练与生成解耦，并用 MTP 加速 rollout。</p>
+      <p>它的定位不是替代 550B Ultra，而是承担系统中的高频执行：例如主 Agent 负责任务规划，Lightning 负责代码审查、告警分析、工具调用和批量子任务。开放权重、量化权重、评测 recipe 与部署 recipe 都给出，使“本地吞吐/复现成本”可以直接验证；但 OpenMDW‑1.1 是开放模型许可，不应自动等同于 OSI 意义上的开源软件。</p>
+
+      <h4>③ GLM‑5.3：同一基座，后训练本身成为版本边界</h4>
+      <p>GLM‑5.3 的模型卡明确写明“uses the same base model as GLM‑5.2 — every gain comes from post‑training”。这使它成为本月很干净的对照实验：744B 级 DSA/MoE 骨干、1M 上下文路线不变，变化来自复杂编码与长程 Agent 的数据、环境和训练预算。官方自报 Terminal‑Bench 3.0 从 4.6 升到 28.3、DeepSWE v1.1 从 46.2 升到 66.9；这些数字依赖 Claude Code harness、最长数小时的任务预算与指定上下文，因此只能说明该后训练配方在相同官方口径下进步，不能直接换算成裸模型能力。</p>
+
+      <figure>
+        <svg class="viz" viewBox="0 0 880 430" role="img" aria-labelledby="month-title month-desc">
+          <title id="month-title">2026 年 8 月三条开放模型效率路线</title><desc id="month-desc">对比 Qwen3.8 Flash Next、GLM 5.3 与 Nemotron 3.5 Lightning 的骨干变化、后训练变化和部署目标。</desc>
+          <rect x="18" y="18" width="844" height="394" rx="12" fill="#fbfcfd"/>
+          <g font-family="system-ui">
+            <text x="440" y="48" text-anchor="middle" font-size="18" font-weight="700" fill="#132238">8 月增量：效率来自三个不同层级</text>
+            <rect x="42" y="78" width="244" height="274" rx="11" fill="#f4f0fb" stroke="#8068b5" stroke-width="2"/>
+            <text x="164" y="107" text-anchor="middle" font-size="14" font-weight="700" fill="#5d488d">Qwen3.8‑Flash‑Next</text>
+            <text x="164" y="129" text-anchor="middle" font-size="11" fill="#68717b">改骨干，也改优化器</text>
+            <rect x="70" y="151" width="188" height="43" rx="7" fill="#fff" stroke="#8068b5"/><text x="164" y="177" text-anchor="middle" font-size="11.5" fill="#4d5260">GDN 3:1 QSA · 125B/6B</text>
+            <rect x="70" y="210" width="188" height="43" rx="7" fill="#fff" stroke="#8068b5"/><text x="164" y="236" text-anchor="middle" font-size="11.5" fill="#4d5260">4 分支门控残差 · Muon</text>
+            <rect x="70" y="269" width="188" height="56" rx="7" fill="#ede5f7"/><text x="164" y="293" text-anchor="middle" font-size="11.5" font-weight="700" fill="#5d488d">目标</text><text x="164" y="311" text-anchor="middle" font-size="10.8" fill="#5d488d">接近旗舰，显著少算</text>
+            <rect x="318" y="78" width="244" height="274" rx="11" fill="#fff5e9" stroke="#dc8741" stroke-width="2"/>
+            <text x="440" y="107" text-anchor="middle" font-size="14" font-weight="700" fill="#96591f">GLM‑5.3</text>
+            <text x="440" y="129" text-anchor="middle" font-size="11" fill="#68717b">不改基座，只改后训练</text>
+            <rect x="346" y="151" width="188" height="43" rx="7" fill="#fff" stroke="#dc8741"/><text x="440" y="177" text-anchor="middle" font-size="11.5" fill="#4d5260">复用 GLM‑5.2 DSA/MoE</text>
+            <rect x="346" y="210" width="188" height="43" rx="7" fill="#fff" stroke="#dc8741"/><text x="440" y="236" text-anchor="middle" font-size="11.5" fill="#4d5260">编码/Agent/安全轨迹扩展</text>
+            <rect x="346" y="269" width="188" height="56" rx="7" fill="#ffead2"/><text x="440" y="293" text-anchor="middle" font-size="11.5" font-weight="700" fill="#96591f">目标</text><text x="440" y="311" text-anchor="middle" font-size="10.8" fill="#96591f">把环境数据变成能力</text>
+            <rect x="594" y="78" width="244" height="274" rx="11" fill="#edf8f4" stroke="#399c7b" stroke-width="2"/>
+            <text x="716" y="107" text-anchor="middle" font-size="14" font-weight="700" fill="#246d57">Nemotron 3.5 Lightning</text>
+            <text x="716" y="129" text-anchor="middle" font-size="11" fill="#68717b">改部署密度与执行角色</text>
+            <rect x="622" y="151" width="188" height="43" rx="7" fill="#fff" stroke="#399c7b"/><text x="716" y="177" text-anchor="middle" font-size="11.5" fill="#4d5260">Mamba/Attention · 30B/3B</text>
+            <rect x="622" y="210" width="188" height="43" rx="7" fill="#fff" stroke="#399c7b"/><text x="716" y="236" text-anchor="middle" font-size="11.5" fill="#4d5260">NVFP4 · MTP/DFlash/DSpark</text>
+            <rect x="622" y="269" width="188" height="56" rx="7" fill="#dff3eb"/><text x="716" y="293" text-anchor="middle" font-size="11.5" font-weight="700" fill="#246d57">目标</text><text x="716" y="311" text-anchor="middle" font-size="10.8" fill="#246d57">单机高频 Agent 执行</text>
+            <path d="M164 352V380H716V352" fill="none" stroke="#a8afb7" stroke-width="2"/>
+            <text x="440" y="399" text-anchor="middle" font-size="11.5" fill="#5f6872">共同点：都把“完成一次 Agent 工作”的成本，而非单 token FLOPs，作为设计单位</text>
+          </g>
+        </svg>
+        <figcaption>Qwen 优化模型结构，GLM 优化后训练分布，NVIDIA 优化系统角色与硬件落点；三者不是同一种“轻量化”。</figcaption>
+      </figure>
+
+      <h3 id="september">9 月 1—20 日最新检查点：全年累计视角必须更新</h3>
+      <div class="table-wrap"><table class="cmp"><thead><tr><th>日期</th><th>模型</th><th>开放状态</th><th>本次新增事实</th><th>仍然未知 / 边界</th></tr></thead><tbody>
+        <tr><td>09-01</td><td>Claude Fable 5.1 / Mythos 5.1</td><td><span class="ev launch">闭源服务</span></td><td>同一底层模型、不同安全策略；1M context，Fable 普遍可用，Mythos 仅可信访问；cache read 降至 $0.25/M，官方估计典型工作负载成本降约 25%</td><td>参数量、注意力、预训练规模未披露；厂商榜单受 effort 与 safeguards 影响</td></tr>
+        <tr><td>09-02</td><td>Gemini 3.8 Flash / Cyber</td><td><span class="ev launch">闭源服务</span></td><td>共享基础智能；Flash 面向编码与 Agent，Cyber 面向可信防守方；支持 effort 档位，HLE‑Verified 官方报 54.9%</td><td>参数与架构未披露；Cyber 非普遍开放</td></tr>
+        <tr><td>09-03</td><td>GPT‑6 Astra</td><td><span class="ev launch">闭源服务</span></td><td>电脑操作、浏览、编码、安全与专业工作成为统一旗舰；官方披露 1M 长上下文评测，API 为 $10/M 输入、$50/M 输出</td><td>参数、MoE、注意力、预训练 token 未披露；大量结果依赖工具与专用 harness</td></tr>
+        <tr><td>09-10</td><td>DeepSeek‑V4.1‑Flash</td><td><span class="ev tech">开放权重</span></td><td>552B backbone；prefill 激活 8B、decode 16B；CED + CSA2 + FP4 KV；1M context；原生多模态</td><td>报告结果主要来自内部统一框架；SWA Bounded Replay 是近似重建，极端分布仍需验证</td></tr>
+      </tbody></table></div>
+
+      <h4>DeepSeek‑V4.1‑Flash 为什么是本次累计报告最重要的结构更新</h4>
+      <p>V4.1‑Flash 把“长上下文成本”拆成四张账单。第一，Causal Encoder‑Decoder（CED）让输入阶段只激活 8B、输出阶段激活 16B，适配输入远长于输出的 Agent。第二，Compressed Sparse Attention 2（CSA2）在层间复用 global KV、索引器 K 与 Top‑K 结果，并用 Full / Reindex / Reuse 三种静态模式控制重算。第三，global KV 在训练时就使用 FP4。第四，SWA Bounded Replay 不再持久化全部局部 KV，而只回放最近一个窗口近似重建状态。</p>
+      <p>报告给出的结果是：global KV 降到每 token 890 bytes，约为 V4‑Flash 的 1/4；需要长期保存在 SSD 或主存中的 persistent KV 约降至 1/8。模型有 552B backbone、40 层（20 encoder + 20 decoder）、384 routed experts，每 token 选 6 个 routed expert；训练 45T 多模态 token，并在 34T token 时把上下文扩到 1M。后训练算法本身没有新花样，仍是 SFT → RL → OPD，提升主要来自合成任务、环境构造和规模化 rollout。其多 Agent 初步实验还把任务奖励、协作 bonus 与基于关键路径的派生延迟惩罚合在一起：奖励有效并行，同时惩罚无意义同步。</p>
+
+      <blockquote class="aside"><strong>本期真正的技术结论：</strong>线性注意力、内容稀疏、SWA 与 KV 量化已不再互斥。2026 年下半年的领先设计倾向于把它们分层组合：递归状态管大部分 token，内容稀疏负责精确远程跳转，SWA 保留局部连续性，FP4/FP8 与跨层复用再处理缓存和带宽。</blockquote>
+
+      <p class="source-strip">本期新增一手来源：<a href="https://github.com/QwenLM/Qwen3.8-Flash-Next/blob/main/tech_report.pdf">Qwen3.8‑Flash‑Next Technical Report</a> · <a href="https://huggingface.co/zai-org/GLM-5.3">GLM‑5.3 Model Card</a> · <a href="https://huggingface.co/nvidia/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-NVFP4">Nemotron 3.5 Lightning Model Card</a> · <a href="https://x.ai/news/grok-4-6">Grok 4.6</a> · <a href="https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash/blob/main/DeepSeek_V41_Tech_Report.pdf">DeepSeek‑V4.1‑Flash Technical Report</a> · <a href="https://www.anthropic.com/claude-fable-and-mythos-5-1">Claude Fable / Mythos 5.1</a> · <a href="https://blog.google/innovation-and-ai/models-and-research/gemini-models/3-8-flash-and-3-8-flash-cyber/">Gemini 3.8 Flash / Cyber</a> · <a href="https://openai.com/index/gpt-6-astra/">GPT‑6 Astra</a></p>
+    </section>
+
+    <section id="deepseek">
+      <div class="chapter p1"><h2>01 · DeepSeek V4 → V4.1：从稀疏计算推进到 KV 全生命周期 <span class="field-tag" style="background:var(--p1)">CSA2 · CED · FP4 KV</span></h2><p class="tagline">V4 先压注意力 FLOPs；V4.1‑Flash 再把 HBM、主存/SSD、prefill 和 decode 分开优化，并把原生多模态与多 Agent RL 接入同一底座。</p></div>
+      <p class="hook">动机：Agent 每一步都把仓库、终端输出和历史状态重新塞回上下文后，瓶颈不只在注意力计算，还在 KV 常驻显存、跨层重复、持久化存储与恢复带宽。</p>
+
+      <h3>9 月新增：V4.1‑Flash 的四层压缩链</h3>
+      <p>V4.1‑Flash 使用 20 层因果 encoder 与 20 层 decoder。Encoder 将长输入压成最终隐状态，decoder 的 global KV 从这些状态投影，因此输入阶段只激活 8B、输出阶段激活 16B；对于“读一百万 token、只写几千 token”的 Agent，这比所有阶段都按同一激活预算更合算。</p>
+      <p>CSA2 将全局层分成 Full、Reindex 与 Reuse：Full 生成 global KV 并建索引；Reindex 复用 global KV 但重新打分；Reuse 连 Top‑K 索引也复用。再叠加 FP4 global KV，运行时 global KV 为每 token 890 bytes，官方报告约为 V4‑Flash 的 1/4。SWA Bounded Replay 则不再把所有局部 KV 长期写入 SSD/主存，而只回放最近一个窗口近似恢复，使 persistent KV 约降到 V4‑Flash 的 1/8。</p>
+      <p>这条路线也明确暴露边界：CSA2 的选择器可能漏掉弱相关证据，Bounded Replay 是近似恢复；报告只证明在其测试分布上退化很小，不能推出任意一百万 token 任务都无损。因此部署时应同时测远程多跳证据、前缀恢复和长轨迹重启，而不是只跑单针 NIAH。</p>
+
+      <h3>问题：V3 之后，瓶颈从“参数够不够”转向“历史怎么被访问”</h3>
+      <p>DeepSeek V4 技术报告给出两个开放权重配置：V4-Pro 为 1.6T 总参数、每 token 激活 49B；V4-Flash 为 284B 总参数、激活 13B，均支持 1M token。这个拆分很重要：Pro 不是 Flash 的简单放大版，而是同一套注意力与残差设计在不同激活预算上的两条产品曲线。</p>
+
+      <h3>方法：五层改造共同削减“长历史税”</h3>
+      <h4>① CSA：先选内容，再做精确注意力</h4>
+      <p>Compressed Sparse Attention（CSA）不让每个 query 与全部历史 token 做点积，而是先通过压缩表征挑出少量内容相关位置，再在候选上计算精确注意力。它属于<span class="key">内容稀疏注意力</span>，不是把序列压进固定大小状态的线性注意力。</p>
+      <div class="equation">C<sub>dense</sub> ∝ L²d　→　C<sub>CSA</sub> ∝ L·k·d，且 k ≪ L</div>
+      <p class="eq-note"><strong>白话翻译：</strong>全注意力让每个 token 看完整本书；CSA 先翻目录，挑出 k 页再细读。这里是复杂度直觉式，真实成本还包括索引、压缩器与内核实现。</p>
+
+      <h4>② HCA：不是只少看，还要少存</h4>
+      <p>Heavily Compressed Attention（HCA）进一步压缩需要长期保留的表示，与 CSA 组成混合路径：局部与高频交互保留足够精度，远距离历史则通过更紧凑状态进入注意力。于是长上下文优化同时作用于 FLOPs 与 KV cache，而不只是训练时的理论复杂度。</p>
+
+      <h4>③ mHC + DeepSeekMoE：让超深稀疏网络不在残差处失稳</h4>
+      <p>V4 保留 DeepSeekMoE 与多 token 预测（MTP），同时引入 mHC 残差机制、调整路由激活，并让早期 FFN 使用哈希路由。MoE 决定“本 token 调哪些参数”，mHC 决定“层与层之间的信息怎样稳定通过”；两者分别控制计算密度和优化稳定性。</p>
+
+      <h4>④ Muon + 32T/33T token：架构节省要靠训练规模兑现</h4>
+      <p>报告披露 V4-Flash 与 V4-Pro 分别使用约 32T、33T 预训练 token，并采用 Muon 优化器。长上下文结构不是在小模型上验证后直接插入，而是与大规模预训练一起共同收敛，这也是“高效注意力可以即插即用”经常失败的原因。</p>
+
+      <h4>⑤ 专家 RL → GRPO → OPD：把多种策略重新合成一个模型</h4>
+      <p>后训练先由领域专家数据与 GRPO 强化学习形成不同能力，再用 on-policy distillation（OPD）把教师策略合并进统一学生；混合 RL 阶段也由 OPD 接手。它与离线蒸馏的关键差别，是学生在自己的当前分布上采样，再向教师询问或对齐，从而减小“训练时会、自己跑就偏”的分布差。</p>
+      <div class="equation">L<sub>OPD</sub> = E<sub>x∼πθ</sub>[ KL( πθ(·|x) ∥ πT(·|x) ) ]</div>
+      <p class="eq-note"><strong>白话翻译：</strong>让学生先按自己的习惯走到现场，再让教师纠偏；反向 KL 更鼓励学生集中到教师认可的高概率动作上。公式用于解释报告所述机制，具体实现还包含采样与多任务细节。</p>
+
+      <figure>
+        <svg class="viz" viewBox="0 0 880 350" role="img" aria-labelledby="dsv-title dsv-desc">
+          <title id="dsv-title">DeepSeek V4 架构与后训练流程</title><desc id="dsv-desc">输入经过 CSA 与 HCA 混合注意力、mHC 残差、DeepSeekMoE 和 MTP，后训练由领域专家、GRPO 和 on-policy distillation 合并。</desc>
+          <rect x="18" y="18" width="844" height="314" rx="12" fill="#fbfcff"/>
+          <text x="42" y="50" font-family="system-ui" font-size="17" font-weight="700" fill="#132238">V4 的两条压缩线：算得少 + 存得少</text>
+          <g font-family="system-ui" text-anchor="middle">
+            <rect x="40" y="86" width="110" height="54" rx="9" fill="#e9f0ff" stroke="#527fd3"/><text x="95" y="108" font-size="13" font-weight="700" fill="#294e92">1M token</text><text x="95" y="127" font-size="11" fill="#536273">仓库 / 工具轨迹</text>
+            <path d="M150 113H195" stroke="#7d8ca3" stroke-width="2" marker-end="url(#arrow1)"/>
+            <rect x="195" y="72" width="142" height="82" rx="9" fill="#fff" stroke="#527fd3" stroke-width="2"/><text x="266" y="99" font-size="13" font-weight="700" fill="#294e92">CSA 内容检索</text><text x="266" y="119" font-size="11" fill="#536273">从 L 中选 k</text><text x="266" y="136" font-size="11" fill="#536273">保留精确点积</text>
+            <path d="M337 113H370" stroke="#7d8ca3" stroke-width="2"/>
+            <rect x="370" y="72" width="142" height="82" rx="9" fill="#fff" stroke="#527fd3" stroke-width="2"/><text x="441" y="99" font-size="13" font-weight="700" fill="#294e92">HCA 状态压缩</text><text x="441" y="119" font-size="11" fill="#536273">远距历史少存</text><text x="441" y="136" font-size="11" fill="#536273">KV cache 下降</text>
+            <path d="M512 113H545" stroke="#7d8ca3" stroke-width="2"/>
+            <rect x="545" y="72" width="128" height="82" rx="9" fill="#fff" stroke="#527fd3" stroke-width="2"/><text x="609" y="99" font-size="13" font-weight="700" fill="#294e92">mHC 残差</text><text x="609" y="119" font-size="11" fill="#536273">稳定深层传播</text><text x="609" y="136" font-size="11" fill="#536273">配合 Muon</text>
+            <path d="M673 113H704" stroke="#7d8ca3" stroke-width="2"/>
+            <rect x="704" y="72" width="126" height="82" rx="9" fill="#e9f0ff" stroke="#527fd3"/><text x="767" y="99" font-size="13" font-weight="700" fill="#294e92">MoE + MTP</text><text x="767" y="119" font-size="11" fill="#536273">49B / 13B 激活</text><text x="767" y="136" font-size="11" fill="#536273">多 token 预测</text>
+            <rect x="90" y="224" width="145" height="56" rx="9" fill="#fff3e8" stroke="#dc8741"/><text x="162" y="247" font-size="12.5" font-weight="700" fill="#8a511d">领域专家 + SFT</text><text x="162" y="265" font-size="11" fill="#665a50">能力分工</text>
+            <rect x="286" y="224" width="125" height="56" rx="9" fill="#fff3e8" stroke="#dc8741"/><text x="348" y="247" font-size="12.5" font-weight="700" fill="#8a511d">GRPO RL</text><text x="348" y="265" font-size="11" fill="#665a50">可验证奖励</text>
+            <rect x="466" y="214" width="168" height="76" rx="9" fill="#eaf7f2" stroke="#399c7b" stroke-width="2"/><text x="550" y="241" font-size="13" font-weight="700" fill="#246d57">On-policy Distillation</text><text x="550" y="261" font-size="11" fill="#536273">在学生分布上合并策略</text><text x="550" y="278" font-size="11" fill="#536273">替代混合 RL 阶段</text>
+            <rect x="685" y="224" width="130" height="56" rx="9" fill="#eaf7f2" stroke="#399c7b"/><text x="750" y="247" font-size="12.5" font-weight="700" fill="#246d57">统一 Agent 模型</text><text x="750" y="265" font-size="11" fill="#536273">减少策略冲突</text>
+            <path d="M235 252H286M411 252H466M634 252H685" stroke="#8795a6" stroke-width="2"/>
+          </g>
+          <defs><marker id="arrow1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#7d8ca3"/></marker></defs>
+        </svg>
+        <figcaption>示意图按技术报告抽象；CSA/HCA 的内部张量与内核细节被省略，不能据此复刻实现。</figcaption>
+      </figure>
+
+      <h3>证据：节省不是“理论 O()”，而是报告中的端到端比率</h3>
+      <div class="stat-grid"><div class="stat"><b>27%</b><span>V4-Pro 单 token 推理 FLOPs / V3.2</span></div><div class="stat"><b>10%</b><span>V4-Pro KV cache / V3.2</span></div><div class="stat"><b>1M</b><span>Pro 与 Flash 的上下文长度</span></div></div>
+      <p>报告还给出更激进的 Flash 比率：单 token 推理 FLOPs 约为 V3.2 的 10%，KV cache 约为 7%。这些数字最能说明 V4 的目标不是单项 benchmark，而是让长轨迹 Agent 的每一步不再重复支付全历史成本；不过它们来自同一报告与其测量环境，不能直接换算成任何第三方部署的吞吐。</p>
+      <p>8 月官方 API 更新将 V4-Flash 推向生产版本，并公布 Terminal-Bench、NL2Repo、DeepSWE、Toolathlon 等 Agent 评测；这些结果支持“模型优化目标已经从问答转向工具工作流”，但不同代理框架、采样预算与工具环境会显著改变数字。</p>
+      <blockquote class="aside"><strong>类比：</strong>V4 像一座大型档案馆：CSA 是按内容检索的索引，HCA 是缩微胶片，MoE 是只叫来相关领域的馆员，OPD 则是把多位馆员的办事流程整理成一个统一前台。</blockquote>
+      <p class="source-strip">一手来源：<a href="https://arxiv.org/abs/2606.19348">DeepSeek‑V4 Technical Report</a> · <a href="https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash/blob/main/DeepSeek_V41_Tech_Report.pdf">DeepSeek‑V4.1‑Flash Technical Report</a> · <a href="https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash">V4.1‑Flash 模型卡与权重</a> · <a href="https://api-docs.deepseek.com/updates/">DeepSeek API 更新日志</a></p>
+    </section>
+
+    <section id="kimi">
+      <div class="chapter p2"><h2>02 · Kimi K2.5 → K3：先让 Agent 并行，再让历史成为状态 <span class="field-tag" style="background:var(--p2)">PARL · KDA</span></h2><p class="tagline">K2.5 解决“看见并行动”，K3 解决“在百万 token 中持续行动”；二者共同把模型从回答器推向任务编排器。</p></div>
+      <p class="hook">动机：搜索、网页、代码和视觉核验往往可以并行；若一个模型仍按单线程逐步做，智能上限可能还没到，墙钟时间已经不可接受。</p>
+
+      <h3>方法：从原生多模态到 Agent Swarm，再到 KDA</h3>
+      <h4>① K2.5：视觉不是后装插件，而是继续预训练的一部分</h4>
+      <p>K2.5 基于 K2 的 1.04T / 32B 激活 MoE，在其上继续进行约 15T 图文混合 token 的联合预训练。MoonViT-3D 以原生分辨率处理图像与视频，共用编码器，并通过四帧分组和时间池化把可处理视频长度扩展约 4 倍。</p>
+
+      <h4>② 早期低比例视觉混合，反而优于后期猛灌视觉</h4>
+      <p>在总 token 预算固定时，报告比较了 Early 10:90、Mid 20:80 与 Late 50:50 的视觉/文本配比。结果并不支持“视觉数据越晚越多越好”：早期、低比例、持续混合在视觉知识、OCR、文本知识与代码上都更稳，说明跨模态表征需要长时间共同塑形。</p>
+      <div class="table-wrap"><table class="cmp compact"><thead><tr><th>视觉注入策略</th><th>视觉知识</th><th>视觉推理</th><th>OCR</th><th>文本知识</th><th>代码</th></tr></thead><tbody><tr><td>Early 10:90</td><td><strong>25.8</strong></td><td><strong>43.8</strong></td><td><strong>65.7</strong></td><td><strong>45.5</strong></td><td><strong>24.8</strong></td></tr><tr><td>Mid 20:80</td><td>25.0</td><td>40.7</td><td>64.1</td><td>43.9</td><td>24.0</td></tr><tr><td>Late 50:50</td><td>24.2</td><td>39.0</td><td>61.5</td><td>43.1</td><td>24.0</td></tr></tbody></table></div>
+      <p class="note">数值来自 K2.5 技术报告的固定预算消融；用于比较注入时机，不用于跨模型排名。</p>
+
+      <h4>③ Zero-vision SFT + 联合多模态 RL：能力可以跨模态迁移</h4>
+      <p>一个反直觉结果是：只用文本 Agent 轨迹做 SFT，也能激活模型对视觉工具的调用；人工编写的“视觉轨迹模板”反而可能限制泛化。随后联合多模态 RL 不仅提升视觉任务，也让 MMLU-Pro 从 84.7 升至 86.4、GPQA-Diamond 从 84.3 升至 86.4、LongBench v2 从 56.7 升至 58.9，显示视觉环境训练对文本推理存在正迁移。</p>
+
+      <h4>④ Agent Swarm + PARL：训练编排器，而不是同时微调所有工人</h4>
+      <p>K2.5 的 Agent Swarm 由一个 orchestrator 拆任务、生成多个 subagent 并汇总；Parallel-Agent Reinforcement Learning（PARL）冻结子 Agent，只训练编排器。奖励同时约束并行度、是否真正完成子任务与最终质量，防止“看似开很多 Agent，实则串行”或无意义扩张。</p>
+      <div class="equation">r<sub>PARL</sub>(x,y) = λ₁r<sub>parallel</sub> + λ₂r<sub>finish</sub> + r<sub>perf</sub>(x,y)</div>
+      <p class="eq-note"><strong>白话翻译：</strong>既奖励“确实同时开工”，也奖励“开出去的任务都收回来”，最后仍由成品质量兜底；否则并行会退化成制造更多日志。</p>
+
+      <h4>⑤ K3：2.8T / 104B、KDA 主层与 1M token Agent RL</h4>
+      <p>K3 将规模推至 2.8T 总参数、104B 激活，以 Kimi Delta Attention（KDA）为主、MLA 精确全局层为辅，并配合 Attention Residuals 与 Stable LatentMoE。KDA 属于真正的线性/递归注意力：历史被写入固定大小状态，查询从状态读出；报告再把 rollout 与沙箱状态持久化，使百万 token 的 Agent 强化学习不必每次从头重放。</p>
+      <div class="equation">S<sub>t</sub> = g<sub>t</sub> ⊙ S<sub>t−1</sub> + U(k<sub>t</sub>,v<sub>t</sub>)；　o<sub>t</sub> = q<sub>t</sub><sup>T</sup>S<sub>t</sub></div>
+      <p class="eq-note"><strong>白话翻译：</strong>KDA 像一本会改写的工作记忆：新信息按门控写进状态，旧信息被衰减或修正，查询无需重新扫描全部 token。公式是递归注意力的简化骨架，不等同于 KDA 的完整 delta 更新。</p>
+
+      <figure>
+        <svg class="viz" viewBox="0 0 880 390" role="img" aria-labelledby="kimi-title kimi-desc">
+          <title id="kimi-title">Kimi K2.5 到 K3 的演进</title><desc id="kimi-desc">上半部分展示 K2.5 的图文视频联合预训练与 Agent Swarm，下半部分展示 K3 的 KDA、MLA、LatentMoE 与持久化沙箱。</desc>
+          <rect x="18" y="18" width="844" height="354" rx="12" fill="#fbfdfc"/>
+          <g font-family="system-ui">
+            <text x="40" y="50" font-size="17" font-weight="700" fill="#132238">K2.5：让多模态 Agent 并行</text>
+            <rect x="42" y="78" width="118" height="66" rx="9" fill="#eaf7f2" stroke="#399c7b"/><text x="101" y="102" text-anchor="middle" font-size="12.5" font-weight="700" fill="#246d57">文本 · 图像 · 视频</text><text x="101" y="122" text-anchor="middle" font-size="11" fill="#536273">15T 混合 token</text>
+            <path d="M160 111H210" stroke="#7d8ca3" stroke-width="2"/>
+            <rect x="210" y="78" width="130" height="66" rx="9" fill="#fff" stroke="#399c7b"/><text x="275" y="102" text-anchor="middle" font-size="12.5" font-weight="700" fill="#246d57">MoonViT-3D</text><text x="275" y="122" text-anchor="middle" font-size="11" fill="#536273">原生分辨率 / 时间池化</text>
+            <path d="M340 111H390" stroke="#7d8ca3" stroke-width="2"/>
+            <rect x="390" y="78" width="140" height="66" rx="9" fill="#fff" stroke="#399c7b"/><text x="460" y="102" text-anchor="middle" font-size="12.5" font-weight="700" fill="#246d57">联合多模态 RL</text><text x="460" y="122" text-anchor="middle" font-size="11" fill="#536273">视觉 → 文本正迁移</text>
+            <path d="M530 111H578" stroke="#7d8ca3" stroke-width="2"/>
+            <rect x="578" y="66" width="246" height="90" rx="9" fill="#ecf8f4" stroke="#399c7b" stroke-width="2"/><text x="701" y="89" text-anchor="middle" font-size="12.5" font-weight="700" fill="#246d57">Orchestrator（PARL）</text><rect x="596" y="108" width="58" height="30" rx="6" fill="#fff" stroke="#8bcab4"/><rect x="671" y="108" width="58" height="30" rx="6" fill="#fff" stroke="#8bcab4"/><rect x="746" y="108" width="58" height="30" rx="6" fill="#fff" stroke="#8bcab4"/><text x="625" y="128" text-anchor="middle" font-size="10.5" fill="#536273">Search</text><text x="700" y="128" text-anchor="middle" font-size="10.5" fill="#536273">Code</text><text x="775" y="128" text-anchor="middle" font-size="10.5" fill="#536273">Vision</text>
+            <line x1="42" y1="190" x2="824" y2="190" stroke="#d9dfdc" stroke-dasharray="5 5"/>
+            <text x="40" y="224" font-size="17" font-weight="700" fill="#132238">K3：让百万 token 历史成为可更新状态</text>
+            <rect x="42" y="252" width="128" height="72" rx="9" fill="#e9f0ff" stroke="#527fd3"/><text x="106" y="278" text-anchor="middle" font-size="12.5" font-weight="700" fill="#294e92">1M 轨迹</text><text x="106" y="298" text-anchor="middle" font-size="11" fill="#536273">持久化 rollout</text>
+            <path d="M170 288H222" stroke="#7d8ca3" stroke-width="2"/>
+            <rect x="222" y="245" width="160" height="86" rx="9" fill="#fff" stroke="#399c7b" stroke-width="2"/><text x="302" y="270" text-anchor="middle" font-size="12.5" font-weight="700" fill="#246d57">KDA 递归状态</text><text x="302" y="290" text-anchor="middle" font-size="11" fill="#536273">线性成本 · delta 更新</text><text x="302" y="307" text-anchor="middle" font-size="11" fill="#536273">主导约 3/4 层</text>
+            <rect x="420" y="245" width="144" height="86" rx="9" fill="#fff" stroke="#527fd3"/><text x="492" y="270" text-anchor="middle" font-size="12.5" font-weight="700" fill="#294e92">MLA 全局层</text><text x="492" y="290" text-anchor="middle" font-size="11" fill="#536273">精确检索锚点</text><text x="492" y="307" text-anchor="middle" font-size="11" fill="#536273">补足固定状态</text>
+            <path d="M382 288H420M564 288H614" stroke="#7d8ca3" stroke-width="2"/>
+            <rect x="614" y="245" width="190" height="86" rx="9" fill="#f3edfb" stroke="#8068b5"/><text x="709" y="270" text-anchor="middle" font-size="12.5" font-weight="700" fill="#5d488d">Stable LatentMoE</text><text x="709" y="290" text-anchor="middle" font-size="11" fill="#536273">2.8T 总量 / 104B 激活</text><text x="709" y="307" text-anchor="middle" font-size="11" fill="#536273">Attention Residuals</text>
+          </g>
+        </svg>
+        <figcaption>K2.5 与 K3 是连续路线：前者把“并行任务分解”变成可训练行为，后者把“超长任务状态”变成骨干结构与 RL 系统共同承担的对象。</figcaption>
+      </figure>
+
+      <h3>证据：并行不是装饰，收益要同时看质量与墙钟时间</h3>
+      <div class="stat-grid"><div class="stat"><b>4.5×</b><span>Agent Swarm 报告的最高延迟缩短</span></div><div class="stat"><b>72.8→79.0</b><span>宽搜索任务 item F1</span></div><div class="stat"><b>2.5×</b><span>K3 相对 K2 的整体 scaling efficiency（报告）</span></div></div>
+      <p>这里最值得保留的不是单个绝对分数，而是评测维度：质量、完成率和时间必须一起看。若只看最终答案，并行 Agent 可以用更高 token 成本换分；若只看速度，又可能因子任务丢失而生成“快但不完整”的答案，PARL 正是在这两个退化点之间加约束。</p>
+      <blockquote class="aside"><strong>类比：</strong>K2.5 像把一位全能研究员升级为项目经理，K3 则给整个团队装上一本不会无限膨胀、但会持续更新的共享工作记忆。</blockquote>
+      <p class="source-strip">一手来源：<a href="https://arxiv.org/abs/2602.02276">Kimi K2.5 Technical Report</a> · <a href="https://github.com/MoonshotAI/Kimi-K2.5">K2.5 官方仓库</a> · <a href="https://arxiv.org/abs/2607.24653">Kimi K3 Technical Report</a> · <a href="https://github.com/MoonshotAI/Kimi-K3">K3 官方仓库</a></p>
+    </section>
+
+    <section id="glm">
+      <div class="chapter p3"><h2>03 · GLM-5 → 5.3：当 Agent RL 变慢，训练系统必须异步 <span class="field-tag" style="background:var(--p3)">DSA · slime · Post-training</span></h2><p class="tagline">744B / 40B 激活的开放权重骨干只是起点；5.3 进一步证明，同一基座上的环境、轨迹与后训练规模可以单独构成一个版本代际。</p></div>
+      <p class="hook">动机：数学题的奖励几秒就能验证，浏览器和终端任务却可能跑几分钟；若训练 GPU 等 rollout，利用率会坍塌，若直接用旧轨迹更新，策略又会漂移。</p>
+
+      <h3>问题：长上下文与长轨迹是两种不同的“长”</h3>
+      <p>GLM-5 以 744B 总参数、40B 激活、256 专家和 80 层构建 MoE，预训练约 28.5T token，其中初始预训练约 27T；中期训练把上下文从 4K 逐步推到 200K。这里的长上下文解决“看得下”，异步 RL 解决“做得久”，两者缺一不可。</p>
+
+      <h3>方法：从 DSA 到跨阶段 on-policy 蒸馏</h3>
+      <h4>① DSA：按 query 内容选历史，而不是按固定距离裁剪</h4>
+      <p>DeepSeek Sparse Attention（DSA）先估计 query 与历史位置的相关性，再对 top-k 位置执行注意力。它仍保留 query-key 点积与显式历史 token，因此属于<span class="key">内容稀疏</span>，与 Gated DeltaNet 把历史压为递归状态的线性注意力不同。</p>
+      <div class="equation">J<sub>i</sub> = TopK(s(q<sub>i</sub>,K), k)；　h<sub>i</sub> = softmax(q<sub>i</sub>K<sub>Jᵢ</sub><sup>T</sup>)V<sub>Jᵢ</sub></div>
+      <p class="eq-note"><strong>白话翻译：</strong>先用便宜的打分器找出与当前问题最相关的 k 段历史，再做标准注意力；稀疏的是访问集合，不是把记忆压成一个固定矩阵。</p>
+
+      <h4>② 高效注意力不是插件：固定 SWA 替换在 128K 上会突然失效</h4>
+      <p>报告同时测试了 Gated DeltaNet、固定 1:1 的 SWA/全注意力交错和搜索得到的 SWA 模式。一个关键消融是：不经过针对性训练便把既有全注意力替换成固定 SWA，128K 汇总结果从 75.28 降到 6.51；即使搜索布局可回到 53.95，也说明“局部窗口 + 少量全局层”必须与训练分布共同设计。</p>
+
+      <h4>③ Reasoning RL → Agentic RL → General RL：分阶段保护能力</h4>
+      <p>GLM-5 把后训练串成三段：先用可验证奖励强化推理，再进入工具与环境内 Agent RL，最后做通用偏好和对齐。阶段越多，遗忘风险越高，因此使用 On-Policy Cross-Stage Distillation：后一阶段在自己的 rollout 上继续吸收前一阶段策略，避免“会操作工具之后反而不会解题”。</p>
+
+      <h4>④ slime 异步 RL：rollout 与优化器解耦</h4>
+      <p>训练框架 slime 把推理集群、环境执行与参数更新拆开：一批轨迹还在浏览器或终端中运行时，训练 GPU 可消费已经完成的样本；系统再通过 token 级裁剪和过期样本丢弃控制策略陈旧度。异步带来吞吐，也引入 behavior policy 与当前 policy 的偏差。</p>
+      <div class="equation">ρ<sub>t</sub> = π<sub>θ</sub>(a<sub>t</sub>|s<sub>t</sub>) / π<sub>beh</sub>(a<sub>t</sub>|s<sub>t</sub>)；　仅保留或裁剪可信 ρ<sub>t</sub></div>
+      <p class="eq-note"><strong>白话翻译：</strong>轨迹生成后模型已经更新了，所以要检查“今天的模型还会不会做出昨天的动作”；差得太远的 token 不应强行拿来训练。这里概括异步 off-policy 控制，具体阈值与损失以报告实现为准。</p>
+
+      <h4>⑤ 5.1 → 5.2：骨干稳定后，把产品目标推到百万上下文与长时工程</h4>
+      <p>GLM-5.1 在 4 月继续提升 Agent 与编程，5.2 于 6 月开放权重并把上下文推至 1M。官方仓库报告 Terminal-Bench 2.1 从 5.1 的 62.0 提升到 81.0、SWE-bench Pro 从 58.4 到 62.1；这些数字仍依赖其指定 Agent harness，但清晰反映优化重心：从短代码生成转向跨终端、跨文件的长时任务。</p>
+
+      <h4>④ 5.3：不换 base model，只扩大后训练的“工作半径”</h4>
+      <p>8 月 27 日的 GLM‑5.3 模型卡明确说明它与 5.2 使用相同 base model，所有提升都来自 post‑training。官方自报 DeepSWE v1.1 为 66.9（5.2 为 46.2）、Terminal‑Bench 3.0 为 28.3（5.2 为 4.6）、AutomationBench 为 48.2（5.2 为 26.2）。这些分数的共同特征是任务长、工具多、最长运行数小时；因此 5.3 更像一次 Agent 行为分布升级，而不是结构升级。</p>
+      <p>模型卡把 harness、最长上下文、output budget、超时和多次 rollout 写得很细，这一点比单独报一个分数更重要：当一个模型使用 400K—1M context、64K—128K 输出和 4—10 小时任务预算时，它的榜单结果已经是“模型 × scaffold × 预算”的系统值。选型时应复用同一 harness 重测，而不是把不同厂商的最高分直接横排。</p>
+
+      <figure>
+        <svg class="viz" viewBox="0 0 880 395" role="img" aria-labelledby="glm-title glm-desc">
+          <title id="glm-title">GLM-5 的骨干与异步强化学习</title><desc id="glm-desc">上半部分是 DSA 和 MoE 骨干，下半部分是推理、Agent、通用强化学习的异步流水线与跨阶段蒸馏。</desc>
+          <rect x="18" y="18" width="844" height="359" rx="12" fill="#fffdfb"/>
+          <g font-family="system-ui">
+            <text x="40" y="50" font-size="17" font-weight="700" fill="#132238">骨干：长文档按内容选取，MoE 按 token 激活</text>
+            <rect x="42" y="78" width="130" height="68" rx="9" fill="#fff3e8" stroke="#dc8741"/><text x="107" y="104" text-anchor="middle" font-size="12.5" font-weight="700" fill="#8a511d">200K / 1M 历史</text><text x="107" y="124" text-anchor="middle" font-size="11" fill="#536273">文档 + 工具记录</text>
+            <path d="M172 112H224" stroke="#8f96a0" stroke-width="2"/>
+            <rect x="224" y="70" width="152" height="84" rx="9" fill="#fff" stroke="#dc8741" stroke-width="2"/><text x="300" y="96" text-anchor="middle" font-size="12.5" font-weight="700" fill="#8a511d">DSA 打分器</text><text x="300" y="116" text-anchor="middle" font-size="11" fill="#536273">query-dependent Top-k</text><text x="300" y="134" text-anchor="middle" font-size="11" fill="#536273">约 1.5–2× 注意力节省</text>
+            <path d="M376 112H432" stroke="#8f96a0" stroke-width="2"/>
+            <rect x="432" y="70" width="150" height="84" rx="9" fill="#fff" stroke="#dc8741"/><text x="507" y="96" text-anchor="middle" font-size="12.5" font-weight="700" fill="#8a511d">精确稀疏 Attention</text><text x="507" y="116" text-anchor="middle" font-size="11" fill="#536273">只访问候选 token</text><text x="507" y="134" text-anchor="middle" font-size="11" fill="#536273">保留远程命中能力</text>
+            <path d="M582 112H634" stroke="#8f96a0" stroke-width="2"/>
+            <rect x="634" y="78" width="170" height="68" rx="9" fill="#f3edfb" stroke="#8068b5"/><text x="719" y="104" text-anchor="middle" font-size="12.5" font-weight="700" fill="#5d488d">256 专家 MoE</text><text x="719" y="124" text-anchor="middle" font-size="11" fill="#536273">744B 总量 / 40B 激活</text>
+            <line x1="42" y1="185" x2="804" y2="185" stroke="#dedbd4" stroke-dasharray="5 5"/>
+            <text x="40" y="220" font-size="17" font-weight="700" fill="#132238">后训练：环境在跑，优化器不停；能力用蒸馏跨阶段传递</text>
+            <rect x="42" y="250" width="134" height="58" rx="9" fill="#fff3e8" stroke="#dc8741"/><text x="109" y="274" text-anchor="middle" font-size="12.5" font-weight="700" fill="#8a511d">Reasoning RL</text><text x="109" y="293" text-anchor="middle" font-size="11" fill="#536273">数学 / 代码验证</text>
+            <rect x="245" y="240" width="154" height="78" rx="9" fill="#fff3e8" stroke="#dc8741" stroke-width="2"/><text x="322" y="266" text-anchor="middle" font-size="12.5" font-weight="700" fill="#8a511d">Agentic RL</text><text x="322" y="286" text-anchor="middle" font-size="11" fill="#536273">浏览器 / 终端 rollout</text><text x="322" y="303" text-anchor="middle" font-size="11" fill="#536273">异步环境执行</text>
+            <rect x="468" y="250" width="134" height="58" rx="9" fill="#fff3e8" stroke="#dc8741"/><text x="535" y="274" text-anchor="middle" font-size="12.5" font-weight="700" fill="#8a511d">General RL</text><text x="535" y="293" text-anchor="middle" font-size="11" fill="#536273">通用偏好 / 安全</text>
+            <rect x="660" y="240" width="150" height="78" rx="9" fill="#eaf7f2" stroke="#399c7b"/><text x="735" y="266" text-anchor="middle" font-size="12.5" font-weight="700" fill="#246d57">统一 GLM-5.x</text><text x="735" y="286" text-anchor="middle" font-size="11" fill="#536273">长时工程 Agent</text><text x="735" y="303" text-anchor="middle" font-size="11" fill="#536273">200K → 1M</text>
+            <path d="M176 279H245M399 279H468M602 279H660" stroke="#8f96a0" stroke-width="2"/>
+            <path d="M108 333C260 370 470 370 735 330" fill="none" stroke="#399c7b" stroke-width="2" stroke-dasharray="6 4"/><text x="407" y="363" text-anchor="middle" font-size="11" fill="#246d57">On-Policy Cross-Stage Distillation：把前阶段能力带到后阶段</text>
+          </g>
+        </svg>
+        <figcaption>异步 RL 的核心不是“更松的同步”，而是一个新的数据分布问题：吞吐提升后，必须显式处理轨迹陈旧与跨阶段遗忘。</figcaption>
+      </figure>
+
+      <h3>证据：DSA 保住多数长文能力，但不同任务的收益并不一致</h3>
+      <div class="table-wrap"><table class="cmp compact"><thead><tr><th>200K 中训后的长文任务</th><th>MLA</th><th>DSA</th><th>解读</th></tr></thead><tbody><tr><td>MQ-NIAH-128K</td><td>100.0</td><td>100.0</td><td>单针检索无损</td></tr><tr><td>MV-NIAH</td><td>95.5</td><td><strong>97.0</strong></td><td>多值检索略升</td></tr><tr><td>SQuAD</td><td>79.7</td><td><strong>86.0</strong></td><td>问答更好</td></tr><tr><td>HotpotQA</td><td><strong>66.3</strong></td><td>63.0</td><td>多跳任务略降</td></tr></tbody></table></div>
+      <p>这组混合结果比“全部无损”更有价值：内容稀疏路由能保住针式检索，却可能在需要多个弱相关证据链的任务上漏选位置。部署长上下文 Agent 时，必须用自己的仓库、日志和多跳工作流做命中率测试，而不能只看 NIAH。</p>
+      <blockquote class="aside"><strong>类比：</strong>DSA 像给图书馆装了一位实时选书员；slime 则像把“外勤调查”和“办公室写报告”分成两班人，办公室不再等所有外勤回齐，但要注明每份材料是哪一版政策下采集的。</blockquote>
+      <p class="source-strip">一手来源：<a href="https://arxiv.org/abs/2602.15763">GLM‑5 Technical Report</a> · <a href="https://github.com/zai-org/GLM-5">GLM‑5 官方仓库</a> · <a href="https://huggingface.co/zai-org/GLM-5.2">GLM‑5.2 模型卡</a> · <a href="https://huggingface.co/zai-org/GLM-5.3">GLM‑5.3 模型卡</a></p>
+    </section>
+
+    <section id="step">
+      <div class="chapter p4"><h2>04 · Step 3.5 Flash：不追求最激进结构，追求 11B 激活的系统密度 <span class="field-tag" style="background:var(--p4)">SWA · MTP-3 · MIS-PO</span></h2><p class="tagline">196B 总参数装进 128GB 级工作站目标，揭示了另一个前沿：模型、解码器和 RL 必须为同一部署边界协同设计。</p></div>
+      <p class="hook">动机：线性注意力理论上更省，但若它破坏 tree drafting 和并行验证，端到端生成反而可能更慢；最优骨干必须与推测解码一起看。</p>
+
+      <h3>方法：用保守的注意力换更激进的整机吞吐</h3>
+      <h4>① 196B / 11B：总容量与单 token 成本分离</h4>
+      <p>Step 3.5 Flash 是 196B 总参数、11B 激活的 MoE，256K 上下文，报告评测时输出上限为 64K。总规模控制在 200B 内，是为了让 FP8 权重有机会落入 128GB 级高端工作站；每 token 仅激活约 5.6%，则把长输出成本压到可持续范围。</p>
+
+      <h4>② 一层全局开路，之后按 3 SWA + 1 全局重复</h4>
+      <p>骨干先放一个全注意力层，再重复 11 个“3 个滑窗注意力 + 1 个全注意力”的块，SWA 窗口为 512，并加入 head-wise gating。局部层承担近期语法和推理连续性，全局层周期性建立跨窗口连接，因此它不是纯局部模型。</p>
+
+      <h4>③ 为什么没选线性注意力：推测解码的树需要可并行验证</h4>
+      <p>报告明确比较过线性注意力，最终选择 SWA 的原因之一，是标准点积注意力更容易支持 tree-based drafting 与 parallel verification。递归状态通常依赖严格的时间更新顺序；同一前缀上同时验证多个候选分支时，需要复制、分叉或重算状态，内核复杂度可能抵消理论节省。</p>
+
+      <h4>④ MTP-3：一次预测三个未来位置，为验证器准备候选树</h4>
+      <p>多 token 预测（MTP）使用三层未来头生成候选，再由主模型并行验证。它既是训练辅助目标，也是推理加速接口；因此 Step 的注意力选择不能只用训练 FLOPs 判断，而要看“候选生成—并行验证—接受长度”的完整路径。</p>
+
+      <h4>⑤ MIS-PO：不相信极端 importance weight，直接屏蔽不可信样本</h4>
+      <p>MoE 在 off-policy RL 中更敏感：旧策略与新策略即使只在少量路由上变化，也可能放大概率比率。MIS-PO 用二元 mask 筛掉偏差过大的 token 或轨迹，而不是让极端 importance weight 主导梯度。</p>
+      <div class="equation">m(τ) = 1[ ρ(τ) ∈ [ρ<sub>min</sub>,ρ<sub>max</sub>] ]；　L = E[m(τ)·L<sub>policy</sub>(τ)]</div>
+      <p class="eq-note"><strong>白话翻译：</strong>旧模型留下的经验如果和当前模型相差太大，就先不学，而不是给它一个巨大权重“硬纠正”；这是对 MIS-PO 过滤思想的简化表达。</p>
+
+      <figure>
+        <svg class="viz" viewBox="0 0 880 380" role="img" aria-labelledby="step-title step-desc">
+          <title id="step-title">Step 3.5 Flash 的混合注意力与推测解码</title><desc id="step-desc">模型以一个全局层开头，之后重复三个滑窗层和一个全局层，并用三个 MTP 头生成候选树供主模型并行验证。</desc>
+          <rect x="18" y="18" width="844" height="344" rx="12" fill="#fffafb"/>
+          <g font-family="system-ui">
+            <text x="40" y="50" font-size="17" font-weight="700" fill="#132238">注意力骨干：局部高频、全局低频</text>
+            <rect x="42" y="77" width="90" height="52" rx="8" fill="#fbeaf0" stroke="#bf5e71"/><text x="87" y="108" text-anchor="middle" font-size="12" font-weight="700" fill="#8c4050">Full</text>
+            <path d="M132 103H164" stroke="#949ba5" stroke-width="2"/>
+            <g text-anchor="middle"><rect x="164" y="77" width="90" height="52" rx="8" fill="#fff" stroke="#bf5e71"/><text x="209" y="100" font-size="12" font-weight="700" fill="#8c4050">SWA</text><text x="209" y="116" font-size="10.5" fill="#65707a">W=512</text><rect x="270" y="77" width="90" height="52" rx="8" fill="#fff" stroke="#bf5e71"/><text x="315" y="100" font-size="12" font-weight="700" fill="#8c4050">SWA</text><text x="315" y="116" font-size="10.5" fill="#65707a">W=512</text><rect x="376" y="77" width="90" height="52" rx="8" fill="#fff" stroke="#bf5e71"/><text x="421" y="100" font-size="12" font-weight="700" fill="#8c4050">SWA</text><text x="421" y="116" font-size="10.5" fill="#65707a">W=512</text><rect x="482" y="77" width="90" height="52" rx="8" fill="#fbeaf0" stroke="#bf5e71"/><text x="527" y="108" font-size="12" font-weight="700" fill="#8c4050">Full</text></g>
+            <text x="618" y="108" font-size="23" fill="#777">× 11 blocks</text>
+            <rect x="728" y="77" width="96" height="52" rx="8" fill="#f3edfb" stroke="#8068b5"/><text x="776" y="100" text-anchor="middle" font-size="12" font-weight="700" fill="#5d488d">MoE</text><text x="776" y="116" text-anchor="middle" font-size="10.5" fill="#65707a">11B active</text>
+            <line x1="42" y1="170" x2="824" y2="170" stroke="#dedbd4" stroke-dasharray="5 5"/>
+            <text x="40" y="205" font-size="17" font-weight="700" fill="#132238">MTP-3：先长出候选树，再一次验证多条分支</text>
+            <rect x="44" y="242" width="112" height="56" rx="9" fill="#fbeaf0" stroke="#bf5e71"/><text x="100" y="265" text-anchor="middle" font-size="12.5" font-weight="700" fill="#8c4050">主隐藏状态</text><text x="100" y="283" text-anchor="middle" font-size="11" fill="#65707a">prefix</text>
+            <path d="M156 270H211" stroke="#949ba5" stroke-width="2"/>
+            <circle cx="238" cy="270" r="24" fill="#fff" stroke="#bf5e71"/><text x="238" y="274" text-anchor="middle" font-size="11" fill="#8c4050">MTP-1</text>
+            <path d="M262 270H310" stroke="#949ba5" stroke-width="2"/>
+            <circle cx="337" cy="243" r="23" fill="#fff" stroke="#bf5e71"/><circle cx="337" cy="297" r="23" fill="#fff" stroke="#bf5e71"/><text x="337" y="247" text-anchor="middle" font-size="10.5" fill="#8c4050">MTP-2</text><text x="337" y="301" text-anchor="middle" font-size="10.5" fill="#8c4050">MTP-2</text>
+            <path d="M360 243L409 220M360 243L409 252M360 297L409 286M360 297L409 320" stroke="#949ba5" stroke-width="2"/>
+            <g fill="#fff" stroke="#bf5e71"><circle cx="431" cy="218" r="21"/><circle cx="431" cy="256" r="21"/><circle cx="431" cy="294" r="21"/><circle cx="431" cy="332" r="21"/></g>
+            <g font-size="10" text-anchor="middle" fill="#8c4050"><text x="431" y="222">MTP-3</text><text x="431" y="260">MTP-3</text><text x="431" y="298">MTP-3</text><text x="431" y="336">MTP-3</text></g>
+            <path d="M455 275H535" stroke="#949ba5" stroke-width="2"/>
+            <rect x="535" y="232" width="150" height="82" rx="9" fill="#eaf7f2" stroke="#399c7b" stroke-width="2"/><text x="610" y="258" text-anchor="middle" font-size="12.5" font-weight="700" fill="#246d57">主模型并行验证</text><text x="610" y="278" text-anchor="middle" font-size="11" fill="#65707a">点积注意力易做树分支</text><text x="610" y="295" text-anchor="middle" font-size="11" fill="#65707a">一次接受多个 token</text>
+            <path d="M685 273H730" stroke="#949ba5" stroke-width="2"/>
+            <rect x="730" y="244" width="94" height="58" rx="9" fill="#eaf7f2" stroke="#399c7b"/><text x="777" y="268" text-anchor="middle" font-size="12" font-weight="700" fill="#246d57">更高吞吐</text><text x="777" y="286" text-anchor="middle" font-size="10.5" fill="#65707a">低延迟输出</text>
+          </g>
+        </svg>
+        <figcaption>Step 的选择说明：注意力复杂度不是唯一目标；是否兼容推测解码、显存边界与现有内核，可能更决定用户实际看到的速度。</figcaption>
+      </figure>
+
+      <h3>证据：小激活预算覆盖推理、代码与工具任务</h3>
+      <div class="stat-grid"><div class="stat"><b>85.4%</b><span>IMO-AnswerBench（报告设置）</span></div><div class="stat"><b>86.4%</b><span>LiveCodeBench v6（报告设置）</span></div><div class="stat"><b>88.2%</b><span>τ²-Bench（报告设置）</span></div></div>
+      <p>报告还给出 BrowseComp（含上下文管理）69.0%、Terminal-Bench 2.0 51.0%，以及 base model 在 SimpleQA 上 31.6、对比 DeepSeek-V3.2-Exp-Base 的 27.0。它们说明 11B 激活并不等于“小能力”，但不同模型的工具脚手架、上下文管理与输出预算并不一致，因此这里不据此建立总排名。</p>
+      <blockquote class="aside"><strong>类比：</strong>线性注意力像极省油的单轨列车，SWA + 全局层像高速公路网；Step 选择后者，是因为推测解码要让多辆候选车同时上路、同时验票，整条运输链反而更顺。</blockquote>
+      <p class="source-strip">一手来源：<a href="https://arxiv.org/abs/2602.10604">Step 3.5 Flash Technical Report</a> · <a href="https://huggingface.co/stepfun-ai/Step-3.5-Flash-FP8">官方 FP8 模型卡</a></p>
+    </section>
+
+    <section id="vlm">
+      <div class="chapter p5"><h2>05 · 原生 VLM 底座：多模态从“接口”进入“世界模型” <span class="field-tag" style="background:var(--p5)">Early Fusion · Omni</span></h2><p class="tagline">Qwen3.5/3.8/Flash‑Next、ERNIE 5、MiniMax M3、MiMo V2.5 与 Seed 2.x 共同表明：视觉、语音和动作不再只在模型入口拼接，而要贯穿预训练、RL 与工具执行。</p></div>
+      <p class="hook">动机：一个电脑操作 Agent 若只在开头“看一眼截图”，之后仍以纯文本推理，它就无法持续感知页面变化、声音反馈和操作后果；多模态必须进入每一轮状态更新。</p>
+
+      <h3>共同变化：同一骨干、同一轨迹、不同输出头</h3>
+      <h4>① Qwen3.5：原生视觉语言与 Gated DeltaNet 同时落地</h4>
+      <p>Qwen3.5-397B-A17B 是 397B 总参数、17B 激活、60 层的原生视觉语言 MoE。其核心布局可写成 15 组 <code>3 ×（Gated DeltaNet → MoE）+ 1 ×（Gated Attention → MoE）</code>：四分之三是线性/递归注意力，四分之一用标准注意力补足精确全局访问；512 个专家中每 token 路由 10 个，另有 1 个共享专家。</p>
+      <p>模型卡给出 262,144 token 原生上下文，可扩到约 1,010,000；预训练与后训练覆盖 201 种语言，并在百万级 Agent 环境中进行异步 RL。它把“多模态”和“高效长上下文”放进同一底座，而不是先训练一个文本模型、再在末端挂视觉适配器。</p>
+
+      <h4>② Qwen3.8 与 Qwen3.5-Omni：规模、音视频和开放权重分成两条支线</h4>
+      <p>8 月的 Qwen3.8 延续 Qwen3.5 架构，先开放 2.4T / 95B 激活版本，再开放 27B 等配置；官方把它定位为首个 Qwen-Max 级开放权重发布，并加入可调 reasoning effort 与思考状态保留。另一条 Qwen3.5-Omni 支线以 Thinker + Talker 组织理解与语音生成，报告披露超过 1 亿小时音视频数据、256K 上下文与 ARIA 文本/语音单元对齐，目标是让实时听说、视频理解和工具调用共用一个 Agent 状态。</p>
+
+      <h4>②b Qwen3.8‑Flash‑Next：轻量支线把“模型外参数”也纳入容量设计</h4>
+      <p>Flash‑Next 不靠简单缩层得到 6B 激活。它把大部分历史压入 Gated DeltaNet 的固定状态，用每四层一个 QSA 保留精确远程检索，再把 51B n‑gram embedding 表放在主存中按需预取。这样一部分“记忆容量”不参与每 token 的 Transformer 计算，也不长期占用加速器显存。Gated Residual 的四分支残差则补偿轻量骨干的表示容量；报告的核心经验是，损失、下游准确率、真实 kernel 成本和稳定性必须一起调，单看 loss 甚至会选错 n‑gram 词表规模。</p>
+
+      <h4>③ ERNIE 5：把四种模态统一成“下一组 token”</h4>
+      <p>ERNIE 5.0 官方称总参数 2.4T，采用模态无关的超稀疏 MoE，激活率低于 3%。文本使用 NTP + MTP，视觉预测下一帧及尺度，音频预测下一组 codec token；统一的 Next-Group-of-Tokens（NGoT）目标让理解和生成不再由互不相干的模型分别承担。</p>
+      <div class="equation">L<sub>NGoT</sub> = − Σ<sub>m∈{text,image,video,audio}</sub> Σ<sub>g</sub> log p(x<sub>g</sub><sup>(m)</sup> | x<sub>&lt;g</sub>)</div>
+      <p class="eq-note"><strong>白话翻译：</strong>无论下一步是一个词、一组图像 patch、下一帧尺度还是一段音频 codec，都被改写成“预测下一组离散单元”；统一的是训练接口，不代表四种信号的 tokenizer 完全相同。</p>
+
+      <h4>④ UMRL / AHRL：对不会做的题给提示，但提示要随学习退场</h4>
+      <p>ERNIE 的统一多模态 RL（UMRL）加入无偏 replay、多粒度 importance sampling 与 positive masking；Adaptive Hint-based RL（AHRL）在难例上按学习进度给提示。随着某样本通过率上升，提示概率指数下降，避免模型长期依赖答案线索。</p>
+      <div class="equation">p<sub>hint</sub>(x<sup>t</sup>) = p<sub>initial</sub> · exp(−γt · pass<sub>initial</sub><sup>x</sup>)</div>
+      <p class="eq-note"><strong>白话翻译：</strong>一开始不会就多给脚手架；练得越久、原本越容易通过，提示退得越快。目标不是“带答案训练”，而是把难度调到模型刚好能探索出成功轨迹。</p>
+
+      <h4>⑤ MiniMax / MiMo / Seed：同为原生多模态，注意力却没有统一答案</h4>
+      <p>MiniMax M2 的技术报告曾测试混合 SWA，因长上下文退化而坚持全注意力；到 M3，规模增至 428B / 23B 激活、上下文 1M，并改用 MiniMax Sparse Attention，同时加入原生多模态与桌面电脑操作。MiMo V2.5 Pro 则用约 1.02T / 42B 激活、1M 上下文和 SWA/全注意力混合；其较小版本披露 70 层中 60 个 SWA、10 个全局层、窗口 128，理论注意力计算约为纯全注意力的七分之一。Seed 2.0/2.1 强调多模态生产力 Agent 与低延迟，但未公开参数和注意力结构，因此只能纳入产品路线，不能加入结构比较。</p>
+
+      <figure>
+        <svg class="viz" viewBox="0 0 880 420" role="img" aria-labelledby="vlm-title vlm-desc">
+          <title id="vlm-title">原生多模态基座的统一闭环</title><desc id="vlm-desc">文本、图像、视频和音频经过各自 tokenizer，进入共享序列和稀疏 MoE 骨干，再输出语言、图像、语音或工具动作，并由环境反馈进入强化学习。</desc>
+          <rect x="18" y="18" width="844" height="384" rx="12" fill="#fcfbff"/>
+          <g font-family="system-ui">
+            <text x="40" y="50" font-size="17" font-weight="700" fill="#132238">“原生”不是一个编码器标签，而是一条从预训练到行动反馈的闭环</text>
+            <g text-anchor="middle"><rect x="40" y="84" width="112" height="48" rx="8" fill="#f3edfb" stroke="#8068b5"/><text x="96" y="113" font-size="12" font-weight="700" fill="#5d488d">文本 token</text><rect x="40" y="145" width="112" height="48" rx="8" fill="#f3edfb" stroke="#8068b5"/><text x="96" y="174" font-size="12" font-weight="700" fill="#5d488d">图像 patch</text><rect x="40" y="206" width="112" height="48" rx="8" fill="#f3edfb" stroke="#8068b5"/><text x="96" y="235" font-size="12" font-weight="700" fill="#5d488d">视频帧组</text><rect x="40" y="267" width="112" height="48" rx="8" fill="#f3edfb" stroke="#8068b5"/><text x="96" y="296" font-size="12" font-weight="700" fill="#5d488d">音频 codec</text></g>
+            <path d="M152 108C210 108 196 174 250 174M152 169H250M152 230C210 230 196 190 250 190M152 291C210 291 196 206 250 206" fill="none" stroke="#8b829c" stroke-width="2"/>
+            <rect x="250" y="126" width="164" height="118" rx="10" fill="#fff" stroke="#8068b5" stroke-width="2"/><text x="332" y="154" text-anchor="middle" font-size="13" font-weight="700" fill="#5d488d">统一序列 / 分组目标</text><text x="332" y="176" text-anchor="middle" font-size="11" fill="#59636f">Early Fusion · NGoT</text><text x="332" y="196" text-anchor="middle" font-size="11" fill="#59636f">位置、时间、尺度编码</text><text x="332" y="216" text-anchor="middle" font-size="11" fill="#59636f">跨模态共同预训练</text>
+            <path d="M414 185H466" stroke="#8b829c" stroke-width="2"/>
+            <rect x="466" y="115" width="172" height="140" rx="10" fill="#fff" stroke="#8068b5" stroke-width="2"/><text x="552" y="144" text-anchor="middle" font-size="13" font-weight="700" fill="#5d488d">共享稀疏 MoE 骨干</text><text x="552" y="166" text-anchor="middle" font-size="11" fill="#59636f">DeltaNet / Sparse / SWA</text><text x="552" y="186" text-anchor="middle" font-size="11" fill="#59636f">按 workload 选择</text><rect x="489" y="205" width="58" height="30" rx="6" fill="#f3edfb"/><rect x="557" y="205" width="58" height="30" rx="6" fill="#f3edfb"/><text x="518" y="225" text-anchor="middle" font-size="10" fill="#5d488d">Expert A</text><text x="586" y="225" text-anchor="middle" font-size="10" fill="#5d488d">Expert B</text>
+            <path d="M638 185H690" stroke="#8b829c" stroke-width="2"/>
+            <g text-anchor="middle"><rect x="690" y="84" width="132" height="48" rx="8" fill="#eaf7f2" stroke="#399c7b"/><text x="756" y="113" font-size="12" font-weight="700" fill="#246d57">文本 / 代码</text><rect x="690" y="145" width="132" height="48" rx="8" fill="#eaf7f2" stroke="#399c7b"/><text x="756" y="174" font-size="12" font-weight="700" fill="#246d57">图像 / 视频</text><rect x="690" y="206" width="132" height="48" rx="8" fill="#eaf7f2" stroke="#399c7b"/><text x="756" y="235" font-size="12" font-weight="700" fill="#246d57">语音 Talker</text><rect x="690" y="267" width="132" height="48" rx="8" fill="#eaf7f2" stroke="#399c7b"/><text x="756" y="296" font-size="12" font-weight="700" fill="#246d57">工具动作</text></g>
+            <path d="M756 315C756 366 332 378 332 244" fill="none" stroke="#bf5e71" stroke-width="2.5" stroke-dasharray="7 5"/>
+            <rect x="468" y="325" width="172" height="48" rx="8" fill="#fff0f4" stroke="#bf5e71"/><text x="554" y="346" text-anchor="middle" font-size="12" font-weight="700" fill="#8c4050">环境反馈 / 多模态 RL</text><text x="554" y="363" text-anchor="middle" font-size="10.5" fill="#59636f">页面变化 · 音频反馈 · 成功条件</text>
+          </g>
+        </svg>
+        <figcaption>真正的原生多模态是闭环：模型不仅理解多种输入，也必须预测多种输出，并把动作后的新视觉/声音重新送入训练与推理状态。</figcaption>
+      </figure>
+
+      <h3>证据：不同模型的“原生”落在不同层级</h3>
+      <div class="table-wrap"><table class="cmp"><thead><tr><th>系列</th><th>预训练融合</th><th>生成能力</th><th>Agent 闭环</th><th>仍需警惕</th></tr></thead><tbody><tr><td>Qwen3.5 / 3.8 / Flash‑Next</td><td>视觉语言 early fusion；Omni 加音视频；Next 优化轻量骨干</td><td>文本、视觉；Omni 语音 Talker</td><td>百万环境异步 RL</td><td>Omni、旗舰与 Flash‑Next 的目标和评测口径不同</td></tr><tr><td>ERNIE 5</td><td>四模态从头联合；NGoT</td><td>文本/图像/视频/音频统一自回归</td><td>UMRL + AHRL</td><td>权重与大量系统细节未公开</td></tr><tr><td>MiniMax M3</td><td>原生多模态</td><td>视觉理解与生成链路</td><td>桌面 computer use</td><td>MSA 完整细节与跨环境复现</td></tr><tr><td>MiMo V2.5 Pro</td><td>视觉/音频编码器进入底座</td><td>多模态理解为主</td><td>MOPD + Agent RL</td><td>不同配置的层数/窗口不可混用</td></tr><tr><td>Seed 2.1</td><td>官方称原生多模态</td><td>产品化多模态交互</td><td>Pro/Turbo 生产力 Agent</td><td>参数、结构与训练数据未披露</td></tr></tbody></table></div>
+      <blockquote class="aside"><strong>类比：</strong>旧式 VLM 像给文字大脑配一位“看图翻译员”；2026 的原生 VLM 更像所有感官都进入同一个值班室，任何一次点击、听见或看见都能改变下一步计划。</blockquote>
+      <p class="source-strip">一手来源：<a href="https://huggingface.co/Qwen/Qwen3.5-397B-A17B">Qwen3.5 模型卡</a> · <a href="https://github.com/QwenLM/Qwen3.8">Qwen3.8 官方仓库</a> · <a href="https://github.com/QwenLM/Qwen3.8-Flash-Next/blob/main/tech_report.pdf">Qwen3.8‑Flash‑Next Technical Report</a> · <a href="https://arxiv.org/abs/2604.15804">Qwen3.5‑Omni Report</a> · <a href="https://arxiv.org/abs/2602.04705">ERNIE 5.0 Technical Report</a> · <a href="https://ernie.baidu.com/blog/posts/ernie5.0/">ERNIE 官方发布</a> · <a href="https://www.minimax.io/blog/minimax-m3">MiniMax M3 发布</a> · <a href="https://mimo.xiaomi.com/mimo-v2-5-pro/">MiMo V2.5 Pro 发布</a> · <a href="https://seed.bytedance.com/en/seed2_1">Seed 2.1 发布</a></p>
+    </section>
+
+    <section id="overseas">
+      <div class="chapter p6"><h2>06 · 海外路线分化：闭源实验室卖“长时工作”，开放路线交付“可审计栈” <span class="field-tag" style="background:var(--p6)">Agent Product · Open Stack</span></h2><p class="tagline">GPT‑6 Astra、Claude Fable 5.1、Gemini 3.8 与 Grok 4.6 的共同语言是行动、预算和安全边界；Nemotron 则用开放权重、量化与 recipe 回答可部署性。</p></div>
+      <p class="hook">动机：当厂商不公开参数量、注意力和训练 token 时，研究者仍可比较任务边界、速度/价格档位、上下文与工具能力，但不能从产品表现反推内部结构。</p>
+
+      <h3>可核验的变化：发布节奏、任务长度与交互形态</h3>
+      <h4>① OpenAI：GPT-5.4 → 5.5 → 5.6，把同一家族拆成性能/成本梯度</h4>
+      <p>OpenAI 在 3 月、4 月和 7 月连续更新 GPT-5 系列，GPT-5.6 以 Sol、Terra、Luna 区分旗舰、均衡和高效率档位，重点覆盖编码、知识、网络安全与科学任务。官方发布页提供能力与产品边界，但未披露参数、MoE 路由或注意力类型，因此“GPT-5.6 使用某种线性注意力”之类说法都不应进入技术结论。</p>
+
+      <h4>② Anthropic：从 Opus 4.6 连续演进到 Opus 5，优化对象是长时 Agent</h4>
+      <p>Anthropic 在 2 月 Opus 4.6 后继续发布 4.7、4.8、Sonnet 5 与 7 月 Opus 5；4.6 起产品提供 1M context beta，后续发布持续强调软件工程、研究、安全和长任务稳定性。版本密度本身反映了新的研发闭环：模型通过真实 Agent 轨迹暴露失败，再快速进入下一轮后训练，而不是等待一次大代际预训练。</p>
+
+      <h4>③ Google：Gemini 3.5 / 3.6 把“智能 × 速度 × 原生多模态”做成多档服务</h4>
+      <p>Gemini 3.5 在 5 月强化前沿推理与行动，3.5 Flash 公开 Terminal-Bench 2.1、MCP Atlas 与 CharXiv 等结果；7 月 3.6 Flash、3.5 Flash-Lite 与 Cyber 又分别切向速度、低价和安全代理。官方称 Flash-Lite 可达约 350 output token/s，定价为每百万输入 token 0.30 美元、输出 2.50 美元；Gemini Omni 则把实时多模态交互进一步产品化。</p>
+
+      <h4>④ xAI：Grok 4.5 → 4.6，以模型生成轨迹扩充工程与推理后训练</h4>
+      <p>7 月 Grok 4.5、8 月 Grok 4.6 聚焦长时 Agent、交互式视觉工作和更完整工程执行。4.6 发布页说明使用更长的补充训练、模型生成的推理与工程数据、SFT 与 RL；这能确认后训练方向，却仍不足以判断其骨干是 dense、MoE、线性还是稀疏注意力。</p>
+
+      <h4>⑤ NVIDIA Nemotron 3：把可审计性本身做成产品差异</h4>
+      <p>Nemotron 3 Super 为 120B / 12B 激活，以 Mamba-2 与全局注意力混合、LatentMoE 和 MTP-2 支持 1M；Ultra 扩到 550B / 55B，并同时开放 base、post-trained、量化版本、训练数据和 GenRM 奖励模型。8 月的 3.5 Lightning 再把同一路线缩到 30B / 3B 激活，给出单个 DGX Spark/H100、NVFP4 与三种推测解码 recipe。它代表海外另一种竞争逻辑：不只提供 API 分数，而是让企业能检查训练材料、在自有硬件量化，并替换 Agent 系统中的奖励与推理组件。</p>
+
+      <h4>⑥ OpenAI GPT‑6 Astra：电脑操作、安全边界与上下文记忆成为同一代能力</h4>
+      <p>9 月 3 日发布的 Astra 把电脑操作、浏览、编码、网络安全、科学和专业文档统一到同一旗舰。官方报告 OSWorld 2.0 为 72.6%，每任务约 40 分钟，对比 GPT‑5.6 Sol 的 65.7% 与约 75 分钟；长上下文 MRCR v2 在 512K—1M 区间为 96.3%。Codex 侧新增跨 context window 的笔记与可搜索旧窗口，说明闭源系统也开始把“记忆管理”从一次性压缩升级为可检索状态。参数、MoE 与注意力仍未披露，因此这些只能归因于整体模型与 harness，不能倒推架构。</p>
+
+      <h4>⑦ Claude Fable 5.1：同一模型用安全策略和缓存经济性切分产品</h4>
+      <p>Fable 5.1 与 Mythos 5.1 是同一底层模型，差别在 safeguards 与访问范围：Fable 普遍可用，Mythos 面向获批的网络安全和生命科学用户。Fable 5.1 的 cache read 从每百万 token 1 美元降到 0.25 美元，Anthropic 按 8 月真实工作负载估计典型成本约降 25%、高度 Agent 化任务可降至约 45%。这反映了新的成本中心：长轨迹反复读取同一上下文时，cache read 价格可能比标称输入价更决定总成本。</p>
+
+      <h4>⑧ Gemini 3.8 Flash / Cyber：同一核心智能按任务风险分流</h4>
+      <p>9 月 2 日的 3.8 Flash 面向长程编码和自主 Agent，Cyber 版本则只向可信防守方开放；二者共享基础智能。官方给出 HLE‑Verified 54.9%，并强调较高 effort 会增加推理步数和工具调用；低 effort 或继续使用 3.7 则偏向成本优先。和 Claude 的 Fable/Mythos 类似，模型能力、推理预算和安全访问不再是三个独立开关，而是同一产品面的联合设计。</p>
+
+      <div class="equation">T<sub>task</sub> ≈ N<sub>steps</sub>·(T<sub>model</sub> + T<sub>tool</sub>) + T<sub>rework</sub></div>
+      <p class="eq-note"><strong>白话翻译：</strong>长时 Agent 的总耗时不是一次回答速度，而是“每一步模型延迟 + 工具延迟”重复很多次，再加上失败返工；因此小幅可靠性提升可能比单次 token/s 更值钱。该式是任务成本分解，不是任何厂商的训练公式。</p>
+
+      <figure>
+        <svg class="viz" viewBox="0 0 880 395" role="img" aria-labelledby="os-title os-desc">
+          <title id="os-title">海外闭源产品栈与开放模型栈的证据边界</title><desc id="os-desc">左侧是闭源厂商可观察的产品能力但未知的底层结构，右侧是 Nemotron 可审计的权重、数据、量化和奖励模型。</desc>
+          <rect x="18" y="18" width="844" height="359" rx="12" fill="#fbfdfe"/>
+          <g font-family="system-ui">
+            <text x="40" y="50" font-size="17" font-weight="700" fill="#132238">两种交付物：能力 API 与可审计栈</text>
+            <rect x="40" y="76" width="374" height="260" rx="12" fill="#f2f8f9" stroke="#348c9d" stroke-width="2"/>
+            <text x="227" y="105" text-anchor="middle" font-size="14" font-weight="700" fill="#246d78">闭源前沿：GPT / Claude / Gemini / Grok</text>
+            <g text-anchor="middle"><rect x="72" y="130" width="130" height="50" rx="8" fill="#fff" stroke="#348c9d"/><text x="137" y="151" font-size="11.5" font-weight="700" fill="#246d78">可观察</text><text x="137" y="168" font-size="10.5" fill="#5c6770">工具 / 视觉 / 长任务</text><rect x="250" y="130" width="130" height="50" rx="8" fill="#fff" stroke="#348c9d"/><text x="315" y="151" font-size="11.5" font-weight="700" fill="#246d78">可度量</text><text x="315" y="168" font-size="10.5" fill="#5c6770">延迟 / 价格 / 成功率</text></g>
+            <rect x="72" y="210" width="308" height="92" rx="8" fill="#eef0f2" stroke="#81878e" stroke-dasharray="6 4"/><text x="226" y="235" text-anchor="middle" font-size="12.5" font-weight="700" fill="#626970">不可从外部确定</text><text x="226" y="258" text-anchor="middle" font-size="11" fill="#626970">参数规模 · MoE 路由 · 注意力类型</text><text x="226" y="279" text-anchor="middle" font-size="11" fill="#626970">预训练 token · 数据配方 · RL 损失</text>
+            <rect x="466" y="76" width="374" height="260" rx="12" fill="#f3f8f5" stroke="#399c7b" stroke-width="2"/>
+            <text x="653" y="105" text-anchor="middle" font-size="14" font-weight="700" fill="#246d57">开放栈：Nemotron 3 Ultra</text>
+            <g text-anchor="middle"><rect x="498" y="130" width="130" height="50" rx="8" fill="#fff" stroke="#399c7b"/><text x="563" y="151" font-size="11.5" font-weight="700" fill="#246d57">开放权重</text><text x="563" y="168" font-size="10.5" fill="#5c6770">550B / 55B active</text><rect x="676" y="130" width="130" height="50" rx="8" fill="#fff" stroke="#399c7b"/><text x="741" y="151" font-size="11.5" font-weight="700" fill="#246d57">混合骨干</text><text x="741" y="168" font-size="10.5" fill="#5c6770">Mamba-2 + Global</text><rect x="498" y="205" width="130" height="50" rx="8" fill="#fff" stroke="#399c7b"/><text x="563" y="226" font-size="11.5" font-weight="700" fill="#246d57">数据 / 配方</text><text x="563" y="243" font-size="10.5" fill="#5c6770">可检查与再训练</text><rect x="676" y="205" width="130" height="50" rx="8" fill="#fff" stroke="#399c7b"/><text x="741" y="226" font-size="11.5" font-weight="700" fill="#246d57">量化 / GenRM</text><text x="741" y="243" font-size="10.5" fill="#5c6770">部署与奖励组件</text></g>
+            <rect x="544" y="280" width="218" height="34" rx="7" fill="#eaf7f2"/><text x="653" y="302" text-anchor="middle" font-size="11.5" font-weight="700" fill="#246d57">代价：集成责任回到部署方</text>
+            <path d="M414 205H466" stroke="#a2a7ad" stroke-width="2" stroke-dasharray="5 4"/>
+            <text x="440" y="193" text-anchor="middle" font-size="10.5" fill="#777">不是高低之分</text>
+          </g>
+        </svg>
+        <figcaption>闭源模型可以在能力上领先，开放模型可以在可审计性上领先；二者回答的是不同采购与研究问题，不能用一个总分抹平。</figcaption>
+      </figure>
+
+      <h3>证据：只比较官方真正披露的字段</h3>
+      <div class="table-wrap"><table class="cmp"><thead><tr><th>系列</th><th>截至 9/20 的 2026 节点</th><th>公开可核验</th><th>不可据此推断</th></tr></thead><tbody><tr><td>OpenAI GPT</td><td>5.4 → 5.5 → 5.6 → GPT‑6 Astra（9月）</td><td>1M 级长上下文评测、电脑操作、API 价格、effort 与安全边界</td><td>参数量、MoE、注意力</td></tr><tr><td>Claude</td><td>Opus 4.6 → 4.7 → 4.8 → Opus 5 → Fable/Mythos 5.1（9月）</td><td>1M context；长时工作；同模型不同 safeguards；缓存价格</td><td>骨干结构和训练规模</td></tr><tr><td>Gemini</td><td>3.5 → 3.6 → 3.7 → 3.8 Flash/Cyber（9月）</td><td>多模态、速度/价格、Agent、effort 与可信防守访问</td><td>参数规模和注意力实现</td></tr><tr><td>Grok</td><td>4.5（7月）→ 4.6（8月）</td><td>补充训练、模型生成数据、SFT + RL；交互视觉</td><td>dense/MoE、线性/稀疏</td></tr><tr><td>Nemotron</td><td>3 Super → Ultra → 3.5 Lightning（8月）</td><td>参数、Mamba/全局混合、1M、权重/数据/量化/推测解码</td><td>第三方环境中的真实集成成本</td></tr></tbody></table></div>
+      <blockquote class="aside"><strong>类比：</strong>闭源前沿像一辆成绩出色但封闭引擎盖的赛车，你能测圈速、油耗和可靠性；Nemotron 像一套交付设计图、零件和测试台的赛车平台，未必每条赛道最快，却能被企业拆开、改装和审计。</blockquote>
+      <p class="source-strip">一手来源：<a href="https://openai.com/index/gpt-6-astra/">OpenAI GPT‑6 Astra</a> · <a href="https://www.anthropic.com/claude-fable-and-mythos-5-1">Claude Fable / Mythos 5.1</a> · <a href="https://blog.google/innovation-and-ai/models-and-research/gemini-models/3-8-flash-and-3-8-flash-cyber/">Gemini 3.8 Flash / Cyber</a> · <a href="https://x.ai/news/grok-4-6">Grok 4.6</a> · <a href="https://research.nvidia.com/labs/nemotron/Nemotron-3-Ultra/">Nemotron 3 Ultra</a> · <a href="https://huggingface.co/nvidia/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-NVFP4">Nemotron 3.5 Lightning</a></p>
+    </section>
+
+    <section id="threads">
+      <h2 class="lvl0">横向串讲：六家公司叙事背后的四条共同主线</h2>
+      <p>把发布会语言拿掉，2026 的技术演进可以归并为四个系统变量：历史访问方式、环境内学习方式、每 token 激活预算，以及模态—动作闭环。它们互相制约：线性注意力节省的延迟可能被工具调用吞掉，Agent RL 得到的可靠性又可能大幅减少返工；因此单看参数、上下文或 benchmark 任一列都会失真。</p>
+
+      <h3 id="attention">主线一：别把所有“省注意力”都叫线性注意力</h3>
+      <div class="equation">Full: O(L²)　|　SWA: O(L·w)　|　Content-sparse: O(L·k)　|　Recurrent/linear: O(L·d<sub>state</sub>)</div>
+      <p class="eq-note"><strong>白话翻译：</strong>全注意力重看全部历史；SWA 只看固定邻域；内容稀疏按当前 query 挑 k 个远近位置；线性/递归方法把过去压进固定状态。它们的常数、训练并行度与硬件内核差别很大，复杂度符号不能直接换成真实速度。</p>
+
+      <figure>
+        <svg class="viz" viewBox="0 0 880 500" role="img" aria-labelledby="attn-title attn-desc">
+          <title id="attn-title">2026 主流高效注意力的四种类型</title><desc id="attn-desc">对比全注意力、滑窗注意力、内容稀疏注意力与线性递归注意力在访问历史、复杂度和代表模型上的差别。</desc>
+          <rect x="18" y="18" width="844" height="464" rx="12" fill="#fcfcfb"/>
+          <g font-family="system-ui">
+            <text x="40" y="50" font-size="17" font-weight="700" fill="#132238">历史怎样到达当前 token？四条路线不可互换</text>
+            <g transform="translate(38 76)">
+              <rect x="0" y="0" width="804" height="82" rx="9" fill="#fff5f5" stroke="#bf5e71"/>
+              <text x="18" y="25" font-size="13" font-weight="700" fill="#8c4050">A · 全注意力 Full Attention</text><text x="18" y="48" font-size="11" fill="#59636f">每个 query 与全部历史直接点积；检索最完整，成本随 L² 增长</text><text x="18" y="67" font-size="11" fill="#59636f">代表：MiniMax M2（报告测试混合 SWA 后仍选 Full）</text>
+              <g transform="translate(540 16)"><circle cx="15" cy="25" r="5" fill="#bf5e71"/><circle cx="52" cy="25" r="5" fill="#bf5e71"/><circle cx="89" cy="25" r="5" fill="#bf5e71"/><circle cx="126" cy="25" r="5" fill="#bf5e71"/><circle cx="163" cy="25" r="8" fill="#8c4050"/><path d="M15 25L163 25M52 25L163 25M89 25L163 25M126 25L163 25" stroke="#d28c99" stroke-width="1.6"/></g>
+            </g>
+            <g transform="translate(38 169)">
+              <rect x="0" y="0" width="804" height="82" rx="9" fill="#fff8ef" stroke="#dc8741"/>
+              <text x="18" y="25" font-size="13" font-weight="700" fill="#8a511d">B · 滑窗 SWA + 周期全局层</text><text x="18" y="48" font-size="11" fill="#59636f">局部层只看最近 w 个 token；全局层周期性跨窗传递，易兼容标准点积内核</text><text x="18" y="67" font-size="11" fill="#59636f">代表：Step 3.5（3:1, w=512）、MiMo V2（约 6:1, w=128）</text>
+              <g transform="translate(540 16)"><circle cx="15" cy="25" r="5" fill="#dc8741"/><circle cx="52" cy="25" r="5" fill="#dc8741"/><circle cx="89" cy="25" r="5" fill="#dc8741"/><circle cx="126" cy="25" r="5" fill="#dc8741"/><circle cx="163" cy="25" r="8" fill="#8a511d"/><path d="M89 25L163 25M126 25L163 25" stroke="#dda86f" stroke-width="2"/><path d="M15 9L163 9" stroke="#8a511d" stroke-width="1.5" stroke-dasharray="5 4"/></g>
+            </g>
+            <g transform="translate(38 262)">
+              <rect x="0" y="0" width="804" height="82" rx="9" fill="#eff5ff" stroke="#527fd3"/>
+              <text x="18" y="25" font-size="13" font-weight="700" fill="#294e92">C · 内容稀疏 Content-sparse</text><text x="18" y="48" font-size="11" fill="#59636f">先按 query 选择远近候选，再做精确注意力；访问集合随内容变化</text><text x="18" y="67" font-size="11" fill="#59636f">代表：DeepSeek CSA2、GLM DSA、Qwen QSA、MiniMax MSA</text>
+              <g transform="translate(540 16)"><circle cx="15" cy="25" r="5" fill="#b2bfd1"/><circle cx="52" cy="25" r="6" fill="#527fd3"/><circle cx="89" cy="25" r="5" fill="#b2bfd1"/><circle cx="126" cy="25" r="6" fill="#527fd3"/><circle cx="163" cy="25" r="8" fill="#294e92"/><path d="M52 25L163 25M126 25L163 25" stroke="#527fd3" stroke-width="2"/></g>
+            </g>
+            <g transform="translate(38 355)">
+              <rect x="0" y="0" width="804" height="96" rx="9" fill="#eff9f5" stroke="#399c7b"/>
+              <text x="18" y="25" font-size="13" font-weight="700" fill="#246d57">D · 线性 / 递归状态 Recurrent State</text><text x="18" y="48" font-size="11" fill="#59636f">历史持续写入固定状态 S；读取不扫描全部 token，但精确回看能力依赖状态容量与更新规则</text><text x="18" y="68" font-size="11" fill="#59636f">代表：Kimi KDA、Qwen Gated DeltaNet、NVIDIA Mamba-2；通常与全局 Attention 混合</text><text x="18" y="86" font-size="10.5" fill="#7a6262">注意：Mamba 是状态空间模型，不应与 top-k 稀疏注意力画等号。</text>
+              <g transform="translate(540 20)"><circle cx="15" cy="25" r="5" fill="#399c7b"/><circle cx="52" cy="25" r="5" fill="#399c7b"/><circle cx="89" cy="25" r="5" fill="#399c7b"/><rect x="112" y="5" width="54" height="40" rx="7" fill="#e0f4eb" stroke="#399c7b"/><text x="139" y="29" text-anchor="middle" font-size="11" font-weight="700" fill="#246d57">S<tspan baseline-shift="sub" font-size="8">t</tspan></text><path d="M15 25H112M52 25H112M89 25H112" stroke="#7bbca5" stroke-width="1.6"/><circle cx="190" cy="25" r="8" fill="#246d57"/><path d="M166 25H182" stroke="#399c7b" stroke-width="2"/></g>
+            </g>
+          </g>
+        </svg>
+        <figcaption>最稳妥的术语边界：SWA 是按距离稀疏，DSA/CSA/MSA 是按内容稀疏，KDA/DeltaNet/Mamba 是递归状态；只有最后一类通常被严格称为线性时间骨干。</figcaption>
+      </figure>
+
+      <div class="table-wrap"><table class="cmp"><thead><tr><th>选择</th><th>长距离信息怎么来</th><th>主要优势</th><th>主要风险</th><th>2026 代表</th></tr></thead><tbody><tr><td>Full</td><td>每层直接访问全部历史</td><td>精确、成熟、易做树验证</td><td>长上下文成本最高</td><td>MiniMax M2</td></tr><tr><td>SWA + Global</td><td>局部传播 + 周期全局层</td><td>标准内核、推测解码友好</td><td>全局层太少会断开远程证据</td><td>Step、MiMo</td></tr><tr><td>Content-sparse</td><td>query 相关 top-k 直接跳转</td><td>保留稀疏远程检索</td><td>选择器漏掉弱相关多跳证据</td><td>DeepSeek、GLM、MiniMax M3</td></tr><tr><td>Recurrent / Linear</td><td>从固定状态读出，混合全局层补锚点</td><td>解码随 L 近线性，KV 受控</td><td>状态压缩、分支验证和训练内核复杂</td><td>Kimi K3、Qwen3.5、Nemotron</td></tr></tbody></table></div>
+
+      <h3 id="rl">主线二：RL 从“答案可验证”升级为“环境可运行”</h3>
+      <p>2024–2025 的推理 RL 主要依赖数学、代码单元测试等可验证奖励；2026 的新难点是奖励稀疏、轨迹极长、工具会失败、环境本身还会变化。于是优化对象从一条答案变成整个 runtime：rollout 调度、沙箱快照、过期样本、策略合并和多 Agent 编排都进入算法边界。</p>
+
+      <figure>
+        <svg class="viz" viewBox="0 0 880 390" role="img" aria-labelledby="rl-title rl-desc">
+          <title id="rl-title">2026 强化学习系统的五级演进</title><desc id="rl-desc">从可验证推理奖励，到工具环境轨迹、异步和 off-policy 控制、on-policy 蒸馏，再到多 Agent 并行编排。</desc>
+          <rect x="18" y="18" width="844" height="354" rx="12" fill="#fdfcfb"/>
+          <g font-family="system-ui" text-anchor="middle">
+            <text x="440" y="50" font-size="17" font-weight="700" fill="#132238">奖励函数没消失，但“谁生成数据、何时更新、怎样复用”成为主问题</text>
+            <path d="M88 185H792" stroke="#c4c7cb" stroke-width="4"/>
+            <g><circle cx="98" cy="185" r="13" fill="#527fd3"/><rect x="40" y="82" width="116" height="78" rx="9" fill="#eef4ff" stroke="#527fd3"/><text x="98" y="108" font-size="12" font-weight="700" fill="#294e92">① Verifiable RL</text><text x="98" y="129" font-size="10.5" fill="#59636f">数学答案 / 测试</text><text x="98" y="146" font-size="10.5" fill="#59636f">GRPO 等</text></g>
+            <g><circle cx="270" cy="185" r="13" fill="#dc8741"/><rect x="208" y="215" width="124" height="82" rx="9" fill="#fff7ed" stroke="#dc8741"/><text x="270" y="241" font-size="12" font-weight="700" fill="#8a511d">② Agentic RL</text><text x="270" y="262" font-size="10.5" fill="#59636f">浏览器 / 终端 / 视觉</text><text x="270" y="279" font-size="10.5" fill="#59636f">稀疏最终奖励</text></g>
+            <g><circle cx="440" cy="185" r="13" fill="#bf5e71"/><rect x="374" y="82" width="132" height="78" rx="9" fill="#fff1f5" stroke="#bf5e71"/><text x="440" y="108" font-size="12" font-weight="700" fill="#8c4050">③ Async / Off-policy</text><text x="440" y="129" font-size="10.5" fill="#59636f">rollout 与训练解耦</text><text x="440" y="146" font-size="10.5" fill="#59636f">GLM slime · MIS-PO</text></g>
+            <g><circle cx="610" cy="185" r="13" fill="#399c7b"/><rect x="544" y="215" width="132" height="82" rx="9" fill="#edf9f4" stroke="#399c7b"/><text x="610" y="241" font-size="12" font-weight="700" fill="#246d57">④ On-policy Distill</text><text x="610" y="262" font-size="10.5" fill="#59636f">多教师 / 跨阶段</text><text x="610" y="279" font-size="10.5" fill="#59636f">V4 OPD · MiMo MOPD</text></g>
+            <g><circle cx="782" cy="185" r="13" fill="#8068b5"/><rect x="718" y="82" width="128" height="78" rx="9" fill="#f3edfb" stroke="#8068b5"/><text x="782" y="108" font-size="12" font-weight="700" fill="#5d488d">⑤ Multi-Agent RL</text><text x="782" y="129" font-size="10.5" fill="#59636f">并行拆解 / 汇总</text><text x="782" y="146" font-size="10.5" fill="#59636f">Kimi PARL</text></g>
+            <path d="M98 316C270 350 610 350 782 316" fill="none" stroke="#8b939d" stroke-width="2" stroke-dasharray="7 5"/>
+            <text x="440" y="350" font-size="11.5" fill="#59636f">共同目标：减少失败返工，而不是单纯让模型生成更长的思维链</text>
+          </g>
+        </svg>
+        <figcaption>五级并非严格时间顺序：一个模型可同时使用多个机制；它展示的是 RL 的系统边界从“损失函数”向“数据生产系统”扩张。</figcaption>
+      </figure>
+
+      <div class="table-wrap"><table class="cmp"><thead><tr><th>RL 难题</th><th>代表解法</th><th>解决什么</th><th>新风险</th></tr></thead><tbody><tr><td>轨迹太慢</td><td>GLM slime；Qwen / Nemotron / DeepSeek 异步 rollout</td><td>训练 GPU 不等环境</td><td>behavior policy 过期与短样本先返回偏差</td></tr><tr><td>旧轨迹偏差大</td><td>Step MIS-PO；DeepSeek staleness mask 与 off-policy 上限</td><td>避免极端 importance weight</td><td>过滤太多导致样本效率低</td></tr><tr><td>阶段间遗忘</td><td>DeepSeek OPD；GLM 跨阶段 OPD；MiMo MOPD</td><td>在学生分布上合并专家能力</td><td>教师偏差被集中继承</td></tr><tr><td>任务可并行</td><td>Kimi PARL；DeepSeek Agent Team + critical-path latency reward</td><td>学习拆解、调度与汇总，并奖励真实并行</td><td>通信成本与“为了 bonus 而委派”</td></tr><tr><td>难例零成功</td><td>ERNIE AHRL</td><td>用退火提示创造可学习轨迹</td><td>提示泄漏与依赖</td></tr><tr><td>环境数据不够</td><td>DeepSeek 任务三元组：problem + environment + verifier</td><td>自动构造可验证工作流与编码环境</td><td>验证器漏洞与合成分布偏移</td></tr></tbody></table></div>
+
+      <h3 id="moe">主线三：总参数继续膨胀，但决定解码成本的是“活跃预算”</h3>
+      <p>MoE 让知识容量与单 token 计算部分解耦，2026 主流开放模型的激活比例多在约 3%–6%，只有 Nemotron 3 Ultra 的公开比例约 10%。这并不等于激活比例越低越好：专家路由、跨卡通信、内存带宽和每层 attention 成本仍可能主导延迟。</p>
+      <div class="table-wrap"><table class="cmp compact"><thead><tr><th>模型</th><th>总参数</th><th>激活参数</th><th>粗略激活比</th><th>主要配套</th></tr></thead><tbody><tr><td>DeepSeek V4-Pro</td><td>1.6T</td><td>49B</td><td>3.1%</td><td>CSA/HCA + mHC</td></tr><tr><td>Kimi K3</td><td>2.8T</td><td>104B</td><td>3.7%</td><td>KDA/MLA + LatentMoE</td></tr><tr><td>Nemotron 3.5 Lightning</td><td>30B</td><td>3B</td><td>10.0%</td><td>Mamba/Attention + NVFP4 + spec decode</td></tr><tr><td>Qwen3.8‑Flash‑Next</td><td>125B + 51B 表</td><td>6B</td><td>4.8%（不含外部表）</td><td>GDN/QSA + gated residual</td></tr><tr><td>DeepSeek V4.1‑Flash</td><td>552B</td><td>8B prefill / 16B decode</td><td>1.4% / 2.9%</td><td>CED + CSA2 + FP4 KV</td></tr><tr><td>Qwen3.5</td><td>397B</td><td>17B</td><td>4.3%</td><td>DeltaNet/Full 3:1</td></tr><tr><td>DeepSeek V4-Flash</td><td>284B</td><td>13B</td><td>4.6%</td><td>压缩注意力 + MTP</td></tr><tr><td>GLM-5</td><td>744B</td><td>40B</td><td>5.4%</td><td>DSA + 256 experts</td></tr><tr><td>MiniMax M3</td><td>428B</td><td>23B</td><td>5.4%</td><td>MSA + native multimodal</td></tr><tr><td>Step 3.5 Flash</td><td>196B</td><td>11B</td><td>5.6%</td><td>SWA/Full + MTP-3</td></tr><tr><td>Nemotron 3 Ultra</td><td>550B</td><td>55B</td><td>10.0%</td><td>Mamba/Global + MTP</td></tr></tbody></table></div>
+      <p class="note">比例由公开的“激活参数 ÷ 总参数”粗算；各报告对 embedding、共享专家、注意力参数和 MTP 头的计入口径可能不同，不适合做小数点级比较。</p>
+
+      <figure>
+        <svg class="viz" viewBox="0 0 880 345" role="img" aria-labelledby="moe-title moe-desc">
+          <title id="moe-title">开放模型总参数与激活参数的对数尺度比较</title><desc id="moe-desc">八个模型的总参数以浅色条显示，激活参数以深色条显示，强调总容量与每 token 计算的分离。</desc>
+          <rect x="18" y="18" width="844" height="309" rx="12" fill="#fcfcfb"/>
+          <g font-family="system-ui">
+            <text x="40" y="49" font-size="17" font-weight="700" fill="#132238">容量很大，单 token 只唤醒一小部分（条长为 log 尺度）</text>
+            <text x="213" y="75" font-size="10.5" fill="#69717b">10B</text><text x="414" y="75" font-size="10.5" fill="#69717b">100B</text><text x="615" y="75" font-size="10.5" fill="#69717b">1T</text><line x1="220" y1="83" x2="220" y2="302" stroke="#e2e2de"/><line x1="421" y1="83" x2="421" y2="302" stroke="#e2e2de"/><line x1="622" y1="83" x2="622" y2="302" stroke="#e2e2de"/>
+            <g font-size="11.5" fill="#3f454c"><text x="42" y="104">V4-Pro</text><text x="42" y="133">Kimi K3</text><text x="42" y="162">Qwen3.5</text><text x="42" y="191">V4-Flash</text><text x="42" y="220">GLM-5</text><text x="42" y="249">MiniMax M3</text><text x="42" y="278">Step 3.5</text><text x="42" y="307">Nemotron Ultra</text></g>
+            <g fill="#dce6f3"><rect x="150" y="91" width="520" height="17" rx="4"/><rect x="150" y="120" width="572" height="17" rx="4"/><rect x="150" y="149" width="364" height="17" rx="4"/><rect x="150" y="178" width="335" height="17" rx="4"/><rect x="150" y="207" width="419" height="17" rx="4"/><rect x="150" y="236" width="371" height="17" rx="4"/><rect x="150" y="265" width="303" height="17" rx="4"/><rect x="150" y="294" width="393" height="17" rx="4"/></g>
+            <g fill="#365f91"><rect x="150" y="96" width="139" height="7" rx="3"/><rect x="150" y="125" width="204" height="7" rx="3"/><rect x="150" y="154" width="46" height="7" rx="3"/><rect x="150" y="183" width="23" height="7" rx="3"/><rect x="150" y="212" width="121" height="7" rx="3"/><rect x="150" y="241" width="72" height="7" rx="3"/><rect x="150" y="270" width="8" height="7" rx="3"/><rect x="150" y="299" width="149" height="7" rx="3"/></g>
+            <rect x="690" y="92" width="18" height="9" rx="3" fill="#dce6f3"/><text x="715" y="101" font-size="10.5" fill="#69717b">总参数</text><rect x="765" y="92" width="18" height="9" rx="3" fill="#365f91"/><text x="790" y="101" font-size="10.5" fill="#69717b">激活</text>
+          </g>
+        </svg>
+        <figcaption>使用对数尺度是为了同时显示 11B 激活和 2.8T 总量；图意在展示解耦，不用于估算实际吞吐。</figcaption>
+      </figure>
+
+      <h3>主线四：2026 的胜负单位从“token”变成“完成的工作”</h3>
+      <p>Terminal-Bench、SWE-bench、BrowseComp、Toolathlon、MCP Atlas 等评测快速进入发布页，说明厂商已经把模型放进工具链中考核。可这也让横评更难：同一个 base model 配不同 Agent scaffold、搜索预算、上下文压缩和失败重试策略，结果可以发生两位数变化。</p>
+      <div class="table-wrap"><table class="cmp"><thead><tr><th>你的实际工作负载</th><th>优先看什么</th><th>候选路线</th><th>上线前必须自测</th></tr></thead><tbody><tr><td>百万 token 仓库 / 法务文档</td><td>远程证据命中率、运行时/持久化 KV、prefill 与恢复</td><td>DeepSeek V4.1、Kimi K3、GLM‑5.3、Qwen3.8、Nemotron Ultra、GPT‑6</td><td>多跳检索、前缀恢复与长轨迹重启，不只做单针 NIAH</td></tr><tr><td>高频代码 Agent</td><td>Terminal/SWE 成功率、MTP、工具延迟、缓存与重试</td><td>Nemotron Lightning、Step 3.5、GLM‑5.3、V4.1、Fable 5.1、GPT‑6</td><td>固定 harness、effort 和超时下的端到端成本</td></tr><tr><td>视觉电脑操作</td><td>页面变化感知、坐标/状态一致性、视频与语音闭环</td><td>Kimi、Qwen、V4.1、ERNIE、MiniMax M3、Gemini、Seed、GPT‑6</td><td>动态页面、错误恢复与授权边界，不只看静态 VQA</td></tr><tr><td>私有化与审计</td><td>许可、权重、量化、训练/奖励数据与硬件内核</td><td>Nemotron、Qwen、DeepSeek、GLM、Step、Kimi、MiMo</td><td>通信开销、算子支持、许可证和安全评审</td></tr><tr><td>低延迟在线服务</td><td>激活参数、输出 tok/s、缓存读写与价格</td><td>Qwen Flash‑Next、Nemotron Lightning、V4.1‑Flash、Step、Gemini Flash</td><td>自己的输入/输出长度和并发分布</td></tr></tbody></table></div>
+
+      <blockquote class="anchor"><strong>三个最容易误判的点：</strong>第一，把 1M context 当作 1M token 都能等权精确回忆；第二，把“开放权重”当作训练数据、许可与安全评估也全部开放；第三，把厂商 Agent 榜单当作纯模型分数，而忽略 scaffold、工具预算和重试策略。</blockquote>
+    </section>
+
+    <section id="sources">
+      <h2 class="lvl0">一手资料索引与口径说明</h2>
+      <p>本解析以截至 2026-09-20 可访问的技术报告、官方模型卡、代码仓库与厂商正式发布页为主；月度窗口固定为 2026 年 8 月 1—31 日，9 月发布仅作为年度累计的最新检查点。只在厂商技术报告或模型卡中出现的 benchmark 被写成“官方报告结果”，不当作独立第三方复现。本次复核未在 Kimi、Step、ERNIE、MiniMax、MiMo、Seed 与 Meta 官方渠道发现 8 月内足以替换现有主线的新基座技术报告，因此明确记录“无重大更新”，不以预告或传闻补位。</p>
+      <ol class="sources">
+        <li><a href="https://arxiv.org/abs/2606.19348">DeepSeek-V4 Technical Report</a></li>
+        <li><a href="https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash/blob/main/DeepSeek_V41_Tech_Report.pdf">DeepSeek‑V4.1‑Flash Technical Report</a></li>
+        <li><a href="https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash">DeepSeek‑V4.1‑Flash Model Card</a></li>
+        <li><a href="https://api-docs.deepseek.com/updates/">DeepSeek API Updates</a></li>
+        <li><a href="https://arxiv.org/abs/2602.02276">Kimi K2.5 Technical Report</a></li>
+        <li><a href="https://github.com/MoonshotAI/Kimi-K2.5">MoonshotAI / Kimi-K2.5</a></li>
+        <li><a href="https://arxiv.org/abs/2607.24653">Kimi K3 Technical Report</a></li>
+        <li><a href="https://github.com/MoonshotAI/Kimi-K3">MoonshotAI / Kimi-K3</a></li>
+        <li><a href="https://arxiv.org/abs/2602.15763">GLM-5 Technical Report</a></li>
+        <li><a href="https://github.com/zai-org/GLM-5">zai-org / GLM-5</a></li>
+        <li><a href="https://huggingface.co/zai-org/GLM-5.2">GLM-5.2 Model Card</a></li>
+        <li><a href="https://huggingface.co/zai-org/GLM-5.3">GLM‑5.3 Model Card</a></li>
+        <li><a href="https://arxiv.org/abs/2602.10604">Step 3.5 Flash Technical Report</a></li>
+        <li><a href="https://huggingface.co/stepfun-ai/Step-3.5-Flash-FP8">Step 3.5 Flash FP8 Model Card</a></li>
+        <li><a href="https://huggingface.co/Qwen/Qwen3.5-397B-A17B">Qwen3.5-397B-A17B Model Card</a></li>
+        <li><a href="https://github.com/QwenLM/Qwen3.8">Qwen3.8 Official Repository</a></li>
+        <li><a href="https://github.com/QwenLM/Qwen3.8-Flash-Next/blob/main/tech_report.pdf">Qwen3.8‑Flash‑Next Technical Report</a></li>
+        <li><a href="https://arxiv.org/abs/2604.15804">Qwen3.5-Omni Technical Report</a></li>
+        <li><a href="https://arxiv.org/abs/2602.04705">ERNIE 5.0 Technical Report</a></li>
+        <li><a href="https://ernie.baidu.com/blog/posts/ernie5.0/">ERNIE 5.0 Official Blog</a></li>
+        <li><a href="https://arxiv.org/abs/2605.26494">MiniMax M2 Technical Report</a></li>
+        <li><a href="https://www.minimax.io/blog/minimax-m3">MiniMax M3 Official Release</a></li>
+        <li><a href="https://huggingface.co/MiniMaxAI/MiniMax-M3">MiniMax M3 Model Card</a></li>
+        <li><a href="https://arxiv.org/abs/2601.02780">MiMo-V2-Flash Technical Report</a></li>
+        <li><a href="https://mimo.xiaomi.com/mimo-v2-5-pro/">MiMo V2.5 Pro Official Release</a></li>
+        <li><a href="https://seed.bytedance.com/en/seed2_1">ByteDance Seed 2.1 Official Release</a></li>
+        <li><a href="https://openai.com/index/gpt-5-6/">OpenAI GPT-5.6</a></li>
+        <li><a href="https://openai.com/index/gpt-6-astra/">OpenAI GPT‑6 Astra</a></li>
+        <li><a href="https://www.anthropic.com/news/claude-opus-5">Anthropic Claude Opus 5</a></li>
+        <li><a href="https://www.anthropic.com/claude-fable-and-mythos-5-1">Anthropic Claude Fable / Mythos 5.1</a></li>
+        <li><a href="https://blog.google/innovation-and-ai/models-and-research/gemini-models/gemini-3-5/">Google Gemini 3.5</a></li>
+        <li><a href="https://blog.google/innovation-and-ai/models-and-research/gemini-models/gemini-3-6-flash-3-5-flash-lite-3-5-flash-cyber/">Google Gemini 3.6 / Flash-Lite / Cyber</a></li>
+        <li><a href="https://blog.google/innovation-and-ai/models-and-research/gemini-models/3-8-flash-and-3-8-flash-cyber/">Google Gemini 3.8 Flash / Cyber</a></li>
+        <li><a href="https://x.ai/news/grok-4-6">xAI Grok 4.6</a></li>
+        <li><a href="https://research.nvidia.com/labs/nemotron/Nemotron-3-Ultra/">NVIDIA Nemotron 3 Ultra</a></li>
+        <li><a href="https://huggingface.co/nvidia/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-NVFP4">NVIDIA Nemotron 3.5 Lightning Model Card</a></li>
+        <li><a href="https://research.nvidia.com/labs/nemotron/files/NVIDIA-Nemotron-3-Super-Technical-Report.pdf">NVIDIA Nemotron 3 Super Technical Report</a></li>
+        <li><a href="https://cohere.com/blog/command-a-plus">Cohere Command A+</a></li>
+      </ol>
+      <div class="warning"><strong>阅读提醒：</strong>2026 年仍在高速更新，模型卡与仓库会继续修订。本文的月度统计固定在 8 月 1—31 日，年度累计固定在 9 月 20 日；之后出现的版本不会倒灌进本期结论。</div>
+    </section>
+
+    <section id="summary">
+      <h2 class="lvl0">三句总结</h2>
+      <div class="summary-box">
+        <p>8 月的核心增量是“效率配方工程化”：Qwen 从骨干与优化器降算力，GLM 用同一基座放大后训练，Nemotron 把高频 Agent 执行压到 30B/3B 激活和单机部署。</p>
+        <p>截至 9 月 20 日，长上下文竞争已从标称 1M 窗口转向 KV 的 HBM/SSD/带宽账单、跨窗口记忆和长轨迹恢复；DeepSeek‑V4.1‑Flash 是最完整的开放结构证据，闭源 GPT‑6、Fable 5.1 与 Gemini 3.8 则把 effort、安全策略和电脑操作产品化。</p>
+        <p>真正的选型单位不是单次 token，也不是厂商榜单，而是固定 harness、预算和授权边界后，一项真实工作能否以可接受的总时延、总成本与失败率完成。</p>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

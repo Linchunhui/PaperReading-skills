@@ -148,6 +148,7 @@ const categories = [
     icon: "icon-llm",
     emoji: "🧠",
     papers: [
+      {"file": "examples/LLM-Foundations/2026-09-foundation-models-monthly.html", "title": "2026 基座模型月报：8 月增量与截至 9 月 20 日累计演进", "desc": "方向月报 · 原始完整报告"},
       { file: "examples/LLM-Foundations/qwen3.8-flash-tech-report.html", title: "Qwen3.8-Flash-Next", desc: "125B-A6B MoE 技术报告精读：Gated DeltaNet、QSA、Hyper-Connections、N-gram Embedding 与训练稳定性" },
       { file: "examples/LLM-Foundations/attention-evolution-2026.html", title: "从 MHA 到线性与稀疏注意力", desc: "Attention Evolution 2026：FlashAttention、MLA、DSA、MoBA、NSA、Mamba、DeltaNet、KDA 与混合架构" },
     ]
@@ -159,6 +160,8 @@ const categories = [
     icon: "icon-vlm",
     emoji: "👁",
     papers: [
+      {"file": "examples/VLM/VLM-2026-09-monthly.html", "title": "多模态理解 VLM：2026 年 9 月进展", "desc": "方向月报 · 原始完整报告"},
+      {"file": "examples/VLM/VLM-2026-08-monthly.html", "title": "2026 年 8 月 VLM 进展：从“看见”到“组织证据”", "desc": "方向月报 · 原始完整报告"},
       { file: "examples/VLM/InternVL.html",      title: "InternVL",       desc: "大规模视觉基础模型" },
       { file: "examples/VLM/LLaVA.html",          title: "LLaVA",          desc: "视觉指令微调开创者" },
       { file: "examples/VLM/OCR.html",            title: "OCR",            desc: "光学字符识别与文档理解" },
@@ -240,6 +243,14 @@ const categories = [
     icon: "icon-radar",
     emoji: "📡",
     papers: [
+      {"file": "examples/Weekly-Radar/2026-W41-radar.html", "title": "AI Research Radar · 2026-W41", "desc": "每周 AI 论文研究雷达"},
+      {"file": "examples/Weekly-Radar/2026-W40-radar.html", "title": "AI Research Radar · 2026-W40", "desc": "每周 AI 论文研究雷达"},
+      {"file": "examples/Weekly-Radar/2026-W39-radar.html", "title": "AI Research Radar · 2026-W39", "desc": "每周 AI 论文研究雷达"},
+      {"file": "examples/Weekly-Radar/2026-W38-radar.html", "title": "AI Research Radar · 2026-W38", "desc": "每周 AI 论文研究雷达"},
+      {"file": "examples/Weekly-Radar/2026-W37-radar.html", "title": "AI Research Radar · 2026-W37", "desc": "每周 AI 论文研究雷达"},
+      {"file": "examples/Weekly-Radar/2026-W36-radar.html", "title": "AI Research Radar · 2026-W36", "desc": "每周 AI 论文研究雷达"},
+      {"file": "examples/Weekly-Radar/2026-W35-radar.html", "title": "AI Research Radar · 2026-W35", "desc": "每周 AI 论文研究雷达"},
+      {"file": "examples/Weekly-Radar/2026-W34-radar.html", "title": "AI Research Radar · 2026-W34", "desc": "每周 AI 论文研究雷达"},
       { file: "examples/Weekly-Radar/2026-W33-radar.html", title: "2026-W33 Research Radar", desc: "9 篇详细速读：基座模型、OPD/RL、世界模型、Diffusion LLM、VLM 与 OCR" },
       { file: "examples/Weekly-Radar/2026-W32-radar.html", title: "2026-W32 Research Radar", desc: "12 篇全文深读：Diffusion LLM、OPD、VLM、OCR、VLA 与世界模型" },
     ]
@@ -247,10 +258,15 @@ const categories = [
   {
     id: "monthly-radar",
     name: "Monthly Radar — 每月论文速读",
-    desc: "按自然月筛选并深读高热度 AI 论文，呈现方法链路、实验依据与复现边界",
+    desc: "汇集方向月报与自然月研究雷达，呈现方法链路、实验依据与复现边界",
     icon: "icon-radar",
     emoji: "🗓",
     papers: [
+      {"file": "examples/VLA/2026-09-20-VLA-monthly.html", "title": "VLA 月度研究雷达 · 2026-09-20", "desc": "方向月报 · 原始完整报告"},
+      {"file": "examples/Others/2026-09-Diffusion-LLM-radar.html", "title": "Diffusion LLM 月报｜2026 年 9 月", "desc": "方向月报 · 原始完整报告"},
+      {"file": "examples/LLM-Foundations/2026-09-foundation-models-monthly.html", "title": "2026 基座模型月报：8 月增量与截至 9 月 20 日累计演进", "desc": "方向月报 · 原始完整报告"},
+      {"file": "examples/VLM/VLM-2026-08-monthly.html", "title": "2026 年 8 月 VLM 进展：从“看见”到“组织证据”", "desc": "方向月报 · 原始完整报告"},
+      {"file": "examples/VLM/VLM-2026-09-monthly.html", "title": "多模态理解 VLM：2026 年 9 月进展", "desc": "方向月报 · 原始完整报告"},
       { file: "examples/Monthly-Radar/2026-M7-radar.html", title: "2026-M7 Research Radar", desc: "13 篇单篇级精读：基座模型、世界模型、VLM、VLA、OPD/RL、OCR 与 Diffusion LLM" },
       { file: "examples/Monthly-Radar/2026-M6-radar.html", title: "2026-M6 Research Radar", desc: "15 篇全文深读：世界模型、VLM、VLA、OPD/RL、OCR 与基座模型" },
       { file: "examples/Monthly-Radar/2026-M5-radar.html", title: "2026-M5 Research Radar", desc: "12 篇单篇级精读：世界模型、VLA、OCR、VLM、OPD/RL、Diffusion LLM 与基座模型" },
@@ -267,6 +283,7 @@ const categories = [
     icon: "icon-other",
     emoji: "✨",
     papers: [
+      {"file": "examples/Others/2026-09-Diffusion-LLM-radar.html", "title": "Diffusion LLM 月报｜2026 年 9 月", "desc": "方向月报 · 原始完整报告"},
       { file: "examples/speculative-decoding-evolution.html", title: "Speculative Decoding Evolution", desc: "推测解码技术演化全景" },
       { file: "examples/Others/Cola-DLM.html",    title: "Cola-DLM",    desc: "Cola 扩散语言模型" },
       { file: "examples/Others/LLaDA2-Uni.html",  title: "LLaDA2-Uni",  desc: "LLaDA2 统一扩散自回归架构" },
@@ -302,7 +319,7 @@ categories.forEach(cat => {
   `;
   contentEl.appendChild(section);
 });
-totalEl.textContent = totalCount;
+totalEl.textContent = new Set(categories.flatMap(cat => cat.papers.map(p => p.file))).size;
 
 document.getElementById("search").addEventListener("input", function () {
   const q = this.value.toLowerCase().trim();
@@ -319,3 +336,4 @@ document.getElementById("search").addEventListener("input", function () {
 </script>
 </body>
 </html>
+

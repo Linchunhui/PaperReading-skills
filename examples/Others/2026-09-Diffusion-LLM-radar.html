@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Diffusion LLM 月报｜2026 年 9 月</title>
+  <style>
+    :root{--bg:#f7f6f1;--paper:#fffefa;--ink:#20242b;--muted:#667085;--line:#d8dce2;--blue:#315b96;--cyan:#2f7f84;--orange:#b66733;--red:#a54b4b;--green:#3d7456;--purple:#69518d;--soft:#edf2f8;--max:920px}
+    *{box-sizing:border-box} html{scroll-behavior:smooth} body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.78 ui-serif,"Noto Serif CJK SC","Source Han Serif SC",Georgia,serif}
+    a{color:var(--blue);text-decoration-thickness:1px;text-underline-offset:3px} header{padding:74px 24px 52px;background:linear-gradient(135deg,#e8eef6,#f7f3ea 60%,#eef5f1);border-bottom:1px solid var(--line)}
+    header .inner,main{max-width:var(--max);margin:auto}.kicker{font:700 13px/1.4 ui-sans-serif,system-ui;letter-spacing:.14em;text-transform:uppercase;color:var(--blue)}
+    h1{font-size:clamp(34px,6vw,58px);line-height:1.1;margin:.28em 0 .22em;letter-spacing:-.035em}.subtitle{font-size:20px;max-width:760px;margin:0;color:#48515f}.meta{font:14px/1.6 ui-sans-serif,system-ui;color:var(--muted);margin-top:18px}
+    main{padding:50px 24px 90px}section{scroll-margin-top:22px;margin:0 0 58px}h2{font-size:30px;line-height:1.22;margin:0 0 20px;padding-top:8px}h3{font-size:22px;line-height:1.34;margin:1.8em 0 .55em}h4{font-size:17px;margin:1.4em 0 .35em}p{margin:.7em 0}strong{font-weight:760}.lead{font-size:20px;line-height:1.7}.note{background:#eef3f7;border-left:4px solid var(--blue);padding:16px 18px;border-radius:0 8px 8px 0}.warning{background:#f8eee9;border-left-color:var(--orange)}
+    .toc{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:19px 22px;margin:30px 0}.toc strong{display:block;margin-bottom:8px}.toc a{display:inline-block;margin:3px 18px 3px 0;font:15px/1.5 ui-sans-serif,system-ui}
+    .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.card{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:20px;box-shadow:0 5px 18px rgba(28,38,55,.04)}.card h3{margin:7px 0 7px;font-size:20px}.tag{display:inline-block;border-radius:999px;padding:3px 9px;font:700 12px/1.4 ui-sans-serif,system-ui;color:#fff;background:var(--blue)}.tag.signal{background:var(--orange)}.hook{font:700 15px/1.55 ui-sans-serif,system-ui;color:#273446}.small{font:14px/1.65 ui-sans-serif,system-ui;color:var(--muted)}
+    .chapter{background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:28px;margin:26px 0}.chapter h3{margin-top:0}.paper-title{font-size:24px;line-height:1.3;margin:.3em 0}.metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:18px 0}.metric{background:var(--soft);border-radius:10px;padding:14px}.metric b{display:block;font:750 22px/1.1 ui-sans-serif,system-ui;color:var(--blue);margin-bottom:6px}.metric span{font:13px/1.45 ui-sans-serif,system-ui;color:#546171}.limit{border-top:1px dashed var(--line);margin-top:18px;padding-top:13px;font-size:15px;color:#596273}.source{font:14px/1.55 ui-sans-serif,system-ui;margin-top:14px}
+    .viz{display:block;width:100%;height:auto;background:#fff;border:1px solid var(--line);border-radius:14px;margin:24px 0}table{width:100%;border-collapse:collapse;font:14px/1.55 ui-sans-serif,system-ui;background:var(--paper)}th,td{border-bottom:1px solid var(--line);padding:12px 10px;text-align:left;vertical-align:top}th{color:#4a5563;background:#f1f3f5}.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:12px}.takeaway{font-size:21px;line-height:1.62;padding:22px;background:#eaf2ee;border-radius:13px}.refs li{margin:.52em 0}.stamp{color:var(--muted);font:13px/1.5 ui-sans-serif,system-ui}
+    @media(max-width:720px){body{font-size:16px}header{padding:52px 20px 38px}main{padding:36px 16px 72px}.grid,.metrics{grid-template-columns:1fr}.chapter{padding:20px}h2{font-size:26px}.table-wrap{margin-right:-8px}.subtitle{font-size:18px}}
+  </style>
+</head>
+<body>
+<header><div class="inner">
+  <div class="kicker">Research radar · Incremental brief</div>
+  <h1>Diffusion LLM 月报</h1>
+  <p class="subtitle">2026.08.21—2026.09.20｜文本、代码与 Agent 型扩散语言模型</p>
+  <p class="meta">只收录本月新增、且有论文／模型页／代码等一手证据的进展；排除图像与视频扩散。数字均按原论文实验口径记录，不能跨表直接比较。</p>
+</div></header>
+<main>
+  <section id="overview">
+    <h2>先说结论：扩散语言模型开始补“系统短板”</h2>
+    <p class="lead">本月最重要的变化，不是又多了一个 mask schedule，而是四块曾经彼此割裂的工程开始合拢：<strong>可继承的混合骨干、长上下文训练并行、学习式低步数解码，以及跨 chunk 的受限状态推理</strong>。其中 dQwen3.5 把线性／混合注意力正式带进可开源评测的基座；Block Parallelism 和固定状态缓存则分别从训练和推理侧把长上下文账单压下来。</p>
+    <div class="toc"><strong>本期导航</strong><a href="#mainlines">重要主线</a><a href="#signals">早期信号</a><a href="#matrix">工程选型</a><a href="#watch">下月观察</a><a href="#refs">来源</a></div>
+    <svg class="viz" viewBox="0 0 860 275" xmlns="http://www.w3.org/2000/svg" style="font-family:inherit">
+      <text x="28" y="34" font-size="18" font-weight="700">本月主线：从“并行填词”走向“可训练、可缓存、可记忆”的系统</text>
+      <rect x="30" y="72" width="175" height="76" rx="12" fill="#dfe9f6" stroke="#315b96"/><text x="118" y="101" text-anchor="middle" font-size="15" font-weight="700">混合骨干</text><text x="118" y="125" text-anchor="middle" font-size="13">AR 权重继承 + DeltaNet</text>
+      <path d="M205 110 H245" stroke="#77849a" stroke-width="2" marker-end="url(#a)"/><rect x="246" y="72" width="175" height="76" rx="12" fill="#e2f1ef" stroke="#2f7f84"/><text x="333" y="101" text-anchor="middle" font-size="15" font-weight="700">长上下文训练</text><text x="333" y="125" text-anchor="middle" font-size="13">CSBP：跨卡分块并行</text>
+      <path d="M421 110 H461" stroke="#77849a" stroke-width="2" marker-end="url(#a)"/><rect x="462" y="72" width="175" height="76" rx="12" fill="#f4e9df" stroke="#b66733"/><text x="549" y="101" text-anchor="middle" font-size="15" font-weight="700">低步数解码</text><text x="549" y="125" text-anchor="middle" font-size="13">TSD / Early-Bird</text>
+      <path d="M637 110 H677" stroke="#77849a" stroke-width="2" marker-end="url(#a)"/><rect x="678" y="72" width="152" height="76" rx="12" fill="#ebe5f3" stroke="#69518d"/><text x="754" y="101" text-anchor="middle" font-size="15" font-weight="700">受限状态</text><text x="754" y="125" text-anchor="middle" font-size="13">register 跨 chunk 记忆</text>
+      <text x="30" y="195" font-size="14" fill="#4f5b68">结构侧：减少序列长度带来的状态与缓存增长</text><text x="30" y="221" font-size="14" fill="#4f5b68">算法侧：减少必要的去噪评估次数（NFE）</text><text x="30" y="247" font-size="14" fill="#4f5b68">能力侧：让并行生成不只快，还能持续积累中间推理状态</text>
+      <defs><marker id="a" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 Z" fill="#77849a"/></marker></defs>
+    </svg>
+    <div class="grid">
+      <div class="card"><span class="tag">主线 1</span><h3>混合注意力成为现实路线</h3><p class="hook">dQwen3.5 只把注意力层双向化，保留多数因果 Gated DeltaNet；匹配训练损失约省一半适配 token。</p></div>
+      <div class="card"><span class="tag">主线 2</span><h3>长上下文从模型问题变成系统问题</h3><p class="hook">CSBP 在 1M 上把扩散 drafter 训练提速 7.59×；固定状态 Mamba 在 256K 把单步延迟降到注意力的约 1/4.3。</p></div>
+      <div class="card"><span class="tag">主线 3</span><h3>加速器开始“学何时承诺”</h3><p class="hook">Temporal Self-Distillation 改写时间轨迹；Early-Bird 学动态 block，而不只是手工阈值。</p></div>
+      <div class="card"><span class="tag">主线 4</span><h3>Agent 侧先补工作记忆</h3><p class="hook">register token 把跨 chunk 状态留在隐藏空间，并可用分块 diffu-GRPO 继续强化。</p></div>
+    </div>
+  </section>
+
+  <section id="mainlines">
+    <h2>重要主线</h2>
+    <div class="chapter" id="dqwen">
+      <span class="tag">新模型 · 混合注意力 · 开源</span><h3 class="paper-title">① dQwen3.5：不必把整个 AR 骨干都改成全双向</h3>
+      <p>它把 Qwen3.5 的注意力层改为双向，但保留占多数的因果 Gated DeltaNet 层。核心判断很实用：序列全局交互可由少量 attention 提供，而线性状态层继续负责便宜的递推。作者发布 0.8B、2B、4B、9B 基座权重，适配训练只用 50B 或 100B token，数据配比为代码 50%、文本 35%、数学 15%，训练上下文 4K。</p>
+      <div class="metrics"><div class="metric"><b>≈ 1/2</b><span>达到匹配训练损失所需适配 token，相比全注意力 dQwen3 控制组</span></div><div class="metric"><b>6 / 7</b><span>2B、50B-token 版本超过 CoDA（200B token）的评测数</span></div><div class="metric"><b>4 / 7</b><span>9B、50B-token 版本相对既有 DLM 取得最佳的评测数</span></div></div>
+      <p><strong>为什么重要：</strong>这比“再造一个全双向 Transformer”更接近现实继承路径，也首次把线性／混合注意力与离散扩散基座放在同一条可开源复现实验线上。HumanEval 上，9B 版本在作者测试的每个大于 1× NFE 加速点均领先同类 DLM。</p>
+      <p class="limit"><strong>边界：</strong>仍是 base 模型，没有 SFT／RL；训练上下文只有 4K。论文中最直接的混合 vs 全注意力控制并非完全同源架构，不能据此把所有优势都归因于混合注意力。</p>
+      <p class="source"><a href="https://arxiv.org/abs/2609.20751">论文</a> · <a href="https://huggingface.co/UT-IFML/dQwen3.5-9B-Base">9B 模型页</a></p>
+    </div>
+
+    <div class="chapter" id="bp">
+      <span class="tag">长上下文 · 分布式训练 · Agent SFT</span><h3 class="paper-title">② Block Parallelism：扩散训练不必让每张卡都保存整段序列</h3>
+      <p>Block Parallelism（BP）让不同设备并行处理不同 block；Context-Sharded BP（CSBP）进一步把 block 内上下文分片，针对扩散训练中“目标 token 已知、但遮罩组合不断变化”的结构复用计算。它覆盖 AR→双向扩散转换、SFT 和 drafter 训练。</p>
+      <div class="metrics"><div class="metric"><b>1.61×</b><span>16×H200、512K 上整模型训练提速</span></div><div class="metric"><b>7.59×</b><span>8×H100、1M 上 DFlash2 drafter 训练提速</span></div><div class="metric"><b>+1 pt</b><span>12 小时 LoRA SFT 后，SWE-bench Verified 与 Terminal-Bench Lite 均提升约 1 点</span></div></div>
+      <p><strong>Agent 价值：</strong>它没有发布一个新的通用 Agent 基座，但直接把 DiffusionGemma 26B-A4B 的代码 Agent 长上下文 SFT 压进 12 小时窗口，并在每个中间 checkpoint 都提高通过率；这是本月最扎实的 Agent 侧增量。</p>
+      <p class="limit"><strong>边界：</strong>这是训练侧并行，不会直接加速未知 token 的在线生成；最大收益依赖 8–16 张 H100/H200，单机开发者暂时吃不到同等红利。</p>
+      <p class="source"><a href="https://arxiv.org/abs/2609.19242">论文</a> · <a href="https://github.com/ScalingIntelligence/Turbo-dLLM">Turbo-dLLM 代码</a></p>
+    </div>
+
+    <div class="chapter" id="fixed-state">
+      <span class="tag">线性状态 · 长上下文 · 缓存</span><h3 class="paper-title">③ Fixed State, Long Reach：真正稳定的是“每步状态大小”</h3>
+      <p>作者在统一的 block diffusion 接口下训练三个 3B 去噪器：全注意力、Mamba、混合。每个模型训练 300B token、训练上下文 1K，并使用可精确缓存的接口。结果把“线性注意力是否适合扩散”从 FLOPs 讨论推进到单卡长上下文实测。</p>
+      <div class="metrics"><div class="metric"><b>6.8 ms</b><span>Mamba 在 256K 的单步延迟；注意力为 29 ms</span></div><div class="metric"><b>7.5 GB</b><span>Mamba 在 256K 的显存；注意力为 82 GB</span></div><div class="metric"><b>296 tok/s</b><span>Mamba 单流吞吐；注意力为 114 tok/s</span></div></div>
+      <p>长距离“针”检索也更抗外推：Mamba 在 2K／4K／8K／16K 上为 75.7%／32.3%／23.6%／22.3%，全注意力在 2K 已降到 12.3%，8K 与 16K 为 0。混合模型大多居中。</p>
+      <p class="limit"><strong>边界：</strong>这些模型只在 1K 上训练，256K 主要证明资源曲线，不等于高质量 256K 理解；绝对检索正确率仍低，且 Mamba／混合多 11%–13% 参数。</p>
+      <p class="source"><a href="https://arxiv.org/abs/2609.11998">论文</a></p>
+    </div>
+
+    <div class="chapter" id="decode">
+      <span class="tag">采样 · 蒸馏 · 推理加速</span><h3 class="paper-title">④ TSD + Early-Bird：把“何时落笔”变成可学习问题</h3>
+      <h4>Temporal Self-Distillation（TSD）</h4><p>让较早时间步的 token 分布靠近模型自己最终承诺的分布，不需离线教师轨迹，也能接在 RL 后模型上。LoRA 只有 83.9M 可训练参数（约 1.05%），论文用 2 张 A100／H200 训练约 3000 步。</p>
+      <div class="metrics"><div class="metric"><b>4.5×</b><span>Countdown 达到约 80% 时：约 20 NFE vs 基线约 90 NFE</span></div><div class="metric"><b>2.3×</b><span>MBPP 相对 LLaDA 达到同等质量所需 NFE 的降幅</span></div><div class="metric"><b>45 NFE</b><span>MBPP 约 50%、HumanEval 约 40% 的工作点</span></div></div>
+      <h4>Early-Bird Decoding</h4><p>用轻量 router 预测可同时提交的动态 block，再用位置感知策略决定落笔顺序。作者在 LLaDA-8B、Dream-7B、LLaDA1.5 上报告相对 vanilla 3.53×–18.76× 吞吐提升；相对 Fast-dLLM 最高 1.58×，精度大致相当。</p>
+      <p class="limit"><strong>边界：</strong>TSD 主要把同等能力搬到更低 NFE，并不提高峰值能力；reward 加权依赖可程序验证正确性。Early-Bird 只测 256／512 长度、batch=1，连续批处理与线上服务尚未验证，部分 router 还受词表与长度绑定。</p>
+      <p class="source"><a href="https://arxiv.org/abs/2609.15177">TSD 论文</a> · <a href="https://arxiv.org/abs/2609.16450">Early-Bird 论文</a></p>
+    </div>
+
+    <div class="chapter" id="register">
+      <span class="tag">Agent · RL · 受限状态推理</span><h3 class="paper-title">⑤ Register Tokens：让 chunk 之间传隐藏状态，而不是只传文本摘要</h3>
+      <p>固定数量的 register token 在一段推理完成后保留隐藏状态，普通输出 token 可清空；下一 chunk 继续读这些寄存器。实验基于 LLaDA／Dream，默认 4 个 register、128-token chunk，并提出 chunked diffu-GRPO 做后训练。</p>
+      <div class="metrics"><div class="metric"><b>+8.5</b><span>数学任务相对离散文本 carry 的最高提升</span></div><div class="metric"><b>+19.5</b><span>代码任务相对离散文本 carry 的最高提升</span></div><div class="metric"><b>+8.1</b><span>LongArithmetic 上 diffu-GRPO：31.6 → 39.7</span></div></div>
+      <p>Countdown 的有界奖励均值在 200 步 RL 后从 19.7 提到 22.3（+2.6）。这条路线更像 Agent 的“受限工作记忆”：状态常数大小，但能跨步延续，不必把中间推理完全外显成文本。</p>
+      <p class="limit"><strong>边界：</strong>超出训练 chunk 数后的严格精确匹配仍很少；RL 设置中寄存器对 prompt 可见，不等于完全私有的隐状态。训练成本也高：论文报告多组 8×B200、约 12–24 小时级实验。</p>
+      <p class="source"><a href="https://arxiv.org/abs/2609.16372">论文</a> · <a href="https://github.com/lbertge/dllm-registers-reasoning">代码仓库</a></p>
+    </div>
+  </section>
+
+  <section id="signals">
+    <h2>早期信号：值得跟，但证据还不够硬</h2>
+    <div class="grid">
+      <div class="card"><span class="tag signal">理论</span><h3>Limits of Confidence</h3><p>证明逐位置置信度无法判断一组 token 是否条件独立；在 ScanAndAdd 上，所有一次写入 ≥2 个未定位置的组都依赖，生成分布的 total variation 是采样噪声底的 29×，但逐样本指标仍为 1.0。</p><p class="small"><strong>意义：</strong>高置信度并行提交可能系统性错配联合分布。<strong>局限：</strong>目前主要是合成闭式分布，不是 7B+ 模型实证。<br><a href="https://arxiv.org/abs/2609.20581">论文</a></p></div>
+      <div class="card"><span class="tag signal">结构</span><h3>DA-DLM</h3><p>用位置定向 DAG 显式建模相邻 token 依赖，复杂度由位置自由 DAG 的 O(N³K²) 降到 O(NK²)。LM1B／OpenWebText 上，BD3LM B16 的 3.46／3.11 降到 3.30／2.92；只增约 2.5M 参数。</p><p class="small"><strong>局限：</strong>仍是小规模语料与约亿级 backbone，尚未证明能扩到指令模型。<br><a href="https://arxiv.org/abs/2609.15070">论文</a> · <a href="https://github.com/jipy0222/DA-DLM">代码</a></p></div>
+      <div class="card"><span class="tag signal">连续表示</span><h3>RMDM</h3><p>把外部编码器提取的全局语义表示映到高斯先验，再条件化离散去噪。OpenWebText、1024 长度上，16 步 GenPPL 126.58 vs MDLM 213.44；匹配 GenPPL≤50 时 287 vs 80 tok/s（3.6×）。</p><p class="small"><strong>局限：</strong>同步数约慢 10%，训练时长更高，且仍是无条件文本建模。<br><a href="https://arxiv.org/abs/2609.12382">论文</a></p></div>
+      <div class="card"><span class="tag signal">AR×Diffusion</span><h3>Zarya</h3><p>同一 Qwen3 骨干联合训练 AR 与 masked diffusion，用 2→64 token 的 slot curriculum；推理可选纯 MDM 或能完整复用 KV cache 的 slotted speculative 模式。已开放 0.6B／1.7B／4B。</p><p class="small"><strong>局限：</strong>论文主结果仍只有 0.6B，2K 上下文，且标注为进行中工作。<br><a href="https://arxiv.org/abs/2609.19868">论文</a> · <a href="https://github.com/ai-forever/zarya">代码</a></p></div>
+      <div class="card"><span class="tag signal">硬件</span><h3>Edge BDLM Accelerator</h3><p>面向 Jetson 级设备的 block-diffusion 协同设计，论文仿真报告 1.5B／7B 能耗降 3.79×／3.96×、延迟提速 2.88×／4.44×，分数下降少于 1 个百分点。</p><p class="small"><strong>局限：</strong>是建模与仿真，并非真实芯片端到端测量。<br><a href="https://arxiv.org/abs/2609.01084">论文</a></p></div>
+    </div>
+  </section>
+
+  <section id="matrix">
+    <h2>开源与部署：现在该试什么</h2>
+    <div class="table-wrap"><table><thead><tr><th>目标</th><th>本月最可操作的入口</th><th>现实成本／风险</th></tr></thead><tbody>
+      <tr><td>评测混合骨干</td><td>dQwen3.5 0.8B–9B base 权重；优先测代码与数学生成的质量—NFE 曲线</td><td>仍需自行补 SFT／服务栈；4K 训练上下文</td></tr>
+      <tr><td>两张 GPU 做低步数适配</td><td>TSD：LoRA 83.9M 参数，论文在 2×A100／H200 上完成</td><td>需要任务级正确性 reward；目标长度相关</td></tr>
+      <tr><td>无重训先加速</td><td>Early-Bird 路由式可变 block 解码</td><td>论文缺连续批处理与长序列验证</td></tr>
+      <tr><td>多卡长上下文 SFT</td><td>Turbo-dLLM 的 BP／CSBP；Agent 任务已有 DiffusionGemma 26B-A4B 案例</td><td>收益建立在 8–16 张 H100/H200 上</td></tr>
+      <tr><td>研究跨 chunk Agent 记忆</td><td>Register Tokens 代码与训练混合数据已开放</td><td>复现实验需要 B200 级预算；泛化跨度有限</td></tr>
+      <tr><td>研究常数状态长上下文</td><td>Fixed-State 论文给出明确架构／缓存证据</td><td>不是轻量微调路线，需要重新训练 3B 级去噪器</td></tr>
+    </tbody></table></div>
+    <p class="note warning"><strong>本月没有出现“新的通用 Agent 型扩散基座”。</strong>Agent 方向的实质增量，一条是 register 隐状态 + 分块 RL，另一条是 CSBP 把长上下文代码 Agent SFT 变得更可训练。把它们称为“Agent 工程组件”比称为“新 Agent 模型”更准确。</p>
+  </section>
+
+  <section id="watch">
+    <h2>下月应盯住的三个验证点</h2>
+    <ol>
+      <li><strong>混合注意力是否保住真实长上下文质量。</strong>dQwen3.5 证明适配效率，但还缺 32K–256K 训练后的检索、代码仓库级任务与服务侧缓存数据。</li>
+      <li><strong>学习式提交策略能否进入 continuous batching。</strong>Early-Bird 的 batch=1 吞吐不是线上吞吐；需要报告多请求调度、尾延迟和 KV／状态缓存占用。</li>
+      <li><strong>受限状态是否能跨环境反馈循环。</strong>Register Tokens 当前主要是分块推理题；真正 Agent 验证应加入工具结果、错误恢复与多轮观测，而非只延长内部算式。</li>
+    </ol>
+    <p class="takeaway"><strong>一句话判断：</strong>9 月的胜负手不是“扩散能不能并行”，而是并行之后能否保持联合一致性、复用状态，并把训练与服务成本降到可部署区间。</p>
+  </section>
+
+  <section id="refs">
+    <h2>一手来源</h2>
+    <ol class="refs">
+      <li><a href="https://arxiv.org/abs/2609.20751">dQwen3.5: Hybrid-Attention Diffusion Language Models</a>（2026-09-17）</li>
+      <li><a href="https://arxiv.org/abs/2609.19242">Block Parallelism for Efficient Distributed Long-Context Diffusion Language Model Training</a>（2026-09-16）</li>
+      <li><a href="https://arxiv.org/abs/2609.11998">Fixed State, Long Reach: What a Constant-Size Cache Buys Block Diffusion at Scale</a>（2026-09-09）</li>
+      <li><a href="https://arxiv.org/abs/2609.15177">Temporal Self-Distillation: Faster Inference in Discrete Diffusion LMs</a>（2026-09-14）</li>
+      <li><a href="https://arxiv.org/abs/2609.16450">Early-Bird Decoding</a>（2026-09-15）</li>
+      <li><a href="https://arxiv.org/abs/2609.16372">Register Tokens for Bounded-State Reasoning in Diffusion Language Models</a>（2026-09-14）</li>
+      <li><a href="https://arxiv.org/abs/2609.20581">Limits of Confidence in Diffusion</a>（2026-09-17）</li>
+      <li><a href="https://arxiv.org/abs/2609.15070">DA-DLM: Explicitly Modeling Token Dependencies in Diffusion Language Models</a>（2026-09-14）</li>
+      <li><a href="https://arxiv.org/abs/2609.12382">RMDM: Representation-based Masked Diffusion Model</a>（2026-09-11）</li>
+      <li><a href="https://arxiv.org/abs/2609.19868">Zarya: A Hybrid Autoregressive–Masked Diffusion Language Model</a>（2026-09-17）</li>
+      <li><a href="https://arxiv.org/abs/2609.01084">Hardware Acceleration of Block-Diffusion LLM for Edge Devices</a>（2026-09-01）</li>
+    </ol>
+    <p class="stamp">检索截止：2026-09-20。证据等级：以上均为论文／官方模型页／官方代码仓库；预印本尚未经过正式同行评审。未重复介绍 8 月及更早、且本期无模型、实验或代码实质更新的旧工作。</p>
+  </section>
+</main>
+</body>
+</html>
