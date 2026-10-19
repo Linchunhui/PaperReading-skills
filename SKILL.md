@@ -16,7 +16,7 @@ Choose in this order:
 3. Use **radar** for “today/this week/this month, HF Daily Papers, AI daily/weekly/monthly report” without supplied papers.
 4. Use **single** for one paper.
 5. Use **series** for 2-6 papers with a clear inheritance or evolution line.
-6. Use **digest** for 2-12 independent supplied papers.
+6. Use **digest** for two or more independent supplied papers.
 7. If the relation is unclear, ask whether one can state: “what problem did the previous generation leave, and how did the next generation add, replace, or bypass it?” If yes, use series; otherwise use digest.
 
 Within **single**, enable **跟着 limu 解读** only when requested (for example, “跟着 limu 解读”, “李沐式精读”, or “用 limu 的讲解方式”), or via `single-limu`. Ordinary “精读” keeps the standard single-paper workflow. This is an optional teaching workflow, not a fifth top-level mode; preserve explicit series/digest/radar requests and never reduce a multi-paper request to one paper because it mentions limu.
@@ -29,6 +29,8 @@ Always read [references/foundation.md](references/foundation.md) completely, the
 - Radar: [references/radar.md](references/radar.md), [references/directions.md](references/directions.md), and [references/per-paper-deep-read.md](references/per-paper-deep-read.md), all completely.
 
 Digest and radar apply the adapted limu teaching method to **every included paper by default**, without changing their multi-paper organization or requiring an extra keyword. The overview may be brief; each paper’s body must recover its problem, method, evidence, cost, and scope. Explicit user requests for a short version override the default; a mode/task title such as “速读” alone does not.
+
+Do not set a default total word budget or per-paper word ceiling for HTML or Markdown. Let the length grow with the number and complexity of papers; finish each paper’s explanation before removing repetition. Never divide a fixed total budget across papers or shorten later papers to fit. If generation limits require batching, save completed sections, continue through every selected paper, and assemble the complete deliverable. Only an explicit user request for a short version or word limit overrides this rule.
 
 For every route that creates an HTML, also read [references/wechat-markdown.md](references/wechat-markdown.md) and create the concise companion Markdown unless the user explicitly requests HTML only.
 
@@ -61,7 +63,7 @@ Before drawing visuals, also read the relevant templates:
 9. If starting from an existing HTML, create the deterministic draft first:
 
    ```bash
-   python3 scripts/html_to_markdown.py "{input.html}" --compact
+   python3 scripts/html_to_markdown.py "{input.html}" --compact --max-chars 0
    ```
 
    Then rewrite the draft semantically into mobile-friendly sections (usually 4–6; multi-paper coverage takes priority) and recheck it against the source HTML.
@@ -140,6 +142,8 @@ When the user requests a recurring task, create an automation if available using
 ## Final acceptance gate
 
 Before delivery, verify:
+
+- No default total or per-paper word ceiling, fixed-budget averaging, automatic truncation, or length-driven omission has reduced coverage; all generated batches are assembled and checked.
 
 - Every digest/radar paper passes `references/per-paper-deep-read.md`; all user-specified papers are covered, later papers retain full depth, and unavailable-source items are not counted as completed deep reads.
 - The route-specific structure and optional-section thresholds pass. For 跟着 limu 解读, also pass the teaching checklist in `references/single-paper-limu.md`: one concrete problem, a recoverable method route, located paragraph explanations, and bounded experimental claims.
