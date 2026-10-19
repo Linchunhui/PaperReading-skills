@@ -1,6 +1,6 @@
 ---
 name: paper-studio
-description: "Use whenever the user shares a research paper (arXiv, PDF, paper URL, or title), asks to read, analyze, compare, or consolidate papers, wants an AI research radar/digest/newsletter/recurring paper task, or asks to convert an existing research HTML into concise Markdown for a WeChat Official Account. Supports single, series, digest, radar, and HTML-to-WeChat-Markdown workflows, including the opt-in single-paper teaching feature 跟着 limu 解读 (single-limu). Produces a standalone HTML plus a concise `.wechat.md` companion by default; single-paper HTML preserves the source PDF basename exactly."
+description: "Use whenever the user shares a research paper (arXiv, PDF, paper URL, or title), asks to read, analyze, compare, or consolidate papers, wants an AI research radar/digest/newsletter/recurring paper task, or asks to convert an existing research HTML into concise Markdown for a WeChat Official Account. Supports single, series, digest, radar, and HTML-to-WeChat-Markdown workflows, including the opt-in single-paper teaching feature 跟着 limu 解读 (single-limu). Digest and daily/weekly/monthly radar default to in-depth reading of every included paper, using concrete examples, stepwise mechanisms, and evidence boundaries. Produces a standalone HTML plus a concise `.wechat.md` companion by default; single-paper HTML preserves the source PDF basename exactly."
 ---
 
 # PaperStudio
@@ -25,8 +25,10 @@ Always read [references/foundation.md](references/foundation.md) completely, the
 
 - Single: [references/single-paper.md](references/single-paper.md). When 跟着 limu 解读 is selected, also read [references/single-paper-limu.md](references/single-paper-limu.md) completely. It contains the built-in teaching method; no separate skill is required.
 - Series: [references/series.md](references/series.md)
-- Digest: [references/digest.md](references/digest.md)
-- Radar: [references/radar.md](references/radar.md) and [references/directions.md](references/directions.md)
+- Digest: [references/digest.md](references/digest.md) and [references/per-paper-deep-read.md](references/per-paper-deep-read.md), both completely.
+- Radar: [references/radar.md](references/radar.md), [references/directions.md](references/directions.md), and [references/per-paper-deep-read.md](references/per-paper-deep-read.md), all completely.
+
+Digest and radar apply the adapted limu teaching method to **every included paper by default**, without changing their multi-paper organization or requiring an extra keyword. The overview may be brief; each paper’s body must recover its problem, method, evidence, cost, and scope. Explicit user requests for a short version override the default; a mode/task title such as “速读” alone does not.
 
 For every route that creates an HTML, also read [references/wechat-markdown.md](references/wechat-markdown.md) and create the concise companion Markdown unless the user explicitly requests HTML only.
 
@@ -39,7 +41,7 @@ Before drawing visuals, also read the relevant templates:
 
 1. Resolve every source and record provenance. For a title or URL, browse to find and verify the primary paper/project page. For a local PDF, inspect the PDF directly. Prefer primary sources for technical claims and numbers.
 2. Collect the title, authors, abstract, related-work context, method, key formulas needed to understand the mechanism, main experiments, ablations, limitations, and the figures that carry understanding.
-3. Draft the route-specific structure. For 跟着 limu 解读, use the teaching sequence in `references/single-paper-limu.md` in place of the standard single-paper section order while retaining its coverage and delivery rules. Make reasoning visible: show how the evidence supports each conclusion. In a paper deep-read, make the method recoverable rather than listing component names: give an end-to-end route, then 4–7 numbered stages that explain state transformations, design reasons, training signals, and inference behavior; use the selected mode reference's depth gate. Treat a deep monthly radar as a collection of self-sufficient single-paper readings, not a stack of abstract cards; reduce the paper count before compressing away method detail.
+3. Draft the route-specific structure. For 跟着 limu 解读, use the teaching sequence in `references/single-paper-limu.md` in place of the standard single-paper section order while retaining its coverage and delivery rules. Make reasoning visible: show how the evidence supports each conclusion. For digest/radar, complete the shared per-paper deep-read workflow for every included paper, with an example, stepwise transformations, located argument explanations, experimental controls, and a specific recall paragraph. Do not reserve depth for Top picks or compress later papers into short cards. In a paper deep-read, make the method recoverable rather than listing component names: give an end-to-end route, then 4–7 numbered stages that explain state transformations, design reasons, training signals, and inference behavior; use the selected mode reference's depth gate.
 4. Copy [assets/style.css](assets/style.css) into the output `<style>` and adapt only the per-paper palette and route-specific needs. Generate accessible, responsive HTML directly with the available HTML/CSS tools.
 5. Compress retained raster images, then embed all image dependencies:
 
@@ -62,10 +64,10 @@ Before drawing visuals, also read the relevant templates:
    python3 scripts/html_to_markdown.py "{input.html}" --compact
    ```
 
-   Then rewrite the draft semantically into 4–6 mobile-friendly sections and recheck it against the source HTML.
+   Then rewrite the draft semantically into mobile-friendly sections (usually 4–6; multi-paper coverage takes priority) and recheck it against the source HTML.
 10. Deliver the validated HTML and `.wechat.md` companion, plus any `.wechat-assets/` directory. Report absolute paths, file sizes, and source coverage/status. Omit the Markdown only when the user explicitly asks for HTML alone.
 
-For periodic radar runs, compute the report key and target filename before discovery. Reuse an existing same-name HTML unless the user explicitly asks to revise it; revisions update the existing path instead of creating a duplicate. When the user constrains discovery to HF Daily Papers, treat that dated HF set as a hard candidate boundary and use arXiv/PDF/project pages only for verification. If HF date coverage must fall back, disclose the actual covered date or interval in the report subtitle.
+For periodic radar runs, compute the report key and target filename before discovery. Reuse an existing same-name HTML only when it satisfies the current scope and per-paper depth requirements and no revision is requested; otherwise update the existing path after verifying missing evidence and expanding the content, without creating a duplicate. When the user constrains discovery to HF Daily Papers, treat that dated HF set as a hard candidate boundary and use arXiv/PDF/project pages only for verification. If HF date coverage must fall back, disclose the actual covered date or interval in the report subtitle.
 
 ## Preserve deterministic naming
 
@@ -139,6 +141,7 @@ When the user requests a recurring task, create an automation if available using
 
 Before delivery, verify:
 
+- Every digest/radar paper passes `references/per-paper-deep-read.md`; all user-specified papers are covered, later papers retain full depth, and unavailable-source items are not counted as completed deep reads.
 - The route-specific structure and optional-section thresholds pass. For 跟着 limu 解读, also pass the teaching checklist in `references/single-paper-limu.md`: one concrete problem, a recoverable method route, located paragraph explanations, and bounded experimental claims.
 - Every formula renders and has an immediate plain-language translation.
 - Every deep-read card is independently understandable: the reader can recover the input-to-output method route, separate training from inference, locate at least one main result and one ablation/diagnostic result, and understand any key formula without opening the paper first.
@@ -146,7 +149,7 @@ Before delivery, verify:
 - Every SVG number matches its cited source and every marker ID is unique within the page.
 - `embed_images.py` and `validate_html.py` pass.
 - The final HTML works as a standalone file on desktop and mobile.
-- The `.wechat.md` has 4–6 major sections, short mobile paragraphs, exact numbers, 1–3 images at most, no base64, no sidebar TOC/Q&A, and a final reference list.
+- The `.wechat.md` has clear sections (usually 4–6 for single/series; grouped by paper/topic for digest/radar), short mobile paragraphs, exact numbers, 1–3 images at most, no base64, no sidebar TOC/Q&A, and a final reference list.
 - The Markdown previews cleanly in a standard WeChat Markdown editor such as doocs/md or Wenyan; project-specific extension syntax is optional, never the default.
 
 Do not call a result complete while any HTML image is external, a formula is visibly broken, a required source is silently missing, a single-paper filename differs from its PDF basename, or the Markdown is merely a full HTML text dump without semantic shortening.

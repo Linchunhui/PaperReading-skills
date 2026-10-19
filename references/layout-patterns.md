@@ -1,231 +1,123 @@
-# Layout Patterns（随笔 / digest 模式）
+# Layout Patterns（随笔 / digest）
 
-随笔（digest）模式比系列（series）模式简单——没有时间线、没有对照矩阵、没有贯穿线。这里只放 digest 特有的模板 + 一个完整结构示例。bar chart 等 SVG 沿用系列的横向 bar 模板（见 [`svg-patterns.md`](./svg-patterns.md)）。
-
-所有模板：`viewBox` 响应式、`font-family: inherit` 跟随正文字体、内嵌而非外部库、`class="viz"` 统一样式。
+随笔用总览帮助选读，再让每篇正文独立展开。模板只约定布局，正文深度以 [`per-paper-deep-read.md`](./per-paper-deep-read.md) 为准；不要把占位段落的长度当成篇幅限制。本文的花括号与论文 A/B 是占位符，使用前全部换成已核实内容。
 
 ## 目录
 
-- [概览卡墙](#1-概览卡墙必画放在-overview-里)
-- [领域分布 SVG](#2-领域分布-svg可选领域失衡时才画)
-- [每篇承重 bar chart](#3-每篇承重-bar-chart沿用)
-- [完整 digest 示例](#4-完整-digest-结构示例3-篇跨-3-领域)
+- [导航卡](#1-导航卡)
+- [按篇深读的正文骨架](#2-按篇深读的正文骨架)
+- [回顾与导航](#3-回顾与导航)
+- [图表](#4-图表)
 
----
+## 1. 导航卡
 
-## 1. 概览卡墙（必画，放在 `#overview` 里）
-
-CSS grid 实现，**不是 SVG**。每篇一张迷你卡，跨 ≥ 3 领域时按领域分组。
-
-### 平铺版（领域少时）
+使用 CSS grid；每张卡给用途、具体变化和正文锚点。跨领域时可加分组标题。卡片是阅读入口，完整讲解在后文。
 
 ```html
-<div class="overview-grid">
-  <a class="overview-card" href="#deepseek-r1" style="--c: var(--p1);">
-    <div class="oc-head">
-      <span class="oc-num">①</span>
-      <span class="field-tag" style="background: var(--p1);">RL</span>
-    </div>
-    <div class="oc-name">DeepSeek-R1</div>
-    <div class="oc-use">用纯 RL 让模型自己长出推理</div>
-    <div class="oc-hook">✦ 不需要 SFT 冷启动也能训出来</div>
-  </a>
-
-  <a class="overview-card" href="#onevl" style="--c: var(--p2);">
-    <div class="oc-head">
-      <span class="oc-num">②</span>
-      <span class="field-tag" style="background: var(--p2);">VLM</span>
-    </div>
-    <div class="oc-name">OneVL</div>
-    <div class="oc-use">物理预测当辅助监督</div>
-    <div class="oc-hook">✦ 物理性监督比语言 latent 有效得多</div>
-  </a>
-
-  <!-- ... 更多卡 ... -->
-</div>
-```
-
-### 分组版（跨 ≥ 3 领域时）
-
-```html
-<h3 class="field-group">强化学习</h3>
-<div class="overview-grid">
-  <!-- 该领域的卡 -->
-</div>
-
-<h3 class="field-group">视觉语言</h3>
-<div class="overview-grid">
-  <!-- 该领域的卡 -->
-</div>
-```
-
-**要点**：
-
-- 编号 ①②③ 和正文卡片标题、TOC、结尾回顾**全程一致**
-- `href="#{shortname}"` 让点卡跳到对应正文卡片
-- 颜色通过 `style="--c: var(--pN);"` 注入该篇主色（卡片左条 + 编号 + field-tag 三处统一）
-- `.oc-hook` 是亮点 hook，整份 digest 最重要的一行——必须**读完之后**抽出来，不是 abstract 客气话、不是方法步骤
-
-CSS 见 [`../assets/style.css`](../assets/style.css) 的 `.overview-*` / `.field-tag` 部分。
-
----
-
-## 2. 领域分布 SVG（可选，领域失衡时才画）
-
-当本期某个领域特别集中（如 5 篇里 3 篇都是 RL），在导读下画一张小的分布图点出来。**不强求**——卡墙分组已经表达了。
-
-```svg
-<svg class="viz" viewBox="0 0 620 200" xmlns="http://www.w3.org/2000/svg" style="font-family:inherit;">
-  <text x="20" y="28" font-size="15" font-weight="700">本期领域分布</text>
-
-  <!-- 每个领域一个色块 + 篇数，宽度按篇数成比例，从多到少排 -->
-  <rect x="40"  y="56" width="190" height="42" rx="5" fill="#5b8def" opacity="0.88"/>
-  <text x="135" y="83" text-anchor="middle" fill="#fff" font-size="14" font-weight="600">RL · 3 篇</text>
-
-  <rect x="250" y="56" width="125" height="42" rx="5" fill="#62b88f" opacity="0.88"/>
-  <text x="312" y="83" text-anchor="middle" fill="#fff" font-size="14" font-weight="600">VLM · 2 篇</text>
-
-  <rect x="395" y="56" width="80"  height="42" rx="5" fill="#e08e45" opacity="0.88"/>
-  <text x="435" y="83" text-anchor="middle" fill="#fff" font-size="14" font-weight="600">评测 · 1</text>
-
-  <text x="20" y="140" font-size="12.5" fill="#666">
-    本期 6 篇里一半在搞 RL + 推理——这个方向明显在升温
-  </text>
-</svg>
-```
-
-宽度按篇数成比例；颜色用各领域代表色；底部一句话点出"这意味着什么"。
-
----
-
-## 3. 每篇承重 bar chart（沿用）
-
-每篇 `#{shortname}-exp` 里至少一张承重图，把"vs baseline 涨了多少"或"消融掉某个组件掉多少"抽成横向 bar。模板和系列 / 单篇一致，bar 用该篇主色：
-
-```svg
-<svg class="viz" viewBox="0 0 700 280" xmlns="http://www.w3.org/2000/svg" style="font-family:inherit;">
-  <text x="20" y="30" font-size="16" font-weight="bold">{标题：这篇 vs baseline / 消融}</text>
-
-  <!-- baseline 竖线 -->
-  <line x1="180" y1="60" x2="180" y2="240" stroke="#999"/>
-
-  <!-- 每条 bar：x=180 固定起点，width 按数值缩放，fill 用该篇主色 -->
-  <rect x="180" y="80"  width="200" height="22" fill="var(--p1)" opacity="0.7"/>
-  <text x="385" y="96"  font-size="13">指标 A：旧 X → 新 Y（+Z%）</text>
-
-  <rect x="180" y="120" width="320" height="22" fill="var(--p1)"/>
-  <text x="505" y="136" font-size="13">指标 B：旧 X → 新 Y（+Z%）</text>
-
-  <text x="20" y="270" font-size="11" fill="#666">Source: Table N of {论文名}</text>
-</svg>
-```
-
-记住：bar 方向 / 长度比例诚实；"越低越好"的指标（RMSE / loss）在标题或底部标明"越短越好"；末尾标 `Source: ...`。
-
----
-
-## 4. 完整 digest 结构示例（3 篇，跨 3 领域）
-
-一份典型 digest 的骨架，照着填内容：
-
-```html
-<header>
-  <h1>Paper Digest · 2026-06-26</h1>
-  <p class="subtitle">3 篇 · RL · VLM · 评测 — 本期一半在搞推理</p>
-  <p class="meta">2026-06-26 · 3 篇论文整合 · 单篇笔记：
-    <a href="./DeepSeek-R1.html">DeepSeek-R1</a> ·
-    <a href="./OneVL.html">OneVL</a> ·
-    <a>（这篇暂无单篇笔记）</a>
-  </p>
-</header>
-
-<main>
-  <!-- 1. 开头总览 -->
-  <section id="overview">
-    <h2 class="lvl0">本期一览</h2>
-    <p>{100-200 字导读：这批哪来的、跨了哪几个领域、哪篇最亮眼、留个钩子}</p>
-
-    <h3 class="field-group">强化学习</h3>
-    <div class="overview-grid">
-      <a class="overview-card" href="#deepseek-r1" style="--c: var(--p1);">
-        <div class="oc-head"><span class="oc-num">①</span>
-          <span class="field-tag" style="background: var(--p1);">RL</span></div>
-        <div class="oc-name">DeepSeek-R1</div>
-        <div class="oc-use">用纯 RL 让模型自己长出推理</div>
-        <div class="oc-hook">✦ 不需要 SFT 冷启动，纯 RL 也能涌现长链思考</div>
-      </a>
-    </div>
-
-    <h3 class="field-group">视觉语言</h3>
-    <div class="overview-grid">
-      <a class="overview-card" href="#onevl" style="--c: var(--p2);"> ... </a>
-    </div>
-
-    <h3 class="field-group">评测</h3>
-    <div class="overview-grid">
-      <a class="overview-card" href="#mmlu-pro" style="--c: var(--p3);"> ... </a>
-    </div>
-  </section>
-
-  <!-- 2. 每篇独立卡片 -->
-  <div class="chapter p1" id="deepseek-r1">
-    <h2>① DeepSeek-R1 <span class="field-tag" style="background: var(--p1);">RL</span></h2>
-    <p class="tagline">用纯 RL 让模型自己长出推理</p>
-    <p class="hook">✦ 亮点：不需要 SFT 冷启动，纯 RL 也能涌现长链思考——冷启动反而拖后腿</p>
-
-    <section id="r1-mot"><h3>出发点</h3><p>...</p></section>
-
-    <section id="r1-met">
-      <h3>方法</h3>
-      <figure>
-        <img src="data:image/jpeg;base64,{BASE64_PAYLOAD}" alt="DeepSeek-R1 训练流程">
-        <figcaption>训练流程（原论文 Figure 2）：先看 RL 冷启动怎么独立站住，再看 SFT 加在哪……</figcaption>
-      </figure>
-      <h4>(1) 整体流程</h4><p>...</p>
-      <h4>(2) GRPO 奖励</h4>
-      <p>$$L = \mathbb{E}[\ldots]$$</p>
-      <p class="note"><strong>白话翻译</strong>：让模型自己比较多个回答的相对好坏，好的强化坏的削弱……</p>
-    </section>
-
-    <section id="r1-exp">
-      <h3>关键发现</h3>
-      <!-- bar chart SVG：AIME / MATH 等数字 vs baseline -->
-    </section>
+<section id="overview">
+  <h2>本期阅读路线</h2>
+  <p>{说明收录范围、各篇任务与建议阅读顺序}</p>
+  <div class="overview-grid">
+    <a class="overview-card" href="#paper-a" style="--c:var(--p1)">
+      <div class="oc-head">
+        <span class="oc-num">①</span>
+        <span class="field-tag" style="background:var(--p1)">{领域}</span>
+      </div>
+      <div class="oc-name">{论文 A 简短名}</div>
+      <div class="oc-use">{具体任务与用途}</div>
+      <div class="oc-hook">{读完原文后提炼的具体变化，不用宣传词}</div>
+    </a>
+    <!-- 为每篇建立对应导航卡，编号和正文一致 -->
   </div>
+</section>
+```
 
-  <div class="chapter p2" id="onevl"> ... </div>
-  <div class="chapter p3" id="mmlu-pro"> ... </div>
+CSS 起手式见 [`../assets/style.css`](../assets/style.css) 的 `.overview-*`、`.field-tag`、`.chapter`。不要设置截断正文的固定高度、line-clamp 或只显示摘要的默认折叠。
 
-  <!-- 3. 结尾回顾 -->
-  <section id="recap">
-    <h2 class="lvl0">回顾：这 3 篇分别是什么</h2>
-    <ul class="recap-list">
-      <li><span class="rc-num">①</span>
-        <span class="field-tag" style="background: var(--p1);">RL</span>
-        <strong>DeepSeek-R1</strong> —— 用纯 RL 长出推理；最反直觉的是冷启动反而拖后腿</li>
-      <li><span class="rc-num">②</span>
-        <span class="field-tag" style="background: var(--p2);">VLM</span>
-        <strong>OneVL</strong> —— 物理预测当辅助监督；+0.87 vs +0.31 的对比记得最牢</li>
-      <li><span class="rc-num">③</span>
-        <span class="field-tag" style="background: var(--p3);">评测</span>
-        <strong>MMLU-Pro</strong> —— 给 LLM 做更难的笔试；原来"会做简单题"和"真懂"差这么远</li>
-    </ul>
-    <p class="takeaway">本期 3 篇有 2 篇都在碰推理——RL 侧从训练范式推、评测侧从测量推，两条线都在收紧。</p>
+## 2. 按篇深读的正文骨架
+
+下面的结构为每篇重复一次，使用唯一前缀；可按论文类型调整自然标题与方法步骤数。所有正文占位内容须写成实际解读，不能把整条机制拆成五句标签。
+
+```html
+<article class="chapter p1" id="paper-a">
+  <h2>① {论文 A 简短名}</h2>
+  <p class="tagline">{改变了哪个具体环节}</p>
+  <p class="meta">{版本与年份} · <a href="{PAPER_URL}">论文原文</a></p>
+  <p class="hook">{为什么值得读，保留成立条件}</p>
+
+  <section id="paper-a-mot">
+    <h3>先看一个具体困难</h3>
+    <p>{任务输入、期望输出、贯穿全文的实例}</p>
+    <p>{最相关旧方案的操作、卡点与后果；指出本篇核心变化}</p>
   </section>
-</main>
 
-<aside id="toc">
-  <a class="lvl1" href="#overview">本期一览</a>
-  <a class="lvl2" href="#deepseek-r1">① DeepSeek-R1</a>
-  <a class="lvl2" href="#onevl">② OneVL</a>
-  <a class="lvl2" href="#mmlu-pro">③ MMLU-Pro</a>
+  <section id="paper-a-met">
+    <h3>拿这个样本走一遍方法</h3>
+    <p>{最小完整路线：起点、关键表示与操作、最终输出}</p>
+    <!-- 在这里插入已核验的原图或教学 SVG；图注解释阅读顺序与关键箭头 -->
+
+    <h4>1. {输入怎样形成可操作的表示}</h4>
+    <p>{进入什么、发生什么变化、结果交给谁、为什么需要；回到同一例子}</p>
+    <h4>2. {核心机制改了哪一步}</h4>
+    <p>{关键变换、与旧方案的差别、相应原文小节如何推进论证}</p>
+    <h4>3. {目标与训练更新}</h4>
+    <p>{监督从哪来、更新/冻结对象、一次更新流程；不适用训练时换成相应论证步骤}</p>
+    <!-- 有承重公式时，使用已核实的原式、来源编号和离线可渲染数学格式 -->
+    <p class="note">{紧邻公式解释变量对象、操作、方向与条件；无公式则删除此占位}</p>
+    <h4>4. {使用时如何产生最终结果}</h4>
+    <p>{推理顺序、保留模块、状态或循环、最终输出；必要时增加步骤}</p>
+  </section>
+
+  <section id="paper-a-exp">
+    <h3>实验究竟支持什么</h3>
+    <p>{主结果：任务、基线、预算、指标、精确数字及 Table/Figure 位置}</p>
+    <!-- 小表或结果图，用正文解释“看哪里—比什么—支持到哪里” -->
+    <p>{消融或诊断：改变了什么、保持了什么、结果与归因边界；没有则说明缺口}</p>
+  </section>
+
+  <section id="paper-a-limits">
+    <h3>代价和适用边界</h3>
+    <p>{成立条件、成本、未证明部分，区分作者说明与自己的分析}</p>
+    <p>{有核验依据时交代代码/模型/数据状态与核验日期}</p>
+  </section>
+
+  <section id="paper-a-recall">
+    <h3>读完记住什么</h3>
+    <p>{具体问题、关键变化、支持证据及边界；能够区分这篇与其他论文}</p>
+  </section>
+</article>
+```
+
+原文论证穿插在方法与证据解释中，例如某段先定义了什么，后一个目标或对照为什么需要它。不要把整篇读法变成机械填写五个空。
+
+## 3. 回顾与导航
+
+```html
+<section id="recap">
+  <h2>回顾与回看入口</h2>
+  <ul class="recap-list">
+    <li><a href="#paper-a">① {论文 A}</a>：{问题与核心变化，保留一个关键条件}</li>
+    <!-- 逐篇补齐，不复制开头 hook -->
+  </ul>
+</section>
+
+<aside id="toc" aria-label="阅读目录">
+  <a class="lvl1" href="#overview">本期阅读路线</a>
+  <a class="lvl1" href="#paper-a">① {论文 A}</a>
+  <a class="lvl2" href="#paper-a-mot">问题</a>
+  <a class="lvl2" href="#paper-a-met">方法</a>
+  <a class="lvl2" href="#paper-a-exp">证据</a>
+  <a class="lvl2" href="#paper-a-limits">边界</a>
   <a class="lvl1" href="#recap">回顾</a>
 </aside>
 ```
 
-**要点**：
+每篇都须有对应的正文、导航和回顾，不以链接到另一个文件代替解释。移动端 TOC 可折叠，但方法正文保持展开。
 
-- 每篇卡片的 `id` 要和概览卡墙的 `href` 对应，点击能跳
-- 编号 ①②③ 在 overview、卡片标题、recap、TOC 里**全程一致**
-- 领域 tag 在四处都出现（overview 卡 / 卡片标题 / recap / 可选领域分布 SVG），用同一种主色，是该篇的视觉锚
-- 没有 `#threads` / 时间线 / 对照矩阵——独立论文就是独立展位，不硬串
+## 4. 图表
+
+- 方法图随论文类型选择，核心作用是让对象、变换和连接看得见；优先原图并写原创导读图注，必要时补教学示意。
+- 结果可用小表、bar/dot chart 或原文图；数字、单位、方向和比较协议都需核验。模板见 [`svg-patterns.md`](./svg-patterns.md)。
+- 领域分布是可选导航信息：每类篇数与实际入选清单一致，长度按数值等比例，不能从本期小样本直接断言整个研究方向升温。
+- 内联 SVG 使用 `viewBox` 与 `font-family:inherit`；每个 marker ID 全页唯一。位图压缩后嵌入 base64。
+- 不在模板里填未经核实的真实论文数字、图号或因果解释，也不把布局示意误当作原论文架构。

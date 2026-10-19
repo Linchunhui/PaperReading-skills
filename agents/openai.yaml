@@ -1,7 +1,7 @@
 interface:
   display_name: "PaperStudio"
-  short_description: "单篇精读与 limu 带读、系列梳理、研究雷达及公众号 Markdown"
-  default_prompt: "使用 $paper-studio 单篇，跟着 limu 解读这篇论文，生成完整 HTML 笔记和精简公众号 Markdown。"
+  short_description: "单篇 limu 带读、系列串讲、逐篇深读的随笔与雷达、公众号 Markdown"
+  default_prompt: "使用 $paper-studio 解读这些论文或生成研究雷达，逐篇讲透问题、方法、实验证据与边界，生成完整 HTML 和精简公众号 Markdown。"
   icon_small: "assets/icon.svg"
   icon_large: "assets/icon.svg"
 policy:
