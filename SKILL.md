@@ -1,6 +1,6 @@
 ---
 name: paper-studio
-description: "Use whenever the user shares a research paper (arXiv, PDF, paper URL, or title), asks to read, analyze, compare, or consolidate papers, wants an AI research radar/digest/newsletter/recurring paper task, or asks to convert an existing research HTML into concise Markdown for a WeChat Official Account. Supports single, series, digest, radar, and HTML-to-WeChat-Markdown workflows. Produces a standalone HTML plus a concise `.wechat.md` companion by default; single-paper HTML preserves the source PDF basename exactly."
+description: "Use whenever the user shares a research paper (arXiv, PDF, paper URL, or title), asks to read, analyze, compare, or consolidate papers, wants an AI research radar/digest/newsletter/recurring paper task, or asks to convert an existing research HTML into concise Markdown for a WeChat Official Account. Supports single, series, digest, radar, and HTML-to-WeChat-Markdown workflows, including the opt-in single-paper teaching feature 跟着 limu 解读 (single-limu). Produces a standalone HTML plus a concise `.wechat.md` companion by default; single-paper HTML preserves the source PDF basename exactly."
 ---
 
 # PaperStudio
@@ -12,16 +12,18 @@ Turn research discovery and close reading into durable, self-contained HTML note
 Choose in this order:
 
 1. For an existing `.html` plus “转 Markdown / 公众号版 / 精简发布”, use **HTML-to-WeChat-Markdown**. Read [references/wechat-markdown.md](references/wechat-markdown.md), run the converter, then perform semantic shortening.
-2. Honor an explicit `single`, `series`, `digest`, or `radar` mode.
+2. Honor an explicit `single`, `series`, `digest`, or `radar` mode; `single-limu` means `single` with the limu teaching workflow.
 3. Use **radar** for “today/this week/this month, HF Daily Papers, AI daily/weekly/monthly report” without supplied papers.
 4. Use **single** for one paper.
 5. Use **series** for 2-6 papers with a clear inheritance or evolution line.
 6. Use **digest** for 2-12 independent supplied papers.
 7. If the relation is unclear, ask whether one can state: “what problem did the previous generation leave, and how did the next generation add, replace, or bypass it?” If yes, use series; otherwise use digest.
 
+Within **single**, enable **跟着 limu 解读** only when requested (for example, “跟着 limu 解读”, “李沐式精读”, or “用 limu 的讲解方式”), or via `single-limu`. Ordinary “精读” keeps the standard single-paper workflow. This is an optional teaching workflow, not a fifth top-level mode; preserve explicit series/digest/radar requests and never reduce a multi-paper request to one paper because it mentions limu.
+
 Always read [references/foundation.md](references/foundation.md) completely, then read the selected mode reference completely:
 
-- Single: [references/single-paper.md](references/single-paper.md)
+- Single: [references/single-paper.md](references/single-paper.md). When 跟着 limu 解读 is selected, also read [references/single-paper-limu.md](references/single-paper-limu.md) completely. It contains the built-in teaching method; no separate skill is required.
 - Series: [references/series.md](references/series.md)
 - Digest: [references/digest.md](references/digest.md)
 - Radar: [references/radar.md](references/radar.md) and [references/directions.md](references/directions.md)
@@ -37,7 +39,7 @@ Before drawing visuals, also read the relevant templates:
 
 1. Resolve every source and record provenance. For a title or URL, browse to find and verify the primary paper/project page. For a local PDF, inspect the PDF directly. Prefer primary sources for technical claims and numbers.
 2. Collect the title, authors, abstract, related-work context, method, key formulas needed to understand the mechanism, main experiments, ablations, limitations, and the figures that carry understanding.
-3. Draft the route-specific structure. Make reasoning visible: show how the evidence supports each conclusion. In a paper deep-read, make the method recoverable rather than listing component names: give an end-to-end route, then 4–7 numbered stages that explain state transformations, design reasons, training signals, and inference behavior; use the selected mode reference's depth gate. Treat a deep monthly radar as a collection of self-sufficient single-paper readings, not a stack of abstract cards; reduce the paper count before compressing away method detail.
+3. Draft the route-specific structure. For 跟着 limu 解读, use the teaching sequence in `references/single-paper-limu.md` in place of the standard single-paper section order while retaining its coverage and delivery rules. Make reasoning visible: show how the evidence supports each conclusion. In a paper deep-read, make the method recoverable rather than listing component names: give an end-to-end route, then 4–7 numbered stages that explain state transformations, design reasons, training signals, and inference behavior; use the selected mode reference's depth gate. Treat a deep monthly radar as a collection of self-sufficient single-paper readings, not a stack of abstract cards; reduce the paper count before compressing away method detail.
 4. Copy [assets/style.css](assets/style.css) into the output `<style>` and adapt only the per-paper palette and route-specific needs. Generate accessible, responsive HTML directly with the available HTML/CSS tools.
 5. Compress retained raster images, then embed all image dependencies:
 
@@ -137,7 +139,7 @@ When the user requests a recurring task, create an automation if available using
 
 Before delivery, verify:
 
-- The route-specific structure and optional-section thresholds pass.
+- The route-specific structure and optional-section thresholds pass. For 跟着 limu 解读, also pass the teaching checklist in `references/single-paper-limu.md`: one concrete problem, a recoverable method route, located paragraph explanations, and bounded experimental claims.
 - Every formula renders and has an immediate plain-language translation.
 - Every deep-read card is independently understandable: the reader can recover the input-to-output method route, separate training from inference, locate at least one main result and one ablation/diagnostic result, and understand any key formula without opening the paper first.
 - Every retained screenshot is complete, legible, compressed, and discussed in the text.

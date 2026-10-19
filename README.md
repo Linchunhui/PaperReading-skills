@@ -4,7 +4,7 @@
 
 `PaperStudio` 是 `PaperReading` 的升级版，支持四种模式：
 
-- **单篇 / single**：1 篇论文 → 深度结构化阅读笔记
+- **单篇 / single**：1 篇论文 → 深度结构化阅读笔记；可选 **跟着 limu 解读 / single-limu** 教学流程
 - **系列 / series**：2–6 篇同系列论文 → 演进综述
 - **随笔 / digest**：2–12 篇独立论文 → 多篇 digest
 - **雷达 / radar**：主动抓取 HF Daily Papers、arXiv 与配置的中文媒体/RSS → 日报或周报
@@ -22,6 +22,7 @@
 
 ```text
 使用 $paper-studio 单篇，分析这篇论文：@paper.pdf
+使用 $paper-studio 单篇，跟着 limu 解读这篇论文：https://arxiv.org/pdf/2501.12948v1
 使用 $paper-studio 系列，梳理 V-JEPA 到 V-JEPA 2.1 的演进
 使用 $paper-studio 随笔，把这几篇独立论文整理成 digest
 使用 $paper-studio 雷达，生成本周 VLM、OCR、VLA 与世界模型周报
@@ -29,6 +30,19 @@
 ```
 
 未明确指定模式时会自动分流：1 篇走单篇；同系列的 2–6 篇走系列；互相独立的 2–12 篇走随笔；没有给论文、询问今日或本周研究动态时走雷达。
+
+## 单篇新增：跟着 limu 解读
+
+这是受李沐论文精读方法启发的原创教学讲解，直接内置在 PaperStudio 中，只需安装 PaperStudio。保留普通单篇模式，明确说“跟着 limu 解读”“李沐式精读”“用 limu 的讲解方式”，或使用 `single-limu` 时启用；只说“精读”仍走普通单篇流程。
+
+```text
+使用 $paper-studio single-limu，精读 @paper.pdf
+使用 $paper-studio 单篇，用 limu 的讲解方式逐段讲 Method，只在对话里解释
+```
+
+讲解先建立具体输入输出和前作卡点，再用同一个例子串起核心方法、训练与推理；在关键段落处解释作者如何推进论证，最后检查实验对照、成本与适用边界。公式先说目的，再讲变量与操作；作者解释、实验观察和讲解者推测分别交代。不会冒充李沐本人或编造他的评价。
+
+默认仍交付完整 HTML 和精简 `.wechat.md`，HTML 严格沿用源 PDF basename，Q&A 放在折叠附录。用户明确限定章节、互动或格式时遵守该要求。流程详见 [单篇 limu 带读规范](references/single-paper-limu.md)。
 
 ## 能力重点
 
@@ -66,6 +80,7 @@ PaperReading-skills/
 ├── references/
 │   ├── foundation.md
 │   ├── single-paper.md
+│   ├── single-paper-limu.md
 │   ├── series.md
 │   ├── digest.md
 │   ├── radar.md

@@ -4,11 +4,12 @@
 >
 > 触发：用户分享 **1 篇** arxiv 链接 / PDF / 论文 URL，或说「读论文」「分析论文」「paper」「reading note」，或在 prompt 里指定模式关键词 **单篇**。
 >
-> 共享的红线 / 原则 / SVG / KaTeX / 截图 / 获取内容规范见 [`foundation.md`](./foundation.md)——本文件只讲单篇特有的**十节结构**和**执行流程**。
+> 共享的红线 / 原则 / SVG / KaTeX / 截图 / 获取内容规范见 [`foundation.md`](./foundation.md)——本文件讲普通单篇的**十节结构**和**执行流程**；选择“跟着 limu 解读”时，再读 [`single-paper-limu.md`](./single-paper-limu.md)，按其中的教学主线组织正文。
 
 ## 目录
 
 - [总目标](#总目标单篇特有)
+- [跟着 limu 解读](#跟着-limu-解读可选)
 - [HTML 大标题](#html-大标题h1怎么写)
 - [十节结构化笔记](#完整解读十节结构化笔记)
 - [HTML 结构模板](#html-结构模板)
@@ -26,6 +27,12 @@
 *可选*：Insight（七）、启发（八）、关键引用（九）三节都是<em>可选加分项</em>，默认全部略过。只有在论文确实满足各自的硬门槛时才写——硬挤这三节比不写更糟。
 
 如果输出在前三件事上让外行卡住，就是失败。
+
+## 跟着 limu 解读（可选）
+
+用户明确要求“跟着 limu 解读”“李沐式精读”“用 limu 的讲解方式”，或指定 `single-limu` 时启用。完整读取 [`single-paper-limu.md`](./single-paper-limu.md)：先建立具体问题，沿同一例子走通方法，带读关键段落的论证作用，再核对实验与适用边界。讲解方法已内置，不依赖独立的 `$limu-paper-reading`。
+
+该参考文件替代下面的十节正文呈现顺序；必需内容仍完整覆盖，相关工作融入问题与方法，Q&A 保留为折叠附录。标题、命名、配图、公式、HTML 校验、公众号版及可选章节门槛均沿用本文件。只说“精读”时仍用普通单篇方式；用户限定篇章、互动或输出格式时优先遵守。
 
 ## HTML 大标题（h1）怎么写
 
@@ -244,7 +251,7 @@ HTML 里 Q&A 推荐做成可折叠（accordion）：点击问题展开答案，�
 ## 执行流程
 
 1. **获取内容** — 见 [`foundation.md`](./foundation.md) 的「获取内容」节：拿标题/作者/摘要/Related Work/Method/Experiments/Limitation；提取承重配图
-2. **完整解读** — 按上面十节结构写正文（七、八、九默认略过）
+2. **完整解读** — 普通单篇按上面十节结构写正文（七、八、九默认略过）；选择“跟着 limu 解读”时按 `single-paper-limu.md` 的教学主线写，覆盖同样的核心内容并通过其附加检查
 3. **过红线** — 见 [`foundation.md`](./foundation.md) 的「过红线」节
 4. **生成 HTML** — 直接生成单文件 HTML；如果当前环境提供前端设计技能，可调用它协作。CSS 起手式用 [`../assets/style.css`](../assets/style.css)。保存到 `Path(pdf_path).with_suffix(".html")`
 5. **嵌入图片** — `python3 scripts/embed_images.py "{输出.html}" --in-place`
