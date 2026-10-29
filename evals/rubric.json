@@ -1,0 +1,32 @@
+{
+  "version": 1,
+  "checks": {
+    "coverage": "每篇八项主线可恢复；方向/关键词/问题签名、贡献与有条件总结可找到。材料不足项逐项说明已知和缺失，不伪装精读。不强制八个标题。",
+    "method_fidelity": "输入、关键操作、输出与衔接清楚；适用时训练/推理分开，不补造参数、循环、监督或实现。",
+    "result_fidelity": "主要贡献相关的正负结果、原值与协议准确，token/延迟和百分点不混淆，无虚构显著性。",
+    "ablation_reasoning": "主要设计、负结果/饱和/代价有结论，混杂不单因归因；理论正确使用假设/反例，缺失材料不断言论文没做。",
+    "scope_and_relations": "遵守原始任务；不漏指定篇目，不加无关发现；同期工作不强造继承，不同比较协议不统一排名，建议组合不冒充验证。",
+    "readability": "形成可复述的连续解释；术语/公式得到解释；不以重复扩写、流程名词或模板标签替代机制。",
+    "delivery": "按指定格式交付完整产物；HTML离线可读、导航有效、无明显溢出；伴随稿保留同一批论文、主线和证据条件。Markdown-only尊重格式。"
+  },
+  "review_schema": {
+    "version": "baseline or candidate",
+    "evaluator": "独立评审上下文标识，不得与生成器相同",
+    "cases": [
+      {
+        "id": "single",
+        "artifact_hashes": {
+          "single.md": "actual sha256"
+        },
+        "checks": {
+          "coverage": {
+            "pass": true,
+            "evidence": "产物原文摘录/定位 + 对应原始材料定位；所有其他check也必须逐项填写"
+          }
+        },
+        "issues": []
+      }
+    ],
+    "notes": "实际未检查的事项写明限制，不可标通过。artifact_hashes使用该case目录下的相对路径。"
+  }
+}

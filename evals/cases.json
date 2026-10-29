@@ -1,0 +1,37 @@
+[
+  {
+    "id": "single",
+    "material": "papers.md",
+    "papers": [
+      "A"
+    ],
+    "prompt": "使用 $paper-studio 精读材料中的论文A，只使用给定材料。请给完整中文Markdown讲解，可以长一点；不用HTML或额外伴随文件。"
+  },
+  {
+    "id": "series",
+    "material": "papers.md",
+    "papers": [
+      "A",
+      "B"
+    ],
+    "prompt": "使用 $paper-studio，把材料中的A和B按同一文档问答方向串讲，解释各自做法与关系。只用给定材料，输出完整中文Markdown，不生成其他格式。"
+  },
+  {
+    "id": "radar",
+    "material": "papers.md",
+    "papers": [
+      "A",
+      "B",
+      "C"
+    ],
+    "prompt": "使用 $paper-studio 雷达，整理我给定的A、B和C三个候选，仅限OCR/文档问答，不额外搜索。C只有这个摘要：一种文档问答方法声称用自适应分辨率改善小字读取，未提供方法正文、结果数字、消融或链接。请输出完整中文HTML和同stem的公众号Markdown，保留我指定的全部条目。"
+  },
+  {
+    "id": "theory",
+    "material": "theory.md",
+    "papers": [
+      "T"
+    ],
+    "prompt": "使用 $paper-studio，用雷达的展开程度解读理论论文T，只使用给定材料。输出完整中文Markdown，不生成其他格式。"
+  }
+]

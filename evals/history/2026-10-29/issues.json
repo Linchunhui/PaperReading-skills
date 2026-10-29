@@ -1,0 +1,74 @@
+[
+  {
+    "id": "R01",
+    "phase": "source review",
+    "trigger": "普通单篇与可选 limu 两套分流",
+    "evidence": "旧 SKILL/single-paper-limu 将普通精读与 limu 分开；用户要求默认融合",
+    "fix": "合并为单篇流程，旧 single-limu 仅别名；删除独立分支参考",
+    "status": "verified: current routes and four-case coverage passed"
+  },
+  {
+    "id": "R02",
+    "phase": "source review",
+    "trigger": "三模式收敛",
+    "evidence": "旧 README、series、layout、svg-patterns 仍将 digest 作为当前模式",
+    "fix": "退役 digest；跨方向指定集合进入 radar，删除 digest reference；保留历史示例说明",
+    "status": "verified: current routes and four-case coverage passed"
+  },
+  {
+    "id": "R03",
+    "phase": "source review",
+    "trigger": "卡片信息丢失及强制篇幅",
+    "evidence": "旧 series 每篇1–3屏、摘要200–300字、三句话总结；雷达主结果和消融揉在一起",
+    "fix": "共用八项主线；分开思路/方法与主结果/消融；每篇有总结；取消默认篇幅和步骤数配额",
+    "status": "verified: current routes and four-case coverage passed"
+  },
+  {
+    "id": "R04",
+    "phase": "static revision",
+    "trigger": "多层引用保留过时要求",
+    "evidence": "第一次静态搜索在 svg-patterns 发现随笔、系列必画时间线、每个模块必须填参数与维度",
+    "fix": "图表按证据与理解需要；未知维度不填；并行工作不强造演进",
+    "status": "verified: active references and final rendering checks passed"
+  },
+  {
+    "id": "R05",
+    "phase": "static revision",
+    "trigger": "离线与格式规则冲突",
+    "evidence": "foundation 允许 CDN，且用户只有HTML才能省Markdown，与主入口原生MathML和用户格式优先不一致",
+    "fix": "必要公式离线渲染；明确仅对话/其他格式优先",
+    "status": "verified: active references and final rendering checks passed"
+  },
+  {
+    "id": "R06",
+    "phase": "runner negative check",
+    "trigger": "没有生成/评审时执行 gate",
+    "evidence": "paperstudio-run1 check 返回 exit1、missing baseline review 与 missing candidate review",
+    "fix": "无需修改；拒绝缺失证据是预期行为；该静态预备轮未生成论文结果",
+    "status": "expected rejection verified"
+  },
+  {
+    "id": "R07",
+    "phase": "generated-output review",
+    "trigger": "series candidate Chinese emphasis and baseline inline math",
+    "evidence": "Independent series review found candidate 15 unresolved strong-emphasis pairs; baseline one c\\\\geq0.8 in ordinary parentheses. Both semantic reviews passed 7/7; defects classified low impact.",
+    "fix": "Added all-Markdown GFM preview requirement, punctuation-outside-emphasis examples and Unicode thresholds to foundation; regenerate all four candidate cases with unchanged sources/rubric.",
+    "status": "verified: series unresolved emphasis pairs 15 → 0; fresh independent review 7/7"
+  },
+  {
+    "id": "R08",
+    "phase": "generated-output review",
+    "trigger": "radar core training terms",
+    "evidence": "Independent round1 radar candidate scored 6/7: LoRA and cross-entropy were named without explaining their role; some charts cited only one table despite using values from another.",
+    "fix": "Radar-specific requirement to explain supervision, update objects and intended output behavior in plain language; label all load-bearing figure sources. Regenerate radar and theory; single/series do not consume radar.md and may carry forward only with identical source/consumed references.",
+    "status": "verified: final radar fresh generation and independent review 7/7; charts cite relevant result and analysis sources"
+  },
+  {
+    "id": "R09",
+    "phase": "runner failure-path test",
+    "trigger": "candidate failed while no check improved",
+    "evidence": "run2 gate correctly rejected radar/readability but interpretation incorrectly said 'No observed regression'.",
+    "fix": "Prioritize rejection wording whenever errors exist; retest the actual failed run. This is an evaluation-tool-only change, not a paper-generation instruction change.",
+    "status": "verified: actual failed run and tampered-artifact probe both reject with explicit failure wording"
+  }
+]

@@ -1,159 +1,137 @@
 ---
 name: paper-studio
-description: "Use whenever the user shares a research paper (arXiv, PDF, paper URL, or title), asks to read, analyze, compare, or consolidate papers, wants an AI research radar/digest/newsletter/recurring paper task, or asks to convert an existing research HTML into concise Markdown for a WeChat Official Account. Supports single, series, digest, radar, and HTML-to-WeChat-Markdown workflows, including the opt-in single-paper teaching feature 跟着 limu 解读 (single-limu). Digest and daily/weekly/monthly radar default to in-depth reading of every included paper, using concrete examples, stepwise mechanisms, and evidence boundaries. Produces a standalone HTML plus a concise `.wechat.md` companion by default; single-paper HTML preserves the source PDF basename exactly."
+description: "Read and explain research papers, connect work within one direction, and discover papers through daily/weekly/monthly research radars. Three modes only: single, series, radar; single combines structured analysis with original limu-inspired teaching by default; single-limu is a compatibility alias. Every formal paper body covers background, direction, problem, approach, concrete method, main results, ablation/analysis conclusions, and summary, with depth adapted to the mode. Produces self-contained HTML and a concise WeChat Markdown companion unless the user requests another format; also converts existing research HTML to WeChat Markdown."
 ---
 
 # PaperStudio
 
-Turn research discovery and close reading into durable, self-contained HTML notes plus concise Markdown articles suitable for WeChat Official Account editors. Write for a smart reader who is new to the topic: concrete, conversational, evidence-backed, and detailed enough to recover the paper's core idea months later.
+Explain papers so readers can recover the actual method, judge its evidence, and identify where it may be useful months later. Use three modes: **单篇精读 / 同方向串讲 / 雷达发现**. Preserve each paper's storyline; vary explanation depth rather than dropping information.
 
 ## Route the request
 
-Choose in this order:
+1. Honor explicit `single`, `series`, or `radar`. `single-limu` is a compatibility alias for the same merged single workflow, not a separate mode.
+2. One supplied paper → **single**. Merge structured coverage with limu-inspired examples, mechanism walkthroughs and evidence reasoning by default.
+3. Multiple supplied papers addressing a common direction, task or research question → **series**. Explain evolution, competing solutions, complementary components or different constraints; do not require or invent direct inheritance. No fixed paper-count ceiling.
+4. Discovery requests such as “latest/this week/this month/HF Daily Papers” → **radar**, even if the report covers only one direction.
+5. Supplied papers from unrelated directions → **radar with supplied candidates**, organized by direction. Preserve the requested set; external discovery is not implied by this route. Use available primary sources to verify content unless the user limits analysis to provided material.
+6. Retire `digest` / 随笔 as a mode. For a legacy request, route by the supplied material using rules 3–5 and state the chosen current mode; do not create a digest report or ask the user to choose a retired mode.
 
-1. For an existing `.html` plus “转 Markdown / 公众号版 / 精简发布”, use **HTML-to-WeChat-Markdown**. Read [references/wechat-markdown.md](references/wechat-markdown.md), run the converter, then perform semantic shortening.
-2. Honor an explicit `single`, `series`, `digest`, or `radar` mode; `single-limu` means `single` with the limu teaching workflow.
-3. Use **radar** for “today/this week/this month, HF Daily Papers, AI daily/weekly/monthly report” without supplied papers.
-4. Use **single** for one paper.
-5. Use **series** for 2-6 papers with a clear inheritance or evolution line.
-6. Use **digest** for two or more independent supplied papers.
-7. If the relation is unclear, ask whether one can state: “what problem did the previous generation leave, and how did the next generation add, replace, or bypass it?” If yes, use series; otherwise use digest.
+An existing HTML plus “转 Markdown / 公众号版 / 精简发布” uses the conversion workflow below. This is a delivery operation, not a fourth reading mode. Preserve explicit chapter scope, interaction style and output format; a request for chat-only analysis does not require files.
 
-Within **single**, enable **跟着 limu 解读** only when requested (for example, “跟着 limu 解读”, “李沐式精读”, or “用 limu 的讲解方式”), or via `single-limu`. Ordinary “精读” keeps the standard single-paper workflow. This is an optional teaching workflow, not a fifth top-level mode; preserve explicit series/digest/radar requests and never reduce a multi-paper request to one paper because it mentions limu.
+## Read the shared and mode instructions
 
-Always read [references/foundation.md](references/foundation.md) completely, then read the selected mode reference completely:
+Always read [references/foundation.md](references/foundation.md) and [references/paper-storyline.md](references/paper-storyline.md) completely. The shared storyline defines eight content obligations for every formal paper body:
 
-- Single: [references/single-paper.md](references/single-paper.md). When 跟着 limu 解读 is selected, also read [references/single-paper-limu.md](references/single-paper-limu.md) completely. It contains the built-in teaching method; no separate skill is required.
-- Series: [references/series.md](references/series.md)
-- Digest: [references/digest.md](references/digest.md) and [references/per-paper-deep-read.md](references/per-paper-deep-read.md), both completely.
-- Radar: [references/radar.md](references/radar.md), [references/directions.md](references/directions.md), and [references/per-paper-deep-read.md](references/per-paper-deep-read.md), all completely.
+**背景 → 方向/任务 → 问题与前作缺口 → 解决思路 → 具体方法 → 主结果 → 消融或分析结论 → 带条件总结。**
 
-Digest and radar apply the adapted limu teaching method to **every included paper by default**, without changing their multi-paper organization or requiring an extra keyword. The overview may be brief; each paper’s body must recover its problem, method, evidence, cost, and scope. Explicit user requests for a short version override the default; a mode/task title such as “速读” alone does not.
+Then read the selected references completely:
 
-Do not set a default total word budget or per-paper word ceiling for HTML or Markdown. Let the length grow with the number and complexity of papers; finish each paper’s explanation before removing repetition. Never divide a fixed total budget across papers or shorten later papers to fit. If generation limits require batching, save completed sections, continue through every selected paper, and assemble the complete deliverable. Only an explicit user request for a short version or word limit overrides this rule.
+- **Single:** [references/single-paper.md](references/single-paper.md), the unified structured and teaching workflow.
+- **Series:** [references/series.md](references/series.md) and [references/per-paper-deep-read.md](references/per-paper-deep-read.md).
+- **Radar:** [references/radar.md](references/radar.md), [references/directions.md](references/directions.md), and [references/per-paper-deep-read.md](references/per-paper-deep-read.md).
+- **HTML creation/conversion:** [references/wechat-markdown.md](references/wechat-markdown.md), unless the user requests HTML only.
+- **Visuals:** [references/svg-patterns.md](references/svg-patterns.md) for SVGs; [references/layout-patterns.md](references/layout-patterns.md) for multi-paper navigation and body layout.
 
-For every route that creates an HTML, also read [references/wechat-markdown.md](references/wechat-markdown.md) and create the concise companion Markdown unless the user explicitly requests HTML only.
+Single expands mechanisms, examples, formulas and experimental reasoning. Series focuses on relationships around a shared question. Radar gives compact but complete explanations. Separate approach from concrete method and main results from ablation conclusions. Every paper has its own summary; navigation cards and the report-level recap do not replace it.
 
-Before drawing visuals, also read the relevant templates:
+Do not set default total/per-paper word, screen or method-step quotas. Let complexity and the user's requested depth determine length. Finish the understanding chain, then remove repetition and peripheral detail. Never divide a total budget across papers, shorten later papers, or omit selected papers to finish a batch. Explicit requests for short versions or abstract-only output take priority; label their scope.
 
-- Single/series: [references/svg-patterns.md](references/svg-patterns.md)
-- Digest: [references/layout-patterns.md](references/layout-patterns.md), plus the bar-chart section in `svg-patterns.md`
+## Execute the workflow
 
-## Execute the shared workflow
-
-1. Resolve every source and record provenance. For a title or URL, browse to find and verify the primary paper/project page. For a local PDF, inspect the PDF directly. Prefer primary sources for technical claims and numbers.
-2. Collect the title, authors, abstract, related-work context, method, key formulas needed to understand the mechanism, main experiments, ablations, limitations, and the figures that carry understanding.
-3. Draft the route-specific structure. For 跟着 limu 解读, use the teaching sequence in `references/single-paper-limu.md` in place of the standard single-paper section order while retaining its coverage and delivery rules. Make reasoning visible: show how the evidence supports each conclusion. For digest/radar, complete the shared per-paper deep-read workflow for every included paper, with an example, stepwise transformations, located argument explanations, experimental controls, and a specific recall paragraph. Do not reserve depth for Top picks or compress later papers into short cards. In a paper deep-read, make the method recoverable rather than listing component names: give an end-to-end route, then 4–7 numbered stages that explain state transformations, design reasons, training signals, and inference behavior; use the selected mode reference's depth gate.
-4. Copy [assets/style.css](assets/style.css) into the output `<style>` and adapt only the per-paper palette and route-specific needs. Generate accessible, responsive HTML directly with the available HTML/CSS tools.
-5. Compress retained raster images, then embed all image dependencies:
+1. Verify paper identity/version and record source coverage. Resolve titles/URLs through primary paper/project pages; inspect supplied PDFs or parsed material. Honor user source boundaries. Generated summaries remain upstream records, not proof that the original paper was checked.
+2. Build one lightweight reading record: eight storyline items, major claims and source positions, figures/formulas, main comparisons, ablation/diagnostic conclusions, costs, and missing evidence. Reuse it across summary and narrative views; do not require a separate JSON deliverable.
+3. Write the method and evidence before the abstract, reading recommendation and report overview. Explain the input-to-output route and each decisive state transformation. Show training/inference differences when relevant. Use examples and formulas where needed, not to fill a fixed template.
+4. Present ablation conclusions separately: what worked, failed, saturated or cost more; preserve the changed factor, important controls, observed result and inference boundary. Distinguish a paper that reports no ablation from unavailable sections and inapplicable paper types.
+5. Apply the selected narrative organization. Complete the same eight-part coverage for all formal entries, including those after Top picks. Preserve per-paper summaries and conditional transferable lessons; personal-project actions and extra Insight remain optional.
+6. For HTML, inline [assets/style.css](assets/style.css) and adapt the palette/layout. Embed retained images and render necessary formulas offline using native MathML or a fully embedded renderer.
+7. Run deterministic delivery checks:
 
    ```bash
    python3 scripts/embed_images.py "{output.html}" --in-place
-   ```
-
-6. Validate deterministic delivery rules:
-
-   ```bash
    python3 scripts/validate_html.py "{output.html}" --source-pdf "{source.pdf}"  # single
-   python3 scripts/validate_html.py "{output.html}"                              # other modes
+   python3 scripts/validate_html.py "{output.html}"                              # combined
    ```
 
-7. Fix every validation failure. Open the final HTML and visually inspect figures, formula rendering, table of contents, accordion behavior, and mobile layout. For a standalone HTML, formulas must render without a remote runtime dependency: use native MathML or a fully embedded renderer.
-8. Write `{HTML stem}.wechat.md` from the same evidence. Do not mechanically copy all HTML sections. Follow `references/wechat-markdown.md`: shorten the narrative, keep exact numbers and boundaries, retain only 1–3 load-bearing images, and move links to a final reference list.
-9. If starting from an existing HTML, create the deterministic draft first:
+8. Check each paper's storyline and evidence separately from file validation. Inspect the final figures, formulas, navigation, accordions and mobile layout. Fix failures before delivery.
+9. Unless the user requests HTML only, write `{HTML stem}.wechat.md` from the same evidence. Preserve per-paper storyline coverage while removing repetition, navigation and peripheral detail. Keep necessary conditions and exact numbers.
+10. Deliver the requested formats with source coverage and material limitations. Follow the environment's durable-file storage rules; do not deliver intermediate manifests unless requested.
 
-   ```bash
-   python3 scripts/html_to_markdown.py "{input.html}" --compact --max-chars 0
-   ```
+For radar, compute the report key before discovery. Reuse an existing same-name report only if the current scope and content requirements are satisfied and no revision is requested. Otherwise update that report after filling evidence/content gaps. Respect explicit candidate sources and direction boundaries; supplied candidates do not authorize adding unrelated discoveries.
 
-   Then rewrite the draft semantically into mobile-friendly sections (usually 4–6; multi-paper coverage takes priority) and recheck it against the source HTML.
-10. Deliver the validated HTML and `.wechat.md` companion, plus any `.wechat-assets/` directory. Report absolute paths, file sizes, and source coverage/status. Omit the Markdown only when the user explicitly asks for HTML alone.
+## Preserve naming and portability
 
-For periodic radar runs, compute the report key and target filename before discovery. Reuse an existing same-name HTML only when it satisfies the current scope and per-paper depth requirements and no revision is requested; otherwise update the existing path after verifying missing evidence and expanding the content, without creating a duplicate. When the user constrains discovery to HF Daily Papers, treat that dated HF set as a hard candidate boundary and use arXiv/PDF/project pages only for verification. If HF date coverage must fall back, disclose the actual covered date or interval in the report subtitle.
-
-## Preserve deterministic naming
-
-For single-paper mode with a PDF, derive the output mechanically:
+For a single paper with a PDF, derive the HTML mechanically:
 
 ```python
 html_path = pdf_path.with_suffix(".html")
 ```
 
-Preserve spaces, punctuation, capitalization, and multiple dots. Do not slugify, translate, or replace the basename with a method name. Download URL/arXiv PDFs first, then derive the HTML path from that downloaded PDF.
+Preserve spaces, punctuation, capitalization and multiple dots. For URL/arXiv input, download the PDF first and derive the HTML basename from it. Do not replace it with a method name or add a limu prefix.
 
-For combined outputs, use:
+Combined outputs:
 
-- Series: `{series-name}.html`
-- Digest: `{YYYY-MM-DD}-digest.html`
-- Daily radar: `{YYYY-MM-DD}-radar.html` plus same-name `.json`
-- Weekly radar: `{YYYY}-W{WW}-radar.html` plus same-name `.json`
-- Monthly radar: `{YYYY}-M{M}-radar.html` plus same-name `.json`
+- Series: `{direction-or-series-name}.html`
+- Daily radar: `{YYYY-MM-DD}-radar.html`
+- Weekly radar: `{YYYY}-W{WW}-radar.html`
+- Monthly radar: `{YYYY}-M{M}-radar.html`
 
-The `.json` is a working provenance manifest, not a mandatory public artifact. If the user requests HTML only, keep discovery/intermediate manifests in a temporary directory and deliver only the HTML.
+The radar JSON is a working provenance manifest, not a mandatory public deliverable. With HTML-only requests, keep it in temporary storage. Companion Markdown uses `{HTML stem}.wechat.md`; retained Markdown images go in `{HTML stem}.wechat-assets/`.
 
-For every HTML above, name the companion `{HTML stem}.wechat.md`. When Markdown images are needed, store them in `{HTML stem}.wechat-assets/` beside the Markdown.
+All HTML image dependencies (`img`, SVG `image`, `source/srcset`, CSS images) must use valid base64 image data URIs; inline SVG is allowed. Source/PDF/project hyperlinks may remain external. Markdown must not contain base64: retain only the useful images as relative asset paths.
 
-## Keep every image self-contained
+## Keep the explanation concrete and evidence-backed
 
-Require every `<img src>`, SVG `<image href>`, `<source src/srcset>`, and CSS image URL to be a valid `data:image/...;base64,...` URI. Inline SVG is allowed. Ordinary source/PDF/project links may remain external `<a href>` links. Never deliver an HTML file with local, `file://`, or remote image dependencies.
+1. Write in natural Chinese unless requested otherwise; explain necessary terms on first use.
+2. Ground the task in specific inputs, outputs and a meaningful use case.
+3. Link the previous method's gap to the new approach before naming its components.
+4. Explain objects, operations and transitions; “alignment/fusion/enhancement” alone is not a mechanism.
+5. Keep one useful example through difficult steps; label invented examples as teaching constructions.
+6. Follow each necessary formula immediately with plain-language purpose, variable objects, operations and conditions.
+7. Trace load-bearing numbers to specific tables, figures or official sources; preserve printed precision and comparison conditions.
+8. Distinguish findings from author claims and your own inferences. Missing data stays missing.
+9. Separate overall results from ablation/diagnostic evidence; do not overstate causality or statistical significance.
+10. State cost, failure conditions and transfer prerequisites. Useful lessons need not be dramatic or immediately actionable in a personal project.
+11. Make the problem, approach, method and finding recoverable on rereading.
+12. Remove repetition across abstract, captions, body and recap; do not replace clarity with more words.
 
-The Markdown companion follows a different portability rule: do not embed base64. Extract 1–3 retained images into `.wechat-assets/` and use relative Markdown image paths so doocs/md, Wenyan, or another publisher can upload them.
+Use media for discovery/context, primary papers/project pages for technical evidence. Distinguish open/closed-source groups, metric directions, percentage points versus relative changes, and theoretical compute versus measured latency. Do not invent architectures, datasets, formulas, results, limitations, quotations or executed experiments.
 
-## Enforce the writing red lines
+## Radar discovery
 
-1. Rewrite anything one would not say while explaining the work to a friend.
-2. Explain each necessary term at first use in practical language.
-3. Prefer short, concrete words over academic padding.
-4. Let each sentence advance one idea.
-5. Use visible nouns and active verbs.
-6. Open Motivation with a concrete reason to care.
-7. Delete filler such as “in recent years” and “it is worth noting.”
-8. Trust the reader; do not repeat the same conclusion three ways.
-9. State weaknesses, missing evidence, and uncertainty honestly.
-10. Keep the key formulas that materially improve understanding of the paper's mechanism, objective, state update, routing, or inference rule. Follow every displayed formula immediately with a Chinese plain-language translation that explains symbols, optimization direction, and design intent. Do not add decorative formulas merely for a more technical appearance.
-11. Make the problem, mechanism, and finding recoverable in 30 seconds six months later.
-12. Prefer understanding over brevity; expand prerequisites when the reader needs them.
-
-Also apply four principles: keep one concrete Motivation anchor throughout; expose the inference chain; show transformations rather than only definitions; and turn implications into executable actions when a real project connection exists.
-
-## Protect evidence integrity
-
-- Trace every reported number to a specific table, figure, or primary project page. Preserve the exact precision printed by the source.
-- Distinguish open-source and closed-source comparison groups and whether higher or lower is better.
-- Use an existing same-paper HTML note to preserve narrative consistency, but verify paper identity and all load-bearing numbers against the primary source.
-- Do not present media summaries as paper claims. In radar mode, use media for discovery/context and primary papers/project pages for technical evidence.
-- Keep direct quotations short and necessary. Prefer paraphrase; do not reproduce long copyrighted passages.
-- Do not invent missing architecture details, dimensions, training data, results, or limitations. Label inference as inference.
-
-## Run radar discovery
-
-Run from the skill directory:
+For active discovery, run from the skill directory as appropriate:
 
 ```bash
 python3 scripts/fetch_content.py --range today -o /tmp/paperstudio-radar.json
 python3 scripts/fetch_content.py --range week --top-k 40 -o /tmp/paperstudio-radar.json
-python3 scripts/fetch_content.py --range month --all-items -o /tmp/paperstudio-radar.json
+python3 scripts/fetch_content.py --start YYYY-MM-DD --end YYYY-MM-DD -o /tmp/paperstudio-radar.json
 ```
 
-Treat `matched_directions` as broad recall only. Apply `references/directions.md` semantically, fill `keep`, `primary_direction`, `secondary_directions`, `why_match`, `why_read`, `evidence_level`, and `drop_reason`, and merge duplicate coverage into one card. Preserve explicit `ok`, `not_configured`, or `error` status for every requested source.
+Treat keyword matches as recall only. Apply semantic direction boundaries, deduplicate, and retain keep/drop reasons, primary/secondary directions, reading reasons and evidence levels. Record every requested source as successful, unconfigured or failed. Follow the user's direction set; “Diffusion” means Diffusion LLM unless visual diffusion is explicitly requested. Explicit HF-only candidate sets remain bounded by the dated HF results.
 
-When the user requests a recurring task, create an automation if available using the complete task prompt in `references/radar.md`; otherwise provide a scheduler/cron command. Use the user's timezone, falling back to the current environment timezone.
+Create or change an automation only when the user requests recurring work. Use the current radar prompt and the user's timezone; editing this skill alone does not modify existing schedules.
 
-## Final acceptance gate
+## HTML-to-WeChat conversion
 
-Before delivery, verify:
+Read the Markdown reference and make a deterministic draft:
 
-- No default total or per-paper word ceiling, fixed-budget averaging, automatic truncation, or length-driven omission has reduced coverage; all generated batches are assembled and checked.
+```bash
+python3 scripts/html_to_markdown.py "{input.html}" --compact --max-chars 0
+```
 
-- Every digest/radar paper passes `references/per-paper-deep-read.md`; all user-specified papers are covered, later papers retain full depth, and unavailable-source items are not counted as completed deep reads.
-- The route-specific structure and optional-section thresholds pass. For 跟着 limu 解读, also pass the teaching checklist in `references/single-paper-limu.md`: one concrete problem, a recoverable method route, located paragraph explanations, and bounded experimental claims.
-- Every formula renders and has an immediate plain-language translation.
-- Every deep-read card is independently understandable: the reader can recover the input-to-output method route, separate training from inference, locate at least one main result and one ablation/diagnostic result, and understand any key formula without opening the paper first.
-- Every retained screenshot is complete, legible, compressed, and discussed in the text.
-- Every SVG number matches its cited source and every marker ID is unique within the page.
-- `embed_images.py` and `validate_html.py` pass.
-- The final HTML works as a standalone file on desktop and mobile.
-- The `.wechat.md` has clear sections (usually 4–6 for single/series; grouped by paper/topic for digest/radar), short mobile paragraphs, exact numbers, 1–3 images at most, no base64, no sidebar TOC/Q&A, and a final reference list.
-- The Markdown previews cleanly in a standard WeChat Markdown editor such as doocs/md or Wenyan; project-specific extension syntax is optional, never the default.
+Then semantically rewrite it. Do not copy the whole HTML or truncate it at a character boundary. The per-paper body retains the storyline and conditional findings; single/series can use a few natural sections, while multi-paper coverage takes priority over section counts.
 
-Do not call a result complete while any HTML image is external, a formula is visibly broken, a required source is silently missing, a single-paper filename differs from its PDF basename, or the Markdown is merely a full HTML text dump without semantic shortening.
+## Updating this skill
+
+Whenever this package is revised, read [references/skill-iteration.md](references/skill-iteration.md) and run its generated-output regression workflow before claiming the update complete. Freeze baseline and candidate packages, generate from raw fixtures in fresh contexts, review against source evidence, record concrete failures, make localized fixes and retest. Run the deterministic gate with [scripts/run_regression.py](scripts/run_regression.py); it verifies records and artifacts, not semantic truth. Do not fabricate test outputs, evaluator judgments or passing runs. Ordinary paper reading does not trigger a skill rewrite or scheduled job.
+
+## Final acceptance
+
+- Every formal paper body passes the eight-part storyline gate with actual content or an accurately scoped gap; approach/method and result/ablation remain distinguishable.
+- Method operations connect, relevant training/inference distinctions are clear, and summaries retain specific findings and boundaries.
+- All supplied and selected papers are accounted for; evidence-poor watch items do not count as completed full-paper reads.
+- Series relations have evidence; shared direction alone is not direct inheritance. Radar reports obey candidate/time/direction boundaries.
+- Content depth matches the mode without fixed quotas or later-paper shrinkage; all batches are assembled.
+- HTML naming, embedded images, offline formulas, source links, navigation and mobile layout pass. File validation does not certify semantic completeness.
+- Requested companion Markdown preserves the same papers and core evidence, with mobile-friendly paragraphs, a final reference list and portable assets.
+
+Do not call a report complete while required evidence is silently missing, formal entries lack storyline elements, images depend on external files, formulas are broken, or the output is merely repeated abstracts.

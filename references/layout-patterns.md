@@ -1,6 +1,6 @@
-# Layout Patterns（随笔 / digest）
+# Layout Patterns（同方向串讲 / 雷达发现）
 
-随笔用总览帮助选读，再让每篇正文独立展开。模板只约定布局，正文深度以 [`per-paper-deep-read.md`](./per-paper-deep-read.md) 为准；不要把占位段落的长度当成篇幅限制。本文的花括号与论文 A/B 是占位符，使用前全部换成已核实内容。
+多篇报告用总览帮助选读，再让每篇正文独立展开。模板只约定布局，正文深度以 [`per-paper-deep-read.md`](./per-paper-deep-read.md) 为准；不要把占位段落的长度当成篇幅限制。本文的花括号与论文 A/B 是占位符，使用前全部换成已核实内容。
 
 ## 目录
 
@@ -42,13 +42,18 @@ CSS 起手式见 [`../assets/style.css`](../assets/style.css) 的 `.overview-*`�
 <article class="chapter p1" id="paper-a">
   <h2>① {论文 A 简短名}</h2>
   <p class="tagline">{改变了哪个具体环节}</p>
-  <p class="meta">{版本与年份} · <a href="{PAPER_URL}">论文原文</a></p>
+  <p class="meta">{方向/任务 · 关键词 · 问题签名 · 版本与年份} · <a href="{PAPER_URL}">论文原文</a></p>
   <p class="hook">{为什么值得读，保留成立条件}</p>
 
   <section id="paper-a-mot">
     <h3>先看一个具体困难</h3>
     <p>{任务输入、期望输出、贯穿全文的实例}</p>
-    <p>{最相关旧方案的操作、卡点与后果；指出本篇核心变化}</p>
+    <p>{最相关旧方案的操作、卡点与后果；交代本篇要解决的目标}</p>
+  </section>
+
+  <section id="paper-a-approach">
+    <h3>解决思路</h3>
+    <p>{改变哪个环节、为什么可能有效、与最相关前作的差别}</p>
   </section>
 
   <section id="paper-a-met">
@@ -72,6 +77,10 @@ CSS 起手式见 [`../assets/style.css`](../assets/style.css) 的 `.overview-*`�
     <h3>实验究竟支持什么</h3>
     <p>{主结果：任务、基线、预算、指标、精确数字及 Table/Figure 位置}</p>
     <!-- 小表或结果图，用正文解释“看哪里—比什么—支持到哪里” -->
+  </section>
+
+  <section id="paper-a-ablation">
+    <h3>消融与分析结论</h3>
     <p>{消融或诊断：改变了什么、保持了什么、结果与归因边界；没有则说明缺口}</p>
   </section>
 
@@ -88,7 +97,7 @@ CSS 起手式见 [`../assets/style.css`](../assets/style.css) 的 `.overview-*`�
 </article>
 ```
 
-原文论证穿插在方法与证据解释中，例如某段先定义了什么，后一个目标或对照为什么需要它。不要把整篇读法变成机械填写五个空。
+必要的原文论证可穿插在方法与证据解释中，例如某段先定义了什么，后一个目标或对照为什么需要它。不要把整篇读法变成机械填写若干空。
 
 ## 3. 回顾与导航
 

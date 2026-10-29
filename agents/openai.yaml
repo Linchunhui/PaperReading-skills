@@ -1,13 +1,13 @@
 interface:
   display_name: "PaperStudio"
-  short_description: "单篇 limu 带读、系列串讲、逐篇深读的随笔与雷达、公众号 Markdown"
-  default_prompt: "使用 $paper-studio 解读这些论文或生成研究雷达，逐篇讲透问题、方法、实验证据与边界，生成完整 HTML 和精简公众号 Markdown。"
+  short_description: "融合教学带读的单篇精读、同方向串讲与完整主线的研究雷达发现"
+  default_prompt: "使用 $paper-studio 解读论文、串讲同方向工作或发现研究进展，讲清背景、问题、思路、方法、结果、消融与带条件总结，按需要展开为 HTML 和公众号 Markdown。"
   icon_small: "assets/icon.svg"
   icon_large: "assets/icon.svg"
 policy:
   products:
-  - "chatgpt"
-  - "codex"
-  - "api"
-  - "atlas"
+  - chatgpt
+  - codex
+  - api
+  - atlas
   allow_implicit_invocation: true
