@@ -244,6 +244,9 @@ const categories = [
     icon: "icon-radar",
     emoji: "📡",
     papers: [
+      {"file":"examples/Weekly-Radar/2026-W44-radar.html","title":"AI Research Radar · 2026-W44","desc":"综合周报 · 10/26–10/31 · 截至10月底，不含11/1"},
+      {"file":"examples/Weekly-Radar/2026-W43-radar.html","title":"AI Research Radar · 2026-W43","desc":"综合周报 · 10/19–10/25 · 最新逐篇主线修订"},
+      {"file":"examples/Weekly-Radar/2026-W42-radar.html","title":"AI Research Radar · 2026-W42","desc":"综合周报 · 10/12–10/18 · 最新逐篇主线修订"},
       {"file": "examples/Weekly-Radar/2026-W41-radar.html", "title": "AI Research Radar · 2026-W41", "desc": "每周 AI 论文研究雷达"},
       {"file": "examples/Weekly-Radar/2026-W40-radar.html", "title": "AI Research Radar · 2026-W40", "desc": "每周 AI 论文研究雷达"},
       {"file": "examples/Weekly-Radar/2026-W39-radar.html", "title": "AI Research Radar · 2026-W39", "desc": "每周 AI 论文研究雷达"},
@@ -259,11 +262,14 @@ const categories = [
   {
     id: "monthly-radar",
     name: "Monthly Radar — 每月论文速读",
-    desc: "汇集方向月报与自然月研究雷达，呈现方法链路、实验依据与复现边界",
+    desc: "综合自然月雷达覆盖 M1–M10；同时保留既有方向月报与滚动窗口报告，各入口注明范围",
     icon: "icon-radar",
     emoji: "🗓",
     papers: [
-      {"file": "examples/VLA/2026-09-20-VLA-monthly.html", "title": "VLA 月度研究雷达 · 2026-09-20", "desc": "方向月报 · 原始完整报告"},
+      {"file":"examples/Monthly-Radar/2026-M10-radar.html","title":"2026-M10 Research Radar · 综合自然月","desc":"2026年10月1–31日 · 跨方向研究雷达"},
+      {"file":"examples/Monthly-Radar/2026-M9-radar.html","title":"2026-M9 Research Radar · 综合自然月","desc":"2026年9月1–30日 · 跨方向研究雷达"},
+      {"file":"examples/Monthly-Radar/2026-M8-radar.html","title":"2026-M8 Research Radar · 综合自然月","desc":"2026年8月1–31日 · 跨方向研究雷达"},
+      {"file": "examples/VLA/2026-09-20-VLA-monthly.html", "title": "VLA 月度研究雷达 · 2026-09-20", "desc": "方向滚动月报 · 近30天，非综合自然月报告"},
       {"file": "examples/Others/2026-09-Diffusion-LLM-radar.html", "title": "Diffusion LLM 月报｜2026 年 9 月", "desc": "方向月报 · 原始完整报告"},
       {"file": "examples/LLM-Foundations/2026-09-foundation-models-monthly.html", "title": "2026 基座模型月报：8 月增量与截至 9 月 20 日累计演进", "desc": "方向月报 · 原始完整报告"},
       {"file": "examples/VLM/VLM-2026-08-monthly.html", "title": "2026 年 8 月 VLM 进展：从“看见”到“组织证据”", "desc": "方向月报 · 原始完整报告"},
@@ -337,4 +343,5 @@ document.getElementById("search").addEventListener("input", function () {
 </script>
 </body>
 </html>
+
 
