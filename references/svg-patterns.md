@@ -234,7 +234,7 @@ EOF
 - [ ] 清晰：200 dpi 起步，文字能看清；不要为了节省体积压糊
 - [ ] 带 caption：原论文的 figure caption 一起截进来
 - [ ] 自己写的 figcaption 是导读语，不是论文原文复读
-- [ ] 单张 100-300 KB；临时文件命名 `{shortname}-arch.jpg`，最终转成 base64，不留路径引用
+- [ ] 单张优先约 100–300 KB，清晰度优先且不是硬上限；临时文件命名 `{shortname}-arch.jpg`，最终转成 base64，不留路径引用
 
 ### 5.2 例外情况：自己画 SVG（少用）
 
@@ -307,3 +307,7 @@ EOF
 - **数值标签必须有**：每条数据都要有数字，每个轴都要有标题
 - **末尾标 Source**：`Source: Table N / Figure N of paper X`
 - **CSS class**：统一加 `class="viz"`，这样在 HTML 全局 style 里就能一处控样式
+
+## 逐篇原图验收
+
+遵守 [core-figures.md](core-figures.md)：每篇正式解读核查并保留适用核心原图，或在该篇给出可追溯的缺图/不适用说明。教学SVG不默默替代原图；不以全报告图数或体积限额省略主图。HTML 必须运行 `validate_html.py output.html --require-core-figures`，并逐篇人工回源与看图。

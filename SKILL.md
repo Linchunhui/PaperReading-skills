@@ -36,6 +36,8 @@ Single expands mechanisms, examples, formulas and experimental reasoning. Series
 
 Do not set default total/per-paper word, screen or method-step quotas. Let complexity and the user's requested depth determine length. Finish the understanding chain, then remove repetition and peripheral detail. Never divide a total budget across papers, shorten later papers, or omit selected papers to finish a batch. Explicit requests for short versions or abstract-only output take priority; label their scope.
 
+Read [references/core-figures.md](references/core-figures.md) for the per-paper original core-figure contract. For every formal paper, retain an available load-bearing original architecture/process figure (or a contribution-appropriate original figure), or explain a verified exception in that paper. Teaching SVGs are supplemental, not silent substitutes.
+
 ## Execute the workflow
 
 1. Verify paper identity/version and record source coverage. Resolve titles/URLs through primary paper/project pages; inspect supplied PDFs or parsed material. Honor user source boundaries. Generated summaries remain upstream records, not proof that the original paper was checked.
@@ -48,8 +50,8 @@ Do not set default total/per-paper word, screen or method-step quotas. Let compl
 
    ```bash
    python3 scripts/embed_images.py "{output.html}" --in-place
-   python3 scripts/validate_html.py "{output.html}" --source-pdf "{source.pdf}"  # single
-   python3 scripts/validate_html.py "{output.html}"                              # combined
+   python3 scripts/validate_html.py "{output.html}" --require-core-figures --source-pdf "{source.pdf}"  # single
+   python3 scripts/validate_html.py "{output.html}" --require-core-figures                              # combined
    ```
 
 8. Check each paper's storyline and evidence separately from file validation. Inspect the final figures, formulas, navigation, accordions and mobile layout. Fix failures before delivery.
@@ -131,6 +133,7 @@ Whenever this package is revised, read [references/skill-iteration.md](reference
 - All supplied and selected papers are accounted for; evidence-poor watch items do not count as completed full-paper reads.
 - Series relations have evidence; shared direction alone is not direct inheritance. Radar reports obey candidate/time/direction boundaries.
 - Content depth matches the mode without fixed quotas or later-paper shrinkage; all batches are assembled.
+- Every formal paper has an original core figure with source and reading guidance, or an evidence-backed visible exception; figure coverage is checked per paper, not by report totals.
 - HTML naming, embedded images, offline formulas, source links, navigation and mobile layout pass. File validation does not certify semantic completeness.
 - Requested companion Markdown preserves the same papers and core evidence, with mobile-friendly paragraphs, a final reference list and portable assets.
 

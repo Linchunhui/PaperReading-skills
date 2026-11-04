@@ -10,6 +10,7 @@ import re
 import sys
 import urllib.parse
 from pathlib import Path
+from html.parser import HTMLParser
 
 
 IMG_SRC_RE = re.compile(
@@ -76,10 +77,96 @@ def validate_srcset(value: str) -> list[str]:
     return errors
 
 
+
+class FigureCoverageParser(HTMLParser):
+    """Small DOM for structural coverage, never a truth/visibility certificate."""
+    VOID = {"area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "param", "source", "track", "wbr"}
+
+    def __init__(self):
+        super().__init__()
+        self.root = {"tag": "root", "attrs": {}, "children": [], "text": ""}
+        self.stack = [self.root]
+        self.nodes = []
+
+    def handle_starttag(self, tag, attrs):
+        node = {"tag": tag, "attrs": dict(attrs), "children": [], "text": ""}
+        self.stack[-1]["children"].append(node)
+        self.nodes.append(node)
+        if tag not in self.VOID:
+            self.stack.append(node)
+
+    def handle_startendtag(self, tag, attrs):
+        self.handle_starttag(tag, attrs)
+        if tag not in self.VOID:
+            self.handle_endtag(tag)
+
+    def handle_endtag(self, tag):
+        for i in range(len(self.stack)-1, 0, -1):
+            if self.stack[i]["tag"] == tag:
+                del self.stack[i:]
+                break
+
+    def handle_data(self, data):
+        for node in self.stack:
+            node["text"] += data
+
+
+def descendants(node):
+    for child in node["children"]:
+        yield child
+        yield from descendants(child)
+
+
+def check_core_figures(text):
+    parser = FigureCoverageParser()
+    parser.feed(text)
+    errors, counts = [], {"formal_papers": 0, "embedded": 0, "unavailable": 0, "not-applicable": 0}
+    bodies = [n for n in parser.nodes if n["attrs"].get("data-paper-body") == "true"]
+    if not bodies:
+        errors.append("core figures: no formal data-paper-body=true container")
+    # Catch existing formal entries that were accidentally left outside the coverage contract.
+    for node in parser.nodes:
+        if node["attrs"].get("data-status") in {"formal", "formal-read"} and node not in bodies:
+            errors.append("core figures: formal entry lacks data-paper-body=true: " + node["attrs"].get("id", "(no id)"))
+    ids = set()
+    for body in bodies:
+        attrs = body["attrs"]
+        ident = attrs.get("id", "")
+        label = "core figures: " + (ident or "(no id)")
+        counts["formal_papers"] += 1
+        if not ident or ident in ids:
+            errors.append(label + ": missing or duplicate paper id")
+        ids.add(ident)
+        state = attrs.get("data-core-figure-status")
+        if state not in {"embedded", "unavailable", "not-applicable"}:
+            errors.append(label + ": missing/invalid data-core-figure-status")
+            continue
+        counts[state] += 1
+        nodes = list(descendants(body))
+        if state == "embedded":
+            figures = [n for n in nodes if n["tag"] == "figure" and n["attrs"].get("data-figure-role") == "original-core"]
+            valid = False
+            for figure in figures:
+                children = list(descendants(figure))
+                images = [n for n in children if n["tag"] == "img" and n["attrs"].get("src", "").startswith("data:image/")]
+                captions = [n for n in children if n["tag"] == "figcaption" and n["text"].strip()]
+                sources = [n for n in children if n["tag"] == "a" and n["attrs"].get("href", "").startswith(("https://", "http://"))]
+                if images and captions and (sources or figure["attrs"].get("data-source", "").strip()):
+                    valid = True
+            if not valid:
+                errors.append(label + ": embedded needs original-core figure, embedded img, caption and source")
+        else:
+            exceptions = [n for n in nodes if "core-figure-exception" in n["attrs"].get("class", "").split()]
+            if not any(n["text"].strip() and n["attrs"].get("data-source", "").strip() and "hidden" not in n["attrs"] for n in exceptions):
+                errors.append(label + ": exception needs visible explanation and data-source")
+    return errors, counts
+
+
 def validate_html(
     html_path: Path,
     *,
     source_pdf: Path | None = None,
+    require_core_figures: bool = False,
 ) -> dict[str, object]:
     text = html_path.read_text(encoding="utf-8")
     errors: list[str] = []
@@ -131,7 +218,13 @@ def validate_html(
         if problem:
             errors.append(f"CSS image url: {problem}: {value[:120]}")
 
+    figure_coverage = None
+    if require_core_figures:
+        figure_errors, figure_coverage = check_core_figures(text)
+        errors.extend(figure_errors)
+
     return {
+        "figure_coverage": figure_coverage,
         "html": str(html_path),
         "source_pdf": str(source_pdf) if source_pdf else "",
         "checked_images": checked_images,
@@ -147,6 +240,7 @@ def main() -> int:
     parser.add_argument("html")
     parser.add_argument("--source-pdf")
     parser.add_argument("--json", action="store_true")
+    parser.add_argument("--require-core-figures", action="store_true", help="Require per-formal-paper original core figure or sourced exception")
     args = parser.parse_args()
 
     html_path = Path(args.html).expanduser().resolve()
@@ -155,7 +249,7 @@ def main() -> int:
         if args.source_pdf
         else None
     )
-    report = validate_html(html_path, source_pdf=source_pdf)
+    report = validate_html(html_path, source_pdf=source_pdf, require_core_figures=args.require_core_figures)
     if args.json:
         print(json.dumps(report, ensure_ascii=False, indent=2))
     elif report["ok"]:

@@ -13,6 +13,8 @@
 
 模式改变展开程度，不改变信息底线。导航卡可以短，正文必须能独立读懂。所有篇目同等覆盖，Top picks 只表示阅读顺序。
 
+![PaperStudio 解读选路图，含单篇精读、同方向串讲和雷达发现](assets/paperstudio-reading-modes.svg)
+
 ## 专题研究
 
 | Skill | 负责 | 输出 |
@@ -23,6 +25,12 @@
 
 用 `$topic-knowledge-system` 编排专题，用 `$paper-understanding-agent` 核对单篇或补证据。两个扩展技能可独立安装，安装时保留各自的整个目录。[六步交接](skills/topic-knowledge-system/references/paper-pipeline.md) · [PDF 准备](skills/paper-understanding-agent/references/pdf-input.md)
 
+### 两张工作流图
+
+![专题知识体系的六步运行流程](skills/topic-knowledge-system/assets/topic-workflow.svg)
+
+![论文理解 Agent 的调度编排](skills/paper-understanding-agent/assets/agent-workflow.svg)
+
 ## 使用
 
 ```text
@@ -32,9 +40,23 @@
 使用 $paper-studio 雷达，生成本周 OCR、VLA 和世界模型报告
 使用 $paper-studio 雷达，仅整理我给的这些候选，不额外发现：……
 使用 $paper-studio，把 existing-note.html 转成公众号 Markdown
+使用 $paper-understanding-agent，从 @paper.pdf 抽取作者原摘要、核心方法、主结果与局限，保留 PDF 页码
+使用 $topic-knowledge-system，基于这些论文和旧串讲整理 OCR 专题，允许公开检索，只补缺口，输出 HTML 和 SVG
 ```
 
 一篇默认单篇；共同方向下的多篇默认串讲；研究动态发现或跨方向候选默认雷达。旧 `single-limu` 写法兼容到融合单篇，不再是可选的另一套正文。旧随笔入口已退役，按材料路由到串讲或雷达。转换已有 HTML 是交付操作，不增加阅读模式。
+
+### 安装与更新
+
+GitHub 的 `main` 是发布源。按需安装下列目录中的技能，保留其 `SKILL.md` 与配套文件。
+
+| 调用名 | GitHub 安装源 |
+| --- | --- |
+| `$paper-studio` | [仓库根入口](SKILL.md)，配套 `agents/`、`assets/`、`references/`、`scripts/` 与 `evals/` |
+| `$paper-understanding-agent` | [skills/paper-understanding-agent](skills/paper-understanding-agent/) 完整目录 |
+| `$topic-knowledge-system` | [skills/topic-knowledge-system](skills/topic-knowledge-system/) 完整目录 |
+
+更新时先比较 GitHub 发布版本与已安装版本，把应保留的技能改动合入 `main`，再按同一提交更新所需技能。PaperStudio 的历史 HTML 报告可直接从示例目录阅读。独立运行论文理解 Agent 需要已配置的模型后端；专题公开扩展按来源授权和检索配置执行。
 
 ## 单篇融合了什么
 
@@ -86,7 +108,7 @@ python3 scripts/validate_html.py "paper.html" --source-pdf "paper.pdf"
 python3 scripts/html_to_markdown.py "output.html" --compact --max-chars 0
 ```
 
-文件校验不等于内容完整。转换脚本负责提取和清理格式，之后仍需核对机制、数字、消融与总结。
+正式报告验收时给 `validate_html.py` 加 `--require-core-figures`。核对每篇的核心原图、出处与读图说明，或记录可核查的缺图原因。教学 SVG 用于解释关键步骤或对照机制。[核心原图规范](references/core-figures.md)
 
 ## 历史示例
 

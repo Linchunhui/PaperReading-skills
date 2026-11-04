@@ -202,7 +202,7 @@ $\lambda$ 控制 XX；……</p>
 
 **(c) 文件大小适中**：HTML 不能因为一张图就肥到打不开
 
-- *单张图压缩后 ≤ 300 KB*；总图量（base64 嵌入后）控制在 ≤ 2 MB
+- *单张图优先压缩到约 100–300 KB*；2 MB 仅是小报告的优化参考，不是总图量上限
 - *转 JPEG 而非保留 PNG*：除非是线条图截图（PNG 锯齿更少），照片类一律 JPEG quality 80-85 优化
 - *压缩流程*（推荐用 PIL 一段脚本搞定）：
 
@@ -216,10 +216,10 @@ if img.width > 1400:
 img.save(out_jpg, "JPEG", quality=85, optimize=True)
 ```
 
-- *base64 内嵌前再核对一遍*：`ls -la` 看每张图的 KB 数；超出预算就降 quality 到 75 或降宽度到 1200
+- *base64 内嵌前再核对一遍*：`ls -la` 看每张图的 KB 数；优先无损优化；必要时调整质量，但不能使图中文字不可读
 - *内嵌后删掉路径依赖*：`<img src>` 只能保留 `data:image/...;base64,...`；不能留 `./x.jpg`、绝对路径、`file://` 或远程图片 URL
 
-不是所有图都值得保存——装饰性图、无信息量的曲线图通常可以跳过。挑承重的（一般 3-6 张就够），多了 HTML 会臃肿、读者也疲劳。但凡你决定保留的图，都必须三条同时过：边界完整、清晰可读、大小适中。
+不设全报告 3–6 张或固定体积配额。按每篇的理解需要保留承重原图，篇数增加时图量相应增加；跳过装饰与重复图，不因体积、篇幅、排名或分批生成删除后续论文主图。压缩不能牺牲边界和可读性。逐篇主图契约见 [core-figures.md](core-figures.md)，优先于任何模板里的数量与体积建议。
 
 ### PDF 下载（仅当来源是 arxiv URL 等无本地 PDF 时）
 
@@ -233,7 +233,7 @@ curl -L -o "$notes_dir/pdf/{你选择并保留的PDF文件名}.pdf" {pdf_url}
 
 ### 截图工作流（串讲 / 雷达里大量从原论文截架构图时用）
 
-详细的「转页 → 裁切 → autotrim → 压缩」脚本和 HTML `<figure>` 引用模板见 [`svg-patterns.md`](./svg-patterns.md) 的「模型架构图」一节。截图质量红线（完整 / 干净 / 清晰 / 带 caption / figcaption 自己写导读 / 单张 100-300 KB）在那一份文件里逐条列出。
+详细的「转页 → 裁切 → autotrim → 压缩」脚本和 HTML `<figure>` 引用模板见 [`svg-patterns.md`](./svg-patterns.md) 的「模型架构图」一节。截图质量红线（完整 / 干净 / 清晰 / 带 caption / figcaption 自己写导读 / 单张优先约 100–300 KB，清晰度优先且不是硬上限）在那一份文件里逐条列出。
 
 ---
 
@@ -276,3 +276,7 @@ python3 scripts/validate_html.py "{输出.html}"                         # 多�
 - CSS 背景图没有残留本地或远程路径。
 
 最后打开 HTML 肉眼检查图片、公式、TOC 和移动端布局；再按 [`wechat-markdown.md`](./wechat-markdown.md) 生成并预览公众号 Markdown，报告两份产物的绝对路径与文件大小。
+
+## 逐篇原图验收
+
+遵守 [core-figures.md](core-figures.md)：每篇正式解读核查并保留适用核心原图，或在该篇给出可追溯的缺图/不适用说明。教学SVG不默默替代原图；不以全报告图数或体积限额省略主图。HTML 必须运行 `validate_html.py output.html --require-core-figures`，并逐篇人工回源与看图。

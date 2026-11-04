@@ -1,0 +1,117 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1560 1097" width="1560" height="1097" role="img" aria-labelledby="title description">
+<title id="title">论文理解 Agent · 调度编排</title>
+<desc id="description">PyMuPDF 将原始 PDF 转成带定位的文本和按需页面图。Agent 运行页、章、篇主链，另行抽取元数据及参考文献，随后评估、生成阅读稿和合并。</desc>
+<style>text{font-family:Inter,"Noto Sans CJK SC","PingFang SC","Microsoft YaHei","Droid Sans Fallback",sans-serif}</style>
+<rect x="0" y="0" width="1560" height="1097" rx="0" fill="#f5f8fa" stroke="none" stroke-width="1.3"/>
+<defs><pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M40 0H0V40" fill="none" stroke="#e6edf2" stroke-width="1"/></pattern></defs>
+<rect width="1560" height="1097" fill="url(#grid)"/>
+<text x="42" y="39" font-size="15" fill="#077d99" font-weight="700" text-anchor="start" letter-spacing="1.8">PAPER UNDERSTANDING / AGENT ARCHITECTURE</text>
+<text x="42" y="91" font-size="43" fill="#1d3043" font-weight="700" text-anchor="start" letter-spacing="0">论文理解 Agent 的调度编排</text>
+<text x="42" y="125" font-size="19" fill="#506579" font-weight="400" text-anchor="start" letter-spacing="0">按页抽取证据，按章解释局部，再回到原文贯通整篇。</text>
+<text x="1518" y="48" font-size="18" fill="#077d99" font-weight="700" text-anchor="end" letter-spacing="0">单篇论文 · 分阶段执行</text>
+<rect x="42" y="150" width="398" height="110" rx="12" fill="#daf0f5" stroke="#077d99" stroke-width="1.3"/>
+<text x="241.0" y="181" font-size="22" fill="#1d3043" font-weight="700" text-anchor="middle" letter-spacing="0">PDF 或已有解析</text>
+<text x="241.0" y="206" font-size="15" fill="#077d99" font-weight="700" text-anchor="middle" letter-spacing="0">PyMuPDF · 可选入口</text>
+<text x="241.0" y="233" font-size="16" fill="#3e566c" font-weight="400" text-anchor="middle" letter-spacing="0">文本块、页码、坐标与按需页面图</text>
+<rect x="532" y="150" width="986" height="110" rx="12" fill="#f5ebdc" stroke="#a95714" stroke-width="1.3"/>
+<text x="1025.0" y="181" font-size="22" fill="#1d3043" font-weight="700" text-anchor="middle" letter-spacing="0">编排入口 · 论文理解 Agent</text>
+<text x="1025.0" y="206" font-size="15" fill="#a95714" font-weight="700" text-anchor="middle" letter-spacing="0">声明版本与处理范围</text>
+<text x="1025.0" y="233" font-size="16" fill="#3e566c" font-weight="400" text-anchor="middle" letter-spacing="0">按依赖调度专业阶段，记录证据、缓存与重试</text>
+<defs><marker id="arrow-077d99" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#077d99"/></marker></defs>
+<path d="M440 205 H530" fill="none" stroke="#077d99" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow-077d99)"/>
+<text x="485" y="192" font-size="15" fill="#077d99" font-weight="400" text-anchor="middle" letter-spacing="0">提交</text>
+<rect x="42" y="301" width="1476" height="646" rx="12" fill="none" stroke="#c6d6e2" stroke-width="1.3" stroke-dasharray="7 5"/>
+<text x="64" y="330" font-size="18" fill="#1d3043" font-weight="700" text-anchor="start" letter-spacing="0">01  正文层级调度</text>
+<text x="1193" y="330" font-size="18" fill="#617289" font-weight="700" text-anchor="start" letter-spacing="0">02  并行抽取</text>
+<rect x="65" y="348" width="313" height="270" rx="12" fill="#f3faf8" stroke="#7cb8a8" stroke-width="1.3" stroke-dasharray="7 5"/>
+<text x="221.5" y="386" font-size="22" fill="#1d3043" font-weight="700" text-anchor="middle" letter-spacing="0">页级 · 并发抽取</text>
+<text x="221.5" y="414" font-size="15" fill="#008168" font-weight="700" text-anchor="middle" letter-spacing="0">paper-page-extract</text>
+<text x="221.5" y="593" font-size="16" fill="#3e566c" font-weight="400" text-anchor="middle" letter-spacing="0">提取机制、数字与原文定位</text>
+<rect x="425" y="348" width="313" height="270" rx="12" fill="#f3faf8" stroke="#7cb8a8" stroke-width="1.3" stroke-dasharray="7 5"/>
+<text x="581.5" y="386" font-size="22" fill="#1d3043" font-weight="700" text-anchor="middle" letter-spacing="0">章级 · 分章理解</text>
+<text x="581.5" y="414" font-size="15" fill="#008168" font-weight="700" text-anchor="middle" letter-spacing="0">paper-structured-summary</text>
+<text x="581.5" y="593" font-size="16" fill="#3e566c" font-weight="400" text-anchor="middle" letter-spacing="0">使用本章原文与相交页证据</text>
+<rect x="785" y="348" width="313" height="270" rx="12" fill="#f3faf8" stroke="#7cb8a8" stroke-width="1.3" stroke-dasharray="7 5"/>
+<text x="941.5" y="386" font-size="22" fill="#1d3043" font-weight="700" text-anchor="middle" letter-spacing="0">篇级 · 整篇汇总</text>
+<text x="941.5" y="414" font-size="15" fill="#008168" font-weight="700" text-anchor="middle" letter-spacing="0">paper-structured-summary</text>
+<text x="941.5" y="593" font-size="16" fill="#3e566c" font-weight="400" text-anchor="middle" letter-spacing="0">核对正文、章节与元数据</text>
+<path d="M1025 260 V280 H221 V346" fill="none" stroke="#077d99" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow-077d99)"/>
+<defs><marker id="arrow-617289" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#617289"/></marker></defs>
+<path d="M1025 280 H1347 V347" fill="none" stroke="#617289" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow-617289)"/>
+<circle cx="1025" cy="280" r="4" fill="#077d99"/>
+<rect x="84" y="439" width="274" height="35" rx="8" fill="#dcefe9" stroke="#008168" stroke-width="1.3"/>
+<text x="221" y="463" font-size="17" fill="#1d3043" font-weight="700" text-anchor="middle" letter-spacing="0">第 01 页</text>
+<rect x="84" y="483" width="274" height="35" rx="8" fill="#dcefe9" stroke="#008168" stroke-width="1.3"/>
+<text x="221" y="507" font-size="17" fill="#1d3043" font-weight="700" text-anchor="middle" letter-spacing="0">第 02 页</text>
+<rect x="84" y="527" width="274" height="35" rx="8" fill="#dcefe9" stroke="#008168" stroke-width="1.3"/>
+<text x="221" y="551" font-size="17" fill="#1d3043" font-weight="700" text-anchor="middle" letter-spacing="0">第 03 页</text>
+<rect x="444" y="451" width="275" height="43" rx="8" fill="#dcefe9" stroke="#008168" stroke-width="1.3"/>
+<text x="581.5" y="479" font-size="17" fill="#1d3043" font-weight="700" text-anchor="middle" letter-spacing="0">章节 A</text>
+<rect x="444" y="516" width="275" height="43" rx="8" fill="#dcefe9" stroke="#008168" stroke-width="1.3"/>
+<text x="581.5" y="544" font-size="17" fill="#1d3043" font-weight="700" text-anchor="middle" letter-spacing="0">章节 B</text>
+<defs><marker id="arrow-008168" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#008168"/></marker></defs>
+<path d="M358 456 H390 V461 H442" fill="none" stroke="#008168" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow-008168)"/>
+<path d="M358 500 H407 V480 H442" fill="none" stroke="#008168" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow-008168)"/>
+<path d="M407 500 V529 H442" fill="none" stroke="#008168" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow-008168)"/>
+<path d="M358 544 H392 V548 H442" fill="none" stroke="#008168" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow-008168)"/>
+<circle cx="407" cy="500" r="3" fill="#008168"/>
+<rect x="803" y="450" width="278" height="113" rx="12" fill="#e5edf9" stroke="#4672b3" stroke-width="1.3"/>
+<text x="942.0" y="481" font-size="22" fill="#1d3043" font-weight="700" text-anchor="middle" letter-spacing="0">整篇结构化理解</text>
+<text x="942.0" y="509" font-size="16" fill="#3e566c" font-weight="400" text-anchor="middle" letter-spacing="0">背景、问题、思路、方法</text>
+<text x="942.0" y="534" font-size="16" fill="#3e566c" font-weight="400" text-anchor="middle" letter-spacing="0">结果、相关工作与局限</text>
+<path d="M719 472 H749 V508 H801" fill="none" stroke="#008168" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow-008168)"/>
+<path d="M719 537 H749 V508" fill="none" stroke="#008168" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="749" cy="508" r="3" fill="#008168"/>
+<rect x="1188" y="348" width="306" height="270" rx="12" fill="#f1f4f8" stroke="#a5b4c5" stroke-width="1.3" stroke-dasharray="7 5"/>
+<rect x="1200" y="366" width="282" height="106" rx="12" fill="#e6ebf1" stroke="#617289" stroke-width="1.3"/>
+<text x="1341.0" y="397" font-size="22" fill="#1d3043" font-weight="700" text-anchor="middle" letter-spacing="0">论文元数据</text>
+<text x="1341.0" y="422" font-size="15" fill="#617289" font-weight="700" text-anchor="middle" letter-spacing="0">paper-metadata</text>
+<text x="1341.0" y="449" font-size="16" fill="#3e566c" font-weight="400" text-anchor="middle" letter-spacing="0">作者、机构、日期、原始摘要</text>
+<rect x="1200" y="493" width="282" height="106" rx="12" fill="#e6ebf1" stroke="#617289" stroke-width="1.3"/>
+<text x="1341.0" y="524" font-size="22" fill="#1d3043" font-weight="700" text-anchor="middle" letter-spacing="0">完整参考文献</text>
+<text x="1341.0" y="549" font-size="15" fill="#617289" font-weight="700" text-anchor="middle" letter-spacing="0">paper-reference-extract</text>
+<text x="1341.0" y="576" font-size="16" fill="#3e566c" font-weight="400" text-anchor="middle" letter-spacing="0">参考区独立抽取、跨页续接</text>
+<path d="M1200 417 H1150 V480 H1084" fill="none" stroke="#617289" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow-617289)"/>
+<text x="409" y="642" font-size="16" fill="#3e566c" font-weight="400" text-anchor="start" letter-spacing="0">页与章按内容块关联。同一页可为多个章节提供证据。</text>
+<text x="64" y="675" font-size="18" fill="#1d3043" font-weight="700" text-anchor="start" letter-spacing="0">03  评估与阅读生成</text>
+<path d="M980 563 V695 H273 V711" fill="none" stroke="#008168" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow-008168)"/>
+<path d="M780 695 V711" fill="none" stroke="#008168" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow-008168)"/>
+<circle cx="780" cy="695" r="3" fill="#008168"/>
+<rect x="65" y="714" width="416" height="108" rx="12" fill="#f5ebdc" stroke="#a95714" stroke-width="1.3"/>
+<text x="273.0" y="745" font-size="22" fill="#1d3043" font-weight="700" text-anchor="middle" letter-spacing="0">突破性与质量价值评估</text>
+<text x="273.0" y="770" font-size="15" fill="#a95714" font-weight="700" text-anchor="middle" letter-spacing="0">paper-value-assessment</text>
+<text x="273.0" y="797" font-size="16" fill="#3e566c" font-weight="400" text-anchor="middle" letter-spacing="0">十维判断、支持与反向证据、适用边界</text>
+<rect x="553" y="714" width="458" height="108" rx="12" fill="#dcefe9" stroke="#008168" stroke-width="1.3"/>
+<text x="782.0" y="745" font-size="22" fill="#1d3043" font-weight="700" text-anchor="middle" letter-spacing="0">深读、摘要与推荐理由</text>
+<text x="782.0" y="770" font-size="15" fill="#008168" font-weight="700" text-anchor="middle" letter-spacing="0">paper-brief</text>
+<text x="782.0" y="797" font-size="16" fill="#3e566c" font-weight="400" text-anchor="middle" letter-spacing="0">按原文解释机制，推荐理由关联证据</text>
+<defs><marker id="arrow-a95714" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#a95714"/></marker></defs>
+<path d="M481 768 H551" fill="none" stroke="#a95714" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow-a95714)"/>
+<text x="517" y="756" font-size="14" fill="#a95714" font-weight="400" text-anchor="middle" letter-spacing="0">判断</text>
+<text x="1192" y="735" font-size="19" fill="#6d4bb5" font-weight="700" text-anchor="start" letter-spacing="0">证据可回查</text>
+<text x="1192" y="765" font-size="16" fill="#3e566c" font-weight="400" text-anchor="start" letter-spacing="0">原文按页码和内容块定位</text>
+<text x="1192" y="790" font-size="16" fill="#3e566c" font-weight="400" text-anchor="start" letter-spacing="0">页面图按需另行视觉复核</text>
+<rect x="65" y="864" width="1429" height="60" rx="12" fill="#ede7f8" stroke="#6d4bb5" stroke-width="1.3"/>
+<text x="100" y="902" font-size="23" fill="#1d3043" font-weight="700" text-anchor="start" letter-spacing="0">校验与合并</text>
+<text x="520" y="901" font-size="19" fill="#1d3043" font-weight="400" text-anchor="start" letter-spacing="0">核对版本、引用和缺项，汇入各阶段产物</text>
+<defs><marker id="arrow-6d4bb5" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#6d4bb5"/></marker></defs>
+<path d="M273 822 V862" fill="none" stroke="#6d4bb5" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round" stroke-dasharray="7 5" marker-end="url(#arrow-6d4bb5)"/>
+<path d="M780 822 V862" fill="none" stroke="#6d4bb5" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round" stroke-dasharray="7 5" marker-end="url(#arrow-6d4bb5)"/>
+<path d="M1081 524 H1132 V862" fill="none" stroke="#6d4bb5" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round" stroke-dasharray="7 5" marker-end="url(#arrow-6d4bb5)"/>
+<path d="M1482 417 H1504 V842 H1428 V862 M1482 546 H1504" fill="none" stroke="#6d4bb5" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round" stroke-dasharray="7 5"/>
+<path d="M1428 842 V862" fill="none" stroke="#6d4bb5" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round" stroke-dasharray="7 5" marker-end="url(#arrow-6d4bb5)"/>
+<rect x="42" y="979" width="1476" height="56" rx="12" fill="#daf0f5" stroke="#077d99" stroke-width="1.3"/>
+<path d="M780 924 V977" fill="none" stroke="#077d99" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow-077d99)"/>
+<text x="78" y="1016" font-size="23" fill="#1d3043" font-weight="700" text-anchor="start" letter-spacing="0">统一交付</text>
+<text x="470" y="1015" font-size="18" fill="#1d3043" font-weight="400" text-anchor="middle" letter-spacing="0">结构化论文记录</text>
+<text x="849" y="1015" font-size="18" fill="#1d3043" font-weight="400" text-anchor="middle" letter-spacing="0">完整论文解读</text>
+<text x="1247" y="1015" font-size="18" fill="#1d3043" font-weight="400" text-anchor="middle" letter-spacing="0">短卡与推荐理由</text>
+<path d="M792 1068 H824" fill="none" stroke="#008168" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow-008168)"/>
+<text x="834" y="1074" font-size="15" fill="#3e566c" font-weight="400" text-anchor="start" letter-spacing="0">正文依赖</text>
+<path d="M980 1068 H1012" fill="none" stroke="#617289" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow-617289)"/>
+<text x="1022" y="1074" font-size="15" fill="#3e566c" font-weight="400" text-anchor="start" letter-spacing="0">独立分支</text>
+<path d="M1168 1068 H1200" fill="none" stroke="#a95714" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow-a95714)"/>
+<text x="1210" y="1074" font-size="15" fill="#3e566c" font-weight="400" text-anchor="start" letter-spacing="0">价值判断</text>
+<path d="M1356 1068 H1388" fill="none" stroke="#6d4bb5" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round" stroke-dasharray="7 5" marker-end="url(#arrow-6d4bb5)"/>
+<text x="1398" y="1074" font-size="15" fill="#3e566c" font-weight="400" text-anchor="start" letter-spacing="0">产物归并</text>
+</svg>

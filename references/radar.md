@@ -105,3 +105,7 @@ python3 scripts/fetch_content.py --start YYYY-MM-DD --end YYYY-MM-DD -o /tmp/pap
 ## 验收
 
 确认时间/候选/方向边界、来源状态与版本真实；每篇主线完整，思路与方法、结果与消融分别可找；方法能复述、总结有条件；数字可定位，缺失不冒充“未报告”；同篇不重复，后续篇不缩水，样本趋势不夸大。最后检查文件与界面。结构校验通过不能证明内容通过。
+
+## 逐篇原图验收
+
+遵守 [core-figures.md](core-figures.md)：每篇正式解读核查并保留适用核心原图，或在该篇给出可追溯的缺图/不适用说明。教学SVG不默默替代原图；不以全报告图数或体积限额省略主图。HTML 必须运行 `validate_html.py output.html --require-core-figures`，并逐篇人工回源与看图。
