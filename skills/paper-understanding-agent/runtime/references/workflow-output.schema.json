@@ -1878,6 +1878,14 @@
             "minLength": 1
           },
           "uniqueItems": true
+        },
+        "metadata_source_unit_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
         }
       },
       "required": [
@@ -2242,6 +2250,12 @@
                   },
                   "assessment_summary": {
                     "$ref": "#/$defs/assessment_summary"
+                  },
+                  "recommendations": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/$defs/reason"
+                    }
                   }
                 },
                 "required": [

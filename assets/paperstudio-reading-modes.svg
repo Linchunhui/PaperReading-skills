@@ -1,34 +1,48 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 420" width="1200" height="420" role="img" aria-labelledby="title description">
-<title id="title">PaperStudio · 论文解读选路</title>
-<desc id="description">按输入选择单篇精读、同方向串讲或雷达发现。三个模式共用八项论文主线，交付 HTML 和可选公众号 Markdown。</desc>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 850" width="1600" height="850" role="img" aria-labelledby="title description">
+<title id="title">PaperStudio · 三种阅读模式与共享证据</title>
+<desc id="description">单篇解读、系列串讲与研究雷达继续保留，通过论文理解共享证据，专题组织跨篇知识。</desc>
 <style>text{font-family:Inter,"Noto Sans CJK SC","PingFang SC","Microsoft YaHei","Droid Sans Fallback",sans-serif}</style>
-<rect x="0" y="0" width="1200" height="420" rx="0" fill="#fbf9f2" stroke="none" stroke-width="1.3"/>
-<text x="32" y="37" font-size="14" fill="#285b4e" font-weight="700" text-anchor="start" letter-spacing="1.7">PAPERSTUDIO / READING MODES</text>
-<text x="32" y="84" font-size="38" fill="#1d332d" font-weight="700" text-anchor="start" letter-spacing="0">PaperStudio · 论文解读选路</text>
-<text x="32" y="116" font-size="18" fill="#4a6156" font-weight="400" text-anchor="start" letter-spacing="0">按输入和目标选入口，每篇保留一条能独立读懂的论文主线。</text>
-<rect x="32" y="146" width="366" height="136" rx="12" fill="#e5efe7" stroke="#2d6b57" stroke-width="1.3"/>
-<text x="215.0" y="177" font-size="22" fill="#1d3043" font-weight="700" text-anchor="middle" letter-spacing="0">单篇精读</text>
-<text x="215.0" y="202" font-size="15" fill="#2d6b57" font-weight="700" text-anchor="middle" letter-spacing="0">single</text>
-<text x="215.0" y="229" font-size="16" fill="#3e566c" font-weight="400" text-anchor="middle" letter-spacing="0">输入：一篇论文</text>
-<text x="215.0" y="254" font-size="16" fill="#3e566c" font-weight="400" text-anchor="middle" letter-spacing="0">讲透机制、公式和实验证据</text>
-<defs><marker id="arrow-2d6b57" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#2d6b57"/></marker></defs>
-<path d="M215 282 V302" fill="none" stroke="#2d6b57" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow-2d6b57)"/>
-<rect x="417" y="146" width="366" height="136" rx="12" fill="#e8eff7" stroke="#3c6388" stroke-width="1.3"/>
-<text x="600.0" y="177" font-size="22" fill="#1d3043" font-weight="700" text-anchor="middle" letter-spacing="0">同方向串讲</text>
-<text x="600.0" y="202" font-size="15" fill="#3c6388" font-weight="700" text-anchor="middle" letter-spacing="0">series</text>
-<text x="600.0" y="229" font-size="16" fill="#3e566c" font-weight="400" text-anchor="middle" letter-spacing="0">输入：同问题的多篇论文</text>
-<text x="600.0" y="254" font-size="16" fill="#3e566c" font-weight="400" text-anchor="middle" letter-spacing="0">比较各路线的改动和适用条件</text>
-<defs><marker id="arrow-3c6388" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#3c6388"/></marker></defs>
-<path d="M600 282 V302" fill="none" stroke="#3c6388" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow-3c6388)"/>
-<rect x="802" y="146" width="366" height="136" rx="12" fill="#f3e9df" stroke="#875137" stroke-width="1.3"/>
-<text x="985.0" y="177" font-size="22" fill="#1d3043" font-weight="700" text-anchor="middle" letter-spacing="0">雷达发现</text>
-<text x="985.0" y="202" font-size="15" fill="#875137" font-weight="700" text-anchor="middle" letter-spacing="0">radar</text>
-<text x="985.0" y="229" font-size="16" fill="#3e566c" font-weight="400" text-anchor="middle" letter-spacing="0">输入：方向与时间，或候选清单</text>
-<text x="985.0" y="254" font-size="16" fill="#3e566c" font-weight="400" text-anchor="middle" letter-spacing="0">梳理研究动态并逐篇讲清主线</text>
-<defs><marker id="arrow-875137" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#875137"/></marker></defs>
-<path d="M985 282 V302" fill="none" stroke="#875137" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow-875137)"/>
-<rect x="32" y="305" width="1136" height="70" rx="12" fill="#f1efe4" stroke="#c4cbbb" stroke-width="1.3"/>
-<text x="51" y="332" font-size="18" fill="#285b4e" font-weight="700" text-anchor="start" letter-spacing="0">每篇解读</text>
-<text x="51" y="355" font-size="18" fill="#293d34" font-weight="400" text-anchor="start" letter-spacing="0">背景 → 方向 → 问题 → 思路 → 方法 → 主结果 → 消融或分析 → 带条件总结</text>
-<text x="32" y="401" font-size="16" fill="#4a6156" font-weight="400" text-anchor="start" letter-spacing="0">默认交付 HTML 与公众号 Markdown。可指定只输出 HTML 或只在对话中讲解。</text>
+<rect x="0" y="0" width="1600" height="850" rx="0" fill="#f8fafb" stroke="none" stroke-width="1.3"/>
+<text x="50" y="44" font-size="16" fill="#42727b" font-weight="700" text-anchor="start" letter-spacing="1.8">PAPERSTUDIO / READING MODES</text>
+<text x="50" y="104" font-size="42" fill="#203b45" font-weight="700" text-anchor="start" letter-spacing="0">原有解读保留 · 三种模式共享论文证据</text>
+<text x="50" y="144" font-size="22" fill="#5e727b" font-weight="400" text-anchor="start" letter-spacing="0">根据阅读目标组织内容，避免为每种呈现重复解析和核验同一篇论文。</text>
+<rect x="50" y="205" width="450" height="135" rx="12" fill="#e7f0f4" stroke="#6a98a7" stroke-width="1.3"/>
+<text x="72" y="241" font-size="29" fill="#172b3a" font-weight="700" text-anchor="start" letter-spacing="0">单篇精读</text>
+<text x="72" y="273" font-size="19" fill="#41576a" font-weight="400" text-anchor="start" letter-spacing="0">建立具体问题，解释作者思路</text>
+<text x="72" y="298" font-size="19" fill="#41576a" font-weight="400" text-anchor="start" letter-spacing="0">走通机制、实验与适用边界</text>
+<rect x="575" y="205" width="450" height="135" rx="12" fill="#e7f0f4" stroke="#6a98a7" stroke-width="1.3"/>
+<text x="597" y="241" font-size="29" fill="#172b3a" font-weight="700" text-anchor="start" letter-spacing="0">同方向串讲</text>
+<text x="597" y="273" font-size="19" fill="#41576a" font-weight="400" text-anchor="start" letter-spacing="0">比较方法改变了哪一步</text>
+<text x="597" y="298" font-size="19" fill="#41576a" font-weight="400" text-anchor="start" letter-spacing="0">保留各篇深读与问题脉络</text>
+<rect x="1100" y="205" width="450" height="135" rx="12" fill="#e7f0f4" stroke="#6a98a7" stroke-width="1.3"/>
+<text x="1122" y="241" font-size="29" fill="#172b3a" font-weight="700" text-anchor="start" letter-spacing="0">研究雷达</text>
+<text x="1122" y="273" font-size="19" fill="#41576a" font-weight="400" text-anchor="start" letter-spacing="0">按时间范围发现与筛选</text>
+<text x="1122" y="298" font-size="19" fill="#41576a" font-weight="400" text-anchor="start" letter-spacing="0">写清进展、增量和推荐依据</text>
+<rect x="50" y="420" width="710" height="150" rx="12" fill="#e6f1e9" stroke="#5f9475" stroke-width="1.3"/>
+<text x="72" y="456" font-size="29" fill="#172b3a" font-weight="700" text-anchor="start" letter-spacing="0">共享取证 · 论文理解 Agent</text>
+<text x="72" y="488" font-size="19" fill="#41576a" font-weight="400" text-anchor="start" letter-spacing="0">screen 初筛 / evidence 取证 / full 完整档案</text>
+<text x="72" y="513" font-size="19" fill="#41576a" font-weight="400" text-anchor="start" letter-spacing="0">正文分层理解，附录与图表按需核验</text>
+<text x="72" y="538" font-size="19" fill="#41576a" font-weight="400" text-anchor="start" letter-spacing="0">缓存、原文定位、实际覆盖与核验状态</text>
+<rect x="840" y="420" width="710" height="150" rx="12" fill="#f4eddf" stroke="#b3975f" stroke-width="1.3"/>
+<text x="862" y="456" font-size="29" fill="#172b3a" font-weight="700" text-anchor="start" letter-spacing="0">跨篇组织 · 专题知识体系</text>
+<text x="862" y="488" font-size="19" fill="#41576a" font-weight="400" text-anchor="start" letter-spacing="0">已有材料 + 缺口检索 → 问题与方法关系</text>
+<text x="862" y="513" font-size="19" fill="#41576a" font-weight="400" text-anchor="start" letter-spacing="0">对齐条件、分支算例、反例与开放问题</text>
+<text x="862" y="538" font-size="19" fill="#41576a" font-weight="400" text-anchor="start" letter-spacing="0">旧串讲可复用，有出处的事实继续回查</text>
+<path d="M275 340 V380" fill="none" stroke="#6a98a7" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M800 340 V380" fill="none" stroke="#6a98a7" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M1325 340 V380" fill="none" stroke="#6a98a7" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M275 380 H1325" fill="none" stroke="#6a98a7" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round"/>
+<defs><marker id="arrow-6a98a7" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#6a98a7"/></marker></defs>
+<path d="M405 380 V420" fill="none" stroke="#6a98a7" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow-6a98a7)"/>
+<path d="M1195 380 V420" fill="none" stroke="#6a98a7" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow-6a98a7)"/>
+<defs><marker id="arrow-5f9475" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#5f9475"/></marker></defs>
+<path d="M760 495 H840" fill="none" stroke="#5f9475" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow-5f9475)"/>
+<text x="800" y="480" font-size="17" fill="#5f9475" font-weight="600" text-anchor="middle" letter-spacing="0">证据</text>
+<rect x="50" y="650" width="1500" height="105" rx="12" fill="#e8edf7" stroke="#7b8faa" stroke-width="1.3"/>
+<text x="72" y="686" font-size="29" fill="#172b3a" font-weight="700" text-anchor="start" letter-spacing="0">阅读交付 · HTML、SVG、原图、公式与证据跳转</text>
+<text x="72" y="718" font-size="19" fill="#41576a" font-weight="400" text-anchor="start" letter-spacing="0">单篇仍可完整精读；串讲仍按问题展开；雷达仍说明筛选与推荐。新增专题能力复用这些产物。</text>
+<defs><marker id="arrow-7b8faa" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#7b8faa"/></marker></defs>
+<path d="M405 570 V610 H800 V650" fill="none" stroke="#7b8faa" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arrow-7b8faa)"/>
+<path d="M1195 570 V610 H800" fill="none" stroke="#7b8faa" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="50" y="810" font-size="19" fill="#62737b" font-weight="400" text-anchor="start" letter-spacing="0">核验状态随证据保存；展示更新不会自动把旧结论升级为已核实的新结论。</text>
 </svg>

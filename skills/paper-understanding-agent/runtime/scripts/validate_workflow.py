@@ -56,7 +56,7 @@ def validate_workflow(inp, out):
             errors.append('Owned/context unit overlap: ' + s['stage_id'])
         if s['kind'] in {'page', 'section'} and not set(s['source_unit_ids'] + s['context_unit_ids']) <= main:
             errors.append('Page/section stage leaks outside main body: ' + s['stage_id'])
-        expected_scope = main | metadata_only if s['kind'] == 'metadata' else main
+        expected_scope = set(scope.get('metadata_source_unit_ids', list(main | metadata_only))) if s['kind'] == 'metadata' else main
         if s['kind'] in {'metadata', 'understanding'} and set(s['source_unit_ids']) != expected_scope:
             errors.append('Whole-body/metadata stage must cover its declared units: ' + s['stage_id'])
         if s['kind'] in {'assessment', 'reading'} and (not main <= set(s['source_unit_ids']) or not set(s['source_unit_ids'] + s['context_unit_ids']) <= main | external):

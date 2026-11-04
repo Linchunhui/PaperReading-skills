@@ -3,6 +3,7 @@
 This does not establish semantic entailment, novelty or scientific correctness.
 """
 from pathlib import Path
+from evidence_checks import measurement_errors
 import argparse,json
 
 FIELDS=['background','direction','problem','approach','methods','summary','results','reported_limitations']
@@ -56,6 +57,8 @@ def validate(inp,out):
             if f['kind'] in {'metadata','contribution','method','reported_result','theorem','limitation','resource_statement'} and 'paper' not in types:
                 errs.append('Non-paper source promoted to paper fact: '+f['fact_id'])
             if f['kind']=='reported_result' and f['observation'] is None:errs.append('Reported result missing measurement: '+f['fact_id'])
+        for f in facts.values():
+            errs.extend(measurement_errors(f,ev))
         def check_fact_refs(node,label=''):
             if isinstance(node,dict):
                 for field in ['fact_ids','supporting_fact_ids','counter_fact_ids']:

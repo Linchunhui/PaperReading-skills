@@ -25,6 +25,20 @@
 
 用 `$topic-knowledge-system` 编排专题，用 `$paper-understanding-agent` 核对单篇或补证据。两个扩展技能可独立安装，安装时保留各自的整个目录。[六步交接](skills/topic-knowledge-system/references/paper-pipeline.md) · [PDF 准备](skills/paper-understanding-agent/references/pdf-input.md)
 
+单篇取证提供三种深度，原有完整解读继续保留：
+
+| 取证模式 | 执行范围 | 主要用途 |
+| --- | --- | --- |
+| `screen` | 元数据、原摘要和选定原文页；需要时增加方法探针 | 候选筛选 |
+| `evidence` | 页/语义块、章节和篇级理解；按需激活附录、核对图表 | 专题事实与比较依据 |
+| `full` | 完整取证、并行深读与价值评估、参考文献、阅读卡与短卡 | 完整单篇档案 |
+
+新流程提供范围草稿、带版本的原文读取、图像转写导入、阶段缓存、局部修复和统一证据包。来源定位、数字一致性与语义支持分别检查。专题结论绑定已核验事实后再渲染，比较时保留评测条件；缺口可反馈检索，受来源范围、轮次和查询预算约束。
+
+[任务入口与命令](skills/paper-understanding-agent/references/research-workflow.md) · [专题研究记录与证据绑定](skills/topic-knowledge-system/references/research-record.md)
+
+当前会话负责范围核对、视觉阅读、语义判断和外部查证；脚本负责确定性的调度、记录和校验。文本 runner 不会自动看 PNG，检索反馈也不代表已启动无人值守服务。自动校验通过不等于论文结论已被科学验证。
+
 ### 两张工作流图
 
 ![专题知识体系的六步运行流程](skills/topic-knowledge-system/assets/topic-workflow.svg)
@@ -41,6 +55,8 @@
 使用 $paper-studio 雷达，仅整理我给的这些候选，不额外发现：……
 使用 $paper-studio，把 existing-note.html 转成公众号 Markdown
 使用 $paper-understanding-agent，从 @paper.pdf 抽取作者原摘要、核心方法、主结果与局限，保留 PDF 页码
+使用 $paper-understanding-agent，先 screen 初筛这些论文；入选后用 evidence 核对方法与结果，按需读附录和主实验表
+使用 $paper-understanding-agent，以 full 模式完整解读这篇论文，保留深读、价值评估与原文证据
 使用 $topic-knowledge-system，基于这些论文和旧串讲整理 OCR 专题，允许公开检索，只补缺口，输出 HTML 和 SVG
 ```
 

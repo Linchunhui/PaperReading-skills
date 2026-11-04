@@ -10,10 +10,12 @@
 | 顶层可选 | `scope`、`intro`、`background`、`lineage`、`open_questions` | `scope` 是范围与截至时间。 `intro` 与 `open_questions` 是字符串数组。 `background` 是最多 4 项的条目数组，省略 ID 即可。 `lineage` 仅写有来源支持的关系。 |
 | 章节必需 | `id`、`title`、`description`、`papers` | `title` 是页面章名。 `description` 是图上的问题陈述。 `papers` 是这一问题对应的 1–5 项条目，可以是论文、教材或标准。 |
 | 章节可选 | `label`、`context`、`case`、`synthesis` | `label` 是图和目录使用的短章名。 `context` 为背景段落数组， `case` 为一个示意算例， `synthesis` 为跨条目的比较或边界。 |
-| 条目必需 | `id`、`name`、`method`、`url` | `name` 是图上的短名， `method` 用一句话交代对象、操作与作用。 `url` 是 HTTPS 原文入口。前序条目也应尽量带原文。 |
+| 条目必需 | `id`、`name`、`method`、`url` | `name` 是图上的短名， `method` 用一句话交代对象、操作与作用。 `url` 是 HTTPS 原文入口，或输入目录内的相对 PDF/HTML/Markdown/文本路径。前序条目也应尽量带原文。 |
 | 条目可选 | `title`、`date`、`steps`、`locator`、`boundary`、`results`、`evidence` | `title` 是正文全名， `steps` 为方法步骤数组， `locator` 用章节、表号、图号或页码定位。日期使用 YYYY-MM-DD，缺失显示「日期待核」，有日期的条目排在前面。 |
 | 章节或条目可选 | `formulas`、`figures` | 见下方。 |
 | 论文条目可选 | `original_figures` | 论文原图数组。放在对应方法和公式之后、结果表之前。 |
+
+新研究报告的条目额外携带 `paper_key`，用于关联同版本 evidence-bundle；同一 paper_key 可以在多章出现。用 research.json 的 bindings 将方法、结果、边界和综合字段绑定到已审结论。旧展示输入仍可单独渲染。
 
 章节和条目 ID 使用小写字母、数字和连字符，全局唯一。章节 ID 用于目录，条目在页面中以 `paper-ID` 锚定。避免使用页面保留名 `top`、`overview`、`background`、`open-questions`、`map-frame` 和 `map-zoom`，以及章节前缀 `paper-`。
 
@@ -38,3 +40,5 @@
 - `figures` 用于自绘 SVG，`original_figures` 用于作者的原图。同一概念已有清晰原图时，优先选原图并保留图例、子图标记和坐标轴。
 
 总览把短名和一句做法排在同一画布。报告正文容纳全名和细节。若生成器提示文字过长，优先缩短图上的 `name`、`label` 或 `method`，并在正文用 `title`、`steps` 和 `boundary` 保留原信息。
+
+仅本地资料无需虚构公开 URL。使用如 `sources/paper.pdf#page=3`，随报告保留源文件；build_topic.py 会按 HTML 与独立 SVG 的输出目录重设相对链接。不接受 file://、绝对路径或输入目录之外的来源。

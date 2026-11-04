@@ -56,6 +56,9 @@ def assemble(inp, manifest, directory):
     p.update({'profile': 'comprehensive', 'processing_status': 'partial' if partial else 'complete'})
     for kind in ['metadata', 'understanding', 'assessment', 'reading']:
         p.update(singles[kind])
+    if 'recommendations' in singles['assessment']:
+        p['recommendations'] = singles['assessment']['recommendations']
+        p['display']['recommendation_ids'] = [r['reason_id'] for r in p['recommendations']]
     p['metadata']['references'] = singles['references']['references']
     p['bibliography'] = {k: singles['references'][k] for k in ['unparsed_segments', 'excluded_segments']}
     for field, key in [('evidence', 'evidence_id'), ('facts', 'fact_id')]:

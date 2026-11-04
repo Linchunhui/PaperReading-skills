@@ -1,5 +1,7 @@
 # 输入与编排契约
 
+新研究任务先按 [研究任务与证据交接](research-workflow.md) 选择 screen/evidence/full。下方完整流程的 main_unit_ids 指本次声明的分析原文，显式激活的附录会保留来源标记后并入派生范围。
+
 ## 准备输入
 
 原始 PDF 可走[本地 PyMuPDF 准备入口](pdf-input.md)，同时保留按需渲染的页面用于视觉复核。

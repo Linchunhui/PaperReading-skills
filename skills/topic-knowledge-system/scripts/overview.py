@@ -9,6 +9,7 @@ import re
 from string import Template
 from unicodedata import east_asian_width
 from urllib.parse import urlsplit
+from source_links import source_url
 
 WIDTH, HEIGHT = 1920, 1080
 BRANCH_X, BRANCH_W, PAPER_X, RIGHT, TRUNK = 280, 238, 571, 1878, 246
@@ -34,9 +35,7 @@ def paper_rows(items, maximum):
                 raise ValueError(f'{item["name"]} 的日期须为 YYYY-MM-DD')
             date.fromisoformat(raw_date)
         if item.get('url'):
-            url = urlsplit(item['url'])
-            if url.scheme != 'https' or not url.hostname or url.username or url.password:
-                raise ValueError(f'{item["name"]} 的来源须为 HTTPS 地址')
+            source_url(item['url'])
     return sorted(items, key=lambda p: p.get('date') or '9999')
 
 

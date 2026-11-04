@@ -62,8 +62,21 @@ def prepare_pdf(args):
                     "locator": {"page": number, "bbox": [x0, y0, x1, y1]},
                 })
                 page_units.append(unit_id)
+            page_text = "".join(u["text"] for u in units if u["unit_id"] in page_units)
+            flags_review = []
+            if not page_units:
+                flags_review.append("empty_or_image_only")
+            if "\ufffd" in page_text:
+                flags_review.append("replacement_characters")
+            if page_units and len(page_text.strip()) < 40:
+                flags_review.append("sparse_text")
+            labels = [{"unit_id": u["unit_id"], "text": u["text"][:200]}
+                      for u in units if u["unit_id"] in page_units and
+                      re.match(r"(?i)^\s*(appendix|appendices|supplement|figure|fig\.|table|附录|图\s*\d|表\s*\d)", u["text"])]
             record = {"page": number, "label": page.get_label(), "rotation": page.rotation,
-                      "unit_ids": page_units, "needs_text_review": not page_units}
+                      "unit_ids": page_units, "needs_text_review": bool(flags_review),
+                      "text_review_flags": flags_review, "label_hints": labels,
+                      "reading_order_status": "unreviewed"}
             if number in render:
                 image_path = f"pages/p{number}.png"
                 image = page.get_pixmap(dpi=args.dpi, alpha=False, annots=False).tobytes("png")
@@ -73,7 +86,9 @@ def prepare_pdf(args):
         source = {"paper_id": args.paper_id, "document_version_id": version,
                   "version_label": args.version, "source_url": args.source_url,
                   "pdf_filename": args.pdf.name, "pdf_sha256": digest, "page_count": document.page_count,
-                  "pymupdf_version": pymupdf.__version__, "pages": pages}
+                  "pymupdf_version": pymupdf.__version__, "pages": pages,
+                  "outline_hints": [{"level": level, "title": title, "page": page} for level, title, page in document.get_toc()],
+                  "hints_status": "unreviewed; not semantic scope assignments"}
 
     write_json(args.out / "input.json", {
         "schema_version": "1.0",

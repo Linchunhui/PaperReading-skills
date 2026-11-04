@@ -13,6 +13,7 @@ from xml.etree import ElementTree as ET
 
 from chapter_trees import TREE_CSS, chapter_svg, render_method_tree
 from overview import paper_rows, render as render_overview, required
+from source_links import source_url, local_sources, rebase_links
 
 ASSETS = Path(__file__).resolve().parents[1] / 'assets'
 COLORS = ('#246452', '#89553d', '#3c6086', '#735884', '#775d24', '#526d42')
@@ -23,13 +24,6 @@ def sequence(obj, key):
     if not isinstance(value, list):
         raise ValueError(f'{key} 须为数组')
     return value
-
-
-def source_url(url):
-    p = urlsplit(url)
-    if p.scheme != 'https' or not p.hostname or p.username or p.password:
-        raise ValueError(f'来源须为 HTTPS 地址：{url}')
-    return url
 
 
 def link(url, label):
@@ -200,7 +194,7 @@ def entry_html(entry, input_dir):
 def branch_html(topic, branch, number, input_dir):
     context = paragraphs(sequence(branch, 'context'))
     case = branch.get('case')
-    baseline = f'<aside class="baseline-case"><h3>读图前的算例</h3><p>{escape(case)}</p></aside>' if case else ''
+    baseline = f'<aside class="baseline-case"><h3>读图前的算例 · 教学示意</h3><p>{escape(case)}</p></aside>' if case else ''
     entries = ''.join(entry_html(p, input_dir) for p in paper_rows(branch['papers'],5))
     return f'''<section class="chapter" id="{branch['id']}" style="--accent:{COLORS[number-1]}">
 <header class="chapter-head"><span class="chapter-index" aria-hidden="true">{number:02}</span>
@@ -291,6 +285,7 @@ def main():
     parser = ArgumentParser(description=__doc__)
     parser.add_argument('input', type=Path, help='topic.json')
     parser.add_argument('output', type=Path, help='输出 HTML 路径')
+    parser.add_argument('--research', type=Path, help='审查专题证据绑定后再渲染；新研究报告应提供')
     parser.add_argument('--svg-dir', type=Path, help='可选，另存总览和各章宽屏、移动版 SVG')
     args = parser.parse_args()
     try:
@@ -298,7 +293,14 @@ def main():
         topic = json.loads(path.read_text(encoding='utf-8'))
         if path == args.output.resolve():
             raise ValueError('输入和输出须为不同文件')
+        if args.research:
+            from topic_handoff import audit, load
+            checked = audit(load(args.research), topic, args.research.resolve().parent)
+            if not checked['ok']:
+                raise ValueError('专题证据校验失败：' + '; '.join(checked['errors']))
         html, overview = build(topic, path.parent)
+        local_urls = local_sources(topic)
+        html = rebase_links(html, local_urls, path.parent, args.output.parent)
         if args.svg_dir:
             diagrams = {'overview.svg': overview}
             for i, branch in enumerate(topic['branches'],1):
@@ -307,6 +309,7 @@ def main():
                         topic,branch,i,variant,standalone=True)
             args.svg_dir.mkdir(parents=True,exist_ok=True)
             for name, svg in diagrams.items():
+                svg = rebase_links(svg, local_urls, path.parent, args.svg_dir)
                 (args.svg_dir / name).write_text(svg,encoding='utf-8')
         args.output.parent.mkdir(parents=True,exist_ok=True)
         args.output.write_text(html,encoding='utf-8')

@@ -43,7 +43,7 @@ class AgentPortabilityTests(unittest.TestCase):
         refs = [s for s in stages.values() if s["kind"] == "references"]
         self.assertEqual(len(refs), 1)
         self.assertEqual(refs[0]["dependencies"], [])
-        self.assertIn("assessment", stages["reading"]["dependencies"])
+        self.assertNotIn("assessment", stages["reading"]["dependencies"])
         self.assertEqual(stages["reading"]["specialist"], "paper-brief")
 
     def test_scope_rejects_missing_input_unit(self):

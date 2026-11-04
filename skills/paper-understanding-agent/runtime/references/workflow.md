@@ -26,7 +26,8 @@ flowchart TD
 
 先保留原始解析结果，再制作下面的范围清单。解析器没有页码或章节时，使用 `chunk-*`、`unsectioned-*` 这样的显式逻辑分组，在 `boundary_notes` 说明，不能猜造页号或章节标题。
 
-- `main_unit_ids`：开头的标题、作者、摘要及正文到结论／总结。
+- `main_unit_ids`：本次声明的分析原文，默认标题、作者、摘要与正文；宿主显式激活的附录会并入派生范围并保留任务覆盖记录。
+- `metadata_source_unit_ids`（可选）：元数据实际读取的正文/元数据单元，必须包含已声明的摘要跨度；未设时保留旧版全正文行为。
 - `metadata_unit_ids`（可选）：正文之外实际包含作者／贡献者、机构或日期的单元，只用于元数据，独立于正文范围。
 - `reference_unit_ids`：完整参考文献区域，包括跨页续接。不能先截断正文再把这个截断文件传给参考文献阶段。
 - `excluded_units=[{unit_id,reason}]`：附录、致谢、版权说明等；仍保留原文，不输入默认正文总结。
@@ -43,16 +44,16 @@ flowchart TD
 | kind | 模型调用的输入 | data 产物 | 归并要求 |
 |---|---|---|---|
 | page（每页／片段一次） | 目标页正文单元、必要相邻上下文 | `page_id, metadata_candidates, summary, open_links` | 候选含 `field,value,fact_ids`；页摘要是 claim 数组；事实留原文定位，不提前做全篇判断 |
-| metadata（一次） | 全部页的候选、正文原文及 metadata_unit_ids | `metadata` | 按原文顺序完整作者、机构与明确对应、日期及类型精度、venue、IDs、资源、原始摘要；冲突不静默覆盖。正式作者行与贡献名单分开，贡献者存 contributors。references 先为空 |
+| metadata（独立一次） | 已声明的 metadata_source_unit_ids，默认前置信息与摘要 | `metadata` | 按原文顺序完整作者、机构与明确对应、日期及类型精度、venue、IDs、资源、原始摘要；冲突不静默覆盖。正式作者行与贡献名单分开，贡献者存 contributors。references 先为空 |
 | section（每章一次） | 该章原文、相关页事实及跨页续接信息 | `section_id,title,summary,open_questions` | summary 为 claim 数组，保留机制与实验条件；不能只拼接页摘要 |
 | understanding（一次） | 全部章节结果、正文事实库、可回查正文及元数据 | `understanding` | 八字段、问题签名、相关工作差分；核心贡献、关键结果与限制不能在逐层压缩中丢失 |
-| assessment（一次） | 正文理解与事实、可选外部证据 | `assessments, assessment_summary` | 十维逐项有依据、边界和缺口；形成阅读层级，不把作者自称创新或会议录用当质量真值 |
-| reading（一次，可内部细分） | 理解、判断及同一证据库 | `recommendations,reuse_cards,insight_rules,glossary,display,content_products` | 生成摘要、深度解读、首页摘要与贡献亮点；理由选择有依据的角度，内容具体、去重、紧凑 |
+| assessment（与深读并行） | 整篇理解、事实、可选外部证据；按需回查原文 | `assessments, assessment_summary, recommendations` | 十维逐项有依据、边界和缺口；形成阅读层级，不把作者自称创新或会议录用当质量真值 |
+| reading（与评估并行） | 整篇理解和同一证据库；按需回查原文 | `reuse_cards,insight_rules,glossary,display,content_products`；`recommendations` 留空 | 生成摘要、深度解读、首页摘要与贡献亮点；推荐理由由 assessment 产生，在交付时合并 |
 | references（独立一次或分批归并） | 全部 reference 单元及续接上下文 | `references,unparsed_segments,excluded_segments` | 每个可见引文出现保留为独立条目，跨页不重复；完整保留原始引文，未知字段留空 |
 
 每个阶段的 evidence、facts 可以新增或复用既有 ID；同 ID 必须完全同值。引用上游事实不必重复复制定义。`source_unit_ids` 是本阶段覆盖的原始单元，`context_unit_ids` 是仅供衔接的单元。page 的事实至少关联一个目标单元；仅来自邻页的事实交回所属页。
 
-正文理解与章节总结使用正文证据。参考文献条目能证明“本文列出了这篇文献”，不能单独证明前作的方法、效果或本文的创新。需要独立前作比较时使用明确的 prior_work 输入。附录补充证据需由明确的扩展范围任务处理，不能偷偷改变默认正文范围。
+正文理解与章节总结使用正文证据。参考文献条目能证明“本文列出了这篇文献”，不能单独证明前作的方法、效果或本文的创新。需要独立前作比较时使用明确的 prior_work 输入。附录补充证据由带理由的范围扩展处理，派生清单保留已读与未读单元；不能把未读理解为论文未报告。
 
 ## 阶段文件与清单
 
@@ -133,3 +134,5 @@ python3 scripts/run_workflow.py --input input.json --manifest manifest.json --ou
 失败只重跑对应阶段及依赖它的下游。元数据与参考文献可独立修复；页事实变化需重新判定涉及的章节、正文理解、评估和阅读内容是否失效。缓存需比对输入指纹、范围清单、上游产物指纹和 producer；合并器只验证当前输入身份与阶段文件，不替代缓存调度器。
 
 输入缺失或阶段 partial 时仍能交付带缺口的统一记录，不能填造未知事实。所有阶段有结果并通过校验也只代表流程与结构完整；原文是否支持语义、章节要点是否遗漏，仍按[要点评测规程](evaluation.md)单独评估。
+
+当前运行器在 assessment/reading 支持有界 source-read 请求，最多两次，每次 16000 字符；不向模型开放任意工具。校验重试仍限两次内容尝试。推荐理由由 assessment 产生，reading 不依赖 assessment；合并保留各自阶段来源。

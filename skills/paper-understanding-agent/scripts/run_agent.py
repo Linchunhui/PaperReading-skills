@@ -14,13 +14,16 @@ SPECIALISTS = ROOT / "references" / "specialists"
 sys.path.insert(0, str(RUNTIME / "scripts"))
 import run_workflow as workflow
 from vpf_transport import DEFAULT_ENDPOINT, DEFAULT_MODEL, VPFTransport
+from task_profiles import project, default_stages, repair_plan
+from evidence_bundle import from_run
+import stage_cache
 
 SUMMARY = ("paper-structured-summary", "references/fields.md")
 ROLES = {
     "page": ("paper-page-extract",),
     "metadata": ("paper-metadata", "references/fields.md"),
-    "section": SUMMARY,
-    "understanding": SUMMARY,
+    "section": SUMMARY + ("references/section-task.md",),
+    "understanding": SUMMARY + ("references/global-task.md",),
     "assessment": ("paper-value-assessment", "references/dimensions.md"),
     "reading": ("paper-brief", "references/content-products.md", "references/rough-read.md"),
     "references": ("paper-reference-extract",),
@@ -35,11 +38,15 @@ GUIDANCE = {
     "section": "Explain this section within its assigned original units. Use the section contract for the response.",
     "assessment": (
         "Use indented JSON and close the assessment_summary, data and root objects separately. "
-        "When repairing a JSON syntax error, construct the JSON anew and retain the valid claims."
+        "When repairing a JSON syntax error, construct the JSON anew and retain the valid claims. "
+        "Generate supported recommendation reasons in data.recommendations after the assessments; return [] if unwarranted. "
+        "The independent reading branch will be joined deterministically at delivery."
     ),
     "reading": (
         "Explain why a metric was chosen when it affects interpretation. Keep attribution of reused "
-        "benchmark results. Select display highlight IDs only from the upstream understanding items."
+        "benchmark results. Select display highlight IDs only from the upstream understanding items. "
+        "Run independently from assessment. Return recommendations=[] and display.recommendation_ids=[]. "
+        "Do not grade novelty or wait for value judgments; final assembly joins assessment-owned reasons."
     ),
     "references": (
         "Use the predeclared owned reference units regardless of parser format. Preserve raw citation "
@@ -80,7 +87,17 @@ def run_identity(input_data, manifest):
 
 
 class AgentRunner(workflow.Runner):
-    def __init__(self, **kwargs):
+    workflow_digest = staticmethod(workflow.digest)
+    workflow_file_digest = staticmethod(workflow.file_digest)
+    workflow_dump = staticmethod(workflow.dump)
+    workflow_error = workflow.WorkflowError
+
+    def __init__(self, shared_cache=None, repair_issues=None, **kwargs):
+        self.shared_cache = Path(shared_cache).resolve() if shared_cache else None
+        if self.shared_cache and self.shared_cache.is_relative_to(ROOT):
+            raise workflow.WorkflowError("Choose a shared cache directory outside the Skill package")
+        self.repair_issues = repair_issues or []
+        self.forced_stage_ids = set()
         self.profiles = {kind: read_profile(kind) for kind in ROLES}
         self.adapter_sha = workflow.file_digest(Path(__file__))
         super().__init__(skill_root=RUNTIME, **kwargs)
@@ -119,6 +136,9 @@ class AgentRunner(workflow.Runner):
             + GUIDANCE.get(spec.kind, "") + "\n"
             + workflow.canonical(profile["documents"])
         )
+        issues = [i for i in self.repair_issues if i.get("stage_id") == spec.stage_id]
+        if issues:
+            specialist += "\nREVIEW FINDINGS TO RESOLVE (verify against sources; retain unresolved gaps):\n" + workflow.canonical(issues)
         return base[:start] + specialist + base[end:]
 
     def header(self, spec, call_ids):
@@ -130,19 +150,54 @@ class AgentRunner(workflow.Runner):
         return header
 
     def key(self, spec, prompt):
-        key = super().key(spec, prompt)
-        key["agent_adapter_sha256"] = self.adapter_sha
-        key["specialist_sha256"] = self.profiles[spec.kind]["sha256"]
-        return key
+        # Include every scoped original unit, including material available via on-demand reads.
+        # Unrelated papers/ranges, output paths and concurrency do not invalidate this stage.
+        return {"cache_version": 2, "paper_id": self.paper["paper_id"], "document_version_id": self.paper["document_version_id"],
+                "source_sha256": workflow.digest([self.units[u] for u in spec.source_unit_ids + spec.context_unit_ids]),
+                "runner_sha256": self.runner_sha, "adapter_sha256": self.adapter_sha,
+                "schema_sha256": workflow.digest(workflow.schema_for_payload(self.schema, spec.kind, spec.group)),
+                "specialist_sha256": self.profiles[spec.kind]["sha256"],
+                "model": self.settings["model"], "execution_mode": self.settings["execution_mode"],
+                "generation": {k: v for k, v in self.settings.items() if k in {"reasoning_effort", "vpf"}},
+                "prompt_sha256": workflow.digest(prompt)}
+
+    def cached(self, spec, key, evidence, facts):
+        if spec.stage_id in self.forced_stage_ids:
+            stage_cache.quarantine(self, spec)
+            return None
+        local = super().cached(spec, key, evidence, facts)
+        return local or stage_cache.import_cached(self, spec, key, evidence, facts)
+
+    def execute(self, spec):
+        stage, metadata = super().execute(spec)
+        stage_cache.export_cached(self, spec, stage, metadata)
+        return stage, metadata
+
+
+def task_input(args):
+    return project(workflow.load(args.input), workflow.load(args.manifest), args.mode,
+                   args.unit_id, args.appendix_unit_id, args.request_reason)
+
+
+def selected_plan(specs, kinds):
+    if kinds is None:
+        return specs
+    selected = {s.stage_id for s in specs if s.kind in kinds}
+    while True:
+        previous = set(selected)
+        selected.update(d for s in specs if s.stage_id in selected for d in s.dependencies)
+        if previous == selected:
+            return [s for s in specs if s.stage_id in selected]
 
 
 def show_plan(args):
-    input_data, manifest = workflow.load(args.input), workflow.load(args.manifest)
+    input_data, manifest = task_input(args)
     schema = workflow.load(RUNTIME / "references" / "workflow-output.schema.json")
     workflow.validate_plan(input_data, manifest, schema, workflow.validator_class(RUNTIME))
     units = {unit["unit_id"]: unit for unit in input_data["papers"][0]["units"]}
     specs = specialist_schedule(workflow.plan_stages(manifest["scope"], units, manifest, args.context_chars))
-    return {"ok": True, "identity": run_identity(input_data, manifest),
+    specs = selected_plan(specs, args.stage or default_stages(args.mode))
+    return {"ok": True, "identity": run_identity(input_data, manifest), "task": manifest["task"],
             "stages": [{**spec.as_dict(), "specialist": ROLES[spec.kind][0]} for spec in specs]}
 
 
@@ -156,12 +211,17 @@ def run(args):
             fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
         except BlockingIOError as exc:
             raise workflow.WorkflowError("This output directory is in use by another Agent run") from exc
-        identity = run_identity(workflow.load(args.input), workflow.load(args.manifest))
+        input_data, manifest = task_input(args)
+        identity = run_identity(input_data, manifest)
         saved = out / "runner-plan.json"
         if saved.is_file():
             owner = workflow.load(saved).get("agent", {})
             if owner.get("name") != ROOT.name or owner.get("identity") != identity:
                 raise workflow.WorkflowError("Use a new output directory for a different paper, scope or runner")
+        derived = out / "task-input"
+        workflow.dump(derived / "input.json", input_data)
+        workflow.dump(derived / "manifest.json", manifest)
+        issues = workflow.load(args.repair_file).get("issues", []) if args.repair_file else []
         mode = "vpf" if args.vpf_service_name else "codex"
         model = args.model or (DEFAULT_MODEL if mode == "vpf" else "gpt-5.6-sol")
         concurrency = args.concurrency if args.concurrency is not None else (1 if mode == "vpf" else 3)
@@ -169,11 +229,38 @@ def run(args):
                                  caller_name=args.vpf_caller or "", model=model, timeout=args.timeout,
                                  generation_timeout=args.vpf_generation_timeout, max_tokens=args.vpf_max_tokens
                                  ) if mode == "vpf" else None
-        runner = AgentRunner(input_path=args.input, manifest_path=args.manifest, out=out, model=model,
+        runner = AgentRunner(input_path=derived / "input.json", manifest_path=derived / "manifest.json", out=out, model=model,
+                             shared_cache=args.cache_dir, repair_issues=issues,
                              reasoning_effort=args.reasoning_effort, concurrency=concurrency,
                              codex_bin=args.codex_bin, timeout=args.timeout, context_chars=args.context_chars,
                              execution_mode=mode, transport=transport)
-        report = runner.run(stages=args.stage, stage_ids=args.stage_id, through=args.through)
+        if issues:
+            history_path = out / "repair-history.json"
+            history = workflow.load(history_path) if history_path.exists() else {}
+            repair = repair_plan(runner.specs, issues, counts=history)
+            workflow.dump(out / "repair-plan.json", repair)
+            blocked = repair["pending"] + [r for r in repair["routes"] if r["action"] != "rerun_stage"]
+            if blocked:
+                previous = out / "runner-report.json"
+                if previous.exists():
+                    report = workflow.load(previous)
+                    report.update(ok=False, outputs={}, pending_repairs=blocked)
+                    workflow.dump(previous, report)
+                return {"ok": False, "pending": blocked, "repair_plan": str(out / "repair-plan.json")}
+            runner.forced_stage_ids = set(repair["rerun_stage_ids"])
+            for issue in issues:
+                history[issue["issue_id"]] = history.get(issue["issue_id"], 0) + 1
+            workflow.dump(history_path, history)
+        explicit_selection = bool(args.stage or args.stage_id or args.through)
+        stages = args.stage if explicit_selection else default_stages(args.mode)
+        report = runner.run(stages=stages, stage_ids=args.stage_id, through=args.through)
+        if report["ok"]:
+            bundle = from_run(out)
+            workflow.dump(out / "evidence-bundle.json", bundle)
+            report["outputs"]["evidence_bundle"] = "evidence-bundle.json"
+            report["task"] = manifest["task"]
+            report["semantic_review_pending"] = len(bundle["verification"]["review_queue"])
+            workflow.dump(out / "runner-report.json", report)
         return {"ok": report["ok"], "report": str(out / "runner-report.json"),
                 "outputs": report["outputs"], "backend": mode,
                 "model_turns_this_run": report[f"actual_completed_{mode}_turns_this_run"]}
@@ -183,6 +270,12 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--input", required=True, type=Path, help="Canonical JSON containing one parsed paper")
     parser.add_argument("--manifest", required=True, type=Path, help="Reviewed source scope, page groups and chapter groups")
+    parser.add_argument("--mode", choices=("screen", "evidence", "full"), default="full")
+    parser.add_argument("--unit-id", action="append", default=[], help="Explicit body probe/extraction units")
+    parser.add_argument("--appendix-unit-id", action="append", default=[], help="Activate declared appendix evidence")
+    parser.add_argument("--request-reason", help="Evidence gap requiring appendix activation")
+    parser.add_argument("--cache-dir", type=Path, help="Optional shared stage cache across task directories")
+    parser.add_argument("--repair-file", type=Path, help="Reviewed issues; bounded local reruns and downstream invalidation")
     parser.add_argument("--out", type=Path, help="One output directory per paper and input scope")
     parser.add_argument("--plan-only", action="store_true", help="Validate and print dependencies without model calls")
     parser.add_argument("--model", help="Expected model. Defaults to Codex or the Qwen model in the VPF deployment.")
