@@ -16,6 +16,7 @@ research.json 契约为 `schema_version="topic-research/1"`：
 | gaps | `{gap_id,question,reason,priority,status}`；priority 越小越先处理，status 为 open/pending/resolved |
 | search_budget | `{max_rounds,max_queries}`，停止不表示覆盖穷尽 |
 | search_history | 实际查询数组，每项含 round_id、query，并记录时间、gap_id、响应来源与执行状态 |
+| search_rounds | 可选数组。每轮保存 round_id、status、known_work_ids_before、retrieved_work_ids、effective_admission_ids、changed_coverage、运行记录路径和仍待核线索 |
 
 paper_key 由单篇证据包给出，绑定 paper_id + document_version_id；不能拿新版论文覆盖旧版事实。paper_key 可被多个分支的不同展示 id 引用。旧串讲提供问题骨架和讲解素材；只有版本和证据可回查的部分才能升级为本轮事实。
 
@@ -50,6 +51,6 @@ python scripts/build_topic.py topic.json report.html --research research.json --
 python scripts/topic_handoff.py gaps --research research.json --output search-next.json
 ```
 
-只为 open 缺口提出新查询，排除已执行的同文查询，受剩余轮次与查询数限制。local 模式不生成公开检索任务。当前会话执行 GPT Researcher、阅读实际结果，更新 search_history、候选与 gap 状态，再运行 screen/evidence；脚本不会自行搜索或运行无人值守 Agent。GPT Researcher 内部展开的实际查询也计入预算，失败的已发出查询同样记录。没有新增有效候选或缺口已可说明时停止，并把未覆盖分支写入报告。
+只为 open 缺口提出新查询，排除已执行的同文查询，受剩余轮次与查询数限制。local 模式不生成公开检索任务。现有调研的查询作为基线记录，新预算的查询写入 search_history。当前会话执行 GPT Researcher，使用 screen/evidence 核对候选，再更新 search_history、search_rounds、候选与缺口。保留每轮的轮前快照。完成在线检索且筛选已结束后，设置 status 为 `reviewed_live`，用 changed_coverage 布尔值标明是否新增问题分支或修正实质结论。effective_admission_ids 只记录已核验且实际入选的作品。去重 ID 由会话根据源证据统一。脚本计算重复率与停止原因，查询执行仍由会话负责。GPT Researcher 的初始与子查询均计入预算。历史记录没有 search_rounds 时仍可规划。阈值可用 search_budget.duplicate_threshold 和 search_budget.max_effective_admissions_for_saturation 调整。
 
 外部核验先复用已有领域基线，再定向查缺失前作、后续反例或代码资源。分别记录仓库访问、许可证、实现覆盖和实际运行结果；有链接不代表已执行。按截至日期解释后续评价，不能用当前证据假装发表当时已知。

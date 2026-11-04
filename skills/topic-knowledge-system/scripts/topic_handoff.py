@@ -190,22 +190,56 @@ def audit(research, topic, base):
             "scope": "Identities, source spans, current support reviews, bound fields and comparison conditions; no scientific truth guarantee"}
 
 
+def round_progress(search_round, budget):
+    """Summarize a reviewed round using caller-resolved work identities."""
+    retrieved = set(search_round["retrieved_work_ids"])
+    previously_known = set(search_round["known_work_ids_before"])
+    admissions = set(search_round["effective_admission_ids"])
+    if not admissions <= retrieved:
+        raise ValueError("Effective admissions must come from the round's retrieved works")
+    if not isinstance(search_round["changed_coverage"], bool):
+        raise ValueError("changed_coverage must be boolean")
+    duplicates = len(retrieved & previously_known)
+    rate = duplicates / len(retrieved) if retrieved else None
+    saturated = (
+        search_round["status"] == "reviewed_live"
+        and rate is not None
+        and rate >= budget.get("duplicate_threshold", 0.85)
+        and len(admissions) <= budget.get("max_effective_admissions_for_saturation", 1)
+        and not search_round["changed_coverage"]
+    )
+    return {"round_id": search_round["round_id"], "identifiable_works": len(retrieved),
+            "previously_known": duplicates, "duplicate_rate": rate,
+            "effective_admissions": len(admissions), "duplicate_saturation": saturated}
+
+
 def plan_gaps(research):
     budget = research.get("search_budget", {})
     history = research.get("search_history", [])
     rounds = {r["round_id"] for r in history}
     remaining = max(0, int(budget.get("max_queries", 0)) - len(history))
-    can_search = research.get("source_policy") == "web" and len(rounds) < int(budget.get("max_rounds", 0)) and remaining > 0
+    summaries = [round_progress(r, budget) for r in research.get("search_rounds", [])]
+    rounds.update(r["round_id"] for r in summaries)
+    stop_reason = None
+    if research.get("source_policy") != "web":
+        stop_reason = "local_only"
+    elif len(rounds) >= int(budget.get("max_rounds", 0)):
+        stop_reason = "round_budget_exhausted"
+    elif remaining == 0:
+        stop_reason = "query_budget_exhausted"
+    elif summaries and summaries[-1]["duplicate_saturation"]:
+        stop_reason = "duplicate_saturation"
     seen = {r["query"].strip().casefold() for r in history}
     gaps = sorted((g for g in research.get("gaps", []) if g.get("status") == "open"), key=lambda g: g.get("priority", 99))
     tasks = []
     for gap in gaps:
         query = gap.get("question", "").strip()
-        if can_search and query and query.casefold() not in seen and len(tasks) < remaining:
+        if stop_reason is None and query and query.casefold() not in seen and len(tasks) < remaining:
             tasks.append({"gap_id": gap["gap_id"], "query": query, "reason": gap.get("reason", ""), "action": "discover_candidates_then_screen"})
             seen.add(query.casefold())
     return {"tasks": tasks, "remaining_queries": remaining,
-            "stop_reason": None if tasks else ("local_only" if research.get("source_policy") != "web" else "budget_exhausted_or_no_new_gap"),
+            "stop_reason": None if tasks else stop_reason or "no_new_open_gap",
+            "round_progress": summaries,
             "unresolved_gap_ids": [g["gap_id"] for g in gaps], "complete_topic": False}
 
 
