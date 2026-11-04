@@ -1,0 +1,46 @@
+{
+  "schema_version": "1.0",
+  "papers": [
+    {
+      "paper_id": "synthetic-toyindex",
+      "document_version_id": "fixture-v1",
+      "coverage": "full_text",
+      "units": [
+        {
+          "unit_id": "b1",
+          "text": "ToyIndex: Reusing Document Layout for Fast Retrieval (synthetic fixture)\nAna Example [1]; Boreal Group [2]\n[1] Acorn Institute. [2] Boreal Lab.\nPreprint posted: 2026-01.\nAbstract: Repeated document search wastes time encoding unchanged layouts. ToyIndex caches layout features and updates only edited regions to reduce query latency while preserving retrieval quality.",
+          "origin": "parsed_text",
+          "locator": {
+            "section": "Front matter"
+          }
+        },
+        {
+          "unit_id": "b2",
+          "text": "Document retrieval repeatedly encodes unchanged layouts. LiteScan [1] reduces image resolution, but loses small-text details. Our question is whether reusing layout features can reduce repeated-search latency without reducing retrieval quality.",
+          "origin": "parsed_text",
+          "locator": {
+            "section": "Introduction"
+          }
+        },
+        {
+          "unit_id": "b3",
+          "text": "ToyIndex builds a page-layout cache once. When a document changes, a region hash selects changed regions for re-encoding; the retriever combines refreshed regions with cached features. On synthetic MiniDocs v1 test, using one ExampleGPU, batch size 1 and FP16, ToyIndex reaches Recall@10 92.0% with query latency 12 ms; LiteScan reaches Recall@10 89.0% with query latency 20 ms. Latency excludes initial cache construction.",
+          "origin": "parsed_text",
+          "locator": {
+            "section": "Method and experiment"
+          }
+        },
+        {
+          "unit_id": "b4",
+          "text": "The cache assumes stable layout coordinates; large page rearrangements require rebuilding it. Monetary cost is not reported. References: [1] Ivo Sample et al. LiteScan: Low-Resolution Document Retrieval. 2024.",
+          "origin": "parsed_text",
+          "locator": {
+            "section": "Limitations and references"
+          }
+        }
+      ],
+      "assets": []
+    }
+  ],
+  "options": {}
+}

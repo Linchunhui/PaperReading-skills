@@ -1,0 +1,70 @@
+{
+  "title": "GRPO 知识体系（节选）",
+  "subtitle": "从训练瓶颈读到方法改动和实验依据",
+  "scope": "演示如何用同一份数据生成总览图、章内小树和正文。本例仅收录两个问题分支。",
+  "core": {
+    "name": "GRPO",
+    "label": "组相对策略优化",
+    "description": "同题采样多个回答，用组内奖励估计优势。"
+  },
+  "background": [
+    {"name": "PPO", "date": "2017-07-20", "method": "用裁剪代理目标限制策略更新。", "url": "https://arxiv.org/abs/1707.06347"},
+    {"name": "DPO", "date": "2023-05-29", "method": "直接从偏好对优化策略，可作为偏好优化路线参照。", "url": "https://arxiv.org/abs/2305.18290"},
+    {"name": "DeepSeekMath", "date": "2024-02-05", "method": "提出 GRPO，以组内比较估计优势。", "url": "https://arxiv.org/abs/2402.03300"}
+  ],
+  "lineage": "PPO → DeepSeekMath（提出 GRPO）",
+  "branches": [
+    {
+      "id": "signal",
+      "title": "怎样获得有用的训练组？",
+      "label": "有效训练组",
+      "description": "组内奖励全相同时，组内比较无法提供区分度。",
+      "context": ["常见失败有全对或全错两种。这里先比较调整采样后筛选与调整任务起点。"],
+      "case": "设一题四个回答的得分都是零。组内相对奖励没有排序信息。这个算例仅说明组内对比为什么需要有差异的结果。",
+      "papers": [
+        {
+          "id": "dapo",
+          "name": "DAPO",
+          "date": "2025-03-18",
+          "url": "https://arxiv.org/abs/2503.14476",
+          "method": "筛掉全对或全错的组并补采，让训练批次包含有效组。",
+          "steps": ["按题采样并计算组内成功率。", "剔除全同分组，补采直至达到所需的有效组数量。"],
+          "results": [
+            {"conditions": "AIME 2024，Qwen2.5-32B Base，使用表 1 的同一套配置。", "metric": "平均正确率 avg@32", "baseline": "Naive GRPO 30%", "result": "完整 DAPO 50%", "change": "+20 个百分点", "locator": "§4.2 表 1", "url": "https://arxiv.org/pdf/2503.14476v2#page=9"},
+            {"conditions": "同表的逐项累加消融，已有四项改动。", "metric": "平均正确率 avg@32", "baseline": "42%", "result": "再加动态采样后 50%", "change": "+8 个百分点", "locator": "表 1 动态采样行", "url": "https://arxiv.org/pdf/2503.14476v2#page=9"}
+          ],
+          "boundary": "完整 DAPO 的对照包含多项改动。动态采样还有补采样开销。"
+        },
+        {
+          "id": "guide",
+          "name": "Guide-assisted GRPO",
+          "date": "2026-10-14",
+          "url": "https://arxiv.org/html/2610.19349v1",
+          "method": "重放成功轨迹的前缀，让模型从中途续做，增加成败差异的机会。",
+          "steps": ["从已有成功轨迹选取一段可重放的前缀。", "模型接手剩余动作，检查同组结果能否形成学习信号。"],
+          "boundary": "需要可重放的成功前缀。评估时核对是否从任务原始起点出发。"
+        }
+      ],
+      "synthesis": "DAPO 修改哪些组进批次，Guide-assisted GRPO 修改组内轨迹从哪里开始。"
+    },
+    {
+      "id": "update",
+      "title": "怎样约束策略更新？",
+      "label": "更新稳定性",
+      "description": "新旧策略概率比波动大时，更新可能失稳。",
+      "formulas": [{"expression": "s = exp[(1/T) Σₜ log rₜ]", "explain": "s 为长度归一化的序列概率比，rₜ 为第 t 个 token 的概率比，T 为序列长度。"}],
+      "papers": [
+        {
+          "id": "gspo",
+          "name": "GSPO",
+          "date": "2025-07-24",
+          "url": "https://arxiv.org/html/2507.18071v2",
+          "method": "先平均 token 对数概率比，再取指数，按整条序列计算权重。",
+          "steps": ["在每条回答内取 token 对数概率比的均值。", "取指数得到序列权重，按序列粒度裁剪。"],
+          "evidence": [{"text": "图 2 比较了训练期间被裁剪的 token 比例，属于更新行为统计。", "locator": "§5.2 图 2"}]
+        }
+      ]
+    }
+  ],
+  "open_questions": ["补采样与修改任务起点如何在同等计算预算下比较？"]
+}

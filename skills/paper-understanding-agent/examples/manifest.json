@@ -1,0 +1,54 @@
+{
+  "paper_id": "synthetic-cache",
+  "document_version_id": "synthetic-v1",
+  "scope": {
+    "main_unit_ids": [
+      "u1",
+      "u2",
+      "u3",
+      "u4"
+    ],
+    "reference_unit_ids": [],
+    "excluded_units": [],
+    "external_unit_ids": [],
+    "unresolved_units": [],
+    "pages": [
+      {
+        "page_id": "logical-1",
+        "unit_ids": [
+          "u1",
+          "u2"
+        ]
+      },
+      {
+        "page_id": "logical-2",
+        "unit_ids": [
+          "u3",
+          "u4"
+        ]
+      }
+    ],
+    "sections": [
+      {
+        "section_id": "intro",
+        "title": "Synthetic introduction",
+        "unit_ids": [
+          "u1",
+          "u2"
+        ]
+      },
+      {
+        "section_id": "results",
+        "title": "Synthetic results and limits",
+        "unit_ids": [
+          "u3",
+          "u4"
+        ]
+      }
+    ],
+    "original_abstract_spans": [],
+    "boundary_notes": [
+      "Synthetic test fixture; no actual page numbers or bibliography are available."
+    ]
+  }
+}

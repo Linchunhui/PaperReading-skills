@@ -1,0 +1,495 @@
+{
+  "schema_version": "1.0",
+  "skill": "paper-understanding",
+  "papers": [
+    {
+      "paper_id": "synthetic-cache",
+      "document_version_id": "synthetic-v1",
+      "coverage": "partial",
+      "processing_status": "partial",
+      "profile": "standard",
+      "metadata": {
+        "title": "Synthetic Local Cache",
+        "authors": [
+          {
+            "author_id": "a1",
+            "name": "Demo Team",
+            "affiliation_ids": []
+          }
+        ],
+        "affiliations": [],
+        "dates": [],
+        "venue": null,
+        "identifiers": [],
+        "resources": [
+          {
+            "resource_id": "code",
+            "kind": "code",
+            "url": null,
+            "status": "planned",
+            "description": "代码计划发表后发布",
+            "fact_ids": [
+              "f6"
+            ]
+          }
+        ],
+        "references": [],
+        "references_scope": "relevant",
+        "original_abstract": null,
+        "fact_ids": [
+          "f1"
+        ]
+      },
+      "evidence": [
+        {
+          "evidence_id": "e1",
+          "unit_id": "u1",
+          "quote": "Synthetic Local Cache. Author: Demo Team. This is a synthetic example, not a real paper."
+        },
+        {
+          "evidence_id": "e2",
+          "unit_id": "u2",
+          "quote": "We address repeated queries over the same documents. Store the last query results keyed by document ID; reuse only if the document version is unchanged."
+        },
+        {
+          "evidence_id": "e3",
+          "unit_id": "u3",
+          "quote": "On ToySet test, the same model, requests, CPU and memory limit are used. Baseline median latency is 20 ms; ours is 12 ms. Accuracy is unchanged. No repeated-run or significance results are supplied here."
+        },
+        {
+          "evidence_id": "e4",
+          "unit_id": "u4",
+          "quote": "Independent queries are not evaluated. We plan to release code after publication; no repository link is supplied."
+        }
+      ],
+      "facts": [
+        {
+          "fact_id": "f1",
+          "kind": "metadata",
+          "text": "合成论文标题为Synthetic Local Cache，作者为Demo Team。",
+          "evidence_ids": [
+            "e1"
+          ],
+          "observation": null
+        },
+        {
+          "fact_id": "f2",
+          "kind": "method",
+          "text": "按文档ID缓存上次查询结果；文档版本未变才复用。",
+          "evidence_ids": [
+            "e2"
+          ],
+          "observation": null
+        },
+        {
+          "fact_id": "f3",
+          "kind": "reported_result",
+          "text": "ToySet test基线中位延迟20ms。",
+          "evidence_ids": [
+            "e3"
+          ],
+          "observation": {
+            "subject": "baseline",
+            "role": "baseline",
+            "task": "重复文档查询",
+            "dataset": "ToySet",
+            "split": "test",
+            "metric": "median latency",
+            "value": 20,
+            "raw_value": "20 ms",
+            "unit": "ms",
+            "direction": "lower",
+            "conditions": [
+              {
+                "name": "comparison",
+                "value": "same model, requests, CPU and memory limit"
+              }
+            ]
+          }
+        },
+        {
+          "fact_id": "f4",
+          "kind": "reported_result",
+          "text": "相同设置下本文中位延迟12ms，准确率未变。",
+          "evidence_ids": [
+            "e3"
+          ],
+          "observation": {
+            "subject": "cache",
+            "role": "ours",
+            "task": "重复文档查询",
+            "dataset": "ToySet",
+            "split": "test",
+            "metric": "median latency",
+            "value": 12,
+            "raw_value": "12 ms",
+            "unit": "ms",
+            "direction": "lower",
+            "conditions": [
+              {
+                "name": "comparison",
+                "value": "same model, requests, CPU and memory limit"
+              }
+            ]
+          }
+        },
+        {
+          "fact_id": "f5",
+          "kind": "limitation",
+          "text": "未提供重复实验和显著性结果；独立查询未测试。",
+          "evidence_ids": [
+            "e3",
+            "e4"
+          ],
+          "observation": null
+        },
+        {
+          "fact_id": "f6",
+          "kind": "resource_statement",
+          "text": "代码计划在发表后提供，目前没有仓库链接。",
+          "evidence_ids": [
+            "e4"
+          ],
+          "observation": null
+        }
+      ],
+      "understanding": {
+        "background": [
+          {
+            "item_id": "b1",
+            "text": "重复文档查询会重复计算已有结果。",
+            "basis": "inference",
+            "fact_ids": [
+              "f2"
+            ]
+          }
+        ],
+        "direction": [
+          {
+            "item_id": "d1",
+            "text": "文档查询结果缓存。",
+            "basis": "paraphrase",
+            "fact_ids": [
+              "f2"
+            ]
+          }
+        ],
+        "problem": [
+          {
+            "item_id": "p1",
+            "text": "同一文档的重复查询仍要重新计算。",
+            "basis": "paraphrase",
+            "fact_ids": [
+              "f2"
+            ]
+          }
+        ],
+        "approach": [
+          {
+            "item_id": "a1",
+            "text": "复用未变文档对应的历史结果。",
+            "basis": "paraphrase",
+            "fact_ids": [
+              "f2"
+            ]
+          }
+        ],
+        "methods": [
+          {
+            "item_id": "m1",
+            "text": "以文档ID保存查询结果，版本未变才返回缓存。",
+            "basis": "paraphrase",
+            "fact_ids": [
+              "f2"
+            ]
+          }
+        ],
+        "summary": [
+          {
+            "item_id": "s1",
+            "text": "版本检查约束下复用缓存，在ToySet test将中位延迟20ms降到12ms；独立查询仍待测试。",
+            "basis": "paraphrase",
+            "fact_ids": [
+              "f2",
+              "f3",
+              "f4",
+              "f5"
+            ]
+          }
+        ],
+        "results": [
+          {
+            "item_id": "r1",
+            "text": "同模型、请求、CPU和内存设置下，中位延迟由20ms降为12ms（减少40%），准确率未变。",
+            "basis": "inference",
+            "fact_ids": [
+              "f3",
+              "f4"
+            ]
+          }
+        ],
+        "reported_limitations": [
+          {
+            "item_id": "l1",
+            "text": "未测试独立查询，也未提供重复实验或显著性结果。",
+            "basis": "paraphrase",
+            "fact_ids": [
+              "f5"
+            ]
+          }
+        ],
+        "problem_signatures": [
+          {
+            "signature_id": "sig1",
+            "problem_item_ids": [
+              "p1"
+            ],
+            "objective": "降低重复查询时延",
+            "input": "文档与查询",
+            "output": "查询结果",
+            "bottleneck": "重复计算",
+            "constraints": [
+              "文档版本未变"
+            ],
+            "fact_ids": [
+              "f2"
+            ]
+          }
+        ],
+        "related_work": []
+      },
+      "assessments": [
+        {
+          "dimension_id": "B1",
+          "grade": null,
+          "status": "insufficient",
+          "judgment": "没有具体前作比较，无法独立判创新程度。",
+          "supporting_fact_ids": [],
+          "counter_fact_ids": [],
+          "conditions": [
+            "合成短材料中的局部判断"
+          ],
+          "missing_evidence": [
+            "原始完整论文、前作和执行日志"
+          ]
+        },
+        {
+          "dimension_id": "B2",
+          "grade": "moderate",
+          "status": "preliminary",
+          "judgment": "重复文档查询存在具体用途，外部影响范围未测。",
+          "supporting_fact_ids": [
+            "f2"
+          ],
+          "counter_fact_ids": [],
+          "conditions": [
+            "合成短材料中的局部判断"
+          ],
+          "missing_evidence": [
+            "原始完整论文、前作和执行日志"
+          ]
+        },
+        {
+          "dimension_id": "B3",
+          "grade": "moderate",
+          "status": "supported",
+          "judgment": "给定设置下中位延迟减少40%，尚无重复实验。",
+          "supporting_fact_ids": [
+            "f3",
+            "f4",
+            "f5"
+          ],
+          "counter_fact_ids": [],
+          "conditions": [
+            "合成短材料中的局部判断"
+          ],
+          "missing_evidence": [
+            "原始完整论文、前作和执行日志"
+          ]
+        },
+        {
+          "dimension_id": "V1",
+          "grade": "moderate",
+          "status": "preliminary",
+          "judgment": "可借鉴带文档版本检查的缓存键设计，需测失效行为。",
+          "supporting_fact_ids": [
+            "f2"
+          ],
+          "counter_fact_ids": [],
+          "conditions": [
+            "合成短材料中的局部判断"
+          ],
+          "missing_evidence": [
+            "原始完整论文、前作和执行日志"
+          ]
+        },
+        {
+          "dimension_id": "Q1",
+          "grade": "moderate",
+          "status": "preliminary",
+          "judgment": "缓存复用条件可理解，未提供执行验证。",
+          "supporting_fact_ids": [
+            "f2"
+          ],
+          "counter_fact_ids": [],
+          "conditions": [
+            "合成短材料中的局部判断"
+          ],
+          "missing_evidence": [
+            "原始完整论文、前作和执行日志"
+          ]
+        },
+        {
+          "dimension_id": "Q2",
+          "grade": "moderate",
+          "status": "preliminary",
+          "judgment": "有局部结果，重复实验和独立查询支持缺失。",
+          "supporting_fact_ids": [
+            "f3",
+            "f4",
+            "f5"
+          ],
+          "counter_fact_ids": [],
+          "conditions": [
+            "合成短材料中的局部判断"
+          ],
+          "missing_evidence": [
+            "原始完整论文、前作和执行日志"
+          ]
+        },
+        {
+          "dimension_id": "Q3",
+          "grade": "moderate",
+          "status": "supported",
+          "judgment": "报告同模型、请求与资源限制，比较只覆盖ToySet test。",
+          "supporting_fact_ids": [
+            "f3",
+            "f4"
+          ],
+          "counter_fact_ids": [],
+          "conditions": [
+            "合成短材料中的局部判断"
+          ],
+          "missing_evidence": [
+            "原始完整论文、前作和执行日志"
+          ]
+        },
+        {
+          "dimension_id": "Q4",
+          "grade": "moderate",
+          "status": "preliminary",
+          "judgment": "独立查询未测试，不能外推泛化。",
+          "supporting_fact_ids": [
+            "f5"
+          ],
+          "counter_fact_ids": [],
+          "conditions": [
+            "合成短材料中的局部判断"
+          ],
+          "missing_evidence": [
+            "原始完整论文、前作和执行日志"
+          ]
+        },
+        {
+          "dimension_id": "Q5",
+          "grade": "moderate",
+          "status": "supported",
+          "judgment": "代码仅为计划，无访问或执行记录。",
+          "supporting_fact_ids": [
+            "f6"
+          ],
+          "counter_fact_ids": [],
+          "conditions": [
+            "合成短材料中的局部判断"
+          ],
+          "missing_evidence": [
+            "原始完整论文、前作和执行日志"
+          ]
+        },
+        {
+          "dimension_id": "Q6",
+          "grade": "moderate",
+          "status": "supported",
+          "judgment": "报告了版本复用条件及已知未测范围。",
+          "supporting_fact_ids": [
+            "f2",
+            "f5"
+          ],
+          "counter_fact_ids": [],
+          "conditions": [
+            "合成短材料中的局部判断"
+          ],
+          "missing_evidence": [
+            "原始完整论文、前作和执行日志"
+          ]
+        }
+      ],
+      "recommendations": [
+        {
+          "reason_id": "rec1",
+          "angle": "value",
+          "label": "缓存条件可借鉴",
+          "text": "文档ID与版本校验结合，可作为重复查询缓存的设计参考。",
+          "basis": "grounded_inference",
+          "assessment_refs": [
+            "V1"
+          ],
+          "fact_ids": [
+            "f2"
+          ],
+          "scope": "重复文档查询",
+          "caveat": "迁移效果未验证。"
+        }
+      ],
+      "reuse_cards": [
+        {
+          "reuse_id": "reuse1",
+          "component": "文档版本约束的缓存键",
+          "prerequisites": [
+            "可检测文档版本变化"
+          ],
+          "steps": [
+            "以文档ID保存结果",
+            "复用前检查版本"
+          ],
+          "minimal_check": "分别测试未变、更改及独立查询，测时延和结果正确性。",
+          "verification_status": "proposed_unrun",
+          "fact_ids": [
+            "f2",
+            "f5"
+          ]
+        }
+      ],
+      "insight_rules": [],
+      "glossary": [],
+      "display": {
+        "one_liner": {
+          "text": "合成示例：通过版本检查约束查询结果复用。",
+          "basis": "paraphrase",
+          "fact_ids": [
+            "f2"
+          ]
+        },
+        "highlight_item_ids": [
+          "p1",
+          "m1",
+          "r1",
+          "l1"
+        ],
+        "recommendation_ids": [
+          "rec1"
+        ]
+      },
+      "missing_information": [
+        {
+          "path": "/metadata/original_abstract",
+          "reason": "not_requested",
+          "detail": "standard仅生成摘要，不复制原摘要。"
+        }
+      ],
+      "limitations": [
+        "完整合成材料，不对应真实论文；没有独立执行记录。"
+      ]
+    }
+  ]
+}

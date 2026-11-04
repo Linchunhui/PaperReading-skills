@@ -1,0 +1,564 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Paper value assessment 1.0",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "skill": {
+      "const": "paper-value-assessment"
+    },
+    "papers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "paper_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "document_version_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "processing_status": {
+            "enum": [
+              "complete",
+              "partial"
+            ]
+          },
+          "coverage": {
+            "enum": [
+              "full_text",
+              "partial",
+              "abstract_only",
+              "structured_only",
+              "reviews_only"
+            ]
+          },
+          "coverage_notes": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 0,
+            "uniqueItems": true
+          },
+          "facts": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "fact_id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "kind": {
+                  "enum": [
+                    "author_claim",
+                    "method",
+                    "reported_result",
+                    "limitation",
+                    "resource_statement",
+                    "prior_work",
+                    "review_opinion",
+                    "author_response",
+                    "resource_verification",
+                    "execution_verification",
+                    "upstream_summary"
+                  ]
+                },
+                "field_refs": {
+                  "type": "array",
+                  "items": {
+                    "enum": [
+                      "B1.contribution_claims",
+                      "B1.closest_prior_work",
+                      "B1.mechanism_differences",
+                      "B2.target_bottleneck",
+                      "B2.importance_evidence",
+                      "B2.affected_scope",
+                      "B3.result_observations",
+                      "B3.comparison_conditions",
+                      "B3.capability_and_tradeoffs",
+                      "V1.reusable_assets",
+                      "V1.reuse_prerequisites",
+                      "V1.demonstrated_reuse",
+                      "Q1.method_and_assumptions",
+                      "Q1.reported_issues",
+                      "Q1.responses_and_checks",
+                      "Q2.claim_evidence_links",
+                      "Q2.controls_and_coverage",
+                      "Q2.missing_support",
+                      "Q3.baseline_selection",
+                      "Q3.protocol_alignment",
+                      "Q3.comparison_confounds",
+                      "Q4.tested_variations",
+                      "Q4.failures_and_constraints",
+                      "Q4.scope_claims",
+                      "Q5.reported_materials",
+                      "Q5.access_and_cost",
+                      "Q5.verification_records",
+                      "Q6.definitions_and_reporting",
+                      "Q6.claim_scope_and_limits",
+                      "Q6.communication_issues"
+                    ]
+                  },
+                  "minItems": 1,
+                  "uniqueItems": true
+                },
+                "statement": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "evidence": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "unit_id": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "quote": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    },
+                    "required": [
+                      "unit_id",
+                      "quote"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "minItems": 1
+                }
+              },
+              "required": [
+                "fact_id",
+                "kind",
+                "field_refs",
+                "statement",
+                "evidence"
+              ],
+              "additionalProperties": false
+            },
+            "minItems": 0
+          },
+          "assessments": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "dimension_id": {
+                  "enum": [
+                    "B1",
+                    "B2",
+                    "B3",
+                    "V1",
+                    "Q1",
+                    "Q2",
+                    "Q3",
+                    "Q4",
+                    "Q5",
+                    "Q6"
+                  ]
+                },
+                "grade": {
+                  "enum": [
+                    "strong",
+                    "moderate",
+                    "weak",
+                    "mixed",
+                    null
+                  ]
+                },
+                "status": {
+                  "enum": [
+                    "supported",
+                    "preliminary",
+                    "disputed",
+                    "insufficient",
+                    "not_applicable"
+                  ]
+                },
+                "scope": {
+                  "enum": [
+                    "paper_evidence",
+                    "review_consensus",
+                    "upstream_summary",
+                    "mixed_sources"
+                  ]
+                },
+                "summary": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "rationale": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "findings": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "field": {
+                        "enum": [
+                          "novelty_delta",
+                          "novelty_level",
+                          "novelty_label",
+                          "problem_significance",
+                          "impact_scope",
+                          "value_label",
+                          "progress_profile",
+                          "magnitude_and_uncertainty",
+                          "progress_label",
+                          "reuse_plan",
+                          "transferability",
+                          "reuse_label",
+                          "technical_assessment",
+                          "issue_severity",
+                          "correctness_label",
+                          "support_matrix",
+                          "critical_gaps",
+                          "evidence_label",
+                          "comparability",
+                          "fairness_gaps",
+                          "comparison_label",
+                          "robustness_scope",
+                          "scope_gap",
+                          "robustness_label",
+                          "reporting_completeness",
+                          "verification_level",
+                          "reproducibility_label",
+                          "clarity_and_completeness",
+                          "claim_calibration",
+                          "reporting_label"
+                        ]
+                      },
+                      "value": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "fact_ids": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "minItems": 0,
+                        "uniqueItems": true
+                      }
+                    },
+                    "required": [
+                      "field",
+                      "value",
+                      "fact_ids"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "minItems": 1
+                },
+                "supporting_fact_ids": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "minItems": 0,
+                  "uniqueItems": true
+                },
+                "counter_fact_ids": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "minItems": 0,
+                  "uniqueItems": true
+                },
+                "conditions": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "minItems": 0,
+                  "uniqueItems": true
+                },
+                "missing_evidence": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "minItems": 0,
+                  "uniqueItems": true
+                }
+              },
+              "required": [
+                "dimension_id",
+                "grade",
+                "status",
+                "scope",
+                "summary",
+                "rationale",
+                "findings",
+                "supporting_fact_ids",
+                "counter_fact_ids",
+                "conditions",
+                "missing_evidence"
+              ],
+              "additionalProperties": false,
+              "allOf": [
+                {
+                  "if": {
+                    "properties": {
+                      "status": {
+                        "enum": [
+                          "insufficient",
+                          "not_applicable"
+                        ]
+                      }
+                    }
+                  },
+                  "then": {
+                    "properties": {
+                      "grade": {
+                        "type": "null"
+                      }
+                    }
+                  },
+                  "else": {
+                    "properties": {
+                      "grade": {
+                        "enum": [
+                          "strong",
+                          "moderate",
+                          "weak",
+                          "mixed"
+                        ]
+                      }
+                    }
+                  }
+                }
+              ]
+            },
+            "minItems": 1
+          },
+          "issues": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "issue_id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "dimension_ids": {
+                  "type": "array",
+                  "items": {
+                    "enum": [
+                      "B1",
+                      "B2",
+                      "B3",
+                      "V1",
+                      "Q1",
+                      "Q2",
+                      "Q3",
+                      "Q4",
+                      "Q5",
+                      "Q6"
+                    ]
+                  },
+                  "minItems": 1,
+                  "uniqueItems": true
+                },
+                "description": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "raised_fact_ids": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "minItems": 1,
+                  "uniqueItems": true
+                },
+                "response_fact_ids": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "minItems": 0,
+                  "uniqueItems": true
+                },
+                "followup_fact_ids": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "minItems": 0,
+                  "uniqueItems": true
+                },
+                "resolution": {
+                  "enum": [
+                    "unresolved",
+                    "author_responded",
+                    "reviewer_acknowledged",
+                    "independently_verified"
+                  ]
+                }
+              },
+              "required": [
+                "issue_id",
+                "dimension_ids",
+                "description",
+                "raised_fact_ids",
+                "response_fact_ids",
+                "followup_fact_ids",
+                "resolution"
+              ],
+              "additionalProperties": false
+            },
+            "minItems": 0
+          },
+          "synthesis": {
+            "type": "object",
+            "properties": {
+              "breakthrough": {
+                "type": "object",
+                "properties": {
+                  "label": {
+                    "enum": [
+                      "strong_candidate",
+                      "incremental_progress",
+                      "no_supported_breakthrough",
+                      "insufficient_evidence",
+                      "not_assessed"
+                    ]
+                  },
+                  "assessment_refs": {
+                    "type": "array",
+                    "items": {
+                      "enum": [
+                        "B1",
+                        "B2",
+                        "B3",
+                        "V1",
+                        "Q1",
+                        "Q2",
+                        "Q3",
+                        "Q4",
+                        "Q5",
+                        "Q6"
+                      ]
+                    },
+                    "minItems": 0,
+                    "uniqueItems": true
+                  },
+                  "rationale": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "label",
+                  "assessment_refs",
+                  "rationale"
+                ],
+                "additionalProperties": false
+              },
+              "value_summary": {
+                "type": "string",
+                "minLength": 1
+              },
+              "reliability_summary": {
+                "type": "string",
+                "minLength": 1
+              },
+              "reading_tier": {
+                "enum": [
+                  "priority_reading_candidate",
+                  "targeted_reference",
+                  "high_potential_pending",
+                  "insufficient_material",
+                  "defer_and_review",
+                  "not_assessed"
+                ]
+              },
+              "assessment_refs": {
+                "type": "array",
+                "items": {
+                  "enum": [
+                    "B1",
+                    "B2",
+                    "B3",
+                    "V1",
+                    "Q1",
+                    "Q2",
+                    "Q3",
+                    "Q4",
+                    "Q5",
+                    "Q6"
+                  ]
+                },
+                "minItems": 0,
+                "uniqueItems": true
+              },
+              "rationale": {
+                "type": "string",
+                "minLength": 1
+              },
+              "limitations": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "minItems": 0,
+                "uniqueItems": true
+              }
+            },
+            "required": [
+              "breakthrough",
+              "value_summary",
+              "reliability_summary",
+              "reading_tier",
+              "assessment_refs",
+              "rationale",
+              "limitations"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "paper_id",
+          "document_version_id",
+          "processing_status",
+          "coverage",
+          "coverage_notes",
+          "facts",
+          "assessments",
+          "issues",
+          "synthesis"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 1
+    }
+  },
+  "required": [
+    "schema_version",
+    "skill",
+    "papers"
+  ],
+  "additionalProperties": false
+}

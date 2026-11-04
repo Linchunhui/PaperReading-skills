@@ -1,0 +1,83 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" xml:lang="zh-CN" role="img" aria-labelledby="map-title map-desc">
+<title id="map-title">$title</title>
+<desc id="map-desc">$description</desc>
+<style>
+  :root {
+    --bg: #faf9f4;
+    --bg-grid: #f1f0e9;
+    --mask: #faf9f4;
+    --text: #253630;
+    --text-muted: #495f54;
+    --arrow: #7e9b89;
+    --color-primary-fill: rgba(6,182,212,0.12);
+    --color-primary-stroke: #0891b2;
+    --color-secondary-fill: rgba(5,150,105,0.12);
+    --color-secondary-stroke: #059669;
+    --color-tertiary-fill: rgba(124,58,237,0.12);
+    --color-tertiary-stroke: #7c3aed;
+    --color-accent-fill: rgba(217,119,6,0.12);
+    --color-accent-stroke: #d97706;
+    --color-alert-fill: rgba(225,29,72,0.12);
+    --color-alert-stroke: #e11d48;
+    --color-connector-fill: rgba(234,88,12,0.12);
+    --color-connector-stroke: #ea580c;
+    --color-neutral-fill: rgba(100,116,139,0.12);
+    --color-neutral-stroke: #64748b;
+    --color-highlight-fill: rgba(59,130,246,0.12);
+    --color-highlight-stroke: #3b82f6;
+    --surface: #fffdf8;
+    --line: #d8ddd4;
+    --root-fill: #245647;
+    --root-text: #fffdf3;
+    --root-muted: #e4eee4;
+    --eyebrow: #506f61;
+    --preface: #f0f2e8;
+    --branch-1: #246452;
+    --branch-1-fill: #e8f1e9;
+    --branch-2: #89553d;
+    --branch-2-fill: #f4eae1;
+    --branch-3: #3c6086;
+    --branch-3-fill: #eaf0f6;
+    --branch-4: #735884;
+    --branch-4-fill: #f0eaf2;
+    --branch-5: #775d24;
+    --branch-5-fill: #f3eedc;
+    --branch-6: #526d42;
+    --branch-6-fill: #eaf0e4;
+}
+  svg {display:block;width:100%;max-width:1920px;height:auto;aspect-ratio:1920/1080;margin:0 auto}
+  text {font-family:"JetBrains Mono","Noto Sans SC","PingFang SC","Microsoft YaHei",sans-serif;fill:var(--text)}
+  .title,.root-title {font-family:Georgia,"Songti SC","PingFang SC",serif;font-weight:700}
+  .title {font-size:47px;letter-spacing:-1.3px}
+  .root-title {font-size:35px;fill:var(--root-text)}
+  .root-desc {font-size:15.5px;font-weight:650;fill:var(--root-text)}
+  .root-copy {font-size:13.5px;fill:var(--root-muted)}
+  .eyebrow,.col-label {fill:var(--eyebrow);font-size:14px;font-weight:700;letter-spacing:1.1px}
+  .subtitle {font-size:17px;fill:var(--text-muted)}
+  .stats {font-size:18px;font-weight:650}
+  .foot {font-size:14px;fill:var(--text-muted)}
+  .preface-title {font-size:14px;font-weight:650;fill:var(--eyebrow)}
+  .context-name {font-size:18px;font-weight:700}
+  .context-desc {font-size:14.4px;fill:var(--text-muted)}
+  .date,.index {font:13px "JetBrains Mono","SF Mono",Menlo,monospace;font-variant-numeric:tabular-nums}
+  .date {fill:var(--text-muted)}
+  .index {font-weight:650}
+  .question-title {font-size:20px;font-weight:700}
+  .question-copy {font-size:15.4px;fill:var(--text-muted)}
+  .paper-title {font-size:17.5px;font-weight:700}
+  .paper-copy {font-size:14.8px;fill:var(--text-muted)}
+  .reading-note {font-size:13px;fill:var(--eyebrow)}
+  .separator,.trunk,.branch-wire,.leaf-wire {fill:none;stroke-linecap:round;stroke-linejoin:round}
+  .separator {stroke:var(--line);stroke-width:1}
+  .trunk {stroke:var(--arrow);stroke-width:1.8}
+  .branch-wire,.leaf-wire {stroke-width:1.3;opacity:.82}
+  .paper:hover .paper-title,.paper:focus-visible .paper-title,.context:hover .context-name,.context:focus-visible .context-name {text-decoration:underline}
+  .branch-1 .index,.branch-1 .question-title {fill:var(--branch-1);} .branch-1.branch-wire,.branch-1.leaf-wire {stroke:var(--branch-1);}
+  .branch-2 .index,.branch-2 .question-title {fill:var(--branch-2);} .branch-2.branch-wire,.branch-2.leaf-wire {stroke:var(--branch-2);}
+  .branch-3 .index,.branch-3 .question-title {fill:var(--branch-3);} .branch-3.branch-wire,.branch-3.leaf-wire {stroke:var(--branch-3);}
+  .branch-4 .index,.branch-4 .question-title {fill:var(--branch-4);} .branch-4.branch-wire,.branch-4.leaf-wire {stroke:var(--branch-4);}
+  .branch-5 .index,.branch-5 .question-title {fill:var(--branch-5);} .branch-5.branch-wire,.branch-5.leaf-wire {stroke:var(--branch-5);}
+  .branch-6 .index,.branch-6 .question-title {fill:var(--branch-6);} .branch-6.branch-wire,.branch-6.leaf-wire {stroke:var(--branch-6);}
+</style>
+$content
+</svg>

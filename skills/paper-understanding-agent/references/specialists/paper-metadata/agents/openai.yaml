@@ -1,0 +1,4 @@
+interface:
+  display_name: "Paper Metadata · 论文元数据"
+  short_description: "抽取论文署名、参考文献与评测指标，保留来源和比较条件并说明缺失"
+  default_prompt: "使用 $paper-metadata 将这些解析文本抽取为结构化论文元数据，区分原始摘要、生成总结与带条件的评测结果。"

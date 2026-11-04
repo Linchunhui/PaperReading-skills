@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$defs": {
+    "evidence": {
+      "type": "object",
+      "properties": {
+        "paper_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "document_version_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "unit_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "quote": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "paper_id",
+        "document_version_id",
+        "unit_id",
+        "quote"
+      ],
+      "additionalProperties": false
+    },
+    "evidence_list": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/evidence"
+      },
+      "minItems": 1
+    },
+    "coverage": {
+      "enum": [
+        "full_text",
+        "partial",
+        "abstract_only",
+        "structured_only"
+      ]
+    }
+  }
+}

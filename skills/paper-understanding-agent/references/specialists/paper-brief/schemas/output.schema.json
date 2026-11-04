@@ -1,0 +1,495 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "skill": {
+      "const": "paper-brief"
+    },
+    "papers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "paper_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "document_version_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "coverage": {
+            "$ref": "common.schema.json#/$defs/coverage"
+          },
+          "status": {
+            "enum": [
+              "complete",
+              "partial"
+            ]
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "abstract": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "markdown": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "evidence": {
+                        "$ref": "common.schema.json#/$defs/evidence_list"
+                      }
+                    },
+                    "required": [
+                      "markdown",
+                      "evidence"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "deep_read": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "sections": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "section_id": {
+                              "type": "string",
+                              "minLength": 1
+                            },
+                            "heading": {
+                              "type": "string",
+                              "minLength": 1
+                            },
+                            "markdown": {
+                              "type": "string",
+                              "minLength": 1
+                            },
+                            "evidence": {
+                              "$ref": "common.schema.json#/$defs/evidence_list"
+                            },
+                            "asset_ids": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "minItems": 0
+                            }
+                          },
+                          "required": [
+                            "section_id",
+                            "heading",
+                            "markdown",
+                            "evidence",
+                            "asset_ids"
+                          ],
+                          "additionalProperties": false
+                        },
+                        "minItems": 1
+                      }
+                    },
+                    "required": [
+                      "sections"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "home_digest": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "markdown": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "evidence": {
+                        "$ref": "common.schema.json#/$defs/evidence_list"
+                      }
+                    },
+                    "required": [
+                      "markdown",
+                      "evidence"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "recommendations": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "reason_id": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "type": {
+                      "enum": [
+                        "performance",
+                        "speed",
+                        "cost",
+                        "priority_institution",
+                        "reproducibility",
+                        "resource",
+                        "method_insight",
+                        "practical_relevance"
+                      ]
+                    },
+                    "label": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "explanation": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "basis": {
+                      "enum": [
+                        "author_claim",
+                        "reported_comparison",
+                        "reported_fact",
+                        "user_preference",
+                        "grounded_inference"
+                      ]
+                    },
+                    "scope": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "comparison": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "target": {
+                              "type": "string",
+                              "minLength": 1
+                            },
+                            "baseline": {
+                              "type": "string",
+                              "minLength": 1
+                            },
+                            "metric": {
+                              "type": "string",
+                              "minLength": 1
+                            },
+                            "outcome": {
+                              "type": "string",
+                              "minLength": 1
+                            },
+                            "conditions": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "name": {
+                                    "type": "string",
+                                    "minLength": 1
+                                  },
+                                  "value": {
+                                    "type": [
+                                      "string",
+                                      "null"
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "name",
+                                  "value"
+                                ],
+                                "additionalProperties": false
+                              },
+                              "minItems": 0
+                            }
+                          },
+                          "required": [
+                            "target",
+                            "baseline",
+                            "metric",
+                            "outcome",
+                            "conditions"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "institution_match": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "priority_id": {
+                              "type": "string",
+                              "minLength": 1
+                            },
+                            "affiliation": {
+                              "type": "string",
+                              "minLength": 1
+                            },
+                            "match_basis": {
+                              "type": "string",
+                              "minLength": 1
+                            }
+                          },
+                          "required": [
+                            "priority_id",
+                            "affiliation",
+                            "match_basis"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "evidence": {
+                      "$ref": "common.schema.json#/$defs/evidence_list"
+                    }
+                  },
+                  "required": [
+                    "reason_id",
+                    "type",
+                    "label",
+                    "explanation",
+                    "basis",
+                    "scope",
+                    "comparison",
+                    "institution_match",
+                    "evidence"
+                  ],
+                  "additionalProperties": false,
+                  "allOf": [
+                    {
+                      "if": {
+                        "properties": {
+                          "type": {
+                            "const": "priority_institution"
+                          }
+                        }
+                      },
+                      "then": {
+                        "properties": {
+                          "institution_match": {
+                            "type": "object",
+                            "properties": {
+                              "priority_id": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "affiliation": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "match_basis": {
+                                "type": "string",
+                                "minLength": 1
+                              }
+                            },
+                            "required": [
+                              "priority_id",
+                              "affiliation",
+                              "match_basis"
+                            ],
+                            "additionalProperties": false
+                          },
+                          "basis": {
+                            "const": "user_preference"
+                          }
+                        }
+                      },
+                      "else": {
+                        "properties": {
+                          "institution_match": {
+                            "type": "null"
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "if": {
+                        "properties": {
+                          "basis": {
+                            "const": "reported_comparison"
+                          }
+                        }
+                      },
+                      "then": {
+                        "properties": {
+                          "comparison": {
+                            "type": "object",
+                            "properties": {
+                              "target": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "baseline": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "metric": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "outcome": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "conditions": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "name": {
+                                      "type": "string",
+                                      "minLength": 1
+                                    },
+                                    "value": {
+                                      "type": [
+                                        "string",
+                                        "null"
+                                      ]
+                                    }
+                                  },
+                                  "required": [
+                                    "name",
+                                    "value"
+                                  ],
+                                  "additionalProperties": false
+                                },
+                                "minItems": 0
+                              }
+                            },
+                            "required": [
+                              "target",
+                              "baseline",
+                              "metric",
+                              "outcome",
+                              "conditions"
+                            ],
+                            "additionalProperties": false
+                          }
+                        }
+                      }
+                    }
+                  ]
+                },
+                "minItems": 0
+              },
+              "omitted": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "field": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "reason": {
+                      "enum": [
+                        "not_requested",
+                        "absent_from_input",
+                        "explicitly_unreported",
+                        "conflicting",
+                        "insufficient_evidence"
+                      ]
+                    },
+                    "explanation": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  },
+                  "required": [
+                    "field",
+                    "reason",
+                    "explanation"
+                  ],
+                  "additionalProperties": false
+                },
+                "minItems": 0
+              }
+            },
+            "required": [
+              "abstract",
+              "deep_read",
+              "home_digest",
+              "recommendations",
+              "omitted"
+            ],
+            "additionalProperties": false
+          },
+          "limitations": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 0
+          }
+        },
+        "required": [
+          "paper_id",
+          "document_version_id",
+          "coverage",
+          "status",
+          "data",
+          "limitations"
+        ],
+        "additionalProperties": false,
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "coverage": {
+                  "not": {
+                    "const": "full_text"
+                  }
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "status": {
+                  "const": "partial"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "minItems": 1
+    }
+  },
+  "required": [
+    "schema_version",
+    "skill",
+    "papers"
+  ],
+  "additionalProperties": false
+}

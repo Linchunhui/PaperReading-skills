@@ -1,0 +1,4 @@
+interface:
+  display_name: "论文单页抽取"
+  short_description: "从一页论文正文一次抽取元数据、方法、结果和带原文定位的事实"
+  default_prompt: "用 $paper-page-extract 处理这页参考文献之前的论文正文，返回一份带证据的 JSON。"

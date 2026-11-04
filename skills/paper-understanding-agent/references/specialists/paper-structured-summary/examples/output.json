@@ -1,0 +1,174 @@
+{
+  "schema_version": "1.0",
+  "skill": "paper-structured-summary",
+  "papers": [
+    {
+      "paper_id": "synthetic-toyindex",
+      "document_version_id": "fixture-v1",
+      "coverage": "full_text",
+      "status": "complete",
+      "data": {
+        "background": [
+          {
+            "item_id": "bg1",
+            "text": "重复检索会反复编码没有变化的文档布局，造成多余计算。",
+            "basis": "paraphrase",
+            "evidence": [
+              {
+                "paper_id": "synthetic-toyindex",
+                "document_version_id": "fixture-v1",
+                "unit_id": "b2",
+                "quote": "Document retrieval repeatedly encodes unchanged layouts."
+              }
+            ]
+          }
+        ],
+        "direction": [
+          {
+            "item_id": "d1",
+            "text": "面向重复查询和局部编辑的文档检索加速。",
+            "basis": "paraphrase",
+            "evidence": [
+              {
+                "paper_id": "synthetic-toyindex",
+                "document_version_id": "fixture-v1",
+                "unit_id": "b2",
+                "quote": "Our question is whether reusing layout features can reduce repeated-search latency without reducing retrieval quality."
+              }
+            ]
+          }
+        ],
+        "problem": [
+          {
+            "item_id": "p1",
+            "text": "怎样降低重复检索延迟，同时保留检索质量和小字细节？",
+            "basis": "paraphrase",
+            "evidence": [
+              {
+                "paper_id": "synthetic-toyindex",
+                "document_version_id": "fixture-v1",
+                "unit_id": "b2",
+                "quote": "Document retrieval repeatedly encodes unchanged layouts. LiteScan [1] reduces image resolution, but loses small-text details. Our question is whether reusing layout features can reduce repeated-search latency without reducing retrieval quality."
+              }
+            ]
+          }
+        ],
+        "approach": [
+          {
+            "item_id": "a1",
+            "text": "先保存能复用的布局特征，后续只重算被编辑的区域。",
+            "basis": "paraphrase",
+            "evidence": [
+              {
+                "paper_id": "synthetic-toyindex",
+                "document_version_id": "fixture-v1",
+                "unit_id": "b3",
+                "quote": "ToyIndex builds a page-layout cache once. When a document changes, a region hash selects changed regions for re-encoding; the retriever combines refreshed regions with cached features."
+              }
+            ]
+          }
+        ],
+        "methods": [
+          {
+            "item_id": "m1",
+            "text": "首次建立页面布局缓存；文档发生改动时，用区域哈希定位变化，重编码这些区域，再把新特征与缓存特征一起用于检索。",
+            "basis": "paraphrase",
+            "evidence": [
+              {
+                "paper_id": "synthetic-toyindex",
+                "document_version_id": "fixture-v1",
+                "unit_id": "b3",
+                "quote": "ToyIndex builds a page-layout cache once. When a document changes, a region hash selects changed regions for re-encoding; the retriever combines refreshed regions with cached features."
+              }
+            ]
+          }
+        ],
+        "summary": [
+          {
+            "item_id": "s1",
+            "text": "该方法用增量更新减少重复计算；在所给 MiniDocs 测试中，ToyIndex 的 Recall@10 为 92.0%、查询延迟为 12 ms。结果只覆盖所给设备和测试条件，延迟不含建缓存。",
+            "basis": "paraphrase",
+            "evidence": [
+              {
+                "paper_id": "synthetic-toyindex",
+                "document_version_id": "fixture-v1",
+                "unit_id": "b3",
+                "quote": "ToyIndex builds a page-layout cache once. When a document changes, a region hash selects changed regions for re-encoding; the retriever combines refreshed regions with cached features. On synthetic MiniDocs v1 test, using one ExampleGPU, batch size 1 and FP16, ToyIndex reaches Recall@10 92.0% with query latency 12 ms; LiteScan reaches Recall@10 89.0% with query latency 20 ms. Latency excludes initial cache construction."
+              }
+            ]
+          }
+        ],
+        "problem_signatures": [
+          {
+            "signature_id": "sig1",
+            "problem_item_ids": [
+              "p1"
+            ],
+            "objective": "降低重复文档检索延迟并维持检索质量",
+            "input": "未变化或局部编辑的文档与检索查询",
+            "output": "检索结果",
+            "bottleneck": "重复编码未变化的布局",
+            "constraints": [
+              "需要稳定的布局坐标",
+              "大幅重排页面需要重建缓存"
+            ],
+            "evidence": [
+              {
+                "paper_id": "synthetic-toyindex",
+                "document_version_id": "fixture-v1",
+                "unit_id": "b2",
+                "quote": "Document retrieval repeatedly encodes unchanged layouts. LiteScan [1] reduces image resolution, but loses small-text details. Our question is whether reusing layout features can reduce repeated-search latency without reducing retrieval quality."
+              },
+              {
+                "paper_id": "synthetic-toyindex",
+                "document_version_id": "fixture-v1",
+                "unit_id": "b3",
+                "quote": "ToyIndex builds a page-layout cache once. When a document changes, a region hash selects changed regions for re-encoding; the retriever combines refreshed regions with cached features."
+              },
+              {
+                "paper_id": "synthetic-toyindex",
+                "document_version_id": "fixture-v1",
+                "unit_id": "b4",
+                "quote": "The cache assumes stable layout coordinates; large page rearrangements require rebuilding it."
+              }
+            ]
+          }
+        ],
+        "results": [
+          {
+            "item_id": "r1",
+            "text": "同一 ExampleGPU、batch size 1、FP16、MiniDocs v1 test 条件下：ToyIndex Recall@10 92.0%、延迟 12 ms；LiteScan 为 89.0% 和 20 ms。延迟不含首次缓存构建。",
+            "basis": "paraphrase",
+            "evidence": [
+              {
+                "paper_id": "synthetic-toyindex",
+                "document_version_id": "fixture-v1",
+                "unit_id": "b3",
+                "quote": "MiniDocs v1 test, using one ExampleGPU, batch size 1 and FP16, ToyIndex reaches Recall@10 92.0% with query latency 12 ms; LiteScan reaches Recall@10 89.0% with query latency 20 ms. Latency excludes initial cache construction."
+              }
+            ]
+          }
+        ],
+        "reported_limitations": [
+          {
+            "item_id": "l1",
+            "text": "缓存依赖稳定布局坐标，大规模页面重排需要重建；论文没有报告货币成本。",
+            "basis": "paraphrase",
+            "evidence": [
+              {
+                "paper_id": "synthetic-toyindex",
+                "document_version_id": "fixture-v1",
+                "unit_id": "b4",
+                "quote": "The cache assumes stable layout coordinates; large page rearrangements require rebuilding it. Monetary cost is not reported."
+              }
+            ]
+          }
+        ],
+        "missing_fields": []
+      },
+      "limitations": [
+        "这是 synthetic fixture，不是真实论文；实验结果只支持样例给出的设置。"
+      ]
+    }
+  ]
+}

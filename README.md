@@ -13,6 +13,16 @@
 
 模式改变展开程度，不改变信息底线。导航卡可以短，正文必须能独立读懂。所有篇目同等覆盖，Top picks 只表示阅读顺序。
 
+## 专题研究
+
+| Skill | 负责 | 输出 |
+| --- | --- | --- |
+| [专题知识体系](skills/topic-knowledge-system/SKILL.md) | 以人工材料为种子，按缺口用 GPT Researcher 扩展，筛选后按问题综合论文 | 专题数据、SVG 问题树和离线 HTML |
+| [论文理解 Agent](skills/paper-understanding-agent/SKILL.md) | 复用已有解析，或用 PyMuPDF 提取文本并按需渲染页面。按阶段抽取原摘要、方法和实验依据 | 可追溯的阶段记录或完整论文档案 |
+| [PaperStudio 系列串讲](references/series.md) | 给出共同问题、贯穿算例、方法比较与适用边界。既有串讲也可作为专题的起点 | 系列讲解与可复用的比较线索 |
+
+用 `$topic-knowledge-system` 编排专题，用 `$paper-understanding-agent` 核对单篇或补证据。两个扩展技能可独立安装，安装时保留各自的整个目录。[六步交接](skills/topic-knowledge-system/references/paper-pipeline.md) · [PDF 准备](skills/paper-understanding-agent/references/pdf-input.md)
+
 ## 使用
 
 ```text

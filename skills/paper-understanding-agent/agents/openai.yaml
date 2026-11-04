@@ -1,0 +1,13 @@
+interface:
+  display_name: 论文理解 Agent
+  short_description: 从 PDF 分阶段抽取可核验的论文信息，也可生成完整论文档案
+  default_prompt: 使用 $paper-understanding-agent 从这篇 PDF 或已有解析中抽取摘要、方法和实验证据。
+  icon_small: assets/icon.svg
+  icon_large: assets/icon.svg
+policy:
+  products:
+  - chatgpt
+  - codex
+  - api
+  - atlas
+  allow_implicit_invocation: true

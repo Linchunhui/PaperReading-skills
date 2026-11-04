@@ -1,0 +1,106 @@
+{
+  "schema_version": "1.0",
+  "skill": "paper-value-assessment",
+  "papers": [
+    {
+      "paper_id": "example-review",
+      "document_version_id": "unversioned-input",
+      "processing_status": "partial",
+      "coverage": "reviews_only",
+      "coverage_notes": [
+        "Only a review excerpt; no paper or appendix."
+      ],
+      "facts": [
+        {
+          "fact_id": "f1",
+          "kind": "review_opinion",
+          "field_refs": [
+            "Q2.missing_support"
+          ],
+          "statement": "审稿人认为证据有潜力，但需要同预算消融。",
+          "evidence": [
+            {
+              "unit_id": "u1",
+              "quote": "The evidence is promising, but a matched-budget ablation is needed."
+            }
+          ]
+        }
+      ],
+      "assessments": [
+        {
+          "dimension_id": "Q2",
+          "grade": "mixed",
+          "status": "preliminary",
+          "scope": "review_consensus",
+          "summary": "存在审稿人提出的对照缺口。",
+          "rationale": "只记录该观点，未读取论文，不能确认原文确实缺少消融。",
+          "findings": [
+            {
+              "field": "support_matrix",
+              "value": "审稿人认为有初步潜力但需要同预算消融；正文未取得，无法独立核查。",
+              "fact_ids": [
+                "f1"
+              ]
+            },
+            {
+              "field": "critical_gaps",
+              "value": "审稿人认为有初步潜力但需要同预算消融；正文未取得，无法独立核查。",
+              "fact_ids": [
+                "f1"
+              ]
+            },
+            {
+              "field": "evidence_label",
+              "value": "审稿人认为有初步潜力但需要同预算消融；正文未取得，无法独立核查。",
+              "fact_ids": [
+                "f1"
+              ]
+            }
+          ],
+          "supporting_fact_ids": [
+            "f1"
+          ],
+          "counter_fact_ids": [],
+          "conditions": [
+            "仅评审观点范围。"
+          ],
+          "missing_evidence": [
+            "正文及消融实验。"
+          ]
+        }
+      ],
+      "issues": [
+        {
+          "issue_id": "i1",
+          "dimension_ids": [
+            "Q2"
+          ],
+          "description": "审稿人要求同预算消融，是否已提供未知。",
+          "raised_fact_ids": [
+            "f1"
+          ],
+          "response_fact_ids": [],
+          "followup_fact_ids": [],
+          "resolution": "unresolved"
+        }
+      ],
+      "synthesis": {
+        "breakthrough": {
+          "label": "not_assessed",
+          "assessment_refs": [],
+          "rationale": "未评突破维度。"
+        },
+        "value_summary": "价值未评。",
+        "reliability_summary": "仅有一条主张支持度观点，未独立核查。",
+        "reading_tier": "insufficient_material",
+        "assessment_refs": [
+          "Q2"
+        ],
+        "rationale": "需要论文内容。",
+        "limitations": [
+          "合成示例，不对应真实论文。"
+        ]
+      }
+    }
+  ]
+}

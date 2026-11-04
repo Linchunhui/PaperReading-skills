@@ -1,0 +1,34 @@
+{
+  "schema_version": "1.0",
+  "papers": [
+    {
+      "paper_id": "example-review",
+      "document_version_id": "unversioned-input",
+      "paper_type": [
+        "方法"
+      ],
+      "coverage": "reviews_only",
+      "coverage_notes": [
+        "Only a review excerpt; no paper or appendix."
+      ],
+      "units": [
+        {
+          "unit_id": "u1",
+          "source_type": "review",
+          "source_id": "synthetic-example",
+          "source_version": null,
+          "text": "The evidence is promising, but a matched-budget ablation is needed.",
+          "locator": {
+            "synthetic": true
+          }
+        }
+      ]
+    }
+  ],
+  "options": {
+    "dimension_ids": [
+      "Q2"
+    ],
+    "target_context": null
+  }
+}

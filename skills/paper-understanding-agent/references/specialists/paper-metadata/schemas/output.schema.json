@@ -1,0 +1,641 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "paper-metadata output",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "skill",
+    "papers"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "skill": {
+      "const": "paper-metadata"
+    },
+    "papers": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "paper_id",
+          "document_version_id",
+          "coverage",
+          "status",
+          "data",
+          "limitations"
+        ],
+        "properties": {
+          "paper_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "document_version_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "coverage": {
+            "enum": [
+              "full_text",
+              "partial",
+              "abstract_only",
+              "structured_only"
+            ]
+          },
+          "status": {
+            "enum": [
+              "complete",
+              "partial"
+            ]
+          },
+          "data": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "extracted",
+              "generated",
+              "missing_fields"
+            ],
+            "properties": {
+              "extracted": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "title",
+                  "authors",
+                  "affiliations",
+                  "dates",
+                  "venue",
+                  "abstract_original",
+                  "references",
+                  "benchmark_observations"
+                ],
+                "properties": {
+                  "title": {
+                    "$ref": "#/$defs/source_text"
+                  },
+                  "authors": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/$defs/author"
+                    }
+                  },
+                  "affiliations": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/$defs/affiliation"
+                    }
+                  },
+                  "dates": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/$defs/date"
+                    }
+                  },
+                  "venue": {
+                    "$ref": "#/$defs/source_text"
+                  },
+                  "abstract_original": {
+                    "$ref": "#/$defs/source_text"
+                  },
+                  "references": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/$defs/reference"
+                    }
+                  },
+                  "benchmark_observations": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/$defs/benchmark_observation"
+                    }
+                  }
+                }
+              },
+              "generated": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "related_work",
+                  "research_questions",
+                  "summary"
+                ],
+                "properties": {
+                  "related_work": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/$defs/related_work"
+                    }
+                  },
+                  "research_questions": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/$defs/claim"
+                    }
+                  },
+                  "summary": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/$defs/claim"
+                    }
+                  }
+                }
+              },
+              "missing_fields": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/missing"
+                }
+              }
+            }
+          },
+          "limitations": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "coverage": {
+                  "enum": [
+                    "partial",
+                    "abstract_only",
+                    "structured_only"
+                  ]
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "status": {
+                  "const": "partial"
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  "$defs": {
+    "source_text": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "text",
+        "evidence"
+      ],
+      "properties": {
+        "text": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "$ref": "common.schema.json#/$defs/evidence"
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "text": {
+                "type": "null"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "evidence": {
+                "maxItems": 0
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "evidence": {
+                "minItems": 1
+              }
+            }
+          }
+        }
+      ]
+    },
+    "author": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "author_id",
+        "name",
+        "kind",
+        "affiliation_ids",
+        "evidence"
+      ],
+      "properties": {
+        "author_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "kind": {
+          "enum": [
+            "person",
+            "collective",
+            "unknown"
+          ]
+        },
+        "affiliation_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "evidence": {
+          "$ref": "common.schema.json#/$defs/evidence_list"
+        }
+      }
+    },
+    "affiliation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "affiliation_id",
+        "name",
+        "evidence"
+      ],
+      "properties": {
+        "affiliation_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "evidence": {
+          "$ref": "common.schema.json#/$defs/evidence_list"
+        }
+      }
+    },
+    "date": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "value",
+        "precision",
+        "raw",
+        "evidence"
+      ],
+      "properties": {
+        "type": {
+          "enum": [
+            "submitted",
+            "preprint_posted",
+            "revised",
+            "accepted",
+            "published",
+            "other"
+          ]
+        },
+        "value": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "precision": {
+          "enum": [
+            "day",
+            "month",
+            "year",
+            "unknown"
+          ]
+        },
+        "raw": {
+          "type": "string",
+          "minLength": 1
+        },
+        "evidence": {
+          "$ref": "common.schema.json#/$defs/evidence_list"
+        }
+      }
+    },
+    "reference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "reference_id",
+        "title",
+        "authors",
+        "authors_complete",
+        "raw_citation",
+        "evidence"
+      ],
+      "properties": {
+        "reference_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "title": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "authors": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "name",
+              "kind"
+            ],
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "kind": {
+                "enum": [
+                  "person",
+                  "collective",
+                  "unknown"
+                ]
+              }
+            }
+          }
+        },
+        "authors_complete": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "raw_citation": {
+          "type": "string",
+          "minLength": 1
+        },
+        "evidence": {
+          "$ref": "common.schema.json#/$defs/evidence_list"
+        }
+      }
+    },
+    "benchmark_observation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "observation_id",
+        "benchmark",
+        "model",
+        "role",
+        "metric",
+        "comparison_group_id",
+        "conditions",
+        "evidence"
+      ],
+      "properties": {
+        "observation_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "benchmark": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "name",
+            "dataset",
+            "version",
+            "split"
+          ],
+          "properties": {
+            "name": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "dataset": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "version": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "split": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          }
+        },
+        "model": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "role": {
+          "enum": [
+            "paper_model",
+            "baseline",
+            "other",
+            "unknown"
+          ]
+        },
+        "metric": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "name",
+            "value",
+            "raw_value",
+            "value_form",
+            "unit",
+            "direction"
+          ],
+          "properties": {
+            "name": {
+              "type": "string",
+              "minLength": 1
+            },
+            "value": {
+              "type": [
+                "number",
+                "null"
+              ]
+            },
+            "raw_value": {
+              "type": "string",
+              "minLength": 1
+            },
+            "value_form": {
+              "enum": [
+                "point",
+                "range",
+                "inequality",
+                "uncertainty",
+                "non_numeric"
+              ]
+            },
+            "unit": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "direction": {
+              "enum": [
+                "higher_is_better",
+                "lower_is_better",
+                "unspecified"
+              ]
+            }
+          }
+        },
+        "comparison_group_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "conditions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "evidence": {
+          "$ref": "common.schema.json#/$defs/evidence_list"
+        }
+      }
+    },
+    "related_work": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "item_id",
+        "work_reference_ids",
+        "problem",
+        "approach",
+        "remaining_gap",
+        "evidence"
+      ],
+      "properties": {
+        "item_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "work_reference_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "problem": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "approach": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "remaining_gap": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "evidence": {
+          "$ref": "common.schema.json#/$defs/evidence_list"
+        }
+      }
+    },
+    "claim": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "item_id",
+        "text",
+        "basis",
+        "evidence"
+      ],
+      "properties": {
+        "item_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "text": {
+          "type": "string",
+          "minLength": 1
+        },
+        "basis": {
+          "enum": [
+            "paraphrase",
+            "inference"
+          ]
+        },
+        "evidence": {
+          "$ref": "common.schema.json#/$defs/evidence_list"
+        }
+      }
+    },
+    "missing": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "reason",
+        "detail"
+      ],
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reason": {
+          "enum": [
+            "absent_from_input",
+            "explicitly_unreported",
+            "conflicting",
+            "partial_coverage"
+          ]
+        },
+        "detail": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}

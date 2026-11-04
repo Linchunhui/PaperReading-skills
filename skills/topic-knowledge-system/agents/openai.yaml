@@ -1,0 +1,13 @@
+interface:
+  display_name: 专题知识体系
+  short_description: 把证据整理成可读专题并生成 SVG 图谱和离线报告
+  default_prompt: 用 $topic-knowledge-system 从我提供的论文和旧串讲出发，按问题构建专题，生成 SVG 问题树和离线 HTML。
+  icon_small: assets/icon.svg
+  icon_large: assets/icon.svg
+policy:
+  products:
+  - chatgpt
+  - codex
+  - api
+  - atlas
+  allow_implicit_invocation: true

@@ -1,0 +1,62 @@
+{
+  "schema_version": "1.0",
+  "papers": [
+    {
+      "paper_id": "synthetic-cache",
+      "document_version_id": "v1",
+      "coverage": "full_text",
+      "units": [
+        {
+          "unit_id": "b1",
+          "text": "这是接口检查用的合成论文，不是真实研究。重复修正文档版面时，系统反复对未变的文字执行同一个抽取模型，造成重复计算。已有整页缓存只要页面布局变化就失效。",
+          "origin": "parsed_text",
+          "locator": {
+            "section": "Synthetic section 1"
+          }
+        },
+        {
+          "unit_id": "b2",
+          "text": "方法以文字内容和模型版本共同作为缓存键。只改坐标时复用抽取结果；文字内容或模型版本改变时重新运行模型，再把结果绑定到新坐标。",
+          "origin": "parsed_text",
+          "locator": {
+            "section": "Synthetic section 2"
+          }
+        },
+        {
+          "unit_id": "b3",
+          "text": "在同一测试语料、同一 GPU 和 batch=1 下，基线逐页重算的平均时延为 100 ms，新方法为 60 ms；两者实体抽取 F1 都为 95.0%。",
+          "origin": "parsed_text",
+          "locator": {
+            "section": "Synthetic section 3"
+          }
+        },
+        {
+          "unit_id": "b4",
+          "text": "消融中忽略模型版本的缓存键时，平均时延为 55 ms，F1 为 91.0%；完整缓存键的对应结果为 60 ms 和 95.0%。",
+          "origin": "parsed_text",
+          "locator": {
+            "section": "Synthetic section 4"
+          }
+        },
+        {
+          "unit_id": "b5",
+          "text": "作者 A 的单位为示例大学。实验只覆盖一个语料和一张 GPU，没有测量货币成本。",
+          "origin": "parsed_text",
+          "locator": {
+            "section": "Synthetic section 5"
+          }
+        }
+      ],
+      "assets": []
+    }
+  ],
+  "options": {
+    "priority_institutions": [
+      {
+        "priority_id": "example-u",
+        "name": "示例大学",
+        "aliases": []
+      }
+    ]
+  }
+}

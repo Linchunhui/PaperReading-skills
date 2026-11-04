@@ -1,0 +1,40 @@
+{
+  "schema_version": "1.0",
+  "papers": [
+    {
+      "paper_id": "synthetic-cache",
+      "document_version_id": "synthetic-v1",
+      "coverage": "partial",
+      "units": [
+        {
+          "unit_id": "u1",
+          "text": "Synthetic Local Cache. Author: Demo Team. This is a synthetic example, not a real paper.",
+          "origin": "parsed_text",
+          "locator": {}
+        },
+        {
+          "unit_id": "u2",
+          "text": "We address repeated queries over the same documents. Store the last query results keyed by document ID; reuse only if the document version is unchanged.",
+          "origin": "parsed_text",
+          "locator": {}
+        },
+        {
+          "unit_id": "u3",
+          "text": "On ToySet test, the same model, requests, CPU and memory limit are used. Baseline median latency is 20 ms; ours is 12 ms. Accuracy is unchanged. No repeated-run or significance results are supplied here.",
+          "origin": "parsed_text",
+          "locator": {}
+        },
+        {
+          "unit_id": "u4",
+          "text": "Independent queries are not evaluated. We plan to release code after publication; no repository link is supplied.",
+          "origin": "parsed_text",
+          "locator": {}
+        }
+      ],
+      "assets": []
+    }
+  ],
+  "options": {
+    "profile": "comprehensive"
+  }
+}

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Paper Structured Summary · 结构化总结"
+  short_description: "按背景、方向、问题、思路、方法和总结组织论文，并保留证据与问题签名"
+  default_prompt: "使用 $paper-structured-summary 将这些解析文本总结为六字段 JSON，讲清机制，并抽取可用于同类问题聚类的问题签名。"

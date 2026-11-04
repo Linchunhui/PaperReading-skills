@@ -1,0 +1,4 @@
+interface:
+  display_name: "Paper Brief · 摘要与深度解读"
+  short_description: "从解析文本生成摘要、深度解读、首页摘要及有证据和比较条件的推荐理由"
+  default_prompt: "使用 $paper-brief 为提供的论文解析文本生成摘要、深度解读、首页解读摘要和有依据的推荐理由，返回结构化 JSON。"

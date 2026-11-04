@@ -1,0 +1,222 @@
+{
+  "schema_version": "1.0",
+  "skill": "paper-brief",
+  "papers": [
+    {
+      "paper_id": "synthetic-cache",
+      "document_version_id": "v1",
+      "coverage": "full_text",
+      "status": "complete",
+      "data": {
+        "abstract": {
+          "markdown": "反复修正文档版面时，**未变文字仍被重复抽取**，而整页缓存会随布局变化失效。本文把**文字内容与模型版本共同作为缓存键**，只改坐标时复用结果并重新绑定坐标，文字或版本变化时才重算。在同一语料、同一 GPU 和 batch=1 下，**平均时延由 100 ms 降至 60 ms，F1 保持 95.0%**；实验仅覆盖一个语料。",
+          "evidence": [
+            {
+              "paper_id": "synthetic-cache",
+              "document_version_id": "v1",
+              "unit_id": "b1",
+              "quote": "这是接口检查用的合成论文，不是真实研究。重复修正文档版面时，系统反复对未变的文字执行同一个抽取模型，造成重复计算。已有整页缓存只要页面布局变化就失效。"
+            },
+            {
+              "paper_id": "synthetic-cache",
+              "document_version_id": "v1",
+              "unit_id": "b2",
+              "quote": "方法以文字内容和模型版本共同作为缓存键。只改坐标时复用抽取结果；文字内容或模型版本改变时重新运行模型，再把结果绑定到新坐标。"
+            },
+            {
+              "paper_id": "synthetic-cache",
+              "document_version_id": "v1",
+              "unit_id": "b3",
+              "quote": "在同一测试语料、同一 GPU 和 batch=1 下，基线逐页重算的平均时延为 100 ms，新方法为 60 ms；两者实体抽取 F1 都为 95.0%。"
+            },
+            {
+              "paper_id": "synthetic-cache",
+              "document_version_id": "v1",
+              "unit_id": "b5",
+              "quote": "作者 A 的单位为示例大学。实验只覆盖一个语料和一张 GPU，没有测量货币成本。"
+            }
+          ]
+        },
+        "deep_read": {
+          "sections": [
+            {
+              "section_id": "problem",
+              "heading": "为什么要做",
+              "markdown": "版面修正未必改变文字，但已有整页缓存会失效，系统因此重复做同一份抽取工作。",
+              "evidence": [
+                {
+                  "paper_id": "synthetic-cache",
+                  "document_version_id": "v1",
+                  "unit_id": "b1",
+                  "quote": "这是接口检查用的合成论文，不是真实研究。重复修正文档版面时，系统反复对未变的文字执行同一个抽取模型，造成重复计算。已有整页缓存只要页面布局变化就失效。"
+                }
+              ],
+              "asset_ids": []
+            },
+            {
+              "section_id": "method",
+              "heading": "缓存什么，什么时候重算",
+              "markdown": "把**文字内容与模型版本一起作为缓存键**。只改坐标就复用抽取结果并重新绑定坐标；文字或模型变了就重算，避免拿旧模型结果冒充新结果。",
+              "evidence": [
+                {
+                  "paper_id": "synthetic-cache",
+                  "document_version_id": "v1",
+                  "unit_id": "b2",
+                  "quote": "方法以文字内容和模型版本共同作为缓存键。只改坐标时复用抽取结果；文字内容或模型版本改变时重新运行模型，再把结果绑定到新坐标。"
+                }
+              ],
+              "asset_ids": []
+            },
+            {
+              "section_id": "result",
+              "heading": "主要结果",
+              "markdown": "同一语料、同一 GPU、batch=1 下，时延从 100 ms 降至 60 ms，F1 均为 95.0%。这支持该设置下的速度收益，不代表所有设备和语料都有相同比例的收益。",
+              "evidence": [
+                {
+                  "paper_id": "synthetic-cache",
+                  "document_version_id": "v1",
+                  "unit_id": "b3",
+                  "quote": "在同一测试语料、同一 GPU 和 batch=1 下，基线逐页重算的平均时延为 100 ms，新方法为 60 ms；两者实体抽取 F1 都为 95.0%。"
+                }
+              ],
+              "asset_ids": []
+            },
+            {
+              "section_id": "ablation",
+              "heading": "消融能借鉴什么",
+              "markdown": "- **缓存键需要包含模型版本**：去掉版本后，时延为 55 ms，但 F1 从完整方法的 95.0% 降至 91.0%；这组设置中更激进的复用牺牲了结果质量。",
+              "evidence": [
+                {
+                  "paper_id": "synthetic-cache",
+                  "document_version_id": "v1",
+                  "unit_id": "b4",
+                  "quote": "消融中忽略模型版本的缓存键时，平均时延为 55 ms，F1 为 91.0%；完整缓存键的对应结果为 60 ms 和 95.0%。"
+                }
+              ],
+              "asset_ids": []
+            },
+            {
+              "section_id": "limits",
+              "heading": "适用边界",
+              "markdown": "实验覆盖一个语料和一张 GPU，未测量货币成本；不能把时延收益直接写成省了多少训练费或服务费。",
+              "evidence": [
+                {
+                  "paper_id": "synthetic-cache",
+                  "document_version_id": "v1",
+                  "unit_id": "b5",
+                  "quote": "作者 A 的单位为示例大学。实验只覆盖一个语料和一张 GPU，没有测量货币成本。"
+                }
+              ],
+              "asset_ids": []
+            }
+          ]
+        },
+        "home_digest": {
+          "markdown": "按文字内容与模型版本缓存抽取结果，避免版面修改触发重复计算。单语料、同一 GPU、batch=1 的测试中，平均时延从 100 ms 降至 60 ms，F1 均为 95.0%。",
+          "evidence": [
+            {
+              "paper_id": "synthetic-cache",
+              "document_version_id": "v1",
+              "unit_id": "b2",
+              "quote": "方法以文字内容和模型版本共同作为缓存键。只改坐标时复用抽取结果；文字内容或模型版本改变时重新运行模型，再把结果绑定到新坐标。"
+            },
+            {
+              "paper_id": "synthetic-cache",
+              "document_version_id": "v1",
+              "unit_id": "b3",
+              "quote": "在同一测试语料、同一 GPU 和 batch=1 下，基线逐页重算的平均时延为 100 ms，新方法为 60 ms；两者实体抽取 F1 都为 95.0%。"
+            },
+            {
+              "paper_id": "synthetic-cache",
+              "document_version_id": "v1",
+              "unit_id": "b5",
+              "quote": "作者 A 的单位为示例大学。实验只覆盖一个语料和一张 GPU，没有测量货币成本。"
+            }
+          ]
+        },
+        "recommendations": [
+          {
+            "reason_id": "speed-1",
+            "type": "speed",
+            "label": "报告设置下时延更低",
+            "explanation": "同一测试语料、同一 GPU 和 batch=1 下，平均时延由 100 ms 降到 60 ms，F1 相同。",
+            "basis": "reported_comparison",
+            "scope": "仅限合成样例中的报告设置；GPU 型号与精度未提供。",
+            "comparison": {
+              "target": "内容与版本缓存",
+              "baseline": "逐页重算",
+              "metric": "平均时延",
+              "outcome": "100 ms → 60 ms；F1 均为 95.0%",
+              "conditions": [
+                {
+                  "name": "语料",
+                  "value": "同一语料"
+                },
+                {
+                  "name": "GPU",
+                  "value": "同一 GPU，具体型号未提供"
+                },
+                {
+                  "name": "batch",
+                  "value": "1"
+                },
+                {
+                  "name": "数值精度",
+                  "value": null
+                }
+              ]
+            },
+            "institution_match": null,
+            "evidence": [
+              {
+                "paper_id": "synthetic-cache",
+                "document_version_id": "v1",
+                "unit_id": "b3",
+                "quote": "在同一测试语料、同一 GPU 和 batch=1 下，基线逐页重算的平均时延为 100 ms，新方法为 60 ms；两者实体抽取 F1 都为 95.0%。"
+              },
+              {
+                "paper_id": "synthetic-cache",
+                "document_version_id": "v1",
+                "unit_id": "b5",
+                "quote": "作者 A 的单位为示例大学。实验只覆盖一个语料和一张 GPU，没有测量货币成本。"
+              }
+            ]
+          },
+          {
+            "reason_id": "institution-1",
+            "type": "priority_institution",
+            "label": "来自配置的重点单位",
+            "explanation": "作者 A 的单位“示例大学”与传入名单名称完全匹配；这表示用户偏好，不证明研究质量。",
+            "basis": "user_preference",
+            "scope": "按本次 options.priority_institutions 匹配。",
+            "comparison": null,
+            "institution_match": {
+              "priority_id": "example-u",
+              "affiliation": "示例大学",
+              "match_basis": "作者单位原文与名单名称完全匹配"
+            },
+            "evidence": [
+              {
+                "paper_id": "synthetic-cache",
+                "document_version_id": "v1",
+                "unit_id": "b5",
+                "quote": "作者 A 的单位为示例大学。实验只覆盖一个语料和一张 GPU，没有测量货币成本。"
+              }
+            ]
+          }
+        ],
+        "omitted": [
+          {
+            "field": "deep_read.assets",
+            "reason": "absent_from_input",
+            "explanation": "合成输入不含图像资产；文字解读已完成。"
+          }
+        ]
+      },
+      "limitations": [
+        "本例全部内容与数字均为合成测试材料，不是真实论文或真实实验。",
+        "未提供原图与公式，不声称已检查图像。"
+      ]
+    }
+  ]
+}

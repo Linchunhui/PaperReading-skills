@@ -1,0 +1,4 @@
+interface:
+  display_name: "论文突破性与质量价值评估"
+  short_description: "依据论文与同行证据评估创新实质、实质进展、质量可靠性和可借鉴价值"
+  default_prompt: "使用 $paper-value-assessment，依据提供的论文及评审材料评估突破性、质量证据和可借鉴价值，并输出可追溯的分维度判断。"

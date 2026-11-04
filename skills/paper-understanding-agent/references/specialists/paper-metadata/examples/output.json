@@ -1,0 +1,344 @@
+{
+  "schema_version": "1.0",
+  "skill": "paper-metadata",
+  "papers": [
+    {
+      "paper_id": "synthetic-toyindex",
+      "document_version_id": "fixture-v1",
+      "coverage": "full_text",
+      "status": "partial",
+      "data": {
+        "extracted": {
+          "title": {
+            "text": "ToyIndex: Reusing Document Layout for Fast Retrieval (synthetic fixture)",
+            "evidence": [
+              {
+                "paper_id": "synthetic-toyindex",
+                "document_version_id": "fixture-v1",
+                "unit_id": "b1",
+                "quote": "ToyIndex: Reusing Document Layout for Fast Retrieval (synthetic fixture)"
+              }
+            ]
+          },
+          "authors": [
+            {
+              "author_id": "a1",
+              "name": "Ana Example",
+              "kind": "person",
+              "affiliation_ids": [
+                "aff1"
+              ],
+              "evidence": [
+                {
+                  "paper_id": "synthetic-toyindex",
+                  "document_version_id": "fixture-v1",
+                  "unit_id": "b1",
+                  "quote": "Ana Example [1]"
+                }
+              ]
+            },
+            {
+              "author_id": "a2",
+              "name": "Boreal Group",
+              "kind": "collective",
+              "affiliation_ids": [
+                "aff2"
+              ],
+              "evidence": [
+                {
+                  "paper_id": "synthetic-toyindex",
+                  "document_version_id": "fixture-v1",
+                  "unit_id": "b1",
+                  "quote": "Boreal Group [2]"
+                }
+              ]
+            }
+          ],
+          "affiliations": [
+            {
+              "affiliation_id": "aff1",
+              "name": "Acorn Institute",
+              "evidence": [
+                {
+                  "paper_id": "synthetic-toyindex",
+                  "document_version_id": "fixture-v1",
+                  "unit_id": "b1",
+                  "quote": "[1] Acorn Institute."
+                }
+              ]
+            },
+            {
+              "affiliation_id": "aff2",
+              "name": "Boreal Lab",
+              "evidence": [
+                {
+                  "paper_id": "synthetic-toyindex",
+                  "document_version_id": "fixture-v1",
+                  "unit_id": "b1",
+                  "quote": "[2] Boreal Lab."
+                }
+              ]
+            }
+          ],
+          "dates": [
+            {
+              "type": "preprint_posted",
+              "value": "2026-01",
+              "precision": "month",
+              "raw": "Preprint posted: 2026-01.",
+              "evidence": [
+                {
+                  "paper_id": "synthetic-toyindex",
+                  "document_version_id": "fixture-v1",
+                  "unit_id": "b1",
+                  "quote": "Preprint posted: 2026-01."
+                }
+              ]
+            }
+          ],
+          "venue": {
+            "text": null,
+            "evidence": []
+          },
+          "abstract_original": {
+            "text": "Repeated document search wastes time encoding unchanged layouts. ToyIndex caches layout features and updates only edited regions to reduce query latency while preserving retrieval quality.",
+            "evidence": [
+              {
+                "paper_id": "synthetic-toyindex",
+                "document_version_id": "fixture-v1",
+                "unit_id": "b1",
+                "quote": "Repeated document search wastes time encoding unchanged layouts. ToyIndex caches layout features and updates only edited regions to reduce query latency while preserving retrieval quality."
+              }
+            ]
+          },
+          "references": [
+            {
+              "reference_id": "ref1",
+              "title": "LiteScan: Low-Resolution Document Retrieval",
+              "authors": [
+                {
+                  "name": "Ivo Sample",
+                  "kind": "person"
+                }
+              ],
+              "authors_complete": false,
+              "raw_citation": "[1] Ivo Sample et al. LiteScan: Low-Resolution Document Retrieval. 2024.",
+              "evidence": [
+                {
+                  "paper_id": "synthetic-toyindex",
+                  "document_version_id": "fixture-v1",
+                  "unit_id": "b4",
+                  "quote": "[1] Ivo Sample et al. LiteScan: Low-Resolution Document Retrieval. 2024."
+                }
+              ]
+            }
+          ],
+          "benchmark_observations": [
+            {
+              "observation_id": "toyindex-recall",
+              "benchmark": {
+                "name": "MiniDocs",
+                "dataset": "MiniDocs",
+                "version": "v1",
+                "split": "test"
+              },
+              "model": "ToyIndex",
+              "role": "paper_model",
+              "metric": {
+                "name": "Recall@10",
+                "value": 92.0,
+                "raw_value": "92.0%",
+                "value_form": "point",
+                "unit": "%",
+                "direction": "higher_is_better"
+              },
+              "comparison_group_id": "minidocs-test-examplegpu-fp16-b1",
+              "conditions": [
+                "one ExampleGPU",
+                "batch size 1",
+                "FP16",
+                "Latency excludes initial cache construction."
+              ],
+              "evidence": [
+                {
+                  "paper_id": "synthetic-toyindex",
+                  "document_version_id": "fixture-v1",
+                  "unit_id": "b3",
+                  "quote": "MiniDocs v1 test, using one ExampleGPU, batch size 1 and FP16, ToyIndex reaches Recall@10 92.0% with query latency 12 ms; LiteScan reaches Recall@10 89.0% with query latency 20 ms. Latency excludes initial cache construction."
+                }
+              ]
+            },
+            {
+              "observation_id": "toyindex-latency",
+              "benchmark": {
+                "name": "MiniDocs",
+                "dataset": "MiniDocs",
+                "version": "v1",
+                "split": "test"
+              },
+              "model": "ToyIndex",
+              "role": "paper_model",
+              "metric": {
+                "name": "query latency",
+                "value": 12,
+                "raw_value": "12 ms",
+                "value_form": "point",
+                "unit": "ms",
+                "direction": "lower_is_better"
+              },
+              "comparison_group_id": "minidocs-test-examplegpu-fp16-b1",
+              "conditions": [
+                "one ExampleGPU",
+                "batch size 1",
+                "FP16",
+                "Latency excludes initial cache construction."
+              ],
+              "evidence": [
+                {
+                  "paper_id": "synthetic-toyindex",
+                  "document_version_id": "fixture-v1",
+                  "unit_id": "b3",
+                  "quote": "MiniDocs v1 test, using one ExampleGPU, batch size 1 and FP16, ToyIndex reaches Recall@10 92.0% with query latency 12 ms; LiteScan reaches Recall@10 89.0% with query latency 20 ms. Latency excludes initial cache construction."
+                }
+              ]
+            },
+            {
+              "observation_id": "litescan-recall",
+              "benchmark": {
+                "name": "MiniDocs",
+                "dataset": "MiniDocs",
+                "version": "v1",
+                "split": "test"
+              },
+              "model": "LiteScan",
+              "role": "baseline",
+              "metric": {
+                "name": "Recall@10",
+                "value": 89.0,
+                "raw_value": "89.0%",
+                "value_form": "point",
+                "unit": "%",
+                "direction": "higher_is_better"
+              },
+              "comparison_group_id": "minidocs-test-examplegpu-fp16-b1",
+              "conditions": [
+                "one ExampleGPU",
+                "batch size 1",
+                "FP16",
+                "Latency excludes initial cache construction."
+              ],
+              "evidence": [
+                {
+                  "paper_id": "synthetic-toyindex",
+                  "document_version_id": "fixture-v1",
+                  "unit_id": "b3",
+                  "quote": "MiniDocs v1 test, using one ExampleGPU, batch size 1 and FP16, ToyIndex reaches Recall@10 92.0% with query latency 12 ms; LiteScan reaches Recall@10 89.0% with query latency 20 ms. Latency excludes initial cache construction."
+                }
+              ]
+            },
+            {
+              "observation_id": "litescan-latency",
+              "benchmark": {
+                "name": "MiniDocs",
+                "dataset": "MiniDocs",
+                "version": "v1",
+                "split": "test"
+              },
+              "model": "LiteScan",
+              "role": "baseline",
+              "metric": {
+                "name": "query latency",
+                "value": 20,
+                "raw_value": "20 ms",
+                "value_form": "point",
+                "unit": "ms",
+                "direction": "lower_is_better"
+              },
+              "comparison_group_id": "minidocs-test-examplegpu-fp16-b1",
+              "conditions": [
+                "one ExampleGPU",
+                "batch size 1",
+                "FP16",
+                "Latency excludes initial cache construction."
+              ],
+              "evidence": [
+                {
+                  "paper_id": "synthetic-toyindex",
+                  "document_version_id": "fixture-v1",
+                  "unit_id": "b3",
+                  "quote": "MiniDocs v1 test, using one ExampleGPU, batch size 1 and FP16, ToyIndex reaches Recall@10 92.0% with query latency 12 ms; LiteScan reaches Recall@10 89.0% with query latency 20 ms. Latency excludes initial cache construction."
+                }
+              ]
+            }
+          ]
+        },
+        "generated": {
+          "related_work": [
+            {
+              "item_id": "rw1",
+              "work_reference_ids": [
+                "ref1"
+              ],
+              "problem": "重复文档检索的计算开销。",
+              "approach": "LiteScan 降低输入图像分辨率。",
+              "remaining_gap": "降低分辨率会丢失小字细节。",
+              "evidence": [
+                {
+                  "paper_id": "synthetic-toyindex",
+                  "document_version_id": "fixture-v1",
+                  "unit_id": "b2",
+                  "quote": "LiteScan [1] reduces image resolution, but loses small-text details."
+                }
+              ]
+            }
+          ],
+          "research_questions": [
+            {
+              "item_id": "q1",
+              "text": "能否复用布局特征，在维持检索质量的同时降低重复检索延迟？",
+              "basis": "paraphrase",
+              "evidence": [
+                {
+                  "paper_id": "synthetic-toyindex",
+                  "document_version_id": "fixture-v1",
+                  "unit_id": "b2",
+                  "quote": "Our question is whether reusing layout features can reduce repeated-search latency without reducing retrieval quality."
+                }
+              ]
+            }
+          ],
+          "summary": [
+            {
+              "item_id": "s1",
+              "text": "ToyIndex 缓存页面布局，用区域哈希找出改动并局部重编码，减少重复编码；给定实验中延迟为 12 ms、Recall@10 为 92.0%，但延迟不含首次建缓存。",
+              "basis": "paraphrase",
+              "evidence": [
+                {
+                  "paper_id": "synthetic-toyindex",
+                  "document_version_id": "fixture-v1",
+                  "unit_id": "b3",
+                  "quote": "ToyIndex builds a page-layout cache once. When a document changes, a region hash selects changed regions for re-encoding; the retriever combines refreshed regions with cached features. On synthetic MiniDocs v1 test, using one ExampleGPU, batch size 1 and FP16, ToyIndex reaches Recall@10 92.0% with query latency 12 ms; LiteScan reaches Recall@10 89.0% with query latency 20 ms. Latency excludes initial cache construction."
+                }
+              ]
+            }
+          ]
+        },
+        "missing_fields": [
+          {
+            "path": "/data/extracted/venue",
+            "reason": "absent_from_input",
+            "detail": "所给文本只有预印本月份，没有会议或期刊信息。"
+          },
+          {
+            "path": "/data/extracted/references/0/authors",
+            "reason": "absent_from_input",
+            "detail": "参考文献使用 et al.，仅保存明确出现的作者。"
+          }
+        ]
+      },
+      "limitations": [
+        "这是 synthetic fixture，不是真实论文。参考文献作者列表不完整，发表场所未知。"
+      ]
+    }
+  ]
+}

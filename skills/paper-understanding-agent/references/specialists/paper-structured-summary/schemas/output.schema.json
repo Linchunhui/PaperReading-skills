@@ -1,0 +1,285 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "paper-structured-summary output",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "skill",
+    "papers"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "skill": {
+      "const": "paper-structured-summary"
+    },
+    "papers": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "paper_id",
+          "document_version_id",
+          "coverage",
+          "status",
+          "data",
+          "limitations"
+        ],
+        "properties": {
+          "paper_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "document_version_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "coverage": {
+            "enum": [
+              "full_text",
+              "partial",
+              "abstract_only",
+              "structured_only"
+            ]
+          },
+          "status": {
+            "enum": [
+              "complete",
+              "partial"
+            ]
+          },
+          "data": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "background",
+              "direction",
+              "problem",
+              "approach",
+              "methods",
+              "summary",
+              "problem_signatures",
+              "results",
+              "reported_limitations",
+              "missing_fields"
+            ],
+            "properties": {
+              "background": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/claim"
+                }
+              },
+              "direction": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/claim"
+                }
+              },
+              "problem": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/claim"
+                }
+              },
+              "approach": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/claim"
+                }
+              },
+              "methods": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/claim"
+                }
+              },
+              "summary": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/claim"
+                }
+              },
+              "problem_signatures": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/problem_signature"
+                }
+              },
+              "results": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/claim"
+                }
+              },
+              "reported_limitations": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/claim"
+                }
+              },
+              "missing_fields": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/missing"
+                }
+              }
+            }
+          },
+          "limitations": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "coverage": {
+                  "enum": [
+                    "partial",
+                    "abstract_only",
+                    "structured_only"
+                  ]
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "status": {
+                  "const": "partial"
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  "$defs": {
+    "claim": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "item_id",
+        "text",
+        "basis",
+        "evidence"
+      ],
+      "properties": {
+        "item_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "text": {
+          "type": "string",
+          "minLength": 1
+        },
+        "basis": {
+          "enum": [
+            "paraphrase",
+            "inference"
+          ]
+        },
+        "evidence": {
+          "$ref": "common.schema.json#/$defs/evidence_list"
+        }
+      }
+    },
+    "problem_signature": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "signature_id",
+        "problem_item_ids",
+        "objective",
+        "input",
+        "output",
+        "bottleneck",
+        "constraints",
+        "evidence"
+      ],
+      "properties": {
+        "signature_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "problem_item_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "objective": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "input": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "output": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "bottleneck": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "constraints": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "evidence": {
+          "$ref": "common.schema.json#/$defs/evidence_list"
+        }
+      }
+    },
+    "missing": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "reason",
+        "detail"
+      ],
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reason": {
+          "enum": [
+            "absent_from_input",
+            "explicitly_unreported",
+            "conflicting",
+            "partial_coverage"
+          ]
+        },
+        "detail": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}

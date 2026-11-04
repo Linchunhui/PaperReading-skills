@@ -1,0 +1,2 @@
+# Optional file relay. Python >=3.12; install only in an authorized isolated env.
+gpt-researcher==0.16.1

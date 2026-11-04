@@ -1,0 +1,136 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "papers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "paper_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "document_version_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "coverage": {
+            "$ref": "common.schema.json#/$defs/coverage"
+          },
+          "identity_note": {
+            "type": "string"
+          },
+          "units": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "unit_id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "text": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "origin": {
+                  "enum": [
+                    "parsed_text",
+                    "structured"
+                  ]
+                },
+                "locator": {
+                  "type": "object"
+                },
+                "upstream_evidence": {
+                  "type": "array",
+                  "items": {
+                    "type": "object"
+                  },
+                  "minItems": 0
+                }
+              },
+              "required": [
+                "unit_id",
+                "text",
+                "origin"
+              ],
+              "additionalProperties": false
+            },
+            "minItems": 1
+          },
+          "assets": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "asset_id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "kind": {
+                  "enum": [
+                    "figure",
+                    "table",
+                    "formula",
+                    "screenshot",
+                    "other"
+                  ]
+                },
+                "uri": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "caption": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "source_unit_ids": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "minItems": 0
+                }
+              },
+              "required": [
+                "asset_id",
+                "kind",
+                "uri",
+                "caption",
+                "source_unit_ids"
+              ],
+              "additionalProperties": false
+            },
+            "minItems": 0
+          }
+        },
+        "required": [
+          "paper_id",
+          "document_version_id",
+          "coverage",
+          "units",
+          "assets"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 1
+    },
+    "options": {
+      "type": "object"
+    }
+  },
+  "required": [
+    "schema_version",
+    "papers",
+    "options"
+  ],
+  "additionalProperties": false
+}
