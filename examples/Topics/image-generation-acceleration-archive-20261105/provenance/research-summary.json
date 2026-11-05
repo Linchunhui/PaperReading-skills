@@ -1,0 +1,474 @@
+{
+  "cutoff": "2026-11-05",
+  "max_rounds": 2,
+  "threshold": 0.85,
+  "minimum_unique_papers": 8,
+  "stop_reason": "round_budget_cap_not_saturation",
+  "rounds": [
+    {
+      "round": "R1",
+      "run": {
+        "status": "completed",
+        "library": "gpt-researcher==0.16.0",
+        "mode": "live",
+        "question": "Audit missing foundations and mechanisms in an existing 64-paper image-generation inference acceleration survey. Prioritize InstaFlow reflow, Adversarial Diffusion Distillation ADD, Latent ADD, EDM schedules, trajectory consistency and exact execution optimizations. Existing coverage includes PD CM LCM DMD DMD2 Hyper-SD PeRFlow MeanFlow caching quantization and multi-GPU. Find primary papers and original method figures, distinguish image evidence from video and training speed. Cutoff 2026-11-05.",
+        "query_budget": 4,
+        "model_provider": "supplied by caller via file relay",
+        "search_provider": "supplied by caller via file relay",
+        "started_at_utc": "2026-11-05T09:33:50.121595+00:00",
+        "events": [
+          {
+            "kind": "initial-search",
+            "request": "initial-search-001-a98e833f8d-request.json",
+            "response": "initial-search-001-a98e833f8d-response.json",
+            "query": "Audit missing foundations and mechanisms in an existing 64-paper image-generation inference acceleration survey. Prioritize InstaFlow reflow, Adversarial Diffusion Distillation ADD, Latent ADD, EDM schedules, trajectory consistency and exact execution optimizations. Existing coverage includes PD CM LCM DMD DMD2 Hyper-SD PeRFlow MeanFlow caching quantization and multi-GPU. Find primary papers and original method figures, distinguish image evidence from video and training speed. Cutoff 2026-11-05.",
+            "provider": "web.run live search 2026-11-05; primary results selected",
+            "result_count": 2
+          },
+          {
+            "kind": "planner",
+            "request": "planner-001-call-request.json",
+            "response": "planner-001-call-response.json",
+            "provider": "current Codex session model; live",
+            "result_count": null
+          },
+          {
+            "kind": "web-search",
+            "request": "web-search-001-3690dfeaee-request.json",
+            "response": "web-search-001-3690dfeaee-response.json",
+            "query": "InstaFlow reflow one step rectified flow 2309.06380 method experiments",
+            "provider": "web.run live 2026-11-05",
+            "result_count": 1
+          },
+          {
+            "kind": "web-search",
+            "request": "web-search-002-24c088cba4-request.json",
+            "response": "web-search-002-24c088cba4-response.json",
+            "query": "Adversarial Diffusion Distillation 2311.17042 latent adversarial diffusion distillation 2403.12015 method",
+            "provider": "web.run live 2026-11-05",
+            "result_count": 3
+          },
+          {
+            "kind": "web-search",
+            "request": "web-search-003-7223729b9e-request.json",
+            "response": "web-search-003-7223729b9e-response.json",
+            "query": "Elucidating design space diffusion models 2206.00364 sampling schedule Heun preconditioning NFE",
+            "provider": "web.run live 2026-11-05",
+            "result_count": 4
+          },
+          {
+            "kind": "web-search",
+            "request": "web-search-004-ce86c36639-request.json",
+            "response": "web-search-004-ce86c36639-response.json",
+            "query": "Distilling Diffusion Models into Conditional GANs 2405.05967 Rectified Diffusion 2410.07303",
+            "provider": "web.run live 2026-11-05",
+            "result_count": 2
+          }
+        ],
+        "blocked_direct_network_attempts": [],
+        "context_chars": 1268,
+        "actual_subqueries": 4,
+        "finished_at_utc": "2026-11-05T09:41:58.334485+00:00"
+      },
+      "candidates": [
+        {
+          "title": "Distilling Diffusion Models into Conditional GANs",
+          "href": "https://arxiv.org/html/2405.05967v1",
+          "body": "Primary paper: diffusion ODE image-noise pairs, perceptual regression and adversarial distillation; method and original figures.",
+          "canonical_id": "2405.05967"
+        },
+        {
+          "title": "On Distillation of Guided Diffusion Models",
+          "href": "https://arxiv.org/abs/2210.03142",
+          "body": "Guidance and progressive distillation remove double branch burden.",
+          "canonical_id": "2210.03142"
+        },
+        {
+          "title": "Adversarial Diffusion Distillation",
+          "href": "https://stability.ai/research/adversarial-diffusion-distillation",
+          "body": "Official research announcement and paper: score distillation and adversarial objective enable 1–4 step text-to-image sampling.",
+          "canonical_id": null
+        },
+        {
+          "title": "InstaFlow",
+          "href": "https://arxiv.org/abs/2309.06380",
+          "body": "Reflow improves noise-image coupling before one-step distillation.",
+          "canonical_id": "2309.06380"
+        },
+        {
+          "title": "Adversarial Diffusion Distillation",
+          "href": "https://arxiv.org/abs/2311.17042",
+          "body": "Score distillation and adversarial supervision for 1–4 steps.",
+          "canonical_id": "2311.17042"
+        },
+        {
+          "title": "Latent Adversarial Diffusion Distillation",
+          "href": "https://arxiv.org/abs/2403.12015",
+          "body": "Latent diffusion discriminator improves high-resolution distillation efficiency.",
+          "canonical_id": "2403.12015"
+        },
+        {
+          "title": "Adversarial Distribution Matching",
+          "href": "https://arxiv.org/abs/2507.18569",
+          "body": "Candidate addressing DMD mode-seeking; image and video conditions need fulltext checks.",
+          "canonical_id": "2507.18569"
+        },
+        {
+          "title": "EDM",
+          "href": "https://arxiv.org/abs/2206.00364",
+          "body": "Separates numerical sampling, schedules, preconditioning and training.",
+          "canonical_id": "2206.00364"
+        },
+        {
+          "title": "Analyzing and Improving Fast Sampling of T2I",
+          "href": "https://arxiv.org/abs/2603.00763",
+          "body": "Candidate explores compatibility of sampling methods.",
+          "canonical_id": "2603.00763"
+        },
+        {
+          "title": "Sampler Scheduler",
+          "href": "https://arxiv.org/abs/2311.06845",
+          "body": "Candidate combines ODE and SDE scheduling.",
+          "canonical_id": "2311.06845"
+        },
+        {
+          "title": "Covariance-aware sampling",
+          "href": "https://arxiv.org/abs/2605.13910",
+          "body": "Pixel-space sampler uses additional JVP; cost definition needs check.",
+          "canonical_id": "2605.13910"
+        }
+      ]
+    },
+    {
+      "round": "R2",
+      "run": {
+        "status": "completed",
+        "library": "gpt-researcher==0.16.0",
+        "mode": "live",
+        "question": "Audit deployment gaps and negative results for image diffusion acceleration: exact condition KV reuse versus approximate cross-step caches, FlashAttention and SageAttention masks, ViDiT-Q, Q-Diffusion, SVDQuant, compilation and offload, multi GPU latency versus GPU seconds. Verify SenseNova-U1.5 50-step CFG4 vs 8-step DMD LoRA CFG1 and vLLM Omni online FP8 compatibility. Distinguish video-primary TeaCache and TaylorSeer evidence. Primary sources only; cutoff 2026-11-05.",
+        "query_budget": 4,
+        "model_provider": "supplied by caller via file relay",
+        "search_provider": "supplied by caller via file relay",
+        "started_at_utc": "2026-11-05T09:39:06.270137+00:00",
+        "events": [
+          {
+            "kind": "initial-search",
+            "request": "initial-search-001-f8f14127c1-request.json",
+            "response": "initial-search-001-f8f14127c1-response.json",
+            "query": "Audit deployment gaps and negative results for image diffusion acceleration: exact condition KV reuse versus approximate cross-step caches, FlashAttention and SageAttention masks, ViDiT-Q, Q-Diffusion, SVDQuant, compilation and offload, multi GPU latency versus GPU seconds. Verify SenseNova-U1.5 50-step CFG4 vs 8-step DMD LoRA CFG1 and vLLM Omni online FP8 compatibility. Distinguish video-primary TeaCache and TaylorSeer evidence. Primary sources only; cutoff 2026-11-05.",
+            "provider": "web.run live 2026-11-05",
+            "result_count": 2
+          },
+          {
+            "kind": "planner",
+            "request": "planner-001-call-request.json",
+            "response": "planner-001-call-response.json",
+            "provider": "current Codex session model live",
+            "result_count": null
+          },
+          {
+            "kind": "web-search",
+            "request": "web-search-001-ab462ff93e-request.json",
+            "response": "web-search-001-ab462ff93e-response.json",
+            "query": "TGATE cross attention temporal redundancy exact text KV cache diffusion paper",
+            "provider": "web.run live 2026-11-05",
+            "result_count": 1
+          },
+          {
+            "kind": "web-search",
+            "request": "web-search-002-b2453adf74-request.json",
+            "response": "web-search-002-b2453adf74-response.json",
+            "query": "FlashAttention SageAttention 2++ ViDiT-Q Q-Diffusion SVDQuant original paper",
+            "provider": "web.run live 2026-11-05",
+            "result_count": 5
+          },
+          {
+            "kind": "web-search",
+            "request": "web-search-003-e03cb9f8fb-request.json",
+            "response": "web-search-003-e03cb9f8fb-response.json",
+            "query": "TeaCache TaylorSeer image video diffusion cache negative result AutoTarget",
+            "provider": "web.run live 2026-11-05",
+            "result_count": 3
+          },
+          {
+            "kind": "web-search",
+            "request": "web-search-004-bd81eef54d-request.json",
+            "response": "web-search-004-bd81eef54d-response.json",
+            "query": "SenseNova U1.5 DMD LoRA CFG FP8 hybrid attention Triton FA3 vLLM Omni",
+            "provider": "web.run live 2026-11-05",
+            "result_count": 3
+          }
+        ],
+        "blocked_direct_network_attempts": [],
+        "context_chars": 1477,
+        "actual_subqueries": 4,
+        "finished_at_utc": "2026-11-05T09:45:06.024710+00:00"
+      },
+      "candidates": [
+        {
+          "title": "TaylorSeer",
+          "href": "https://arxiv.org/html/2503.06923v2",
+          "body": "Cache-then-forecast, continuous feature change.",
+          "canonical_id": "2503.06923"
+        },
+        {
+          "title": "TeaCache",
+          "href": "https://arxiv.org/abs/2411.19108",
+          "body": "Original video evidence, separate from image implementations.",
+          "canonical_id": "2411.19108"
+        },
+        {
+          "title": "AutoTarget",
+          "href": "https://arxiv.org/abs/2610.03577",
+          "body": "Few-step solver-aware cache target selection, existing negative result.",
+          "canonical_id": "2610.03577"
+        },
+        {
+          "title": "TGATE",
+          "href": "https://arxiv.org/abs/2404.02747",
+          "body": "Temporal attention gating is approximate reuse of converged attention outputs, not simply exact static K/V projection reuse.",
+          "canonical_id": "2404.02747"
+        },
+        {
+          "title": "vLLM Omni recipe",
+          "href": "https://github.com/vllm-project/vllm-omni/blob/main/recipes/SenseNova/SenseNova-U1.5.md",
+          "body": "CFG1 required for DMD LoRA; record hardware and warmup.",
+          "canonical_id": null
+        },
+        {
+          "title": "vLLM Omni FP8 guide",
+          "href": "https://github.com/vllm-project/vllm-omni/blob/main/docs/user_guide/quantization/fp8.md",
+          "body": "Official quantization documentation records architecture-specific support and sensitive layers; Ampere may use weight-only paths.",
+          "canonical_id": null
+        },
+        {
+          "title": "ViDiT-Q",
+          "href": "https://arxiv.org/abs/2406.02540",
+          "body": "Diffusion transformer PTQ, image and video; hardware metrics must retain model conditions.",
+          "canonical_id": "2406.02540"
+        },
+        {
+          "title": "SageAttention",
+          "href": "https://arxiv.org/html/2410.02367v9",
+          "body": "Quantized attention, unlike exact FlashAttention.",
+          "canonical_id": "2410.02367"
+        },
+        {
+          "title": "SageAttention2",
+          "href": "https://arxiv.org/abs/2411.10958",
+          "body": "INT4 attention smoothing.",
+          "canonical_id": "2411.10958"
+        },
+        {
+          "title": "SageAttention2++",
+          "href": "https://arxiv.org/abs/2505.21136",
+          "body": "More efficient SageAttention2 implementation; kernel speed differs from pipeline speed.",
+          "canonical_id": "2505.21136"
+        },
+        {
+          "title": "SVDQuant",
+          "href": "https://arxiv.org/abs/2411.05007",
+          "body": "Existing baseline low-rank outlier handling with fused kernels.",
+          "canonical_id": "2411.05007"
+        },
+        {
+          "title": "SenseNova-U1.5",
+          "href": "https://arxiv.org/abs/2609.11929",
+          "body": "Primary report candidate; official engine docs differ by version.",
+          "canonical_id": "2609.11929"
+        },
+        {
+          "title": "Attention backend docs",
+          "href": "https://docs.vllm.ai/projects/vllm-omni/en/latest/user_guide/diffusion/attention_backends/",
+          "body": "Backend compatibility is architecture-specific.",
+          "canonical_id": null
+        }
+      ]
+    }
+  ],
+  "round2_overlap": {
+    "shared_ids": [],
+    "related_unique_papers": 10,
+    "repeat_rate": 0.0,
+    "baseline_64_overlap": [
+      "2411.05007",
+      "2503.06923",
+      "2610.03577"
+    ]
+  },
+  "additions": [
+    {
+      "id": "2309.06380",
+      "name": "InstaFlow",
+      "title": "InstaFlow: One Step is Enough for High-Quality Diffusion-Based Text-to-Image Generation",
+      "date": "2023-09-12",
+      "version": "v2",
+      "branch": "fewstep",
+      "round": "R1",
+      "url": "https://arxiv.org/html/2309.06380v2",
+      "method": "先用 reflow 改善噪声与图像的配对和路径，再蒸馏成一步映射。",
+      "steps": [
+        "教师从噪声生成图像，得到文本条件下的端点配对；在配对的直线插值上重新拟合速度。",
+        "Reflow 改变运输映射；蒸馏压缩既定映射。二者作用不同，直线插值训练也不保证学到处处笔直的轨迹。",
+        "对海报算例，学生学习从噪声直接到图像潜变量；仍需文本编码和解码。算例仅为教学。"
+      ],
+      "evidence": "v2 §2.2、§3、Table 1：SD1.4 直接一步蒸馏 FID-5k 40.9；相同初步训练预算下 reflow 后蒸馏为31.0（COCO2017-5k）；A100、batch=1均为0.09秒。这里是Pre实验，不能与扩展训练后的InstaFlow最终成绩混用。",
+      "boundary": "需要后训练与教师配对；旧SD的512²结果不等于现代高分辨率文字、编辑能力。原图3流程已从原文图注核对；本轮未取得可裁取PDF，提供原文入口。",
+      "figure_hint": "图3：比较上方直接蒸馏失败路径与下方 reflow→蒸馏路径。关键是先改变噪声—图像配对；图中的直线是机制示意，不能据此证明训练误差为零。"
+    },
+    {
+      "id": "2311.17042",
+      "name": "ADD",
+      "title": "Adversarial Diffusion Distillation",
+      "date": "2023-11-28",
+      "version": "v1",
+      "branch": "fewstep",
+      "round": "R1",
+      "url": "https://arxiv.org/html/2311.17042v1",
+      "method": "用对抗损失维持真实感，用冻结扩散教师的蒸馏信号维持语义与组合能力。",
+      "steps": [
+        "学生从加噪图像生成预测，预训练视觉特征上的判别头区分真实与生成图像。",
+        "给学生输出重新加噪，再由冻结教师给去噪目标；原文主要在像素空间计算蒸馏损失。",
+        "推理采用1–4次U-Net评估，不使用普通CFG双分支；这是权重后训练，不能靠换采样器获得。"
+      ],
+      "evidence": "v1 §3、§4、Table 1(d)：SD2.1小模型消融、512²、COCO2017-5k、4000训练迭代×batch128；仅对抗损失FID20.8，组合指数加权蒸馏为20.6；单独蒸馏315.6。此小预算消融不代表最终ADD-XL排名。",
+      "boundary": "真实性、覆盖度与对齐需分别评测。不能把1–4步解释为无条件适用于任何基座；不把训练损失模块算入部署推理成本。原图2可在固定版本查看；本地缺图。",
+      "figure_hint": "图2：从学生输出分两路看，判别器检查真实感，冻结教师检查加噪后去噪的一致性；虚线/梯度停止体现谁被更新。两条监督路径都在训练端。"
+    },
+    {
+      "id": "2403.12015",
+      "name": "LADD",
+      "title": "Fast High-Resolution Image Synthesis with Latent Adversarial Diffusion Distillation",
+      "date": "2024-03-18",
+      "version": "v1",
+      "branch": "fewstep",
+      "round": "R1",
+      "url": "https://arxiv.org/html/2403.12015v1",
+      "method": "把判别特征与训练目标移到潜空间，让大模型的少步对抗蒸馏更易扩展到高分辨率。",
+      "steps": [
+        "教师生成合成训练数据；学生输出潜变量后重新加噪。",
+        "从冻结教师的注意力块提取特征，接可训练判别头；无需每次把潜变量解码成像素再送DINOv2。",
+        "调整噪声采样，改变结构与纹理监督侧重；推理仍需最终图像解码。"
+      ],
+      "evidence": "v1 §3、§4.3–4.4、§5：作者对比潜空间蒸馏目标与模型规模，SD3-Turbo用至多4次Transformer评估生成多宽高比图像。此处仅保留原文定性比较，不从偏好图估读精确百分比。",
+      "boundary": "减少训练期解码和判别开销，不等于部署时取消VAE；训练效率与出图延迟分开。不是简单将ADD所有损失搬入latent。原图3已核图注与方法；本地缺图。",
+      "figure_hint": "图3：上两行ADD经过像素解码和DINOv2；下行LADD直接使用教师的latent特征。先比较数据流，再找被取消的解码环节，最后区分训练路径与最终出图路径。"
+    },
+    {
+      "id": "2206.00364",
+      "name": "EDM",
+      "title": "Elucidating the Design Space of Diffusion-Based Generative Models",
+      "date": "2022-06-01",
+      "version": "v2摘要＋官方实现快照",
+      "branch": "solvers",
+      "round": "R1",
+      "url": "https://arxiv.org/abs/2206.00364v2",
+      "method": "把求解器、噪声时刻、预条件和训练设计拆开；为步数与网络评估次数提供清晰基准。",
+      "steps": [
+        "官方实现的采样时刻采用rho控制的噪声序列，默认rho=7；每次Euler预测后再作Heun校正。",
+        "最后落到零噪声时跳过校正。因此确定性18个区间需35次网络评估，而非18次。",
+        "采样改进可用于兼容的已有网络；EDM预条件与训练目标的改进属于另一组实验。"
+      ],
+      "evidence": "本轮论文PDF因工具大小限制未读全，OpenReview遇到验证页；已核官方NVlabs/edm README与generate.py中的edm_sampler和ablation_sampler。官方示例明确CIFAR-10 18 steps / NFE35，FFHQ 40 / 79。只据此收录机制入口，不把摘要FID当完整复核实验。",
+      "boundary": "证据等级：官方代码与摘要核验，论文方法和实验全文待补。CIFAR32²不是1024²文生图。原图缺失；不要将EDM视为只换scheduler就能复现全部收益。",
+      "figure_hint": "暂无本地核验原图。建议回查论文Figure 2的NFE–FID曲线；不能把训练新模型的FID改进归给采样器。"
+    },
+    {
+      "id": "2404.02747",
+      "name": "TGATE",
+      "title": "Faster Diffusion via Temporal Attention Decomposition",
+      "date": "2024-04-03",
+      "version": "v2",
+      "branch": "caching",
+      "round": "R2",
+      "url": "https://arxiv.org/html/2404.02747v2",
+      "method": "按生成阶段复用注意力输出，区分早期语义规划和后期细节改善。",
+      "steps": [
+        "门控时刻保存条件和无条件交叉注意力结果的均值，后续直接复用。",
+        "早期self-attention用间隔缓存；后期恢复完整self-attention。",
+        "缓存的是依赖图像查询的注意力结果，因此属于近似跨步复用；固定文本K/V投影复用是另一件事。"
+      ],
+      "evidence": "v2 §3–4、Eq.6、Table 1–2；图2用COCO 1000条caption和各层平均观察跨步变化趋小。表中图像延迟设备为GTX1080Ti，不能搬用到H100或国产卡。本文保留机制与条件，不转抄未逐项复算的加速倍数。",
+      "boundary": "门控和间隔需随基座与调度验证；并非任何DiT的文本表示都静态。原图2趋势是样本平均，不能证明每个prompt/层都不变。本地缺图。",
+      "figure_hint": "图2：横轴去噪阶段、纵轴相邻注意力变化；阴影是方差。均值下降支持门控动机，却不意味着完全相同，更不等于精确KV缓存。"
+    },
+    {
+      "id": "2406.02540",
+      "name": "ViDiT-Q",
+      "title": "ViDiT-Q: Efficient and Accurate Quantization of Diffusion Transformers for Image and Video Generation",
+      "date": "2024-06-04",
+      "version": "v3",
+      "branch": "compression",
+      "round": "R2",
+      "url": "https://arxiv.org/html/2406.02540v3",
+      "method": "针对DiT在token、条件、时间和通道上的变化，组合细粒度动态量化与静态—动态通道平衡。",
+      "steps": [
+        "权重按通道、激活按token量化；动态参数适应时刻与CFG分支差异。",
+        "静态缩放先平衡初始极值，旋转应对随时间变化的通道不均。",
+        "极低位宽可按不同质量维度分配混合精度；文中PixArt W4A8实验并未使用混合精度。"
+      ],
+      "evidence": "v3 §5.1、Figure 6：PixArt-alpha，20-step DPM-Solver、CFG4.5、COCO前1024个prompt；FP16 FID73.34 / IR0.901，W4A8 FID74.33 / IR0.887。§5.3硬件评测A100、CUDA12.1、batch1、20步；不能跨数据规模比较FID。",
+      "boundary": "PTQ仍需校准和相应融合内核；论文整体1.4–1.7×范围含不同模型，不等于每个图像模型。国产卡需重验算子与低位宽实现。本地缺图。",
+      "figure_hint": "图2把四类分布变化对应到量化设计；图3区分固定初始偏斜和随时刻变化的偏斜。图6看图像条件，图5是视频，不能混作同一证据。"
+    },
+    {
+      "id": "2205.14135",
+      "name": "FlashAttention",
+      "title": "FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness",
+      "date": "2022-05-27",
+      "version": "网页PDF快照，修订号未确认",
+      "branch": "spatial",
+      "round": "补充原文核验",
+      "url": "https://arxiv.org/pdf/2205.14135",
+      "method": "通过分块与在线softmax减少显存读写，保持标准注意力的数学运算。",
+      "steps": [
+        "把Q/K/V切块放入片上内存，边计算边更新softmax归一化与输出，避免完整N×N注意力矩阵写回HBM。",
+        "数学上是精确注意力；浮点归约顺序仍可能产生数值差异，不承诺逐bit一致。",
+        "接入图像模型时先确认mask、head维度、dtype与硬件支持，再看attention在整管线中占比。"
+      ],
+      "evidence": "公开论文PDF §2–3、Figure 1、Algorithm 1已读；论文主实验包括BERT/GPT-2训练，不能把其训练加速倍数写成图像生成推理收益。本文将其作为执行层基础，不编造图像端到端benchmark。",
+      "boundary": "通用内核接口不保证支持任意混合mask；它与稀疏注意力、INT4/FP8注意力的误差来源不同。版本号未确认，本轮不裁图复用。",
+      "figure_hint": "图1先看HBM与SRAM的数据移动，再看分块如何避免保存大矩阵；右侧特定语言模型训练速度不代表图像生成速度。"
+    },
+    {
+      "id": "2505.21136",
+      "name": "SageAttention2++",
+      "title": "SageAttention2++: A More Efficient Implementation of SageAttention2",
+      "date": "2025-05-27",
+      "version": "v3",
+      "branch": "spatial",
+      "round": "R2",
+      "url": "https://arxiv.org/abs/2505.21136v3",
+      "method": "改进量化注意力的FP8计算实现，降低SageAttention2的中间累积开销。",
+      "steps": [
+        "继承INT4/INT8的QK和FP8的PV计算；重新分配P、V的量化范围以控制FP8累积误差。",
+        "采用FP16累积，并延后转为FP32以减少转换开销；这是近似低精度内核，不是FlashAttention的精确重排。",
+        "核对目标卡的INT4/FP8能力及具体mask后，分别测attention耗时和整管线耗时。"
+      ],
+      "evidence": "本地v3 PDF第1–5页方法与实验已读；Figure 1是RTX4090、head_dim128、序列1K–32K、causal分别开/关的内核TOPS。Table 3包含FLUX/SD3.5图像指标及独立视频指标。这里只复述条件，不把峰值TOPS比当作出图倍率。",
+      "boundary": "8+8和4+8误差不同；图像指标相近不证明所有文字/布局保持。面向NVIDIA特定指令的实测不能直接迁移国产卡。",
+      "figure_hint": "图1上下分别是不使用/使用causal mask；同一序列长度比较各颜色，横跨长度不能当同一次任务。图没有包含VAE、文本编码或排队。"
+    }
+  ],
+  "engineering_sources": [
+    {
+      "url": "https://github.com/OpenSenseNova/SenseNova-U1/blob/e2edb8b18e31c5ea45294c8781e9020793d164be/docs/base_vs_distill.md"
+    },
+    {
+      "url": "https://github.com/OpenSenseNova/SenseNova-U1/blob/c14b506f0066e65c248f03a284fb96448a459eb1/docs/inference_infra_CN.md"
+    },
+    {
+      "url": "https://github.com/vllm-project/vllm-omni/blob/79a46a4f5471e7b8f3ce093d0cf0b94ba7264c04/recipes/SenseNova/SenseNova-U1.5.md"
+    },
+    {
+      "url": "https://github.com/NVlabs/edm/blob/62072d2612c7da05165d6233d13d17d71f213fee/generate.py"
+    }
+  ],
+  "limits": [
+    "No experiment reproduction",
+    "EDM full paper not read in this edition; official code and abstract verified",
+    "FlashAttention PDF revision not confirmed",
+    "Public PDF download approval timed out twice; download did not execute",
+    "Raw search traces retained in working directory; public record includes concise selected candidates rather than republishing search snippets"
+  ]
+}

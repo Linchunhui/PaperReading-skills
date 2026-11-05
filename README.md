@@ -43,7 +43,7 @@
 
 ### 专题直达
 
-- [图像生成 · 推理加速](https://linchunhui.github.io/PaperReading-skills/examples/Topics/image-generation-acceleration/) · 72项资料、25张原图；成本口径、选型与深浅主题
+- [图像生成 · 推理加速](https://linchunhui.github.io/PaperReading-skills/examples/Topics/image-generation-acceleration/) · 39篇2025–2026重点论文、七条问题路线、八篇经典基础；27组原图与深浅主题
 
 - [RSI：递归自我改进](https://linchunhui.github.io/PaperReading-skills/examples/Topics/rsi-knowledge-system.html) · [SVG 知识图](https://linchunhui.github.io/PaperReading-skills/examples/Topics/rsi-knowledge-map.svg)
 - [投机解码：草稿、验证与预算](https://linchunhui.github.io/PaperReading-skills/examples/Topics/speculative-decoding-topic.html) · [SVG 知识图](https://linchunhui.github.io/PaperReading-skills/examples/Topics/speculative-decoding-map.svg)
