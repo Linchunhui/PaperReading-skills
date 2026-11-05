@@ -43,6 +43,8 @@
 
 ### 专题直达
 
+- [22个研究专题 · 知识体系](https://linchunhui.github.io/PaperReading-skills/examples/Topics/knowledge-systems-22-20261105/) · 从背景与前序到问题树、方法机制和实验边界，覆盖 Agent、生成模型、多模态、具身与后训练。
+
 - [图像生成 · 推理加速](https://linchunhui.github.io/PaperReading-skills/examples/Topics/image-generation-acceleration/) · 39篇2025–2026重点论文、七条问题路线、八篇经典基础；30组原图与深浅主题
 
 - [RSI：递归自我改进](https://linchunhui.github.io/PaperReading-skills/examples/Topics/rsi-knowledge-system.html) · [SVG 知识图](https://linchunhui.github.io/PaperReading-skills/examples/Topics/rsi-knowledge-map.svg)

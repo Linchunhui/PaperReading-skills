@@ -1,0 +1,579 @@
+{
+  "title": "22个研究专题 · 知识体系",
+  "cutoff": "2026-11-05",
+  "topic_count": 22,
+  "topics": [
+    {
+      "id": "harness-system",
+      "title": "Agent Harness：从运行状态到可靠演进",
+      "field": "Harness",
+      "question": "从一次多步任务出发，讲清状态放在哪里、工具怎样执行、失败如何恢复，以及怎样用轨迹改进系统。",
+      "href": "topics/harness-system/index.html"
+    },
+    {
+      "id": "agent-general",
+      "title": "Agent通用机制：行动、记忆与协作",
+      "field": "Agent",
+      "question": "围绕同一条行动轨迹，解释如何拆任务、使用工具、保留经验和协调多个执行者。",
+      "href": "topics/agent-general/index.html"
+    },
+    {
+      "id": "agent-tasks",
+      "title": "任务型Agent：从仓库修复到完整交付",
+      "field": "Agent",
+      "question": "沿环境中的观测、行动与验收，比较通用机制在代码、电脑操作和数据任务中的具体落点。",
+      "href": "topics/agent-tasks/index.html"
+    },
+    {
+      "id": "research-system",
+      "title": "Deep Research：从搜索到可追溯结论",
+      "field": "Deep Research",
+      "question": "用一次专题调研讲清怎样搜得全、读得准、识别分歧并有依据地停止，最终形成按问题组织的报告。",
+      "href": "topics/research-system/index.html"
+    },
+    {
+      "id": "image-foundation",
+      "title": "图像生成基模",
+      "field": "图像生成",
+      "question": "从视觉表示、生成目标和主干结构讲起，再解释数据与后训练怎样影响质量、遵从和能力边界。",
+      "href": "topics/image-foundation/index.html"
+    },
+    {
+      "id": "image-control-edit",
+      "title": "图像可控生成与编辑",
+      "field": "图像生成",
+      "question": "在给定结构、参考图或输入图像后，怎样完成要求的改动，同时保持主体、布局及未修改内容？",
+      "href": "topics/image-control-edit/index.html"
+    },
+    {
+      "id": "image-design",
+      "title": "图中文字与版式设计",
+      "field": "图像生成",
+      "question": "围绕“文字正确、布局可控、视觉协调”的设计交付，比较直接生成、先规划后渲染和混合流水线。",
+      "href": "topics/image-design/index.html"
+    },
+    {
+      "id": "video-model",
+      "title": "视频生成基模与长视频",
+      "field": "视频生成",
+      "question": "从时空表示和条件建模进入长视频，解释因果生成、自身历史训练、缓存与持续输出的关系。",
+      "href": "topics/video-model/index.html"
+    },
+    {
+      "id": "video-control-edit",
+      "title": "视频可控生成与编辑",
+      "field": "视频生成",
+      "question": "把相机、主体、故事与声音看作随时间变化的约束，解释如何控制、修改并维持整段连贯性。",
+      "href": "topics/video-control-edit/index.html"
+    },
+    {
+      "id": "document-parsing",
+      "title": "文档解析：从页面像素到可靠结构",
+      "field": "文档解析",
+      "question": "以一份复杂 PDF 为线索，解释流水线与端到端模型怎样处理识别、结构、跨页连接、属性和评测。",
+      "href": "topics/document-parsing/index.html"
+    },
+    {
+      "id": "multimodal-core",
+      "title": "多模态理解：感知、接地与证据推理",
+      "field": "多模态理解",
+      "question": "追踪视觉输入如何进入语言主干，先找到有效证据，再解释推理、幻觉和训练改动发生在哪一层。",
+      "href": "topics/multimodal-core/index.html"
+    },
+    {
+      "id": "multimodal-context",
+      "title": "多图、长视频与空间多模态理解",
+      "field": "多模态理解",
+      "question": "当证据分散在不同图像、时刻或视角时，怎样选择、记忆和组合信息并给出可定位的回答？",
+      "href": "topics/multimodal-context/index.html"
+    },
+    {
+      "id": "unified-model",
+      "title": "多模态统一理解与生成：表示、目标与专家分工",
+      "field": "多模态统一理解和生成",
+      "question": "从同一张图的识别、解释、修改和再验证出发，比较共享与分离路径、视觉表示及自回归与扩散混合。",
+      "href": "topics/unified-model/index.html"
+    },
+    {
+      "id": "world-main",
+      "title": "世界模型：从未来预测到可执行的想象",
+      "field": "世界模型",
+      "question": "用同一个可行动场景连接世界状态、动作条件预测、可交互生成和闭环规划，明确预测正确到行动有效之间的条件。",
+      "href": "topics/world-main/index.html"
+    },
+    {
+      "id": "embodied-vla",
+      "title": "具身VLA：从视觉指令到可迁移的动作策略",
+      "field": "具身智能",
+      "question": "从视觉和指令生成可执行动作，串起动作头、跨本体数据、模仿学习、在线强化学习和实时执行。",
+      "href": "topics/embodied-vla/index.html"
+    },
+    {
+      "id": "embodied-interaction",
+      "title": "具身接触与全身操作：触觉闭环、预测与协调",
+      "field": "具身智能",
+      "question": "从精细接触到全身平衡，解释感知、动作接口和失败恢复怎样共同约束可执行的操纵策略。",
+      "href": "topics/embodied-interaction/index.html"
+    },
+    {
+      "id": "architecture-main",
+      "title": "基础模型架构：状态与计算如何组织",
+      "field": "基础模型架构",
+      "question": "围绕历史信息存在哪里、何时读取以及计算怎样分配，串起注意力、递推状态、MoE 和循环深度。",
+      "href": "topics/architecture-main/index.html"
+    },
+    {
+      "id": "rl-main",
+      "title": "后训练强化学习：目标、更新与系统",
+      "field": "后训练强化学习",
+      "question": "沿采样、评分、优势估计、策略更新和系统执行组织一篇主线，连接 PPO/GRPO、偏好目标和长程 Agent 训练。",
+      "href": "topics/rl-main/index.html"
+    },
+    {
+      "id": "opd-main",
+      "title": "OPD：学生轨迹上的在线蒸馏",
+      "field": "后训练 OPD",
+      "question": "用同一条学生轨迹把采样、教师评分、分布对齐和更新串起来，比较变体各自改变哪一步。",
+      "href": "topics/opd-main/index.html"
+    },
+    {
+      "id": "diffusion-main",
+      "title": "Diffusion LLM：从去掩码到多模态",
+      "field": "Diffusion LLM / VLM",
+      "question": "以扩散语言主干为主轴，覆盖纯文本、视觉理解和统一多模态生成，并解释并行解码、纠错与后训练。",
+      "href": "topics/diffusion-main/index.html"
+    },
+    {
+      "id": "inference-main",
+      "title": "LLM推理加速：从一次前向到整套服务",
+      "field": "推理加速",
+      "question": "围绕文本生成请求，比较投机解码、KV 管理、模型压缩、算子与服务调度怎样降低延迟和单位有效 token 成本。",
+      "href": "topics/inference-main/index.html"
+    },
+    {
+      "id": "image-acceleration",
+      "title": "图像生成推理加速",
+      "field": "推理加速",
+      "question": "围绕一次完整出图任务，比较减少生成步数、复用中间计算、降低每步成本和部署优化，在相同质量目标下怎样节省时间与显存。",
+      "href": "topics/image-acceleration/index.html"
+    }
+  ],
+  "files": [
+    {
+      "path": "index.html",
+      "bytes": 20540,
+      "sha256": "19c1beb750c13f81110b9551efe1f98e375973c62e5ee03f225c0dfee633eeae"
+    },
+    {
+      "path": "topics/agent-general/index.html",
+      "bytes": 688370,
+      "sha256": "facccd8e85cf582675353922f8556651ad1bb2a60a845d5fcd9a9beb92d91d02"
+    },
+    {
+      "path": "topics/agent-general/legacy.html",
+      "bytes": 693075,
+      "sha256": "e85098702d0ec868178cb18a6862a357e5ebcef5743e1e64621036fbeb301f66"
+    },
+    {
+      "path": "topics/agent-tasks/index.html",
+      "bytes": 891920,
+      "sha256": "9ac73f1c884e7a14638ed936274034fb7c8dba07cccbc415f04f97486fb704e9"
+    },
+    {
+      "path": "topics/agent-tasks/legacy.html",
+      "bytes": 899713,
+      "sha256": "c94e278d2b27b14b81f6229e4ed2e9bb5779e215e972c6b606f967a8242c68c7"
+    },
+    {
+      "path": "topics/architecture-main/index.html",
+      "bytes": 3561606,
+      "sha256": "2008cbb8dc44baf807aa6e836b8b932006f83c2168881bdb559b6af60b9d69d0"
+    },
+    {
+      "path": "topics/diffusion-main/deep-reading.html",
+      "bytes": 4120665,
+      "sha256": "25585e901b245565ba5e4c87eee411221709602a705bbc2a05443131ff2bf52e"
+    },
+    {
+      "path": "topics/diffusion-main/deep-reading.svg",
+      "bytes": 26781,
+      "sha256": "6814e43956f13bf7b8f862aa091325734e4cedbe338cb64a5b8a30f2d411e162"
+    },
+    {
+      "path": "topics/diffusion-main/index.html",
+      "bytes": 3407920,
+      "sha256": "d188e7184b4333463fdd9da9f769088f74f8f7598a6d90e552a55e18fa62f629"
+    },
+    {
+      "path": "topics/document-parsing/index.html",
+      "bytes": 1129636,
+      "sha256": "034806cecc39d0f8e4c7382b2e0ba04aed7dd450f80e143a564502a6dc9a789b"
+    },
+    {
+      "path": "topics/embodied-interaction/index.html",
+      "bytes": 2297164,
+      "sha256": "c11ff68c48b94aa3eda67889fd59591be5ebbb1dae645b959d76fba3aae42a73"
+    },
+    {
+      "path": "topics/embodied-vla/index.html",
+      "bytes": 584013,
+      "sha256": "1fccb7a36ca3d0ed863c6c69b37a35784d540b4eea038caaad88431823b93086"
+    },
+    {
+      "path": "topics/harness-system/index.html",
+      "bytes": 618788,
+      "sha256": "ab241d3eda1aab9b38b8209fe966bf12f6decd8156f555f8a550500f4ae6be70"
+    },
+    {
+      "path": "topics/harness-system/legacy.html",
+      "bytes": 623252,
+      "sha256": "aca3d3c369970283a00626ef39fbd41392daec8e40f2819d0bf5cf1115c43db9"
+    },
+    {
+      "path": "topics/image-acceleration/index.html",
+      "bytes": 460588,
+      "sha256": "60acc5d903df6f33c501e89705ceb75f96a5c33dc0aab5479a1732b2ca141993"
+    },
+    {
+      "path": "topics/image-acceleration/remote-baseline/NOTICE.md",
+      "bytes": 1541,
+      "sha256": "a28e871832cf6d8f2e7dcd520068aa6690c3e185e24e51a9962a576e7379a6eb"
+    },
+    {
+      "path": "topics/image-acceleration/remote-baseline/benchmark-template.csv",
+      "bytes": 557,
+      "sha256": "a1a708640a6e52fb37c5c3bfdd253d2d940b995ace1eec83c6b7a439dfd507e7"
+    },
+    {
+      "path": "topics/image-acceleration/remote-baseline/diagrams/caching.svg",
+      "bytes": 4174,
+      "sha256": "9f9ef6d0e464936e6c6e1d8c0827e3a836d63ade7ba93b4d0f1f7027b74308c3"
+    },
+    {
+      "path": "topics/image-acceleration/remote-baseline/diagrams/compression.svg",
+      "bytes": 4195,
+      "sha256": "79360d01c3e555d763f8d4d777f0320dcaa08c938465871a7c7f28ea73fbc856"
+    },
+    {
+      "path": "topics/image-acceleration/remote-baseline/diagrams/deployment.svg",
+      "bytes": 2718,
+      "sha256": "9b704b8e67aa1800a191f24115016048926d956651b9c0ec77ebaabacfe89f5f"
+    },
+    {
+      "path": "topics/image-acceleration/remote-baseline/diagrams/fewstep.svg",
+      "bytes": 22227,
+      "sha256": "6499fe03028e00d05ec238dbba035210924f228813daa6d15552464e45435e85"
+    },
+    {
+      "path": "topics/image-acceleration/remote-baseline/diagrams/solvers.svg",
+      "bytes": 4166,
+      "sha256": "bd3840b376fe1f04c19c0a8f44fdcc8e0f7a309781b17bc89ca3f6c67b933ea4"
+    },
+    {
+      "path": "topics/image-acceleration/remote-baseline/diagrams/spatial.svg",
+      "bytes": 7130,
+      "sha256": "afdff181c6cdc4c24a1bf21c88056da9463e98a00affc6dab16a9dc48c82b5c0"
+    },
+    {
+      "path": "topics/image-acceleration/remote-baseline/figures/2311.05556-fig1-v3edition.png",
+      "bytes": 42195,
+      "sha256": "a562ede3a05602b33224797eebc7e8d3d042f9c002caf2506552f7741a79b5e7"
+    },
+    {
+      "path": "topics/image-acceleration/remote-baseline/figures/2404.13686-fig2.png",
+      "bytes": 82943,
+      "sha256": "1abbcd5e9d633b820b209aab21fab99bcd6c4c95e4acbd270f136b099a471800"
+    },
+    {
+      "path": "topics/image-acceleration/remote-baseline/figures/2404.14507-fig2-v3edition.png",
+      "bytes": 263472,
+      "sha256": "430672be6d4e715105bbdcac66444368fde10f1353ed7d8c4251929f05100f55"
+    },
+    {
+      "path": "topics/image-acceleration/remote-baseline/figures/2410.10629-fig2.png",
+      "bytes": 42118,
+      "sha256": "84aa5e6ffe2dfdef7d8134c515183498d20e7aeb641fef7705d746da40e6f634"
+    },
+    {
+      "path": "topics/image-acceleration/remote-baseline/figures/2410.10733-fig1-v3edition.png",
+      "bytes": 38547,
+      "sha256": "69be05397ffd27ea7a2bf30ebdf932cf48eb37ef52992b60de7a618e01110178"
+    },
+    {
+      "path": "topics/image-acceleration/remote-baseline/figures/2411.05007-fig3.png",
+      "bytes": 65332,
+      "sha256": "c9ad8e74ce20cb275bb2625641e3d8b216df7d4e40f5198f0595d027f70be562"
+    },
+    {
+      "path": "topics/image-acceleration/remote-baseline/figures/2501.15420-fig3.png",
+      "bytes": 38374,
+      "sha256": "45a0da19885cf08b31a5f33d7e6ac25399bbe1dd98cdfdb4167fc328a0dddcde"
+    },
+    {
+      "path": "topics/image-acceleration/remote-baseline/figures/2505.21136-fig1-v3edition.png",
+      "bytes": 72315,
+      "sha256": "0ea4a9cd4bb6af8a466a851ff365ab1154a1c87c78b0087ae441c3f5b80feddb"
+    },
+    {
+      "path": "topics/image-acceleration/remote-baseline/figures/2506.14603-fig2-v3edition.png",
+      "bytes": 109083,
+      "sha256": "ceee02b78ac6fe7c3f3c65cf1701a53fd86c496171c8da894136444ad4445c29"
+    },
+    {
+      "path": "topics/image-acceleration/remote-baseline/figures/2506.16054-fig3-v3edition.png",
+      "bytes": 202796,
+      "sha256": "81d75017a0cd56c8f2c446ec0c328be569fe21584aa629ec2321ca3d1635cb90"
+    },
+    {
+      "path": "topics/image-acceleration/remote-baseline/figures/2510.27684-fig1.png",
+      "bytes": 83783,
+      "sha256": "4dba382343f0665d6a832b13ebf1869490475dd392724b3a10682c0bc6cc9757"
+    },
+    {
+      "path": "topics/image-acceleration/remote-baseline/figures/2511.20549-fig2-v3edition.png",
+      "bytes": 500751,
+      "sha256": "93c826d27ed282592603ee49401742f03b26a5ecb6ae8745ce469a364e82eebe"
+    },
+    {
+      "path": "topics/image-acceleration/remote-baseline/figures/2511.22677-fig1.png",
+      "bytes": 265517,
+      "sha256": "16369040b5c2f14e7015c55865ca2b1e35db39f8910a2b708d766d0b8d4d0f5a"
+    },
+    {
+      "path": "topics/image-acceleration/remote-baseline/figures/2512.02899-fig2-v3edition.png",
+      "bytes": 233725,
+      "sha256": "6971599df62c56ab04505907b0ba1933b89494e4349821de7d4350a9dc7c11cb"
+    },
+    {
+      "path": "topics/image-acceleration/remote-baseline/figures/2512.05150-fig2-v3edition.png",
+      "bytes": 99606,
+      "sha256": "2874feca09f5cc28ce5686bbb250571e86ff07b6b0008b1e8c6dd676a6c427b2"
+    },
+    {
+      "path": "topics/image-acceleration/remote-baseline/figures/2602.03139-fig2-v3edition.png",
+      "bytes": 224673,
+      "sha256": "48fb30801678f0b218e7244fec1e491fcd3bc7048fdc9873085d40e5cd261ef6"
+    },
+    {
+      "path": "topics/image-acceleration/remote-baseline/figures/2602.16968-fig2-v3edition.png",
+      "bytes": 853605,
+      "sha256": "64a67d2120fcedd5a0ad02462a228bf13b191ecc22be4f3b7adf94aaa1836c3f"
+    },
+    {
+      "path": "topics/image-acceleration/remote-baseline/figures/2605.06376-fig4.png",
+      "bytes": 305811,
+      "sha256": "c15687ca54890c1f4c83096c12670bfde2bef51c7f85d0e306e85eae7edbb8ec"
+    },
+    {
+      "path": "topics/image-acceleration/remote-baseline/figures/2607.19064-fig13.png",
+      "bytes": 256227,
+      "sha256": "3a320f46aaba24f9a84620428f253b9215a880d0fb9c19f48e93117856fa6074"
+    },
+    {
+      "path": "topics/image-acceleration/remote-baseline/figures/2607.26004-fig2-v3edition.png",
+      "bytes": 25813,
+      "sha256": "cee610e49fe6256a1cc3def35a04505f314d184d762f013f63b63c399f865569"
+    },
+    {
+      "path": "topics/image-acceleration/remote-baseline/figures/dcgen-figure-3.png",
+      "bytes": 187671,
+      "sha256": "a12dfecd29b5b9e321ff06d6f8e8bb15ea3d6b2cac86e72f4da878a5fbef2ce5"
+    },
+    {
+      "path": "topics/image-acceleration/remote-baseline/figures/distrifusion-figure-3.png",
+      "bytes": 238534,
+      "sha256": "f8c6bab358e45e6fa7271de27350979601980402ea6c9d9880c687c65f33f9d4"
+    },
+    {
+      "path": "topics/image-acceleration/remote-baseline/figures/orbitquant-figure-2.png",
+      "bytes": 232536,
+      "sha256": "fde6e1a96d3506887a2a75d1ea6afddc442946dadaca2fda8761cac5e277845b"
+    },
+    {
+      "path": "topics/image-acceleration/remote-baseline/figures/pid-figure-3.png",
+      "bytes": 224439,
+      "sha256": "e4a653646a5e553d4ece4968f3a6f77d036f8161d7aef825737a4dc89ee68e09"
+    },
+    {
+      "path": "topics/image-acceleration/remote-baseline/figures/skrr-figure-2.png",
+      "bytes": 181466,
+      "sha256": "7c613fb2f071d01674382a1cdd310b02dc56b03a1b5cee09ac62949e8a45a218"
+    },
+    {
+      "path": "topics/image-acceleration/remote-baseline/index.html",
+      "bytes": 3153857,
+      "sha256": "d8f95c9ee0be3dba545f5d38f993d178aa261a3dce27a9a06ad16b98742374a4"
+    },
+    {
+      "path": "topics/image-acceleration/remote-baseline/provenance/data/candidate-catalog.json",
+      "bytes": 1170348,
+      "sha256": "e95a5d012c2c408c513e0731b2b2c9417f0a2647ec6f5ea4730219104d7910da"
+    },
+    {
+      "path": "topics/image-acceleration/remote-baseline/provenance/figures-manifest.json",
+      "bytes": 28989,
+      "sha256": "dabd4419f403d713339a675c4ce051207b9b8fb0ec4422016a615cdcddf47fcf"
+    },
+    {
+      "path": "topics/image-acceleration/remote-baseline/provenance/local/all-candidate-statuses.json",
+      "bytes": 279174,
+      "sha256": "29e28b5dd34daee061c010bec2cd764f7d5a2a3107f1d29aa546ec70ce8c7a8b"
+    },
+    {
+      "path": "topics/image-acceleration/remote-baseline/provenance/local/local-recall-audit.json",
+      "bytes": 4235,
+      "sha256": "118023f96ba55588d7ff69e9b21f8b4888fdbd47997da1ff9cc7c7366f19d051"
+    },
+    {
+      "path": "topics/image-acceleration/remote-baseline/provenance/qa/independent-review.json",
+      "bytes": 7581,
+      "sha256": "5dcb001ecc09cb885b385cf3a02526c5d67a7b1dbad2cdc36f2a7debd4cddd6f"
+    },
+    {
+      "path": "topics/image-acceleration/remote-baseline/provenance/research-summary.json",
+      "bytes": 26838,
+      "sha256": "4df1db56e5248c26f75c1cc5679f8e0928dcbe68bc4adc4d8e6f0eaa37d32bfb"
+    },
+    {
+      "path": "topics/image-acceleration/remote-baseline/provenance/research/round-audit.json",
+      "bytes": 18186,
+      "sha256": "76538d286ecc321623aeb2c5e3c592d93cb9ece50da3d273ff3e31414c470f45"
+    },
+    {
+      "path": "topics/image-acceleration/remote-baseline/provenance/source-manifest.json",
+      "bytes": 70731,
+      "sha256": "8d60bfba4562dbc49460acdd1e7a4cfeb5dda1844b65e46ce54c61b36d9fb19f"
+    },
+    {
+      "path": "topics/image-acceleration/remote-baseline/provenance/topic.json",
+      "bytes": 278766,
+      "sha256": "7dec58a97a7a46e9452dce1c8531043239f36ee7b4c999c6d087bcfff8e10d1b"
+    },
+    {
+      "path": "topics/image-acceleration/remote-baseline/theme.css",
+      "bytes": 8815,
+      "sha256": "9c92f06b2d612586a39227a8d8d374b985deef344d60c6feaae22758b2c8a520"
+    },
+    {
+      "path": "topics/image-acceleration/remote-baseline/theme.js",
+      "bytes": 732,
+      "sha256": "b0912f950d27817f9570bbfc9d2c6b6448ae0195e9cee457769ceff943443ad2"
+    },
+    {
+      "path": "topics/image-control-edit/baseline.html",
+      "bytes": 4252305,
+      "sha256": "f4d022a9557056e99380314da4a1d87c141177cea1ff35ffe8d60c66fb271bfa"
+    },
+    {
+      "path": "topics/image-control-edit/index.html",
+      "bytes": 396102,
+      "sha256": "9b617e8f8048d9a089ef1dc8308673704e11a214f5f3866a6e8aba68e67bc9cd"
+    },
+    {
+      "path": "topics/image-design/baseline.html",
+      "bytes": 2241405,
+      "sha256": "48c6018b9216b108f5b669577ca2beb2fba8e39c6c47abcfc4dfe64a3f35575d"
+    },
+    {
+      "path": "topics/image-design/index.html",
+      "bytes": 428726,
+      "sha256": "6382c1e86dfaed9d69cf106ac353dabc0729830862596a9ecc0f2d7cfc1d3925"
+    },
+    {
+      "path": "topics/image-foundation/baseline.html",
+      "bytes": 6596123,
+      "sha256": "3feeecf742732bca65045607851d7e6a6750c0ccf60b511262f2e1df36b385e7"
+    },
+    {
+      "path": "topics/image-foundation/index.html",
+      "bytes": 432820,
+      "sha256": "ff2933db3f6e1283ec9331340c135803d9c27e5314a480f90faa2e3ed1f6f023"
+    },
+    {
+      "path": "topics/inference-main/index.html",
+      "bytes": 8597732,
+      "sha256": "50489fe8b31fa868c5d080f43b8feab6bfe64c6c080dd1190673868a7f69a87a"
+    },
+    {
+      "path": "topics/multimodal-context/index.html",
+      "bytes": 629288,
+      "sha256": "e6c53876f747a72ed1862b5a7015011fb8ed7c96b662cd3db5d9eaea05c53ecb"
+    },
+    {
+      "path": "topics/multimodal-core/index.html",
+      "bytes": 979315,
+      "sha256": "ee599b25d917d19b7bc11ed5d00c328b83a7ca80aa54cb83939604896fb1ae05"
+    },
+    {
+      "path": "topics/opd-main/deep-reading.html",
+      "bytes": 4506659,
+      "sha256": "f89783d66126f7869145a73b8c12c075c6d5237e006f9f3da07e04abf7b76cdf"
+    },
+    {
+      "path": "topics/opd-main/deep-reading.svg",
+      "bytes": 24584,
+      "sha256": "3737ec72353a0677723bb597b2b87d430e08fc35180aa332333aeee9d35a84a9"
+    },
+    {
+      "path": "topics/opd-main/index.html",
+      "bytes": 3641210,
+      "sha256": "902d3d6fbf171bff0d7ce83e49f629ed8cd3dd6d2f5b030d1bc5c521a5b743a7"
+    },
+    {
+      "path": "topics/research-system/index.html",
+      "bytes": 832260,
+      "sha256": "5f2d639e92a5edd08e6cfead0c96d8b054d34a7fef4a1926204614e90efffae0"
+    },
+    {
+      "path": "topics/research-system/legacy.html",
+      "bytes": 838104,
+      "sha256": "4297192ad1d88c430540ae230105d703a89eaf72a540e2d077afb9ac6e298744"
+    },
+    {
+      "path": "topics/rl-main/deep-reading.html",
+      "bytes": 2231961,
+      "sha256": "31cfdae9f80cab516b0fc35f097e81f3cb5da68fd42cae15c66fcddf096736f7"
+    },
+    {
+      "path": "topics/rl-main/deep-reading.svg",
+      "bytes": 27414,
+      "sha256": "ff163a53f467a00eebe4304a4d7c7563ac5505a1df7b547fa734b1793ac32e04"
+    },
+    {
+      "path": "topics/rl-main/index.html",
+      "bytes": 652979,
+      "sha256": "7b892ecca5cc345df86af9ef9fdd5d5a9c9093309fd11cbcd68f216f609208a0"
+    },
+    {
+      "path": "topics/unified-model/index.html",
+      "bytes": 775007,
+      "sha256": "f70fe78107cc93e30a2815ad3dd5de5d1e5954e8aa56b589a720687f3c58a584"
+    },
+    {
+      "path": "topics/video-control-edit/baseline.html",
+      "bytes": 5072279,
+      "sha256": "75f81d75b10d8a7be9022bb68d98b570f73f90e0ad3428f2cf7976719f3418d1"
+    },
+    {
+      "path": "topics/video-control-edit/index.html",
+      "bytes": 815215,
+      "sha256": "ddb1f18e6f4518911e13ccc0b6c5addbba182b8549329da29dc7c2e5f10b3e2d"
+    },
+    {
+      "path": "topics/video-model/baseline.html",
+      "bytes": 4798257,
+      "sha256": "d927a3d0b2982797d452f41d02e4ea2c5f8b0b3e6251cc5ee763f75f866d57db"
+    },
+    {
+      "path": "topics/video-model/index.html",
+      "bytes": 276279,
+      "sha256": "42f8d4d13a2f7cb7127effff178e418481fc3983927154495e8df687fc741c56"
+    },
+    {
+      "path": "topics/world-main/index.html",
+      "bytes": 543094,
+      "sha256": "6fa0ae53377aaefd7ad177bc91cbf923ed85444d3e69d725e3e4277efc11c8bc"
+    }
+  ],
+  "offline_scope": "Report text and embedded figures; primary paper URLs require network."
+}
