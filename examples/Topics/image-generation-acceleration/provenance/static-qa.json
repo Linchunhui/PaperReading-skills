@@ -1,0 +1,13 @@
+{
+  "papers": 72,
+  "retained_original_papers": 64,
+  "retained_core_text_blocks": true,
+  "images": 25,
+  "internal_and_relative_links": "passed",
+  "unique_ids": 140,
+  "image_hashes": "passed",
+  "private_paths": "none",
+  "minimum_palette_contrast": 4.75,
+  "original_sha256": "5782641a862c25c93b21b560e99bc138ef4aaaf0bb975d31411814bbc03d51e2",
+  "browser_qa": "pending published URL"
+}

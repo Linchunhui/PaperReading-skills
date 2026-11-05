@@ -43,10 +43,12 @@
 
 ### 专题直达
 
+- [图像生成 · 推理加速](https://linchunhui.github.io/PaperReading-skills/examples/Topics/image-generation-acceleration/) · 72项资料、25张原图；成本口径、选型与深浅主题
+
 - [RSI：递归自我改进](https://linchunhui.github.io/PaperReading-skills/examples/Topics/rsi-knowledge-system.html) · [SVG 知识图](https://linchunhui.github.io/PaperReading-skills/examples/Topics/rsi-knowledge-map.svg)
 - [投机解码：草稿、验证与预算](https://linchunhui.github.io/PaperReading-skills/examples/Topics/speculative-decoding-topic.html) · [SVG 知识图](https://linchunhui.github.io/PaperReading-skills/examples/Topics/speculative-decoding-map.svg)
 
-两个专题保留完整正文、内嵌论文原图与来源。公开版仅将原调研笔记的私人文件链接改为笔记名称，论文原文链接保留。历史[投机解码演化串讲](https://linchunhui.github.io/PaperReading-skills/examples/speculative-decoding-evolution.html)继续保留。
+三个专题保留完整正文、内嵌论文原图与来源。公开版仅将原调研笔记的私人文件链接改为笔记名称，论文原文链接保留。历史[投机解码演化串讲](https://linchunhui.github.io/PaperReading-skills/examples/speculative-decoding-evolution.html)继续保留。
 
 ## 专题研究
 
@@ -166,3 +168,4 @@ python3 scripts/html_to_markdown.py "output.html" --compact --max-chars 0
 ## License
 
 MIT，见 [LICENSE](LICENSE)。
+
