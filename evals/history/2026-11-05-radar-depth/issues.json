@@ -1,0 +1,62 @@
+[
+  {
+    "id": "RADAR-DEPTH-01",
+    "trigger": "多篇雷达中“紧凑/最小完整”优先于讲通机制",
+    "output_excerpt": "旧规范：Radar gives compact but complete explanations；雷达消融通常用简短结果要点。",
+    "source_location": "基线 SKILL.md、references/per-paper-deep-read.md、references/radar.md",
+    "root_cause_hypothesis": "主线覆盖要求已有，但未规定逐篇备课、实际复述与先保存再合并，容易省掉关键连接。",
+    "revision": "新增 radar-writing；区分证据缺口与解释缺口，方法/实验优先写作，逐篇复述与回查后保存。统一相关入口措辞。",
+    "retest": "五例基线/候选各 35/35；R6 放在六篇末尾仍可复述。W44 同材料改写完成；未观察到成对分数提升。",
+    "recurrence": "本组未出现关键机制缩水；未证明一般场景消除该问题。"
+  },
+  {
+    "id": "RADAR-DEPTH-02",
+    "trigger": "本轮原论文访问被网络策略阻断",
+    "output_excerpt": "arXiv CONNECT 403；旧报告含“已核对方法”等历史声明。",
+    "source_location": "保留 W44 原稿的逐篇核验范围；materials/*/source-record.md",
+    "root_cause_hypothesis": "复用上游解读时容易把历史核验转述为当前已读全文。",
+    "revision": "报告及各篇标明上游材料改写、全文未重新核验；保留历史来源定位，禁止补造机制/结果，教学例子单独标注。",
+    "retest": "独立审查 13 篇正文与 13 张保留原图，0 未解决问题。",
+    "recurrence": "当前材料边界保留；新全文取证仍 blocked，未绕过网络策略。"
+  },
+  {
+    "id": "RADAR-DEPTH-03",
+    "trigger": "候选 single 的美元数值被带数学扩展的 GFM 当公式",
+    "output_excerpt": "$1,230 等三个货币美元符号",
+    "source_location": "regression/candidate/single/single.generated.md；fixture A 的成本数据",
+    "root_cause_hypothesis": "美元符号与数学定界符歧义，属于产物展示问题。",
+    "revision": "仅将三处字面美元符号转义；保留原始生成稿及 presentation-fixes.json；未修改技能规则。",
+    "retest": "独立评审核对仅新增三处反斜杠；重新预览 mathml=0，桌面/手机无溢出。",
+    "recurrence": "当前产物已修正；不作为技能生成改善计分。"
+  },
+  {
+    "id": "RADAR-DEPTH-04",
+    "trigger": "W44 扩写中三处措辞边界",
+    "output_excerpt": "LOWN：足够多的候选持续一致；PDRVLA：RGB、深度与光流伪标签；L3G：更新几何后，独立的 lifting 分支。",
+    "source_location": "相应上游 source-record.md 与保留原图；w44-content-review.json",
+    "root_cause_hypothesis": "压缩术语和连接词可引入集合、标签归属或时间顺序歧义。",
+    "revision": "明确 LOWN 的置信度排序候选前缀；区分 RGB 图像和深度/光流伪标签；删除 L3G 未获支持的先后关系。",
+    "retest": "独立审查逐项 resolved_and_rechecked，记录现行文字、依据及正文哈希。",
+    "recurrence": "当前 13 篇审查无未解决问题；结论限于上游材料忠实性。"
+  },
+  {
+    "id": "RADAR-DEPTH-05",
+    "trigger": "完整新版的放大弹窗在初始化时包含无 src 的 img",
+    "output_excerpt": "视觉检查：15 images，1 broken；正文实际 14 张图片均可加载。",
+    "source_location": "评审交付的 build_reports.py ZOOM 模板",
+    "root_cause_hypothesis": "提前创建空图片节点使资源检查出现真实空资源。",
+    "revision": "打开弹窗时才创建图片并赋值；未修改原始图像或论文正文。",
+    "retest": "完整新版 14 images、0 broken；比较页 13 篇、方法定位、放大、手机切换、独立评价状态与 JSON 导出实际通过。",
+    "recurrence": "最终展示检查通过。"
+  },
+  {
+    "id": "RADAR-DEPTH-06",
+    "trigger": "下载后对照页为空。",
+    "output_excerpt": "禁用脚本时，旧页面两个 iframe 均为空。",
+    "source_location": "comparison-template.html 的 entries-data/show()；compatibility-fix/original-comparison.html",
+    "root_cause_hypothesis": "交付依赖脚本执行且没有静态正文回退。上一轮检查只覆盖脚本可执行的浏览器，未覆盖受限下载预览。",
+    "revision": "将 13 篇、26 份新旧正文和 26 张配图直接写入 HTML，移除脚本和 iframe；原生锚点导航，桌面并排、手机上下阅读；评价使用 feedback.md。更新构建入口、说明和下载包。",
+    "retest": "断网 + 禁用脚本：13 篇、26 正文、26 图片，0 断图、0 失效锚点、0 重复 ID，桌面和手机无整页溢出；26/26 正文和原图保留。",
+    "recurrence": "修复版通过；用户具体预览器未获知。"
+  }
+]

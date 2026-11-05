@@ -1,0 +1,45 @@
+{
+  "issue_id": "RADAR-DEPTH-06",
+  "user_report": "下载后对照页为空。",
+  "reproduction": "旧文件正文只在 application/json 中，由脚本填入两个 iframe。禁用脚本后实际复现：主页面 0 篇正文，两个 iframe 正文均 0 字符。用户的具体打开程序尚未确认。",
+  "root_cause": "交付依赖脚本执行且没有静态正文回退。上一轮检查只覆盖脚本可执行的浏览器，未覆盖受限下载预览。",
+  "revision": "将 13 篇、26 份新旧正文和 26 张配图直接写入 HTML，移除脚本和 iframe；原生锚点导航，桌面并排、手机上下阅读；评价使用 feedback.md。更新构建入口、说明和下载包。",
+  "verification": {
+    "original_with_scripts_disabled": {
+      "page_paper_bodies": 0,
+      "iframes": 2,
+      "iframe_body_characters": [
+        0,
+        0
+      ]
+    },
+    "fixed": {
+      "scripts_disabled": true,
+      "offline": true,
+      "papers": 13,
+      "bodies": 26,
+      "images": 26,
+      "scripts": 0,
+      "iframes": 0,
+      "desktop_overflow": false,
+      "bad_anchors": [],
+      "duplicate_ids": [],
+      "navigation_positions": {
+        "#old-2610-34283-method": -0.5,
+        "#new-2610-34283-method": 0.34375,
+        "#changes-2610-34283": 0.34375
+      },
+      "mobile_overflow": false,
+      "mobile_all_versions_visible": true,
+      "broken_images": 0
+    },
+    "scope": "Reproduces the old empty paper panes with page scripts disabled. The user opening application is not known. Tests the standalone replacement with scripting disabled and network offline."
+  },
+  "content_preservation": "26/26 正文去空白文本及配图源逐项匹配既有报告；原始报告、新版完整报告与伴随稿哈希未改变。",
+  "original_snapshot": "compatibility-fix/original-comparison.html",
+  "original_sha256": "5df160579f58a195e171aef67820fc5b7aa0cb5fb675fa33a762092d393ff89c",
+  "fixed_file": "W44-radar-comparison-fixed.html",
+  "fixed_sha256": "c8941b45cbbfe851a946b2b5d5b36f292c0ae0a39aedb53dd6d51eda83577b5d",
+  "status": "resolved_in_delivered_static_artifact; exact user preview application not identified",
+  "limits": "No paper content or skill generation rules changed. Prior regression scores are unchanged and do not test the original preview compatibility."
+}

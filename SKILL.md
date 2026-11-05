@@ -28,11 +28,13 @@ Then read the selected references completely:
 
 - **Single:** [references/single-paper.md](references/single-paper.md), the unified structured and teaching workflow.
 - **Series:** [references/series.md](references/series.md) and [references/per-paper-deep-read.md](references/per-paper-deep-read.md).
-- **Radar:** [references/radar.md](references/radar.md), [references/directions.md](references/directions.md), and [references/per-paper-deep-read.md](references/per-paper-deep-read.md).
+- **Radar:** [references/radar.md](references/radar.md), [references/directions.md](references/directions.md), [references/per-paper-deep-read.md](references/per-paper-deep-read.md), and [references/radar-writing.md](references/radar-writing.md). Follow the per-paper preparation, writing, checking and assembly sequence before producing the report overview.
 - **HTML creation/conversion:** [references/wechat-markdown.md](references/wechat-markdown.md), unless the user requests HTML only.
 - **Visuals:** [references/svg-patterns.md](references/svg-patterns.md) for SVGs; [references/layout-patterns.md](references/layout-patterns.md) for multi-paper navigation and body layout.
 
-Single expands mechanisms, examples, formulas and experimental reasoning. Series focuses on relationships around a shared question. Radar gives compact but complete explanations. Separate approach from concrete method and main results from ablation conclusions. Every paper has its own summary; navigation cards and the report-level recap do not replace it.
+Single expands mechanisms, examples, formulas and experimental reasoning. Series focuses on relationships around a shared question. Radar prepares independently understandable explanations for readers with machine-learning foundations who do not yet know each paper's mechanism. Develop the connections needed to recover that mechanism, then remove repetition. Separate approach from concrete method and main results from ablation conclusions. Every paper has its own summary; navigation cards and the report-level recap do not replace it.
+
+For radar, every retained paper body uses these six main headings in this exact order: **背景 → 问题 → 思路 → 方法 → 结果 → 总结**. Keep identity, direction and sources above them. Put main results and ablation/analysis in distinct subsections within 结果; keep the overall applicability and limits in 总结. Develop additional explanation primarily inside 方法 and the key evidence in 结果. Background, problem and approach have separate, concise jobs. Paper-specific teaching titles may be subheadings, not replacements for the six main headings. Single and series retain their own organization. Explicit user formats take priority; source-poor entries retain their visible gaps instead of invented content.
 
 Do not set default total/per-paper word, screen or method-step quotas. Let complexity and the user's requested depth determine length. Finish the understanding chain, then remove repetition and peripheral detail. Never divide a total budget across papers, shorten later papers, or omit selected papers to finish a batch. Explicit requests for short versions or abstract-only output take priority; label their scope.
 
@@ -58,7 +60,7 @@ Read [references/core-figures.md](references/core-figures.md) for the per-paper 
 9. Unless the user requests HTML only, write `{HTML stem}.wechat.md` from the same evidence. Preserve per-paper storyline coverage while removing repetition, navigation and peripheral detail. Keep necessary conditions and exact numbers.
 10. Deliver the requested formats with source coverage and material limitations. Follow the environment's durable-file storage rules; do not deliver intermediate manifests unless requested.
 
-For radar, compute the report key before discovery. Reuse an existing same-name report only if the current scope and content requirements are satisfied and no revision is requested. Otherwise update that report after filling evidence/content gaps. Respect explicit candidate sources and direction boundaries; supplied candidates do not authorize adding unrelated discoveries.
+For radar, compute the report key before discovery. Keep a per-paper work record and save each checked body before assembling the report; follow radar-writing.md for evidence gaps, explanation gaps and retelling checks. Reuse an existing same-name report only if the current scope and content requirements are satisfied and no revision is requested. Otherwise update that report after filling evidence/content gaps. For requested before/after evaluation, preserve the original and write clearly labeled review copies in separate directories. Respect explicit candidate sources and direction boundaries; supplied candidates do not authorize adding unrelated discoveries.
 
 ## Preserve naming and portability
 
@@ -133,6 +135,7 @@ Whenever this package is revised, read [references/skill-iteration.md](reference
 - All supplied and selected papers are accounted for; evidence-poor watch items do not count as completed full-paper reads.
 - Series relations have evidence; shared direction alone is not direct inheritance. Radar reports obey candidate/time/direction boundaries.
 - Content depth matches the mode without fixed quotas or later-paper shrinkage; all batches are assembled.
+- Radar assembly preserves the checked per-paper bodies and selected-paper set, with the six fixed main headings in order. Method and evidence depth belongs within 方法 and 结果; result/analysis subsections remain distinct. Retelling and evidence checks have concrete outcomes; unresolved source gaps remain visible and do not become invented explanations.
 - Every formal paper has an original core figure with source and reading guidance, or an evidence-backed visible exception; figure coverage is checked per paper, not by report totals.
 - HTML naming, embedded images, offline formulas, source links, navigation and mobile layout pass. File validation does not certify semantic completeness.
 - Requested companion Markdown preserves the same papers and core evidence, with mobile-friendly paragraphs, a final reference list and portable assets.

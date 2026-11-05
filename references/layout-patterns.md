@@ -36,7 +36,7 @@ CSS 起手式见 [`../assets/style.css`](../assets/style.css) 的 `.overview-*`�
 
 ## 2. 按篇深读的正文骨架
 
-下面的结构为每篇重复一次，使用唯一前缀；可按论文类型调整自然标题与方法步骤数。所有正文占位内容须写成实际解读，不能把整条机制拆成五句标签。
+下面的结构为每篇重复一次，使用唯一前缀。雷达保留背景、问题、思路、方法、结果、总结六个主标题及顺序，方法与结果的小标题随论文类型和难点调整；步骤数没有配额。串讲可按共同问题调整自然标题。所有正文占位内容须写成实际解读，不能把整条机制拆成五句标签。
 
 ```html
 <article class="chapter p1" id="paper-a">
@@ -45,19 +45,23 @@ CSS 起手式见 [`../assets/style.css`](../assets/style.css) 的 `.overview-*`�
   <p class="meta">{方向/任务 · 关键词 · 问题签名 · 版本与年份} · <a href="{PAPER_URL}">论文原文</a></p>
   <p class="hook">{为什么值得读，保留成立条件}</p>
 
-  <section id="paper-a-mot">
-    <h3>先看一个具体困难</h3>
+  <section id="paper-a-background">
+    <h3>背景</h3>
     <p>{任务输入、期望输出、贯穿全文的实例}</p>
+  </section>
+
+  <section id="paper-a-problem">
+    <h3>问题</h3>
     <p>{最相关旧方案的操作、卡点与后果；交代本篇要解决的目标}</p>
   </section>
 
   <section id="paper-a-approach">
-    <h3>解决思路</h3>
+    <h3>思路</h3>
     <p>{改变哪个环节、为什么可能有效、与最相关前作的差别}</p>
   </section>
 
   <section id="paper-a-met">
-    <h3>拿这个样本走一遍方法</h3>
+    <h3>方法</h3>
     <p>{最小完整路线：起点、关键表示与操作、最终输出}</p>
     <!-- 在这里插入已核验的原图或教学 SVG；图注解释阅读顺序与关键箭头 -->
 
@@ -74,25 +78,23 @@ CSS 起手式见 [`../assets/style.css`](../assets/style.css) 的 `.overview-*`�
   </section>
 
   <section id="paper-a-exp">
-    <h3>实验究竟支持什么</h3>
+    <h3>结果</h3>
+    <h4>关键结果</h4>
     <p>{主结果：任务、基线、预算、指标、精确数字及 Table/Figure 位置}</p>
     <!-- 小表或结果图，用正文解释“看哪里—比什么—支持到哪里” -->
-  </section>
 
-  <section id="paper-a-ablation">
-    <h3>消融与分析结论</h3>
-    <p>{消融或诊断：改变了什么、保持了什么、结果与归因边界；没有则说明缺口}</p>
-  </section>
+    <section id="paper-a-ablation">
+      <h4>关键消融与分析</h4>
+      <p>{消融或相应分析：改变了什么、保持了什么、结果与归因边界；材料不足准确说明缺口}</p>
+    </section>
 
-  <section id="paper-a-limits">
-    <h3>代价和适用边界</h3>
-    <p>{成立条件、成本、未证明部分，区分作者说明与自己的分析}</p>
-    <p>{有核验依据时交代代码/模型/数据状态与核验日期}</p>
+    <h4>成本与比较限制</h4>
+    <p>{与关键结论有关的代价、比较条件和未证明部分，不重复所有限制}</p>
   </section>
 
   <section id="paper-a-recall">
-    <h3>读完记住什么</h3>
-    <p>{具体问题、关键变化、支持证据及边界；能够区分这篇与其他论文}</p>
+    <h3>总结</h3>
+    <p>{简明收束贡献、可借鉴内容和整体适用边界；能够区分这篇与其他论文}</p>
   </section>
 </article>
 ```
@@ -113,10 +115,12 @@ CSS 起手式见 [`../assets/style.css`](../assets/style.css) 的 `.overview-*`�
 <aside id="toc" aria-label="阅读目录">
   <a class="lvl1" href="#overview">本期阅读路线</a>
   <a class="lvl1" href="#paper-a">① {论文 A}</a>
-  <a class="lvl2" href="#paper-a-mot">问题</a>
+  <a class="lvl2" href="#paper-a-background">背景</a>
+  <a class="lvl2" href="#paper-a-problem">问题</a>
+  <a class="lvl2" href="#paper-a-approach">思路</a>
   <a class="lvl2" href="#paper-a-met">方法</a>
-  <a class="lvl2" href="#paper-a-exp">证据</a>
-  <a class="lvl2" href="#paper-a-limits">边界</a>
+  <a class="lvl2" href="#paper-a-exp">结果</a>
+  <a class="lvl2" href="#paper-a-recall">总结</a>
   <a class="lvl1" href="#recap">回顾</a>
 </aside>
 ```

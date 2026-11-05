@@ -1,0 +1,467 @@
+{
+  "baseline": {
+    "previous_run": "/workspace/reviews/radar-2026-W44-20261105/regression",
+    "baseline_equals_previous_candidate_package": true,
+    "published_previous_commit": "38d9ef03a4686ea9544cd94202e35aa1f087e624",
+    "user_requested_sections": [
+      "背景",
+      "问题",
+      "思路",
+      "方法",
+      "结果",
+      "总结"
+    ],
+    "user_request": "保持六段结构，方法和关键结果重点展开，继续同步独立 Git 分支"
+  },
+  "execution": {
+    "baseline": {
+      "source_run": "/workspace/reviews/radar-2026-W44-20261105/regression",
+      "source_version": "candidate",
+      "reason": "Exact package, case prompts, raw fixtures and rubric hashes match. Previous independent generation/review reused unchanged; the new baseline task files only differ in output paths.",
+      "source_review_sha256": "01b5dfdd25e6359d75fb517be858d7dc76f1a0e0f82987a304893ac17c180492"
+    },
+    "candidate": "Five fresh independent generation contexts with the frozen candidate package; no rubric or sibling outputs shown.",
+    "additional_real_case": "W44 user feedback: free narrative headings obscured the requested six-section structure. All 13 prior article bodies preserved for structure/role comparison."
+  },
+  "sources": {
+    "theory.md": "975fd1cda7604134071d52523aa4d6421b6819d0dfe4f5909170782246ebe821",
+    "papers.md": "b0af9157930f0cf18bafef03925281eb6a769cb1429b3e0e6698caf1e5593bf5",
+    "radar-depth.md": "f1bd1da5a19d914322ec1c36cc684e5a1d329ce233a5863beea95ab1aea5b6c6"
+  },
+  "rubric_sha256": "859397141d2d38c89efeed313e8306a69d282742b269bbec7b02de0ba2c9bf2f",
+  "package_fingerprints": {
+    "baseline": "5d1aca3e9a37ec21fd90b5239214ab5f580c97124f0d4b118b986e9d97fe13b0",
+    "candidate": "a68788fcf9bc2e92a3a3541b2611b1ff032e47e46bead953420b3d05de038430"
+  },
+  "published_runtime_file_hashes": {
+    "SKILL.md": "cc0c6394c77124172be38b122d897fe615358459e1927af84ac12ed895d2530a",
+    "references/core-figures.md": "5dac30cef8e0e2fcb7bce6faa617a9507129e1c6f68a6dcc2a711b05ab78bef2",
+    "references/directions.md": "fc180d705a47cad3e30e122919e5a18f030ecb0a17614a988020bfacf732adab",
+    "references/foundation.md": "44fb750f546c8d194b66e13f1541a884bd75f61d43d0216188713562d722a220",
+    "references/layout-patterns.md": "388d0ac772b6b1c1437831bece56440ea227eee1d5bfaa62ea928b35c33b2651",
+    "references/paper-storyline.md": "559c7cff2d999a9dba86c357e668780172c1a2ad36b08c7d743de432e0589da6",
+    "references/per-paper-deep-read.md": "45f89a9b83ed4105676e85801c5c21c053929af63a1986c37f0810b83d6b62db",
+    "references/radar.md": "06004a7ca17f59c145a664fe6b832ea55b3f78ae2107731618e23927f199ff5a",
+    "references/series.md": "8e32126193ea6e0d77d785d08f48571b6d8ec9b3dbf0ee12ec51265c5c105910",
+    "references/single-paper.md": "336b233d8de133b151fce6949665a401da75231124f7907b57c4b988ea419af9",
+    "references/skill-iteration.md": "e3b1a001a400b2ea0ccfba803f0545bda4b86676bd75622f1c2283f2245a1550",
+    "references/svg-patterns.md": "96b0730ce8786ca13fc7e3482532651d928d730f73b926c23f3af9c2ba1b00a9",
+    "references/wechat-markdown.md": "c6f3d3f07a6ea42750dd7252abea58f19d28f309b5264d56ad6df8237936ec85",
+    "references/radar-writing.md": "de5e1c37f6715a10ee5d11d11b8f88415d27e820d1a5a108635db950f790aa23",
+    "scripts/embed_images.py": "2899325c39c288a7954756628151209ea7e772082090f94de8d5498474147b72",
+    "scripts/fetch_content.py": "7c4395da91e8bae9f3773c835a467e33ebe3df52275f78a1fe170a4861343152",
+    "scripts/fetch_papers.py": "73b9647096201a47ce0fe226bf66705836a1683ad34b05e956d0acf403ed9b97",
+    "scripts/html_to_markdown.py": "d42a12ec4fba6d2d06799d26ec182162202da99345a077665fde12975c1f8bdd",
+    "scripts/run_regression.py": "7d94cb8fac19a5505260c194f2b4384cd1e4548c25e60c1f08c6e9eeff88a5b8",
+    "scripts/test_core_figures.py": "ea0953355dea36eff6760fdbda7c76f8f08a8bec5942ebec62d574addf746f80",
+    "scripts/validate_html.py": "bdb294284dde0e5db4d2738c7e367ffffe9fa9e272291f0cd406840d28971df6",
+    "assets/icon.svg": "83edb7ff1fcb54461e60f8bab4147bf6e24b4f9bb9e5d29283c614f40b811039",
+    "assets/paperstudio-reading-modes.svg": "b21cb6f5eeb0d918639ad20cdfadd6cc1e7b87c0acd609dc323f756f6d53bce1",
+    "assets/reading-directory-map.svg": "43406d1964bffbedca0d05cdc2a180d0edb69c9423d15615c59d66932cc1a190",
+    "assets/reading-index-dark.jpg": "8e1b632180dbf7f644e71ff16cb7c7ec12267bf7b92a2683938490d18d9ea442",
+    "assets/reading-index-light.jpg": "c83eb58c7c4a300558bdc71eb4ad5c28e78180d4374801cda06adaaf7b7a5203",
+    "assets/style.css": "5ad158a74e91299e241b01b2a6b0919fc4dbf9c91355522a54e44fe4b9147022",
+    "agents/openai.yaml": "4550b9e49030c873a05acf044346b431dcf59fcc17649c70ed2e256207fb7e78"
+  },
+  "generation_and_review": "Five fresh independent candidate generators; independent reviewer plus separate B output-first supplement; exact unchanged baseline generations and review carried forward with package/fixture/prompt/rubric hashes verified.",
+  "review_totals": {
+    "baseline": 35,
+    "candidate": 35
+  },
+  "gate_interpretation": "No observed regression in this suite; no measured gain",
+  "w44_review_sha256": "5bad1275a9cc1aef9f81580273469151c7091768f465c4d65fb317471a08bb47",
+  "delivery_checks": [
+    {
+      "file": "after/2026-W44-radar.html",
+      "sha256": "16e899a04772a4eecc2b98a42855122f623569335c1ebc479a86aa935b257950",
+      "javascript_disabled": true,
+      "offline": true,
+      "scripts": 0,
+      "iframes": 0,
+      "images": 14,
+      "broken_images": 0,
+      "desktop_overflow": false,
+      "bad_anchors": [],
+      "duplicate_ids": [],
+      "external_asset_dependencies": [],
+      "paper_sections": [
+        [
+          "背景",
+          "问题",
+          "思路",
+          "方法",
+          "结果",
+          "总结"
+        ],
+        [
+          "背景",
+          "问题",
+          "思路",
+          "方法",
+          "结果",
+          "总结"
+        ],
+        [
+          "背景",
+          "问题",
+          "思路",
+          "方法",
+          "结果",
+          "总结"
+        ],
+        [
+          "背景",
+          "问题",
+          "思路",
+          "方法",
+          "结果",
+          "总结"
+        ],
+        [
+          "背景",
+          "问题",
+          "思路",
+          "方法",
+          "结果",
+          "总结"
+        ],
+        [
+          "背景",
+          "问题",
+          "思路",
+          "方法",
+          "结果",
+          "总结"
+        ],
+        [
+          "背景",
+          "问题",
+          "思路",
+          "方法",
+          "结果",
+          "总结"
+        ],
+        [
+          "背景",
+          "问题",
+          "思路",
+          "方法",
+          "结果",
+          "总结"
+        ],
+        [
+          "背景",
+          "问题",
+          "思路",
+          "方法",
+          "结果",
+          "总结"
+        ],
+        [
+          "背景",
+          "问题",
+          "思路",
+          "方法",
+          "结果",
+          "总结"
+        ],
+        [
+          "背景",
+          "问题",
+          "思路",
+          "方法",
+          "结果",
+          "总结"
+        ],
+        [
+          "背景",
+          "问题",
+          "思路",
+          "方法",
+          "结果",
+          "总结"
+        ],
+        [
+          "背景",
+          "问题",
+          "思路",
+          "方法",
+          "结果",
+          "总结"
+        ]
+      ],
+      "mobile_overflow": false,
+      "mobile_nav_positions": {
+        "background": 16,
+        "mot": 15.546875,
+        "approach": 15.65625,
+        "met": 15.59375,
+        "exp": 16.4375,
+        "recall": 15.984375
+      }
+    },
+    {
+      "file": "comparison.html",
+      "sha256": "40dd1178eb3fbf9a0ec841ced816b08f80a8df06d24fce81d47db3577e4312f2",
+      "javascript_disabled": true,
+      "offline": true,
+      "scripts": 0,
+      "iframes": 0,
+      "images": 26,
+      "broken_images": 0,
+      "desktop_overflow": false,
+      "bad_anchors": [],
+      "duplicate_ids": [],
+      "external_asset_dependencies": [],
+      "paper_sections": [
+        [
+          "背景",
+          "问题",
+          "思路",
+          "方法",
+          "结果",
+          "总结"
+        ],
+        [
+          "背景",
+          "问题",
+          "思路",
+          "方法",
+          "结果",
+          "总结"
+        ],
+        [
+          "背景",
+          "问题",
+          "思路",
+          "方法",
+          "结果",
+          "总结"
+        ],
+        [
+          "背景",
+          "问题",
+          "思路",
+          "方法",
+          "结果",
+          "总结"
+        ],
+        [
+          "背景",
+          "问题",
+          "思路",
+          "方法",
+          "结果",
+          "总结"
+        ],
+        [
+          "背景",
+          "问题",
+          "思路",
+          "方法",
+          "结果",
+          "总结"
+        ],
+        [
+          "背景",
+          "问题",
+          "思路",
+          "方法",
+          "结果",
+          "总结"
+        ],
+        [
+          "背景",
+          "问题",
+          "思路",
+          "方法",
+          "结果",
+          "总结"
+        ],
+        [
+          "背景",
+          "问题",
+          "思路",
+          "方法",
+          "结果",
+          "总结"
+        ],
+        [
+          "背景",
+          "问题",
+          "思路",
+          "方法",
+          "结果",
+          "总结"
+        ],
+        [
+          "背景",
+          "问题",
+          "思路",
+          "方法",
+          "结果",
+          "总结"
+        ],
+        [
+          "背景",
+          "问题",
+          "思路",
+          "方法",
+          "结果",
+          "总结"
+        ],
+        [
+          "背景",
+          "问题",
+          "思路",
+          "方法",
+          "结果",
+          "总结"
+        ]
+      ],
+      "mobile_overflow": false
+    }
+  ],
+  "assembly_checks": [
+    {
+      "paper_id": "2610.33966",
+      "full_authored_body_preserved_in_html": true,
+      "original_figure_data_preserved": true,
+      "article_sha256": "a6132c2bb6789896a3987d8b5f5e405928e2de174c2846b937f5ac48dee38c48"
+    },
+    {
+      "paper_id": "2610.34283",
+      "full_authored_body_preserved_in_html": true,
+      "original_figure_data_preserved": true,
+      "article_sha256": "1cabedf2a7c510a888429632bd06989746c476a80df5d62d7ed319c55e6aff89"
+    },
+    {
+      "paper_id": "2610.36077",
+      "full_authored_body_preserved_in_html": true,
+      "original_figure_data_preserved": true,
+      "article_sha256": "0f03dafd833c9cca98e4ac00cbcd6d1db7b8320c0c3e4e88397e7a0387a17f75"
+    },
+    {
+      "paper_id": "2610.36671",
+      "full_authored_body_preserved_in_html": true,
+      "original_figure_data_preserved": true,
+      "article_sha256": "bfd9e9531fddc73f8e8e902a1c2f4991ac5bce5f0c2815a5a2ff4a1640e00b01"
+    },
+    {
+      "paper_id": "2610.39301",
+      "full_authored_body_preserved_in_html": true,
+      "original_figure_data_preserved": true,
+      "article_sha256": "5e47960f687498f40eca523ebe6d0bf15873414c53bc3453efd0c53d509495db"
+    },
+    {
+      "paper_id": "2610.19687",
+      "full_authored_body_preserved_in_html": true,
+      "original_figure_data_preserved": true,
+      "article_sha256": "2646f7f376c768418f9dbf089a079b48697f888d90bea77afa68c4714288c9b4"
+    },
+    {
+      "paper_id": "2610.35013",
+      "full_authored_body_preserved_in_html": true,
+      "original_figure_data_preserved": true,
+      "article_sha256": "0b3ee76def01bcd4dbeb03ba013320a9af574fe79416b1a3eadce71cbed93a18"
+    },
+    {
+      "paper_id": "2610.37381",
+      "full_authored_body_preserved_in_html": true,
+      "original_figure_data_preserved": true,
+      "article_sha256": "a6f2764a694cf3e939c644d01dcb0864da26c6284366e087f9cd736e6f12947c"
+    },
+    {
+      "paper_id": "2610.31668",
+      "full_authored_body_preserved_in_html": true,
+      "original_figure_data_preserved": true,
+      "article_sha256": "2ba6b2c23220a04a9e30177a0018a6e06449f5550cff9bf113f28a7d3aca02a3"
+    },
+    {
+      "paper_id": "2610.32965",
+      "full_authored_body_preserved_in_html": true,
+      "original_figure_data_preserved": true,
+      "article_sha256": "b40937ac651cfc6c24815ab9b97ccbb202fcc52fd7778a20dde49f97bc20e3e1"
+    },
+    {
+      "paper_id": "2610.36068",
+      "full_authored_body_preserved_in_html": true,
+      "original_figure_data_preserved": true,
+      "article_sha256": "a8341e3cdb757c1806c4a1701ae5cd52840cd7a51fec0dedf200d54dbc3d6c26"
+    },
+    {
+      "paper_id": "2610.40614",
+      "full_authored_body_preserved_in_html": true,
+      "original_figure_data_preserved": true,
+      "article_sha256": "a7dfcefd6a2d2f093fdb67dcf5aa626c4cd510355019401dd6d1387ae600139d"
+    },
+    {
+      "paper_id": "2610.38331",
+      "full_authored_body_preserved_in_html": true,
+      "original_figure_data_preserved": true,
+      "article_sha256": "c84340ea04aa81319afc7a05f3e866f7177458b9be9f4764a055c961719b5353"
+    }
+  ],
+  "regression_visual_checks": [
+    {
+      "file": "/workspace/reviews/radar-2026-W44-six-sections-20261105/regression/candidate/single/single.md",
+      "desktop_overflow": false,
+      "images": 0,
+      "broken_images": 0,
+      "mathml": 0,
+      "errors": [],
+      "mobile_overflow": false
+    },
+    {
+      "file": "/workspace/reviews/radar-2026-W44-six-sections-20261105/regression/candidate/series/series.md",
+      "desktop_overflow": false,
+      "images": 0,
+      "broken_images": 0,
+      "mathml": 0,
+      "errors": [],
+      "mobile_overflow": false
+    },
+    {
+      "file": "/workspace/reviews/radar-2026-W44-six-sections-20261105/regression/candidate/theory/theory.md",
+      "desktop_overflow": false,
+      "images": 0,
+      "broken_images": 0,
+      "mathml": 0,
+      "errors": [],
+      "mobile_overflow": false
+    },
+    {
+      "file": "/workspace/reviews/radar-2026-W44-six-sections-20261105/regression/candidate/radar/radar.html",
+      "desktop_overflow": false,
+      "images": 0,
+      "broken_images": 0,
+      "mathml": 0,
+      "errors": [],
+      "mobile_overflow": false
+    },
+    {
+      "file": "/workspace/reviews/radar-2026-W44-six-sections-20261105/regression/candidate/radar/radar.wechat.md",
+      "desktop_overflow": false,
+      "images": 0,
+      "broken_images": 0,
+      "mathml": 0,
+      "errors": [],
+      "mobile_overflow": false
+    },
+    {
+      "file": "/workspace/reviews/radar-2026-W44-six-sections-20261105/regression/candidate/radar_depth/radar_depth.md",
+      "desktop_overflow": false,
+      "images": 0,
+      "broken_images": 0,
+      "mathml": 0,
+      "errors": [],
+      "mobile_overflow": false
+    }
+  ],
+  "b_review_limit": "The main evaluator incidentally read B while checking single A. A separate reviewer read B outputs before seeing B sources. The supplemental snapshot refers to the pre-figure-fix HTML; final figure/hashes are checked by the main evaluator.",
+  "limits": [
+    "W44 uses historical upstream records and retained figures; original paper full texts were not re-verified.",
+    "No live discovery, monthly end-to-end run or real-PDF extraction retested.",
+    "Repository skill update only; personal-install quick_validate was unavailable."
+  ]
+}

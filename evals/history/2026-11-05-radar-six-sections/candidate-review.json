@@ -1,0 +1,202 @@
+{
+  "version": "candidate",
+  "evaluator": "six_candidate_review",
+  "cases": [
+    {
+      "id": "single",
+      "artifact_hashes": {
+        "single.md": "5a40d3ba33f1dcf374970f90b442bc4184d4fe4ed8cf5e301b45bf045ccd338e"
+      },
+      "checks": {
+        "coverage": {
+          "pass": true,
+          "evidence": "single.md:3–11 给方向、关键词、问题签名与贡献；15–43 背景/问题/思路，45–136 方法，138–216 结果/分析，218–236 有条件总结，八项主线可恢复。47 明示无原图，依据 fixtures/papers.md A §1–§6，尤其 §6 的材料覆盖。"
+        },
+        "method_fidelity": {
+          "pass": true,
+          "evidence": "single.md:51–104 可恢复 256-token 首答→未校准 c 的均值→0.8 门控→固定 16 框取 2→原图裁切→全局/裁片/原问题二次解码后停止；108–136 正确区分同一 50k 数据的选择器监督与冻结后 LoRA 训练。与 A §2–§3 逐项一致，教学示例显式标识。"
+        },
+        "result_fidelity": {
+          "pass": true,
+          "evidence": "single.md:140–164 对应 A §4 Table A1，同 DocGrid-test 10k/解码器/训练集、A100 batch=1，保留 68.0/76.2/75.4、各子集、256/4096/1024 token 和 40/95/73 ms；7.4 个百分点、简单题退 0.5、token 少 75% 与延迟少约 23.2% 区分正确。166–172 的加权核对明确是假设，不改原值。"
+        },
+        "ablation_reasoning": {
+          "pass": true,
+          "evidence": "single.md:178–216 对应 A §5 Table A2：随机选框 70.1% 支持选择质量但不承担全部收益；k=4 的 0.2 点、无门控的 0.1 点均保留成本；100k 与双倍解码器混杂不单因归因，未虚构显著性、校准或门限扫描。"
+        },
+        "scope_and_relations": {
+          "pass": true,
+          "evidence": "single/task.md 要求仅论文 A、仅给定材料及中文 Markdown；single.md:5、240 明确是构造测试材料且只用 A §1–§6，正文无 B 或外部发现。"
+        },
+        "readability": {
+          "pass": true,
+          "evidence": "先读实际复述已在 candidate-review-notes.md 保存：输入页面/问题，首答与 c 控制一次补读，选择器训练后交给 LoRA 阶段；承重判断是 75.4%/1024 token/73 ms 相对 DenseRead 的精度成本取舍。定位 51–104、108–136、140–164；回源 A §2–§4 无需修正。c、IoU、LoRA 的解释与阶段连接充分。"
+        },
+        "delivery": {
+          "pass": true,
+          "evidence": "完整 single.md 尊重 single/task.md 的 Markdown-only 要求。统一 visual-checks.json 记录桌面/手机无溢出；实际查看 candidate-single-single-md-mobile.png 未见文字裁切。HTML/伴随稿不属于该任务要求。"
+        }
+      },
+      "issues": []
+    },
+    {
+      "id": "series",
+      "artifact_hashes": {
+        "series.md": "5161f32d2b72f9d4a5ebe7c092d5db2545daed1c63bc91507b0f6b25a94ab781"
+      },
+      "checks": {
+        "coverage": {
+          "pass": true,
+          "evidence": "series.md:23–97 与 101–154 分别恢复 A/B 的方向、问题、背景、思路、方法、主结果、分析与条件总结；3、178–189 给出来源范围。对应 papers.md A §1–§6、B §1–§5。series 不强制六个显式主栏，B 103–107 的合并标题不构成缺项。"
+        },
+        "method_fidelity": {
+          "pass": true,
+          "evidence": "series.md:33–56 对 A §2–§3：未校准 c、固定网格取两框、一次补读及两阶段冻结/更新准确。107–117 对 B §2：首次 16 区域/4096 token、内容哈希、只缓存视觉表示、同页新问重新解码、内容变化重编码、64 MB/页，无额外训练或证据框；未补造淘汰算法。"
+        },
+        "result_fidelity": {
+          "pass": true,
+          "evidence": "series.md:60–72 对 A §4，整体/小字/简单子集、token、平均端到端延迟和条件保留；123–132 对 B §3，2k 页×10 问、单 A100 batch=1、均值含首次编码、80% 不变、120→52 ms 且首次 120 ms 均正确。不同模型/协议不直接排名。"
+        },
+        "ablation_reasoning": {
+          "pass": true,
+          "evidence": "series.md:78–91 对 A §5，随机选择贡献、k/门控成本、数据/规模混杂完整；138–148 对 B §4，1/10/20 问的 120/52/48 ms、两页交替容量 1/2 页的 120/52 ms 和条件边界准确，未将 48 ms 当固定解码时间。"
+        },
+        "scope_and_relations": {
+          "pass": true,
+          "evidence": "series/task.md 指定 A/B 同方向串讲；series.md:7、132、160–168 保留 B §1 的同期无继承、B §3 的不可统一排名、B §5 的全页缓存抵消按需节省与组合未验证。168 的局部缓存组合明确是讲解提出的待验证设想。"
+        },
+        "readability": {
+          "pass": true,
+          "evidence": "先读复述见 candidate-review-notes.md：A 的路由/两阶段与 B 的建立→复用→内容变化重编码都能从正文恢复，承重判断分别是精度/读取成本和十问平均收益但首问不变。B 盲读旁证 b-output-first-check.json（six_w44_review）在未读 B 来源时复述 99–154，回查 B §1–§5 后无需修正；本评审已有来源先验的限制仍保留。"
+        },
+        "delivery": {
+          "pass": true,
+          "evidence": "完整 series.md 满足 series/task.md 的中文 Markdown-only 要求，../../fixtures/papers.md 链接路径正确。统一桌面/手机检查无溢出，实际查看 candidate-series-series-md-desktop.png 的段落与比较表清楚。"
+        }
+      },
+      "issues": []
+    },
+    {
+      "id": "radar",
+      "artifact_hashes": {
+        "radar.html": "920adec5bdafef3a7bbf266db5524313526f7c3701c315d09208d1cd8dc51bfc",
+        "radar.wechat.md": "07e4e8dbe52820383a4f67ad31697c3aebb6a497a487eb9903a3d2fa33799e9e"
+      },
+      "checks": {
+        "coverage": {
+          "pass": true,
+          "evidence": "radar.html 三篇各有背景/问题/思路/方法/结果/总结六个 h3，A/B 篇首方向/关键词/签名/来源齐全，结果下主结果与分析分开（197–247、253–295）；MD 15–75、83–125 对齐。C HTML 300–317/MD 129–161 按 task.md 的单句摘要逐栏区分已知与缺失，不计全文完成。"
+        },
+        "method_fidelity": {
+          "pass": true,
+          "evidence": "radar.html:219–228、275–280 与 MD:31–43、97–101 分别对应 papers.md A §2–§3、B §2，门控边界、固定框、一次补读、冻结对象、缓存对象及更新时机准确。最终 B SVG 266–273 已修为命中读取跳过编码/未命中编码缓存两路汇入当前问题解码；原歧义及修复保留在 issues。"
+        },
+        "result_fidelity": {
+          "pass": true,
+          "evidence": "radar.html:232–236、284–286 与 MD:51–59、109–111 对应 A §4/B §3；保留同协议、硬件/batch、token/延迟区别、简单题退步、B 首次无收益和均值含首次编码。C 未虚构任何结果或参数。"
+        },
+        "ablation_reasoning": {
+          "pass": true,
+          "evidence": "HTML:238–244、288–292 与 MD:63–69、115–119 对 A §5/B §4：选择质量非全部归因、k/门控饱和和成本、100k/模型混杂、问数饱和与容量失效完整。C HTML 314/MD 157 将未提供消融列为材料缺口，未断言论文没做。"
+        },
+        "scope_and_relations": {
+          "pass": true,
+          "evidence": "radar/task.md 指定 A/B/C 且无搜索；HTML 首页与 MD:5–7 明确限定此集合，未伪称自然周发现。HTML 292、295、320/MD 119、125、165 保留同期无继承、不同协议不可排名、组合未经验证，与 B §1/§3/§5 一致。"
+        },
+        "readability": {
+          "pass": true,
+          "evidence": "candidate-review-notes.md 有 A/B/C 实际复述：A 首答控制局部补读，B 按页表示跨题复用，C 无法恢复方法与实验是摘要局限。b-output-first-check.json 独立确认 B HTML/MD 初读可复述且回源无需修正。修后 B 图已实际看桌面/手机，两路箭头与图注一致，原理解歧义解决。"
+        },
+        "delivery": {
+          "pass": true,
+          "evidence": "同 stem HTML 与公众号 MD 完整、论文/主线/证据条件一致。HTML 样式与 SVG 内嵌，无外部必要资产；94 个本地锚点无缺目标/重复 id。统一视觉日志无桌面/手机溢出、断图或 JS 错误，已看首页与 B 图截图。实际点击桌面 B 方法及手机折叠目录 C 方法，目标到达约 24/25 px 顶部，手机文档宽 390=视口 390。"
+        }
+      },
+      "issues": [
+        {
+          "id": "B-RADAR-FLOW",
+          "severity": "minor",
+          "status": "resolved",
+          "location": "radar.html:266–273",
+          "evidence": "首读 SHA256 0314b7c8a126e8cdefc1170188993eb8b5e92c78721d6f9fd9ce8813e92893ad 的 B SVG 只有串行箭头，可能误读每次均编码或首问等待新问题；正文正确。本评审与 six_w44_review 的输出先读补查独立识别同一问题。",
+          "resolution": "生成者仅修 SVG 与图注。最终文件明确命中/未命中两路合流到当前问题解码；已核对源码并实际看 ../screenshots/candidate-radar-b-figure-review-desktop.png、-mobile.png 及 root 的 regression-b-figure 截图，语义与布局均通过。旧图和独立补查原始哈希保留，当前无未解决问题。"
+        }
+      ]
+    },
+    {
+      "id": "theory",
+      "artifact_hashes": {
+        "theory.md": "c362f420480cd3bc4f97821eabb08506bdf228e1dacb5f0410e62f8ce215c66f"
+      },
+      "checks": {
+        "coverage": {
+          "pass": true,
+          "evidence": "theory.md:3–7 给出方向、关键词、问题签名与来源；9/13/17/21/47/71 为六主栏，结果含主界和假设/退化/成本分析。69 明确无训练/模型分数/消融/部署实验，匹配 fixtures/theory.md T §1–§4，未硬补实证内容。"
+        },
+        "method_fidelity": {
+          "pass": true,
+          "evidence": "theory.md:25–43 对 T §2：非负 e、零初值、固定 0≤ρ<1/ε≥0、r 次近似后精确清零、周期内 j 的范围完整；三步展开到几何和与重置后的复用连接正确。"
+        },
+        "result_fidelity": {
+          "pass": true,
+          "evidence": "theory.md:51–57 给 B(r)=ε(1−ρʳ)/(1−ρ)≤ε/(1−ρ)，与 T §2 一致；明确是条件上界、实际误差未必达到、不能当准确率/速度结果，对应 T §3–§4。"
+        },
+        "ablation_reasoning": {
+          "pass": true,
+          "evidence": "theory.md:61–69 对 T §3–§4，用 ρ=1 的 jε、固定 r 可有 rε 的补充推论、r 不减与零扰动情形说明假设边界。固定 r 的澄清标为递推推论；未把不随 j 的统一界失效误写为固定周期必无界，未补造重置成本或最优 r。"
+        },
+        "scope_and_relations": {
+          "pass": true,
+          "evidence": "theory/task.md 要求仅理论 T、雷达展开程度、Markdown-only；正文只依据 T §1–§4，旧分析关系按来源描述，无模型实验或外部工作。"
+        },
+        "readability": {
+          "pass": true,
+          "evidence": "先读复述见 candidate-review-notes.md：每步收缩旧误差并加 ε，做 r 次清零，逐步界随 j 不减故第 r 步覆盖全周期；承重判断是有条件数学保证而非系统加速。定位 25–43、51–67；回源 T §2–§3 无需修正，符号与重复周期连接充分。"
+        },
+        "delivery": {
+          "pass": true,
+          "evidence": "完整 theory.md 满足 theory/task.md 的中文 Markdown-only。公式为直接可读 Unicode，无外部渲染依赖；统一桌面/手机检查无溢出，已实际查看 candidate-theory-theory-md-mobile.png。"
+        }
+      },
+      "issues": []
+    },
+    {
+      "id": "radar_depth",
+      "artifact_hashes": {
+        "radar_depth.md": "73e90cbddc72bce8d566a62b10cb94b5ad8f1bd8122140c98c35bca5f339ac5c"
+      },
+      "checks": {
+        "coverage": {
+          "pass": true,
+          "evidence": "radar_depth.md 按任务顺序保留 R1–R6，每篇六主栏共 36 栏，结果分主结果/消融与分析，方向与来源在篇首。R1:22–85、R2:89–155、R3:159–226、R4:230–296、R5:300–340、R6:344–454 对应 fixtures/radar-depth.md 各篇全节；R5 逐项标未知，R2 附录扫描未取得但不说没做。"
+        },
+        "method_fidelity": {
+          "pass": true,
+          "evidence": "逐篇核对：R1 48–58/源13–15 的 ID+属性可信覆盖、旧键保留与缺键拒答；R2 115–127/源41–43 的原文跨度聚类、每簇每答案最大权重；R3 185–199/源70–72 的错误但过约束得分、两类24次配额、取整和固定二轮分数；R4 256–266/源98–100 的同检查点隔离两支。R6 370–408/源136–148 完整区分训练可见 y、P 阶段结束冻结、r 二选一调度、仅训 A+注意力 LoRA/mask loss、一次 zₚ 四轮复用和每轮永久揭八位置；R5 不补造机制。"
+        },
+        "result_fidelity": {
+          "pass": true,
+          "evidence": "R1 64–81/源19–27 保留当前/历史/遮挡与端到端延迟；R2 133–151/源47–56 保留3k题、1/4调用和加法题负结果；R3 205–222/源76–84 保留64上限、实际采样、token只少20和单种子；R4 272–292/源104–110 正确区分三成功率和68→24干预。R6 414–450/源152–178 保留4k/600M、四轮/八轮、46/42/78ms、27/18GPUh、延迟不含检索及78%为不可部署诊断。"
+        },
+        "ablation_reasoning": {
+          "pass": true,
+          "evidence": "R1 写入阈值准确率收益伴旧帧误引轻升、历史退步；R2 重复子集的聚类作用与算术失败；R3 均分预算提高成功但多付成本、零分唯一可行分支分析；R4 旧图替换支持观测获益而非内部表述。R6 442–450 对源§6–§7 保留条件错配、渐变同时改总体教师比例的混杂、重采样代价、教师诊断边界、缺零向量/打乱目标与方差。R5 未提供分析不等于原文没做。"
+        },
+        "scope_and_relations": {
+          "pass": true,
+          "evidence": "radar_depth/task.md 指定六篇顺序、仅给定材料；正文无新增发现。464–502 的 R1/R2 证据单位类比、R1/R4 方法/评测启发、R2/R3 支持度/可验证性区分、R3/R6 预算差异均限定问题层面，未强造继承、统一排名或已验证组合；R5 不因 Bridge 名称建立技术关系。"
+        },
+        "readability": {
+          "pass": true,
+          "evidence": "candidate-review-notes.md 先于读取 fixtures/radar-depth.md 保存六篇机制与承重判断，回源后无需修正。R1 低分保旧键、R2 每簇每答案一票、R3 二轮额度不再更新、R4 成对成功非均值均可复述。R6 370–408 逐段接通 E/W→z*→P→A/LoRA→仅x部署，32→24→16→8→0揭示过程清楚；414–450 支持带条件结果判断，末篇无压缩断点。"
+        },
+        "delivery": {
+          "pass": true,
+          "evidence": "完整 radar_depth.md 尊重 task.md 的 Markdown-only，无额外必需文件。统一桌面/手机记录无溢出或 JS 错误；实际看手机首页及 regression-depth-r6-mobile.png，字行和导航清楚。GFM预览48个页内链接全部有目标；预览仅为检查辅助，交付仍为Markdown。"
+        }
+      },
+      "issues": []
+    }
+  ],
+  "notes": "独立候选评审，未访问基线。每篇实际复述与回源过程保存在 candidate-review-notes.md。single 与 theory、radar_depth 在首读记录后读取对应来源；读取 single 的 A 来源时，截取表达式未匹配中文冒号，意外连带见到 B，因此 series/radar 的 A/B 存在来源先验。该限制如实保留，并由未见 B 来源的 six_w44_review 另做 b-output-first-check.json：先保存三份 B 复述，再只读源 B，回核无需修改。其修图前哈希原样保留。本评审未修改候选产物；radar 初始 B 图歧义由生成者局部修复，issues 保留 resolved 记录。五案例35项均已检查，最终无未解决阻断项。artifact_hashes 为本次写入时重新计算的实际SHA256，键为对应case目录内相对路径；radar所有必要样式和SVG内嵌，无额外必要资产。visual-checks.json 为root统一浏览器测量，截图已按记录实际查看；截图只证明相应可见区域，完整内容判断来自逐行阅读与源核对。"
+}

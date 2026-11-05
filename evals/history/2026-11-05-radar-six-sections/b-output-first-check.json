@@ -1,0 +1,157 @@
+{
+  "review_type": "B_output_first_understandability_supplement",
+  "reviewer": "six_w44_review",
+  "phase": "completed_output_first_then_limited_B_source_check",
+  "output_first_saved_at_utc": "2026-11-05T12:32:35.921229+00:00",
+  "scope": "只审三份候选中 B 正文及直接关于 B 的跨篇文字；未读基线或主评审记录，未扩展 A/C 案例。",
+  "source_read_before_this_save": false,
+  "output_first_records": [
+    {
+      "path": "candidate/series/series.md",
+      "read_locations": [
+        "B 99–154",
+        "比较表 B 列 9–19",
+        "跨篇 B 分析 160–168、173、176",
+        "B 来源定位 186–189"
+      ],
+      "mechanism_retelling": "CachePage 首次对页面全部 16 区域完整编码成 4096 个视觉 token，占 64 MB/页，用页面内容哈希保存。针对同页的新问题读出视觉表示，再由配套解码器生成当前答案。问题改变不使页面表示失效，页面内容改变则重新编码；缓存不存旧答案且不跨页共享。没有额外训练和证据框；必须让重复页表示留在容量内才能复用。",
+      "key_result_judgment": "MultiQuestionDoc 2k 页、每页 10 问、单 A100/batch 1 且平均含首次编码下，80.0% 准确率不变，平均 120→52 ms，但首次仍 120 ms。1/10/20 问的 120/52/48 与交替两页容量 1/2 页的 120/52 说明收益来自摊销和命中，不能当阅读质量提高或固定解码器耗时。",
+      "understandability": "通过。编码对象、缓存键、变化失效、解码仍有成本及工作集条件都可从正文复述，没有关键因果跳步。",
+      "six_section_observation": "正文内容覆盖六类职责，但 B 的背景、问题、思路合并在 103–107 的描述性小节；其余为方法、主结果、系统分析、B 总结。若要求每篇显式六栏，该系列 B 未满足固定标签格式；不是内容机制缺失。",
+      "first_read_issues": [
+        {
+          "id": "B-SERIES-STRUCTURE",
+          "type": "structure_observation",
+          "severity": "conditional",
+          "location": "series.md:103–107",
+          "observation": "背景、问题、思路合并，未显式排列六栏；需要主代理按 series 模式实际格式要求判断是否要求修改。"
+        }
+      ],
+      "sha256_at_output_first_read": "5161f32d2b72f9d4a5ebe7c092d5db2545daed1c63bc91507b0f6b25a94ab781",
+      "current_file_sha256": "5161f32d2b72f9d4a5ebe7c092d5db2545daed1c63bc91507b0f6b25a94ab781",
+      "source_check_result": "先读复述与 B §1–5 相符，没有来源核对后才补回的关键机制或结果条件。",
+      "source_check_required_retelling_correction": false,
+      "final_understandability_conclusion": "pass",
+      "six_role_semantic_coverage": "pass",
+      "explicit_six_column_layout": "not_present: 背景/问题/思路合并为一个描述性小节；事实记录，不代替主代理对 series 模式格式要求的裁定。"
+    },
+    {
+      "path": "candidate/radar/radar.html",
+      "read_locations": [
+        "paper-b 251–297",
+        "B 概览/回顾/来源同页文字"
+      ],
+      "mechanism_retelling": "先按页面内容哈希查缓存。未命中时编码全部 16 区域并保存 4096 个视觉 token；同页命中时跳过整页编码，将缓存表示和当前问题交给配套解码器，仍生成新的答案。页面变化或表示不可用时需重新编码。每页 64 MB，缓存只保留视觉表示，不保存旧答案，也不跨页复用。",
+      "key_result_judgment": "每页固定 10 问时平均延迟 120→52 ms 且准确率均 80.0%，只说明所测重复页负载的系统效率；首问仍 120 ms。20 问 48 ms 显示边际收益缩小，两页交替时容量不足收益消失，不能推广任意访问模式或跨 A 排名。",
+      "understandability": "正文通过。方法和结果条件清楚；教学图的连线存在局部歧义，需依赖正文与标签纠正。",
+      "six_section_observation": "背景/问题/思路/方法/结果/总结六栏显式齐全，推理操作全在方法；结果下主成绩与访问条件分析分开，未伪装训练消融。",
+      "first_read_issues": [
+        {
+          "id": "B-RADAR-FLOW",
+          "type": "diagram_semantics",
+          "severity": "minor",
+          "location": "radar.html:266–273",
+          "observation": "SVG 所有箭头串联当前页查缓存→未命中编码→同页新问题读缓存→解码，缺少命中直接进入复用/解码的分支。只看连线可能理解为每次都编码，或首问等到同页新问题才解码；文字命中时跳过及后文正确，因此未妨碍整体机制复述。",
+          "suggested_fix": "图中分出命中/未命中路径：命中直接取表示，未命中先编码保存，两路再合流到当前问题解码。"
+        }
+      ],
+      "sha256_at_output_first_read": "0314b7c8a126e8cdefc1170188993eb8b5e92c78721d6f9fd9ce8813e92893ad",
+      "current_file_sha256": "0314b7c8a126e8cdefc1170188993eb8b5e92c78721d6f9fd9ce8813e92893ad",
+      "source_check_result": "先读复述与 B §1–5 相符，没有来源核对后才补回的关键机制或结果条件。",
+      "source_check_required_retelling_correction": false,
+      "final_understandability_conclusion": "pass",
+      "six_role_semantic_coverage": "pass",
+      "explicit_six_column_layout": "pass",
+      "diagram_conclusion": "正文与标签正确；单一路径连线存在轻微歧义，未改变先读者对实际机制的复述。"
+    },
+    {
+      "path": "candidate/radar/radar.wechat.md",
+      "read_locations": [
+        "B 77–125",
+        "回顾 165",
+        "B 引文 173"
+      ],
+      "mechanism_retelling": "第一问编码全部 16 区域成 4096 视觉 token，以页面内容哈希缓存；同页新问把缓存表示与当前问题交给解码器，答案重新生成。页面变化重编码，不保存旧答案或跨页共享；无需额外训练/证据框，每页 64 MB 且容量必须让重复页保留。",
+      "key_result_judgment": "自身 RepeatEncode 对照在 2k 页每页 10 问、单 A100/batch 1 且均值含首编的条件下，准确率 80.0% 不变，平均 120→52 ms，首次 120 ms 无改善。问题数和两页交替容量试验支持摊销/命中条件；不能将 B 与 A 的分数或速度直接排序，组合未经验证。",
+      "understandability": "通过。伴随稿虽压缩图和例子，仍完整保留缓存对象、哈希失效、每题解码、训练要求、内存和条件分析，没有关键机制遗漏。",
+      "six_section_observation": "六栏显式齐全且各司其职，主结果与访问条件分析在结果栏中分开，总结含贡献与单问/容量限制。",
+      "first_read_issues": [],
+      "sha256_at_output_first_read": "07e4e8dbe52820383a4f67ad31697c3aebb6a497a487eb9903a3d2fa33799e9e",
+      "current_file_sha256": "07e4e8dbe52820383a4f67ad31697c3aebb6a497a487eb9903a3d2fa33799e9e",
+      "source_check_result": "先读复述与 B §1–5 相符，没有来源核对后才补回的关键机制或结果条件。",
+      "source_check_required_retelling_correction": false,
+      "final_understandability_conclusion": "pass",
+      "six_role_semantic_coverage": "pass",
+      "explicit_six_column_layout": "pass",
+      "companion_key_mechanism_omission": "none"
+    }
+  ],
+  "source_check": {
+    "read_at_utc": "2026-11-05T12:34:15.909541+00:00",
+    "path": "/workspace/reviews/radar-2026-W44-six-sections-20261105/regression/fixtures/papers.md",
+    "read_start_line": 26,
+    "read_end_line": 36,
+    "read_boundary": "从 # B： 开始至 # C： 前或文件结束；此次 B 到文件结尾，第26–36行。",
+    "B_excerpt_sha256": "86abecf21b879e0615cf3fcc9ccb5abf738d98aec4cca19983e5b3f4ad079572",
+    "fixture_file_sha256": "b0af9157930f0cf18bafef03925281eb6a769cb1429b3e0e6698caf1e5593bf5",
+    "output_first_snapshot_sha256": "fa8a222e71a8f5960d96290eeae26bef47cdea804f4f96444a45a89c0e0af88e",
+    "checks": [
+      {
+        "source_lines": [
+          27,
+          28
+        ],
+        "check": "任务与关系",
+        "result": "三份均保留同页连续多问、RepeatEncode 每问整页重编码，以及 B 与 A 同期并行而非继承。"
+      },
+      {
+        "source_lines": [
+          29,
+          30
+        ],
+        "check": "真实机制",
+        "result": "三份复述均对应首次全部 16 区域/4096 token、内容哈希、同页缓存表示+当前问题重新解码、页面改变重编码；非答案缓存、不跨页、无额外训练/证据框、64MB/页均保留。"
+      },
+      {
+        "source_lines": [
+          31,
+          32
+        ],
+        "check": "主结果与协议",
+        "result": "2k 页、每页 10 问、自身基线、单 A100/batch 1、均值含首次编码、80.0% 平局、120→52ms 与首问 120ms 全部一致；没有把系统效率写成质量提升或跨 A 公平排名。"
+      },
+      {
+        "source_lines": [
+          33,
+          34
+        ],
+        "check": "分析与负条件",
+        "result": "1/10/20 问的 120/52/48ms，两页交替容量 1/2 页时 120/52ms 全保留，并明确访问条件分析和不可外推任意负载。"
+      },
+      {
+        "source_lines": [
+          35,
+          36
+        ],
+        "check": "边界与组合",
+        "result": "每题成本/跨题系统成本区分、64MB 与重复访问约束、全页缓存抵消 A 部分按需编码节省、组合未经验证均保留。"
+      }
+    ],
+    "source_based_factual_mismatches": [],
+    "retellings_unchanged_after_source_read": true,
+    "source_limitation": "这里是专门构造的测试材料，不对应真实论文；没有外部核验。"
+  },
+  "final_conclusion": {
+    "overall": "pass_with_observations",
+    "understandability": "三份 B 都能在未见来源时复述实际缓存机制并形成带协议条件的结果判断。来源核对未要求修改复述。",
+    "semantic_placement": "radar HTML 和 WeChat 六栏语义归位准确；主结果与访问条件分析可区分，推理流程在方法。series B 内容覆盖六类职责，但背景/问题/思路未分为显式六栏。",
+    "companion": "WeChat 伴随稿保留全部关键机制、实验条件与负条件，没有通过删掉图而丢失操作链。",
+    "remaining_observations": [
+      "B-SERIES-STRUCTURE：若 series 也受逐篇显式六栏要求约束，则需拆分前三栏；仅从可理解性和语义职责看已覆盖。",
+      "B-RADAR-FLOW：建议教学 SVG 分出命中/未命中两路再合流到当前问题解码，消除单一路径连线歧义。"
+    ],
+    "blocking_factual_issues": [],
+    "edits_performed": false,
+    "scope_boundary": "未读取基线或主评审记录，未评审 A/C 内容或其他案例，未修改任何产物。"
+  }
+}

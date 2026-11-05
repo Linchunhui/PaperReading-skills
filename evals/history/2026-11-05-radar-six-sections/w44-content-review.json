@@ -1,0 +1,1502 @@
+{
+  "schema_version": "1.0",
+  "review_type": "independent_six_section_content_review",
+  "reviewer": "six_w44_review",
+  "reviewed_at_utc": "2026-11-05T12:29:19.233519+00:00",
+  "work_root": "/workspace/reviews/radar-2026-W44-six-sections-20261105",
+  "overall_conclusion": "pass",
+  "overall_scope": {
+    "article_count": 13,
+    "inputs": [
+      "after/articles/{id}.md",
+      "previous-articles/{id}.md",
+      "materials/{id}/source-record.md",
+      "materials/index.json"
+    ],
+    "procedure": "分三组，先只读候选并保存机制复述、关键结果判断及六栏职责，再读旧稿/差异与 source-record 回核，最终核对现行正文 SHA256。",
+    "groups": [
+      [
+        "2610.39301",
+        "2610.19687",
+        "2610.35013",
+        "2610.37381"
+      ],
+      [
+        "2610.33966",
+        "2610.34283",
+        "2610.36077",
+        "2610.36671"
+      ],
+      [
+        "2610.31668",
+        "2610.32965",
+        "2610.36068",
+        "2610.40614",
+        "2610.38331"
+      ]
+    ],
+    "exclusions": [
+      "未外部取证或重新阅读全文、附录、论文表格。",
+      "未检查无关合成回归，不声明任何新回归通过。",
+      "未编辑任何候选文章正文。",
+      "原图本轮不变；只对照既有占位、图号与导读的保留，未重新做视觉审图。"
+    ]
+  },
+  "overall_findings": [
+    "13 篇均严格按背景、问题、思路、方法、结果、总结六个主栏目排列。",
+    "通过依据是正文机制能够复述、结果能够有条件判断，标题一致性仅为辅助检查。",
+    "方法与结果承担主要细节；推理操作已归方法，主结果与消融/分析可区分。",
+    "综述用关键认识和分类/协议分析承接结果，没有强造模型实验。",
+    "承重数字、负结果、协议、来源及版本边界均保留；总结保留贡献与总体适用边界。",
+    "没有发现应阻止此次六栏改稿交付的内容问题。"
+  ],
+  "auxiliary_checks": {
+    "six_main_headings_exact": true,
+    "numeric_token_sets": "13 篇旧稿与候选的数值 token 集合无增删；仅作辅助查漏，不代替语义审读。",
+    "candidate_hashes": "成稿时重新读取现行正文并与本次锁定值逐篇核对，13/13 一致。",
+    "source_hash_semantics": "materials/index.json 的 source_sha256 对应 source-record 去掉前四行包装后的上游正文，不含尾换行。13/13 相符；完整记录文件另存 source_record_file_sha256。"
+  },
+  "retelling_notes_path": "/workspace/reviews/radar-2026-W44-six-sections-20261105/six-section-retelling-notes.md",
+  "unresolved_issues": [],
+  "articles": [
+    {
+      "paper_id": "2610.33966",
+      "title": "InteractiveWorld",
+      "conclusion": "pass",
+      "reason": "六栏均有实质内容职责；未发现本轮承重信息丢失或语义改错。",
+      "candidate_path": "/workspace/reviews/radar-2026-W44-six-sections-20261105/after/articles/2610.33966.md",
+      "candidate_sha256": "a6132c2bb6789896a3987d8b5f5e405928e2de174c2846b937f5ac48dee38c48",
+      "previous_article_path": "/workspace/reviews/radar-2026-W44-six-sections-20261105/previous-articles/2610.33966.md",
+      "previous_article_sha256": "e57285435f9fe7f09289a1b7a6458751f5ed0c8436e901d8c2b4d2adf6ebfd50",
+      "source_record_path": "/workspace/reviews/radar-2026-W44-six-sections-20261105/materials/2610.33966/source-record.md",
+      "source_record_file_sha256": "a2eb66aac7c786582775ff1a4eabc6f86dd7a7053b74fc804c4eb9b8a25b5f34",
+      "upstream_body_sha256": "0cd21da0df7945cde7f4dcc0ac730b1b9e4a66aacd2227c6fac52164232d8555",
+      "upstream_body_matches_index": true,
+      "candidate_first_read": {
+        "mechanism_retelling": "助手给语言指导、执行者落实、环境按物理状态核验，多轮画面使助手能跟踪执行偏差；三层环境把语言转成动作和可检查状态。Pass、MCR、首错和成功子集动作成本分别衡量不同方面。",
+        "key_result_judgment": "41.7% Pass 对 Oracle 100% 显示持续协助缺口；Memory 在部分任务改善而 Planning 下降，真人校准仅 36-task 和三人模拟器子集。",
+        "section_retelling_note": "六栏成立，主成绩与诊断分开，评测本身的方法职责清楚。"
+      },
+      "sections": [
+        {
+          "name": "背景",
+          "start_line": 9,
+          "end_line": 12,
+          "responsibility_fulfilled": true,
+          "assessment": "交代穿戴式协助随用户执行改变环境的场景。"
+        },
+        {
+          "name": "问题",
+          "start_line": 13,
+          "end_line": 18,
+          "responsibility_fulfilled": true,
+          "assessment": "说明第一轮识别、静态 VQA 与直接机器人评测为何漏掉语言指导执行链。"
+        },
+        {
+          "name": "思路",
+          "start_line": 19,
+          "end_line": 22,
+          "responsibility_fulfilled": true,
+          "assessment": "提出助手、执行者、可验证环境的分工，明确是环境评测而非新助手训练。"
+        },
+        {
+          "name": "方法",
+          "start_line": 23,
+          "end_line": 50,
+          "responsibility_fulfilled": true,
+          "assessment": "解释三层状态链、交互循环、任务集合、信息边界、完成度、首错与成功子集动作成本。"
+        },
+        {
+          "name": "结果",
+          "start_line": 51,
+          "end_line": 70,
+          "responsibility_fulfilled": true,
+          "assessment": "主成绩和任务族差异先行；首错、Memory 控制及真人校准另列分析，保留退步与有限范围。"
+        },
+        {
+          "name": "总结",
+          "start_line": 71,
+          "end_line": 75,
+          "responsibility_fulfilled": true,
+          "assessment": "收束评测链贡献和持续协助可靠性的边界，迁移需明确执行者信息和完成状态。"
+        }
+      ],
+      "content_anchors": {
+        "mechanism": [
+          27,
+          29,
+          35,
+          41,
+          43,
+          45,
+          47
+        ],
+        "main_results": [
+          55,
+          57
+        ],
+        "analysis": [
+          61,
+          63,
+          65,
+          67,
+          69
+        ],
+        "source": [
+          5,
+          7,
+          33,
+          75
+        ]
+      },
+      "preservation_checks": {
+        "carrying_numbers_negative_results_protocols": [
+          "六类各 20 题，共 120 题；Accessibility 屏蔽视觉；动作成本只在各自成功子集相对 Oracle 计算。",
+          "41.7%/54.8%、其余不超过 33.3%、Oracle 100%/无助手 0%；Decision 85.0 对 Guidance/Planning 20.0/25.0。",
+          "70.4–85.7% 是首错占比；Memory 的正向变化和两模型 Planning 下降均保留。",
+          "36-task、四模型执行者与三真人，13–15 对 15/16/15；校准是在模拟器中。"
+        ],
+        "semantic_assessment": "回看旧稿和冻结上游记录后，机制、证据对象与限定条件一致；压缩铺垫和收束未删掉承重信息。",
+        "source_assessment": "来源、版本和历史核验边界仍可追溯，未升格为本轮阅读全文。"
+      },
+      "depth_and_repetition_assessment": "方法和结果承担主要深度；背景、问题、思路简明区分场景、缺口和切入。必要概念回指用于机制解释，无需要删除的纯重复铺垫。",
+      "material_limits_retained": "有限场景与三人子集不能推出真实家庭部署；完整验证规则和执行者提示未保存。",
+      "unresolved_issues": []
+    },
+    {
+      "paper_id": "2610.34283",
+      "title": "ChronoReplay",
+      "conclusion": "pass",
+      "reason": "六栏均有实质内容职责；未发现本轮承重信息丢失或语义改错。",
+      "candidate_path": "/workspace/reviews/radar-2026-W44-six-sections-20261105/after/articles/2610.34283.md",
+      "candidate_sha256": "1cabedf2a7c510a888429632bd06989746c476a80df5d62d7ed319c55e6aff89",
+      "previous_article_path": "/workspace/reviews/radar-2026-W44-six-sections-20261105/previous-articles/2610.34283.md",
+      "previous_article_sha256": "e077069cb133693bdf893c4af2afee59821b4aff0ff9c4a269349cf6eb8bff0f",
+      "source_record_path": "/workspace/reviews/radar-2026-W44-six-sections-20261105/materials/2610.34283/source-record.md",
+      "source_record_file_sha256": "1b38559c6ad61eb916c62bf80cb8d6d38a9e68e4fc70b14d083cc35673693aa4",
+      "upstream_body_sha256": "02da37dac4f690309162e98699306f9d367fa07303c226a164dc1d4691d6fbd9",
+      "upstream_body_matches_index": true,
+      "candidate_first_read": {
+        "mechanism_retelling": "按 episode 恢复当前轮合法历史，保留类别／数值／时间接口，再先按答案长度、有效轮归一化，平衡轨迹族与类别保持族；同一个 checkpoint 做多类读出。",
+        "key_result_judgment": "固定访问的三基准均值 48.28→56.86 支持训练收益，额外取帧的 57.98 单列；格式控制 OST/UCS 一升一降，族平衡三组成对种子收益更一致。",
+        "section_retelling_note": "六栏成立，思路是短概括，方法解释了前缀、接口、权重和训练／推理边界。"
+      },
+      "sections": [
+        {
+          "name": "背景",
+          "start_line": 9,
+          "end_line": 12,
+          "responsibility_fulfilled": true,
+          "assessment": "以方向、距离和时间三种输出说明共享经历但不同读出的背景。"
+        },
+        {
+          "name": "问题",
+          "start_line": 13,
+          "end_line": 18,
+          "responsibility_fulfilled": true,
+          "assessment": "点明接口偏科和拆散历史两个缺口。"
+        },
+        {
+          "name": "思路",
+          "start_line": 19,
+          "end_line": 22,
+          "responsibility_fulfilled": true,
+          "assessment": "简述合法前缀、原生答案和族平衡，没有混成新记忆网络。"
+        },
+        {
+          "name": "方法",
+          "start_line": 23,
+          "end_line": 52,
+          "responsibility_fulfilled": true,
+          "assessment": "展开合法时间前缀、接口语义、两族归一化、权重和训练／推理边界。"
+        },
+        {
+          "name": "结果",
+          "start_line": 53,
+          "end_line": 79,
+          "responsibility_fulfilled": true,
+          "assessment": "主表限定固定访问；顺序、格式和权重分别分析，格式反向结果未删。"
+        },
+        {
+          "name": "总结",
+          "start_line": 80,
+          "end_line": 84,
+          "responsibility_fulfilled": true,
+          "assessment": "收束数据约束贡献，明确格式需逐任务验证，不能外推任意在线持续学习不遗忘。"
+        }
+      ],
+      "content_anchors": {
+        "mechanism": [
+          27,
+          35,
+          37,
+          43,
+          45,
+          49,
+          51
+        ],
+        "main_results": [
+          57,
+          61,
+          62,
+          63,
+          64,
+          68,
+          70
+        ],
+        "analysis": [
+          74,
+          76,
+          78
+        ],
+        "source": [
+          5,
+          7,
+          31,
+          84
+        ]
+      },
+      "preservation_checks": {
+        "carrying_numbers_negative_results_protocols": [
+          "α=0.5 对应轨迹占 1/3；Qwen3-VL-8B-Instruct 一轮，更新 LM/merger、冻结视觉编码器。",
+          "三基准 48.98/50.52/45.33→53.89/63.93/52.77，均值 48.28→56.86；57.98 仅是 OVO-S 额外取帧。",
+          "OST 排除训练重叠场景但保留题型；异协议公开行不能直接排名。",
+          "两组成对顺序对照、Native/Canonical 的 OST/UCS 交叉结果、三种子族平衡均值±样本标准差均保留。"
+        ],
+        "semantic_assessment": "回看旧稿和冻结上游记录后，机制、证据对象与限定条件一致；压缩铺垫和收束未删掉承重信息。",
+        "source_assessment": "来源、版本和历史核验边界仍可追溯，未升格为本轮阅读全文。"
+      },
+      "depth_and_repetition_assessment": "方法和结果承担主要深度；背景、问题、思路简明区分场景、缺口和切入。必要概念回指用于机制解释，无需要删除的纯重复铺垫。",
+      "material_limits_retained": "单 8B 骨干、headline 单种子；单族对照伴随数据覆盖变化，完整损失与取帧细节未保存。",
+      "unresolved_issues": []
+    },
+    {
+      "paper_id": "2610.36077",
+      "title": "The Trinity",
+      "conclusion": "pass",
+      "reason": "六栏均有实质内容职责；未发现本轮承重信息丢失或语义改错。",
+      "candidate_path": "/workspace/reviews/radar-2026-W44-six-sections-20261105/after/articles/2610.36077.md",
+      "candidate_sha256": "0f03dafd833c9cca98e4ac00cbcd6d1db7b8320c0c3e4e88397e7a0387a17f75",
+      "previous_article_path": "/workspace/reviews/radar-2026-W44-six-sections-20261105/previous-articles/2610.36077.md",
+      "previous_article_sha256": "54e59d3ba0c2e823225031e39807933a419c52ac91d42f0ea9e2e4d352bf3afa",
+      "source_record_path": "/workspace/reviews/radar-2026-W44-six-sections-20261105/materials/2610.36077/source-record.md",
+      "source_record_file_sha256": "efef8e6c43410eebdc956d216820117419f2e37491a0b220aa1bbf3c4cea63a5",
+      "upstream_body_sha256": "ffa30289b9f7ec758cf2ea25a89ad5efc9be72758fe656d0201c30af8745f0ec",
+      "upstream_body_matches_index": true,
+      "candidate_first_read": {
+        "mechanism_retelling": "冻结骨干，以能力前缀组织任务和 Harness，Creator 生成并验证练习世界，Explorer 改局部模块并按严格提分规则选择性继承父模块；固定池路由只能使用公开任务信息和可验证历史。",
+        "key_result_judgment": "四轮迭代在 Train 及 16 个非机器人 Unseen 集合上提高，18 基准摘要集合不同；模拟课程首次构造 token 近翻倍，不能声称更省。",
+        "section_retelling_note": "六栏成立，完整系统与 module-only、路由 Oracle 与部署信息均区分。"
+      },
+      "sections": [
+        {
+          "name": "背景",
+          "start_line": 9,
+          "end_line": 12,
+          "responsibility_fulfilled": true,
+          "assessment": "建立多模态异构任务共享状态跟踪和约束检查的背景。"
+        },
+        {
+          "name": "问题",
+          "start_line": 13,
+          "end_line": 18,
+          "responsibility_fulfilled": true,
+          "assessment": "区分逐任务重复劳动、全局工作流冲突和练习世界构造成本。"
+        },
+        {
+          "name": "思路",
+          "start_line": 19,
+          "end_line": 22,
+          "responsibility_fulfilled": true,
+          "assessment": "概括按能力组织外围 Harness，明确冻结骨干与能力标签含义。"
+        },
+        {
+          "name": "方法",
+          "start_line": 23,
+          "end_line": 56,
+          "responsibility_fulfilled": true,
+          "assessment": "三棵树、课程验证、父/本地接纳规则、固定池路由信息边界和技能准备均有操作解释。"
+        },
+        {
+          "name": "结果",
+          "start_line": 57,
+          "end_line": 83,
+          "responsibility_fulfilled": true,
+          "assessment": "主结果保留 16/18 集合差异；路由、module-only 与构造成本分列分析。"
+        },
+        {
+          "name": "总结",
+          "start_line": 84,
+          "end_line": 88,
+          "responsibility_fulfilled": true,
+          "assessment": "收束共享经验复用及分支、路由、世界保真和总成本前提，不保证局部演化单调。"
+        }
+      ],
+      "content_anchors": {
+        "mechanism": [
+          27,
+          33,
+          37,
+          41,
+          43,
+          45,
+          49,
+          51,
+          53,
+          55
+        ],
+        "main_results": [
+          61,
+          63
+        ],
+        "analysis": [
+          67,
+          71,
+          72,
+          73,
+          74,
+          76,
+          78,
+          80,
+          82
+        ],
+        "source": [
+          5,
+          7,
+          31,
+          88
+        ]
+      },
+      "preservation_checks": {
+        "carrying_numbers_negative_results_protocols": [
+          "28 Train 39.1→73.2、16 非机器人 Unseen 42.1→64.1、18 含机器人 Unseen 约 +26 范围不混。",
+          "机器人各 60% 为带技能准备完整配置；路由 Oracle 只作事后诊断。",
+          "路由四行 52.74/46.23、65.79/52.36、71.27/60.96、73.16/63.61，module-only 三行均保留。",
+          "Real 211.56M→Sim 405.70M 构造成本；0–100 归一后均匀平均不等于统一物理量。"
+        ],
+        "semantic_assessment": "回看旧稿和冻结上游记录后，机制、证据对象与限定条件一致；压缩铺垫和收束未删掉承重信息。",
+        "source_assessment": "来源、版本和历史核验边界仍可追溯，未升格为本轮阅读全文。"
+      },
+      "depth_and_repetition_assessment": "方法和结果承担主要深度；背景、问题、思路简明区分场景、缺口和切入。必要概念回指用于机制解释，无需要删除的纯重复铺垫。",
+      "material_limits_retained": "能力定义/审核有人工选择，固定排序缺敏感性控制；只有父模块替换要求严格提分。",
+      "unresolved_issues": []
+    },
+    {
+      "paper_id": "2610.36671",
+      "title": "LOWN",
+      "conclusion": "pass",
+      "reason": "六栏均有实质内容职责；未发现本轮承重信息丢失或语义改错。",
+      "candidate_path": "/workspace/reviews/radar-2026-W44-six-sections-20261105/after/articles/2610.36671.md",
+      "candidate_sha256": "bfd9e9531fddc73f8e8e902a1c2f4991ac5bce5f0c2815a5a2ff4a1640e00b01",
+      "previous_article_path": "/workspace/reviews/radar-2026-W44-six-sections-20261105/previous-articles/2610.36671.md",
+      "previous_article_sha256": "ffd18a58ddfca9f6ae55caf0af90f4ddf8ef14453d51bea3037cf7c5c05eb5e7",
+      "source_record_path": "/workspace/reviews/radar-2026-W44-six-sections-20261105/materials/2610.36671/source-record.md",
+      "source_record_file_sha256": "8140c36ef46968162d4a3d7c59d8afa33c005e194f0a8ca863a8c92f364581f5",
+      "upstream_body_sha256": "ba02ae7669567e59c185e16073df8090f828c66ac1e8a9f69b54882d519b8c75",
+      "upstream_body_matches_index": true,
+      "candidate_first_read": {
+        "mechanism_retelling": "完整视觉前向保存锚点；每步文本前向检查按锚点置信度排序的一致前缀，足够 k 则提交全部前缀，少于 k 则重看图并按分歧优先提交；路由和多 token 提交共同省计算。",
+        "key_result_judgment": "0.353 倍 FLOPs、99.6% 平均分仍伴随具体任务退步，2.2–4.7% 提交被新视觉推翻说明一致性不等于正确性。",
+        "section_retelling_note": "六栏成立，全部推理步骤在方法，质量／成本和消融／可靠性在结果。"
+      },
+      "sections": [
+        {
+          "name": "背景",
+          "start_line": 9,
+          "end_line": 12,
+          "responsibility_fulfilled": true,
+          "assessment": "交代扩散文本生成反复处理固定图像的成本来源。"
+        },
+        {
+          "name": "问题",
+          "start_line": 13,
+          "end_line": 16,
+          "responsibility_fulfilled": true,
+          "assessment": "比较永久裁剪与固定周期访问的不足，提出响应当前需求。"
+        },
+        {
+          "name": "思路",
+          "start_line": 17,
+          "end_line": 20,
+          "responsibility_fulfilled": true,
+          "assessment": "以旧视觉锚点和文本一致性概括无训练推理路线。"
+        },
+        {
+          "name": "方法",
+          "start_line": 21,
+          "end_line": 46,
+          "responsibility_fulfilled": true,
+          "assessment": "推理步骤完整归方法，包括排序前缀、k 阈值、分歧优先、自适应提交和检查本身成本。"
+        },
+        {
+          "name": "结果",
+          "start_line": 47,
+          "end_line": 66,
+          "responsibility_fulfilled": true,
+          "assessment": "FLOPs/质量及组合时延为主结果；随机访问、两种节省与证书可靠性分开分析。"
+        },
+        {
+          "name": "总结",
+          "start_line": 67,
+          "end_line": 71,
+          "responsibility_fulfilled": true,
+          "assessment": "收束随生成状态调整视觉访问的贡献，保留质量不均与证书非正确性保证。"
+        }
+      ],
+      "content_anchors": {
+        "mechanism": [
+          25,
+          31,
+          33,
+          37,
+          39,
+          41,
+          43,
+          45
+        ],
+        "main_results": [
+          51,
+          53,
+          55
+        ],
+        "analysis": [
+          59,
+          61,
+          63,
+          65
+        ],
+        "source": [
+          5,
+          7,
+          29,
+          71
+        ]
+      },
+      "preservation_checks": {
+        "carrying_numbers_negative_results_protocols": [
+          "LLaDA-V、batch 1、贪心、无 KV 缓存、十基准；0.353 倍 FLOPs、99.6% 和截顶 98.6%。",
+          "DocVQA 83.91→82.31、MathVista 59.10→56.00；Fast-dLLM 时延减 38.1–50.1% 伴随 LLaVA 63→58。",
+          "随机访问仅匹配平均完整前向次数，53.40/30.48 对 56.00/34.43。",
+          "27–68% 与剩余成本的 21–43% 未相加；2.2–4.7% 被新完整前向推翻保留自身轨迹范围。"
+        ],
+        "semantic_assessment": "回看旧稿和冻结上游记录后，机制、证据对象与限定条件一致；压缩铺垫和收束未删掉承重信息。",
+        "source_assessment": "来源、版本和历史核验边界仍可追溯，未升格为本轮阅读全文。"
+      },
+      "depth_and_repetition_assessment": "方法和结果承担主要深度；背景、问题、思路简明区分场景、缺口和切入。必要概念回指用于机制解释，无需要删除的纯重复铺垫。",
+      "material_limits_retained": "旧锚点会过时，文档图表节省较小；重复保护和 k 完整调度未保存。",
+      "unresolved_issues": []
+    },
+    {
+      "paper_id": "2610.39301",
+      "title": "Youtu-Parsing-Omni",
+      "conclusion": "pass",
+      "reason": "六栏均有实质内容职责；未发现本轮承重信息丢失或语义改错。",
+      "candidate_path": "/workspace/reviews/radar-2026-W44-six-sections-20261105/after/articles/2610.39301.md",
+      "candidate_sha256": "5e47960f687498f40eca523ebe6d0bf15873414c53bc3453efd0c53d509495db",
+      "previous_article_path": "/workspace/reviews/radar-2026-W44-six-sections-20261105/previous-articles/2610.39301.md",
+      "previous_article_sha256": "bd8a4c873ef8199750381ebe14495cb6f1300d723ee07e7eb383d23795a89697",
+      "source_record_path": "/workspace/reviews/radar-2026-W44-six-sections-20261105/materials/2610.39301/source-record.md",
+      "source_record_file_sha256": "5f734138958e2731d73ef6a7c03dfbf1690406b3e7be9f37d9959ef149af6bde",
+      "upstream_body_sha256": "5682d6e666a480d6e2d3f9be1cdc621ab628e6c5e3e62bdd10bebd7167010f7a",
+      "upstream_body_matches_index": true,
+      "candidate_first_read": {
+        "mechanism_retelling": "各模态入口不同，但共享双向感知 Transformer；后训练从 SFT、schema 路由奖励进入 OSAD。学生自行生成并过滤格式失败，教师在同一学生前缀上额外看参考解析，用内容 JS 与结构前向 KL 分别监督，仅更新 LoRA，六轮刷新。",
+        "key_result_judgment": "96.96 overall 仅略高于 TeleOCR 96.91，文本与公式分别落后，不能说全面领先；OSAD 的顺序曲线也不能分解成各组件净贡献。",
+        "section_retelling_note": "六栏职责成立，深度集中在方法和分项／消融解释。"
+      },
+      "sections": [
+        {
+          "name": "背景",
+          "start_line": 9,
+          "end_line": 12,
+          "responsibility_fulfilled": true,
+          "assessment": "建立解析必须读准内容并组织结构的应用背景。"
+        },
+        {
+          "name": "问题",
+          "start_line": 13,
+          "end_line": 18,
+          "responsibility_fulfilled": true,
+          "assessment": "分开多塔接口复杂度与序列反馈难定位内容错误两个缺口。"
+        },
+        {
+          "name": "思路",
+          "start_line": 19,
+          "end_line": 22,
+          "responsibility_fulfilled": true,
+          "assessment": "概括共享感知编码和角色化局部监督两条路线。"
+        },
+        {
+          "name": "方法",
+          "start_line": 23,
+          "end_line": 50,
+          "responsibility_fulfilled": true,
+          "assessment": "共享入口、训练顺序、同前缀、角色损失、LoRA 与六轮刷新完整展开。"
+        },
+        {
+          "name": "结果",
+          "start_line": 51,
+          "end_line": 76,
+          "responsibility_fulfilled": true,
+          "assessment": "主成绩保留分项落后；初始化受控配置和顺序阶段曲线分开，未把后者伪装独立消融。"
+        },
+        {
+          "name": "总结",
+          "start_line": 77,
+          "end_line": 79,
+          "responsibility_fulfilled": true,
+          "assessment": "保留内容/结构分工贡献及参考质量、阅读/空间差异、阶段归因边界。"
+        }
+      ],
+      "content_anchors": {
+        "mechanism": [
+          29,
+          31,
+          33,
+          37,
+          39,
+          43,
+          45,
+          47,
+          49
+        ],
+        "main_results": [
+          55,
+          59,
+          60,
+          61,
+          63,
+          65
+        ],
+        "analysis": [
+          69,
+          71,
+          73,
+          75
+        ],
+        "source": [
+          3,
+          5,
+          7,
+          29
+        ]
+      },
+      "preservation_checks": {
+        "carrying_numbers_negative_results_protocols": [
+          "共享感知但模态入口/合并器/投影器分开，5B 解码器，轮内只更新 LoRA、六轮且仍依赖参考解析。",
+          "1651 页；96.96/96.91/96.34，文本 0.0271/0.0267，公式 96.80/97.53；ChemOCR 54.2/49.6 与 74.6/74.9。",
+          "初始化 Qwen3-4B+0.4B、无解析数据、同 300B；767.0/636.4，随机 16 项中 8 项更强及 BLINK 52.89/43.41。",
+          "95.21→96.96，1.75 为 SFT 后总增益 1.99 的阶段部分，不分摊为各子项净贡献。"
+        ],
+        "semantic_assessment": "回看旧稿和冻结上游记录后，机制、证据对象与限定条件一致；压缩铺垫和收束未删掉承重信息。",
+        "source_assessment": "来源、版本和历史核验边界仍可追溯，未升格为本轮阅读全文。"
+      },
+      "depth_and_repetition_assessment": "方法和结果承担主要深度；背景、问题、思路简明区分场景、缺口和切入。必要概念回指用于机制解释，无需要删除的纯重复铺垫。",
+      "material_limits_retained": "schema/角色权重未保存；初始化不是最终 5B 拆件，OSAD 预算与子组件没有完全隔离。",
+      "unresolved_issues": []
+    },
+    {
+      "paper_id": "2610.19687",
+      "title": "FSPO",
+      "conclusion": "pass",
+      "reason": "六栏均有实质内容职责；未发现本轮承重信息丢失或语义改错。",
+      "candidate_path": "/workspace/reviews/radar-2026-W44-six-sections-20261105/after/articles/2610.19687.md",
+      "candidate_sha256": "2646f7f376c768418f9dbf089a079b48697f888d90bea77afa68c4714288c9b4",
+      "previous_article_path": "/workspace/reviews/radar-2026-W44-six-sections-20261105/previous-articles/2610.19687.md",
+      "previous_article_sha256": "bc80aad8bb914a9d4f772d2852a8d4d298aa13be44d3cfbda8e40c61e3dffe8f",
+      "source_record_path": "/workspace/reviews/radar-2026-W44-six-sections-20261105/materials/2610.19687/source-record.md",
+      "source_record_file_sha256": "eeee90a94ee278f3b0d0426f884baf9f4f93335543643d4d0778762280f63c62",
+      "upstream_body_sha256": "62bb201fb6c2da51f9da03f41edb764d021484fcb19a088ff9e0c4ef1fbea1c8",
+      "upstream_body_matches_index": true,
+      "candidate_first_read": {
+        "mechanism_retelling": "同一模型通过问题与问题加示范形成学生／特权教师，当前稀疏分布匹配提供适应信号；将选定前缀的历史分布缓存下来、延迟刷新，并用参考答案和周期调度稳定学习。",
+        "key_result_judgment": "五小时窗口最佳 avg@16 有总体提升，但工具任务五小时持平、一小时 SDPO 更好；54.1% 的局部负修正反例说明组件需可靠参照。",
+        "section_retelling_note": "六栏职责成立，背景／问题／思路各有任务；缓存行为和部署条件放在方法。"
+      },
+      "sections": [
+        {
+          "name": "背景",
+          "start_line": 9,
+          "end_line": 12,
+          "responsibility_fulfilled": true,
+          "assessment": "介绍推理与工具后训练中的验证及自蒸馏反馈。"
+        },
+        {
+          "name": "问题",
+          "start_line": 13,
+          "end_line": 16,
+          "responsibility_fulfilled": true,
+          "assessment": "说明目标随参数漂移、EMA 显存和只存答案丢失分布的问题。"
+        },
+        {
+          "name": "思路",
+          "start_line": 17,
+          "end_line": 20,
+          "responsibility_fulfilled": true,
+          "assessment": "概括当前适应、历史分布和可靠参考共同更新 policy。"
+        },
+        {
+          "name": "方法",
+          "start_line": 21,
+          "end_line": 48,
+          "responsibility_fulfilled": true,
+          "assessment": "示范来源、同前缀、稀疏匹配、延迟刷新、参考权重和周期调度都可复述，部署边界明确。"
+        },
+        {
+          "name": "结果",
+          "start_line": 49,
+          "end_line": 81,
+          "responsibility_fulfilled": true,
+          "assessment": "主成绩保留窗口最佳与显存核算条件；目标、缓存和调度消融保留负修正反例。"
+        },
+        {
+          "name": "总结",
+          "start_line": 82,
+          "end_line": 84,
+          "responsibility_fulfilled": true,
+          "assessment": "收束历史行为存储贡献和 verifier、参考、缓存覆盖与反馈偏差条件。"
+        }
+      ],
+      "content_anchors": {
+        "mechanism": [
+          27,
+          29,
+          31,
+          33,
+          35,
+          39,
+          41,
+          45,
+          47
+        ],
+        "main_results": [
+          53,
+          57,
+          58,
+          60,
+          62
+        ],
+        "analysis": [
+          66,
+          70,
+          71,
+          72,
+          73,
+          74,
+          76,
+          78,
+          80
+        ],
+        "source": [
+          3,
+          5,
+          7,
+          27
+        ]
+      },
+      "preservation_checks": {
+        "carrying_numbers_negative_results_protocols": [
+          "四 GH200、五任务、五小时最优 avg@16；Qwen 76.2/72.0、Olmo 72.4/68.0；工具 68.5 平局且一小时 SDPO 更强。",
+          "56GB/70GB 为作者核算；6T 约省 12TB 明示参数副本会计外推。",
+          "目标控制 64.5、60.1、56.0、61.7、54.1，局部负修正不独立有益。",
+          "缓存/EMA/快照 64.5/63.2/58.8，反转周期 59.7；信号相互依赖未被改成可加收益。"
+        ],
+        "semantic_assessment": "回看旧稿和冻结上游记录后，机制、证据对象与限定条件一致；压缩铺垫和收束未删掉承重信息。",
+        "source_assessment": "来源、版本和历史核验边界仍可追溯，未升格为本轮阅读全文。"
+      },
+      "depth_and_repetition_assessment": "方法和结果承担主要深度；背景、问题、思路简明区分场景、缺口和切入。必要概念回指用于机制解释，无需要删除的纯重复铺垫。",
+      "material_limits_retained": "K、负修正精确式、缓存配置、训练方差未保存；可靠反馈与参考依赖保留。",
+      "unresolved_issues": []
+    },
+    {
+      "paper_id": "2610.35013",
+      "title": "MPO",
+      "conclusion": "pass",
+      "reason": "六栏均有实质内容职责；未发现本轮承重信息丢失或语义改错。",
+      "candidate_path": "/workspace/reviews/radar-2026-W44-six-sections-20261105/after/articles/2610.35013.md",
+      "candidate_sha256": "0b3ee76def01bcd4dbeb03ba013320a9af574fe79416b1a3eadce71cbed93a18",
+      "previous_article_path": "/workspace/reviews/radar-2026-W44-six-sections-20261105/previous-articles/2610.35013.md",
+      "previous_article_sha256": "13032082273f3e62f97ff3be844f78438dd04295d851e5027c4ae3719f406e7f",
+      "source_record_path": "/workspace/reviews/radar-2026-W44-six-sections-20261105/materials/2610.35013/source-record.md",
+      "source_record_file_sha256": "3f65e4929730b5f09e1080f6f9574b7d7775fcd1570e78cc87bc8dc527f5a0eb",
+      "upstream_body_sha256": "40cd43743f9dca42da7965a99a0f2a9132b97ab1979f2f0a6cf74d74d8f8220b",
+      "upstream_body_matches_index": true,
+      "candidate_first_read": {
+        "mechanism_retelling": "先沿完整交互轮构造 GAE，再把轮内 TD trace 去均值后加回，保持整轮平均信用；前向仍是整轮 token 比率乘积，反向只留当前 token 梯度，以免局部信用在共享求导中相消。",
+        "key_result_judgment": "4B 搜索成绩改善，但只有一次训练、选最佳 checkpoint 后五次评估；β=1.5 回落与 token IS 对照给出两项设计证据。",
+        "section_retelling_note": "六栏职责成立，89.5% 的诊断已作为分析而非普遍规律。"
+      },
+      "sections": [
+        {
+          "name": "背景",
+          "start_line": 9,
+          "end_line": 12,
+          "responsibility_fulfilled": true,
+          "assessment": "建立生成 token 与环境完整调用的两种时间尺度。"
+        },
+        {
+          "name": "问题",
+          "start_line": 13,
+          "end_line": 16,
+          "responsibility_fulfilled": true,
+          "assessment": "解释序列共享优势与 token GAE 各自的信用传播缺口。"
+        },
+        {
+          "name": "思路",
+          "start_line": 17,
+          "end_line": 20,
+          "responsibility_fulfilled": true,
+          "assessment": "概括先轮级后局部信用及完整轮概率权重的对齐。"
+        },
+        {
+          "name": "方法",
+          "start_line": 21,
+          "end_line": 50,
+          "responsibility_fulfilled": true,
+          "assessment": "TD 求和、MAE 均值保持、完整乘积与自身梯度均充分说明，训练和部署分开。"
+        },
+        {
+          "name": "结果",
+          "start_line": 51,
+          "end_line": 86,
+          "responsibility_fulfilled": true,
+          "assessment": "主表含训练/评估协议；89.5% 诊断、β、IS、λ 及理论适用条件在分析。"
+        },
+        {
+          "name": "总结",
+          "start_line": 87,
+          "end_line": 89,
+          "responsibility_fulfilled": true,
+          "assessment": "收束尺度对齐贡献，保留轮边界、critic、多训练种子和固定选择规则条件。"
+        }
+      ],
+      "content_anchors": {
+        "mechanism": [
+          27,
+          29,
+          31,
+          33,
+          35,
+          37,
+          39,
+          43,
+          45,
+          47,
+          49
+        ],
+        "main_results": [
+          55,
+          59,
+          60,
+          61,
+          63,
+          65
+        ],
+        "analysis": [
+          69,
+          71,
+          75,
+          76,
+          77,
+          79,
+          81,
+          83,
+          85
+        ],
+        "source": [
+          3,
+          5,
+          7,
+          27
+        ]
+      },
+      "preservation_checks": {
+        "carrying_numbers_negative_results_protocols": [
+          "89.5% 仅单搜索运行；Eq.20 均值保持在批归一化前；未复发避免 token 连乘的旧误读。",
+          "4B/30B 三项主成绩与相对各列最强非 MPO 的 4.33/3.85/0.66 点，GAIA/HLE 文本子集。",
+          "训练 300/300/200 步、一次训练、最佳 checkpoint 后五次评估、Search 每题 32 rollout 全保留。",
+          "β=0/1/1.5 三行、token IS 45.72/36.35/8.89、λ 0.80/0.95、λcritic=1 保留。"
+        ],
+        "semantic_assessment": "回看旧稿和冻结上游记录后，机制、证据对象与限定条件一致；压缩铺垫和收束未删掉承重信息。",
+        "source_assessment": "来源、版本和历史核验边界仍可追溯，未升格为本轮阅读全文。"
+      },
+      "depth_and_repetition_assessment": "方法和结果承担主要深度；背景、问题、思路简明区分场景、缺口和切入。必要概念回指用于机制解释，无需要删除的纯重复铺垫。",
+      "material_limits_retained": "完整折扣/trace 实现未保存；一次训练消融和有界优势理论不构成统计稳定或神经训练单调保证。",
+      "unresolved_issues": []
+    },
+    {
+      "paper_id": "2610.37381",
+      "title": "PDRVLA",
+      "conclusion": "pass",
+      "reason": "六栏均有实质内容职责；未发现本轮承重信息丢失或语义改错。",
+      "candidate_path": "/workspace/reviews/radar-2026-W44-six-sections-20261105/after/articles/2610.37381.md",
+      "candidate_sha256": "a6f2764a694cf3e939c644d01dcb0864da26c6284366e087f9cd736e6f12947c",
+      "previous_article_path": "/workspace/reviews/radar-2026-W44-six-sections-20261105/previous-articles/2610.37381.md",
+      "previous_article_sha256": "d8180883feb76b958bb355035abed97a0e13e924c1408b0109dee6b3e1686bbf",
+      "source_record_path": "/workspace/reviews/radar-2026-W44-six-sections-20261105/materials/2610.37381/source-record.md",
+      "source_record_file_sha256": "6c4b0c4d01b06eef117e91c86a91a385c0e49c2ee4438184ebaecec679f8bf05",
+      "upstream_body_sha256": "3b40502bef5a2ef10892cbf546aa93936261e8d402071c32099680a6d5084ea3",
+      "upstream_body_matches_index": true,
+      "candidate_first_read": {
+        "mechanism_retelling": "从 VLM 中间层用固定查询提取物理 token；训练期利用直接未来潜特征预测和冻结视频模型的可回传映射监督；联合策略阶段保留直接头、移除视频模型，部署再移除预测头，动作专家以物理／语义／本体状态生成动作 chunk。",
+        "key_result_judgment": "四个仿真总分较强但有明确任务落后；预测 MSE 消融没有隔离动作成功率的因果收益。",
+        "section_retelling_note": "六栏职责成立，四步 Euler 与八步动作、训练与推理、不同消融基线都区分清楚。"
+      },
+      "sections": [
+        {
+          "name": "背景",
+          "start_line": 9,
+          "end_line": 12,
+          "responsibility_fulfilled": true,
+          "assessment": "简述指令理解与运动后外观/几何/接触的控制需求。"
+        },
+        {
+          "name": "问题",
+          "start_line": 13,
+          "end_line": 16,
+          "responsibility_fulfilled": true,
+          "assessment": "提出最终语义特征与在线视频规划成本的取舍。"
+        },
+        {
+          "name": "思路",
+          "start_line": 17,
+          "end_line": 20,
+          "responsibility_fulfilled": true,
+          "assessment": "概括训练期未来监督压入紧凑 physical tokens。"
+        },
+        {
+          "name": "方法",
+          "start_line": 21,
+          "end_line": 58,
+          "responsibility_fulfilled": true,
+          "assessment": "特征提取、物理预训练、联合策略和部署四层分开；冻结/回传及四 Euler/八动作步解释清楚。"
+        },
+        {
+          "name": "结果",
+          "start_line": 59,
+          "end_line": 87,
+          "responsibility_fulfilled": true,
+          "assessment": "四仿真主表含落后分项；预测/ECoT/频率三组分析分别保留控制和因果边界。"
+        },
+        {
+          "name": "总结",
+          "start_line": 88,
+          "end_line": 90,
+          "responsibility_fulfilled": true,
+          "assessment": "收束留下训练监督表征、移除部署预测的贡献，保留动作侧因果和真实泛化未证。"
+        }
+      ],
+      "content_anchors": {
+        "mechanism": [
+          27,
+          29,
+          31,
+          33,
+          39,
+          41,
+          43,
+          45,
+          49,
+          51,
+          55,
+          57
+        ],
+        "main_results": [
+          63,
+          67,
+          68,
+          69,
+          70,
+          72,
+          74
+        ],
+        "analysis": [
+          78,
+          80,
+          82,
+          84,
+          86
+        ],
+        "source": [
+          3,
+          5,
+          7,
+          27
+        ]
+      },
+      "preservation_checks": {
+        "carrying_numbers_negative_results_protocols": [
+          "第 8 层、50×2560、四 block、57.3M/1.4%、未来 30 动作步五帧、150M 专家、四 Euler 与八动作 chunk。",
+          "99.3/89.9/93.6/81.5；97.6 对 98.5、64.6 对 85.4；基线数据预训练规模不同。",
+          "同样本预算日程，100 未见 episode/828 clips；0.6439→0.6354、1.32%，RGB/深度/光流 4.06/2.12/0.62%，光流 95% 区间跨零。",
+          "ECoT 92.8→96.0、在线 95.6、Plus 无收益；周期 32.13/32.25/20.63；三设置不合成累计收益。"
+        ],
+        "semantic_assessment": "回看旧稿和冻结上游记录后，机制、证据对象与限定条件一致；压缩铺垫和收束未删掉承重信息。",
+        "source_assessment": "来源、版本和历史核验边界仍可追溯，未升格为本轮阅读全文。"
+      },
+      "depth_and_repetition_assessment": "方法和结果承担主要深度；背景、问题、思路简明区分场景、缺口和切入。必要概念回指用于机制解释，无需要删除的纯重复铺垫。",
+      "material_limits_retained": "physical token 不是命名物理量；预测头/损失配置未保存，v1/v2 不混，预测改善未独立隔离动作收益。",
+      "unresolved_issues": []
+    },
+    {
+      "paper_id": "2610.31668",
+      "title": "Video World Models Survey",
+      "conclusion": "pass",
+      "reason": "六栏均有实质内容职责；未发现本轮承重信息丢失或语义改错。",
+      "candidate_path": "/workspace/reviews/radar-2026-W44-six-sections-20261105/after/articles/2610.31668.md",
+      "candidate_sha256": "2ba6b2c23220a04a9e30177a0018a6e06449f5550cff9bf113f28a7d3aca02a3",
+      "previous_article_path": "/workspace/reviews/radar-2026-W44-six-sections-20261105/previous-articles/2610.31668.md",
+      "previous_article_sha256": "e94fc480ef7568113f707ada18f611ab3998cf8eaf10bed9bde2e44c9e17bd86",
+      "source_record_path": "/workspace/reviews/radar-2026-W44-six-sections-20261105/materials/2610.31668/source-record.md",
+      "source_record_file_sha256": "5d1b7c09d7136fac69a941b5aeee8a69ce462663d0cbff57a33e24caab8540fd",
+      "upstream_body_sha256": "8ab5d00416ceac160bd34a28d93ccf7605496332bea2516315fee2c7e0b1d895",
+      "upstream_body_matches_index": true,
+      "candidate_first_read": {
+        "mechanism_retelling": "以视频为潜在世界的局部有损投影，用 Reading、Writing、Sharing、Interacting 分清信息恢复、条件生成、理解生成耦合、动作和观察更新；按证据强度审视不同主张。",
+        "key_result_judgment": "短片逼真不能推出状态持续和决策效用；共享收益需要同数据、容量或预算的单向／共享对照。",
+        "section_retelling_note": "六栏成立，方法是分类和读图，结果明确改为关键认识／协议分析，没有捏造模型实验或消融。"
+      },
+      "sections": [
+        {
+          "name": "背景",
+          "start_line": 7,
+          "end_line": 10,
+          "responsibility_fulfilled": true,
+          "assessment": "介绍视频局部观察及多种模型共用视频的背景。"
+        },
+        {
+          "name": "问题",
+          "start_line": 11,
+          "end_line": 14,
+          "responsibility_fulfilled": true,
+          "assessment": "指出视觉连贯、世界状态和控制证据被混用。"
+        },
+        {
+          "name": "思路",
+          "start_line": 15,
+          "end_line": 20,
+          "responsibility_fulfilled": true,
+          "assessment": "提出四操作与证据组织方式，不训练新网络，四操作互补而非等级。"
+        },
+        {
+          "name": "方法",
+          "start_line": 21,
+          "end_line": 44,
+          "responsibility_fulfilled": true,
+          "assessment": "用同一教学场景说明四操作输入输出，再解释原图计划/修订组织。"
+        },
+        {
+          "name": "结果",
+          "start_line": 45,
+          "end_line": 67,
+          "responsibility_fulfilled": true,
+          "assessment": "以关键认识和分类/协议分析承接结果，适配综述，未强造组件消融。"
+        },
+        {
+          "name": "总结",
+          "start_line": 68,
+          "end_line": 74,
+          "responsibility_fulfilled": true,
+          "assessment": "收束证据对齐贡献，无全属性统一标准且不能替代引用论文核验。"
+        }
+      ],
+      "content_anchors": {
+        "mechanism": [
+          17,
+          19,
+          25,
+          27,
+          29,
+          31,
+          33,
+          39,
+          41
+        ],
+        "main_results": [
+          49,
+          53,
+          54,
+          55,
+          56,
+          58
+        ],
+        "analysis": [
+          62,
+          64,
+          66
+        ],
+        "source": [
+          3,
+          5,
+          43,
+          72,
+          74
+        ]
+      },
+      "preservation_checks": {
+        "carrying_numbers_negative_results_protocols": [
+          "Reading/Writing/Sharing/Interacting 定义，共享层次，被动/动作条件/观察更新区分均保留。",
+          "输出合理、忠于条件、状态一致、决策效用四类证据，以及单层分数不能越级主张。",
+          "同数据/容量/预算对照，长回环、动作干预、物理因果、随机未来与闭环延迟。",
+          "Figure 6 并列路线非已验证统一系统；v1 和未纳入的 10/29 v2 范围保留。"
+        ],
+        "semantic_assessment": "回看旧稿和冻结上游记录后，机制、证据对象与限定条件一致；压缩铺垫和收束未删掉承重信息。",
+        "source_assessment": "来源、版本和历史核验边界仍可追溯，未升格为本轮阅读全文。"
+      },
+      "depth_and_repetition_assessment": "方法和结果承担主要深度；背景、问题、思路简明区分场景、缺口和切入。必要概念回指用于机制解释，无需要删除的纯重复铺垫。",
+      "material_limits_retained": "分类交叉、代表基准非穷尽；未逐篇重审引用论文，不能独立审定文献覆盖。",
+      "unresolved_issues": []
+    },
+    {
+      "paper_id": "2610.32965",
+      "title": "RynnUnify",
+      "conclusion": "pass",
+      "reason": "六栏均有实质内容职责；未发现本轮承重信息丢失或语义改错。",
+      "candidate_path": "/workspace/reviews/radar-2026-W44-six-sections-20261105/after/articles/2610.32965.md",
+      "candidate_sha256": "b40937ac651cfc6c24815ab9b97ccbb202fcc52fd7778a20dde49f97bc20e3e1",
+      "previous_article_path": "/workspace/reviews/radar-2026-W44-six-sections-20261105/previous-articles/2610.32965.md",
+      "previous_article_sha256": "ae7f3b69af16c87273801698f9a79f96521274ced9004dfa044125b895432918",
+      "source_record_path": "/workspace/reviews/radar-2026-W44-six-sections-20261105/materials/2610.32965/source-record.md",
+      "source_record_file_sha256": "e32376623db860fea5923b568500947f7daab40be0c125de4efff98cf737751b",
+      "upstream_body_sha256": "cf5645904dbc0368f96aed25efc854f2bbeabb28d6cb77b36366e34a9e293346",
+      "upstream_body_matches_index": true,
+      "candidate_first_read": {
+        "mechanism_retelling": "reasoner 给子任务、变化和时长，generator 用四张场景记忆及近期时间前缀预测；训练对条件加入离线缓存预测误差，未来监督仍是真值。Agentic 用独立策略路由 D/G；WAM 以生成器中间特征条件化动作头，动作生成和执行前缀分开。",
+        "key_result_judgment": "规划优于所列统一模型但低于组合系统；生成辅助平均上升仍有空间分项退步，真机仅三任务；各组件消融缺口保持历史记录口径。",
+        "section_retelling_note": "六栏成立，方法充分区分三条链、所有推理操作均在方法，主结果与失败／归因分开。"
+      },
+      "sections": [
+        {
+          "name": "背景",
+          "start_line": 7,
+          "end_line": 10,
+          "responsibility_fulfilled": true,
+          "assessment": "简述跨片段具身任务中的理解、子任务、预想和历史延续。"
+        },
+        {
+          "name": "问题",
+          "start_line": 11,
+          "end_line": 14,
+          "responsibility_fulfilled": true,
+          "assessment": "覆盖表征衔接、历史丢失、几何偏差和动作输出缺口。"
+        },
+        {
+          "name": "思路",
+          "start_line": 15,
+          "end_line": 18,
+          "responsibility_fulfilled": true,
+          "assessment": "概括基础推理/预测循环与 Agentic/WAM 扩展。"
+        },
+        {
+          "name": "方法",
+          "start_line": 19,
+          "end_line": 60,
+          "responsibility_fulfilled": true,
+          "assessment": "场景记忆、两阶段基础训练、自强迫、D/G 路由和 WAM 三阶段及推理充分展开。"
+        },
+        {
+          "name": "结果",
+          "start_line": 61,
+          "end_line": 86,
+          "responsibility_fulfilled": true,
+          "assessment": "主结果按规划/问答/执行列协议；失败/归因清楚区分系统比较与等算力控制。"
+        },
+        {
+          "name": "总结",
+          "start_line": 87,
+          "end_line": 93,
+          "responsibility_fulfilled": true,
+          "assessment": "收束三类连接方式，保留几何、历史、闭环成本、真机三任务和实现核验边界。"
+        }
+      ],
+      "content_anchors": {
+        "mechanism": [
+          21,
+          27,
+          31,
+          33,
+          35,
+          37,
+          43,
+          45,
+          47,
+          49,
+          53,
+          55,
+          57
+        ],
+        "main_results": [
+          65,
+          69,
+          70,
+          71,
+          72,
+          73,
+          75
+        ],
+        "analysis": [
+          79,
+          81,
+          83,
+          85
+        ],
+        "source": [
+          3,
+          5,
+          39,
+          85,
+          93
+        ]
+      },
+      "preservation_checks": {
+        "carrying_numbers_negative_results_protocols": [
+          "基础两个 8B 与独立 Agentic 8B 分开；四参考帧/13 帧前缀，固定 checkpoint 一次离线缓存，监督未来仍是真值。",
+          "4D+4G/原生多图 8D、奖励口径和软路由条件；WAM 三阶段、48×12、16 Euler/执行前 16 动作、特征而非解码视频输入。",
+          "200 场景/15 步及 0.50 PI+0.40 VR+0.10 VQ；54.80/45.05/65.71、44/50、52/50/57.1；Selected-20 51.5/47.0。",
+          "三真机任务每题 20 次、46.7 对 25.0/26.7；全量报告与统一重评不同、阶段成功率不能相乘。",
+          "Area/Mess 改善与 Position/Distance/Size 退步、其他三 UMM 路径退步、VQ 77.53<79.69 均保留。",
+          "组件消融缺口保留为旧稿当时所见，不冒充本轮阅读全文确认论文没有消融；提交/封面日期分开。"
+        ],
+        "semantic_assessment": "回看旧稿和冻结上游记录后，机制、证据对象与限定条件一致；压缩铺垫和收束未删掉承重信息。",
+        "source_assessment": "来源、版本和历史核验边界仍可追溯，未升格为本轮阅读全文。"
+      },
+      "depth_and_repetition_assessment": "方法和结果承担主要深度；背景、问题、思路简明区分场景、缺口和切入。必要概念回指用于机制解释，无需要删除的纯重复铺垫。",
+      "material_limits_retained": "新增策略和 RL 预算使 D/G 不能归因纯生成开关；共享注意力/路由精确目标/动作编码未保存。",
+      "unresolved_issues": []
+    },
+    {
+      "paper_id": "2610.36068",
+      "title": "Rollback",
+      "conclusion": "pass",
+      "reason": "六栏均有实质内容职责；未发现本轮承重信息丢失或语义改错。",
+      "candidate_path": "/workspace/reviews/radar-2026-W44-six-sections-20261105/after/articles/2610.36068.md",
+      "candidate_sha256": "a8341e3cdb757c1806c4a1701ae5cd52840cd7a51fec0dedf200d54dbc3d6c26",
+      "previous_article_path": "/workspace/reviews/radar-2026-W44-six-sections-20261105/previous-articles/2610.36068.md",
+      "previous_article_sha256": "8692d593db57b25744f47671a3007c24f3c00679232de76da5e2a6e874c1aaf0",
+      "source_record_path": "/workspace/reviews/radar-2026-W44-six-sections-20261105/materials/2610.36068/source-record.md",
+      "source_record_file_sha256": "0c705846bbf4b630cb84c9be9f6b93cbb6de8df5374e79858a9fb4455bbb5e2e",
+      "upstream_body_sha256": "6af3851fea8c82ead7c04df6824a31cd8ed3876fb94fd43d0ab293214c8fe8ef",
+      "upstream_body_matches_index": true,
+      "candidate_first_read": {
+        "mechanism_retelling": "缓存动作 chunk 边界的模拟上下文，从同起点做 MCTS 候选比较，终局 judge 结果聚合为相对质量档，条件流匹配把搜索学入策略；真实轨迹持续校准模拟器，部署不要求在线搜树。",
+        "key_result_judgment": "三任务均值 46.72%→57.93%，Block 中去子树平均的 59.33% 仍使用树搜索，因此对照支持聚合方式；模型误差诊断使用适应过的轨迹，非未见泛化。",
+        "section_retelling_note": "六栏成立，反事实边界与模型可信度在总结保留。"
+      },
+      "sections": [
+        {
+          "name": "背景",
+          "start_line": 7,
+          "end_line": 10,
+          "responsibility_fulfilled": true,
+          "assessment": "说明接触任务试错成本与世界模型模拟机会。"
+        },
+        {
+          "name": "问题",
+          "start_line": 11,
+          "end_line": 14,
+          "responsibility_fulfilled": true,
+          "assessment": "点出重复前史、终局信用和单次随机标签噪声。"
+        },
+        {
+          "name": "思路",
+          "start_line": 15,
+          "end_line": 20,
+          "responsibility_fulfilled": true,
+          "assessment": "概括共同模拟起点分叉、相对动作监督和真实校准，并明确非物理回退。"
+        },
+        {
+          "name": "方法",
+          "start_line": 21,
+          "end_line": 54,
+          "responsibility_fulfilled": true,
+          "assessment": "恢复、MCTS、judge、子树分档、条件动作学习及 LoRA+DMD 循环完整，部署操作在方法。"
+        },
+        {
+          "name": "结果",
+          "start_line": 55,
+          "end_line": 79,
+          "responsibility_fulfilled": true,
+          "assessment": "同世界模型主表和受控消融分开；拟合与假阳性诊断都限定证据范围。"
+        },
+        {
+          "name": "总结",
+          "start_line": 80,
+          "end_line": 86,
+          "responsibility_fulfilled": true,
+          "assessment": "收束同状态比较贡献，保留模型可信度、非真实反事实因果保证和基础设施成本。"
+        }
+      ],
+      "content_anchors": {
+        "mechanism": [
+          19,
+          27,
+          29,
+          31,
+          33,
+          39,
+          41,
+          43,
+          45,
+          49,
+          51,
+          53
+        ],
+        "main_results": [
+          59,
+          63,
+          64,
+          65,
+          66,
+          68
+        ],
+        "analysis": [
+          72,
+          74,
+          76,
+          78
+        ],
+        "source": [
+          3,
+          5,
+          35,
+          86
+        ]
+      },
+      "preservation_checks": {
+        "carrying_numbers_negative_results_protocols": [
+          "GE-Sim2.0 三相机+本体状态，无中间 critic；最好兄弟归一、同档组舍弃、π0.5 最高档部署，树固定启动版本。",
+          "69.33/40.00/64.44 对同 GE-Sim2 的 RISE 58.67/28.89/52.59，均值 46.72→57.93，一 Genie-02 平台。",
+          "同初始化和计算预算，Block 69.33、冻结 64.67、单 rollout 59.33；后者仍保留树搜索。",
+          "L1 19.52→12.96 使用适应轨迹；40 失败回放无假阳性只约束这些样本；图 0.75/0.50/0.00 不是任务实测。"
+        ],
+        "semantic_assessment": "回看旧稿和冻结上游记录后，机制、证据对象与限定条件一致；压缩铺垫和收束未删掉承重信息。",
+        "source_assessment": "来源、版本和历史核验边界仍可追溯，未升格为本轮阅读全文。"
+      },
+      "depth_and_repetition_assessment": "方法和结果承担主要深度；背景、问题、思路简明区分场景、缺口和切入。必要概念回指用于机制解释，无需要删除的纯重复铺垫。",
+      "material_limits_retained": "test-time grounding 非每次部署现场求梯度；模型/judge 可错，未保存独立重复或统计检验。",
+      "unresolved_issues": []
+    },
+    {
+      "paper_id": "2610.40614",
+      "title": "L3G-World",
+      "conclusion": "pass",
+      "reason": "六栏均有实质内容职责；未发现本轮承重信息丢失或语义改错。",
+      "candidate_path": "/workspace/reviews/radar-2026-W44-six-sections-20261105/after/articles/2610.40614.md",
+      "candidate_sha256": "a7dfcefd6a2d2f093fdb67dcf5aa626c4cd510355019401dd6d1387ae600139d",
+      "previous_article_path": "/workspace/reviews/radar-2026-W44-six-sections-20261105/previous-articles/2610.40614.md",
+      "previous_article_sha256": "9aa4d5f45d21de499f38596357b70b2270aea3ad0c9a569f212d5517e1c232be",
+      "source_record_path": "/workspace/reviews/radar-2026-W44-six-sections-20261105/materials/2610.40614/source-record.md",
+      "source_record_file_sha256": "83460bd13493af32eb79504d075794cf0af452e02342b0e3df7e5ce0a5c711ae",
+      "upstream_body_sha256": "e95e829372de0431937bb2efba9c4e4a7c155e8915731443e72a898e76109d25",
+      "upstream_body_matches_index": true,
+      "candidate_first_read": {
+        "mechanism_retelling": "以覆盖不足／RGB 残差选择新增位置，聚类生成新高斯查询并修正可见旧高斯；lifting 写入 VAE 特征，生成时直接渲染潜变量作条件，跨窗口训练限制长期回传。",
+        "key_result_judgment": "回环一致性改善且存储更紧凑，1086.58 FPS 只测条件渲染；Table 3 重建与 Table 4 生成消融独立，不能拼用不同完整基线。",
+        "section_retelling_note": "六栏成立，思路仅概括两环节，方法／结果分别承担细节与证据。"
+      },
+      "sections": [
+        {
+          "name": "背景",
+          "start_line": 7,
+          "end_line": 10,
+          "responsibility_fulfilled": true,
+          "assessment": "建立单图沿相机轨迹生成和回访的记忆需求。"
+        },
+        {
+          "name": "问题",
+          "start_line": 11,
+          "end_line": 14,
+          "responsibility_fulfilled": true,
+          "assessment": "指出短上下文遗忘、重复写入和 RGB 再编码成本。"
+        },
+        {
+          "name": "思路",
+          "start_line": 15,
+          "end_line": 18,
+          "responsibility_fulfilled": true,
+          "assessment": "概括选择性新增/修正及直接 VAE 特征存储两个变化。"
+        },
+        {
+          "name": "方法",
+          "start_line": 19,
+          "end_line": 46,
+          "responsibility_fulfilled": true,
+          "assessment": "掩码、聚类查询、旧高斯修正、lifting、条件读取和跨窗口训练具体展开。"
+        },
+        {
+          "name": "结果",
+          "start_line": 47,
+          "end_line": 73,
+          "responsibility_fulfilled": true,
+          "assessment": "主表保留回环与硬件/深度条件；重建与生成消融独立，局部吞吐和端到端严格区分。"
+        },
+        {
+          "name": "总结",
+          "start_line": 74,
+          "end_line": 80,
+          "responsibility_fulfilled": true,
+          "assessment": "收束更新粒度/存储空间贡献，保留任意时长、动态与接触物理未证，infinite 非无限稳定。"
+        }
+      ],
+      "content_anchors": {
+        "mechanism": [
+          25,
+          29,
+          31,
+          33,
+          39,
+          41,
+          43,
+          45
+        ],
+        "main_results": [
+          51,
+          55,
+          56,
+          57,
+          58,
+          60,
+          62
+        ],
+        "analysis": [
+          66,
+          68,
+          70,
+          72
+        ],
+        "source": [
+          3,
+          5,
+          35,
+          80
+        ]
+      },
+      "preservation_checks": {
+        "carrying_numbers_negative_results_protocols": [
+          "DL3DV/RealEstate10K 481 帧去程再原路返回、单 A100、显式方法共享尺度深度。",
+          "16.00/0.366 对 13.53/0.652，11.88 MiB 对 501.57，1086.58 FPS 对 3.11 仅条件渲染；Fast 14.59。",
+          "Table 3 batch 2 重建：41K→75K、16.52→16.26、去修正 15.52、943.6→2.97 FPS。",
+          "Table 4 生成：0.435→0.464、48.09→50.63，未拼 Table 2 的 0.366；RealEstate10K 非全面最佳保留。"
+        ],
+        "semantic_assessment": "回看旧稿和冻结上游记录后，机制、证据对象与限定条件一致；压缩铺垫和收束未删掉承重信息。",
+        "source_assessment": "来源、版本和历史核验边界仍可追溯，未升格为本轮阅读全文。"
+      },
+      "depth_and_repetition_assessment": "方法和结果承担主要深度；背景、问题、思路简明区分场景、缺口和切入。必要概念回指用于机制解释，无需要删除的纯重复铺垫。",
+      "material_limits_retained": "阈值、聚类数、高斯参数化和精确目标未保存；不能由局部吞吐推端到端或无限期稳定。",
+      "unresolved_issues": []
+    },
+    {
+      "paper_id": "2610.38331",
+      "title": "Soft-MTP",
+      "conclusion": "pass",
+      "reason": "六栏均有实质内容职责；未发现本轮承重信息丢失或语义改错。",
+      "candidate_path": "/workspace/reviews/radar-2026-W44-six-sections-20261105/after/articles/2610.38331.md",
+      "candidate_sha256": "c84340ea04aa81319afc7a05f3e866f7177458b9be9f4764a055c961719b5353",
+      "previous_article_path": "/workspace/reviews/radar-2026-W44-six-sections-20261105/previous-articles/2610.38331.md",
+      "previous_article_sha256": "a93f20b769213ac08f2bd5a8405c9e96c63ccd206456ad4d17686d0fe7ce7e35",
+      "source_record_path": "/workspace/reviews/radar-2026-W44-six-sections-20261105/materials/2610.38331/source-record.md",
+      "source_record_file_sha256": "4e5ec3d4a193f82ae09012d23d7e0fab63b31c437b35b1b1b1ccdc3049bc67c4",
+      "upstream_body_sha256": "6e78d99fafff69c9907ac35b4a374759bde07c9b29388081b287bdc574166aa6",
+      "upstream_body_matches_index": true,
+      "candidate_first_read": {
+        "mechanism_retelling": "对齐目标 token 后将硬标签梯度分为分布对齐与教师残差；共享输出矩阵使零值 stop-gradient 路由能够抵消 MTP 上游残差，保留普通 NTP 训练及输出矩阵交叉熵。",
+        "key_result_judgment": "1.2B 准确率 57.31 对标准 MTP 56.80；1.4–1.5% 才是相对 MTP 的速度增量，约 1.7 倍属于整套自投机；显式 KL 数学微调更好构成负结果。",
+        "section_retelling_note": "六栏成立，数学教学例子标明非原公式，推理起草／验证归方法，成本是结果独立子节。"
+      },
+      "sections": [
+        {
+          "name": "背景",
+          "start_line": 7,
+          "end_line": 10,
+          "responsibility_fulfilled": true,
+          "assessment": "介绍 NTP、MTP 多头监督和自投机解码用途。"
+        },
+        {
+          "name": "问题",
+          "start_line": 11,
+          "end_line": 16,
+          "responsibility_fulfilled": true,
+          "assessment": "指出草稿分布对齐与硬标签残差的目标差异及显式 KL 成本。"
+        },
+        {
+          "name": "思路",
+          "start_line": 17,
+          "end_line": 20,
+          "responsibility_fulfilled": true,
+          "assessment": "概括共享输出映射下减残差并保留输出矩阵 CE。"
+        },
+        {
+          "name": "方法",
+          "start_line": 21,
+          "end_line": 54,
+          "responsibility_fulfilled": true,
+          "assessment": "目标对齐、梯度分解、零值反向路由和参数分工完整；教学数学明确非原公式，推理起草/验证归方法。"
+        },
+        {
+          "name": "结果",
+          "start_line": 55,
+          "end_line": 86,
+          "responsibility_fulfilled": true,
+          "assessment": "质量/解码主成绩、梯度与有效秩诊断、训练成本分节，反向 KL 结果和比较基线保留。"
+        },
+        {
+          "name": "总结",
+          "start_line": 87,
+          "end_line": 93,
+          "responsibility_fulfilled": true,
+          "assessment": "收束精确梯度处理，保留共享头前提、小规模实验、温和速度增量与迁移边界。"
+        }
+      ],
+      "content_anchors": {
+        "mechanism": [
+          25,
+          27,
+          29,
+          31,
+          33,
+          35,
+          41,
+          43,
+          45,
+          47,
+          53
+        ],
+        "main_results": [
+          61,
+          65,
+          66,
+          67,
+          69,
+          71
+        ],
+        "analysis": [
+          75,
+          77,
+          79,
+          81,
+          85
+        ],
+        "source": [
+          3,
+          5,
+          49,
+          93
+        ]
+      },
+      "preservation_checks": {
+        "carrying_numbers_negative_results_protocols": [
+          "167M–1.2B、FineWeb-Edu 31.5B、K=3、同权重；1.2B 56.75/56.80/57.31，167M 仅 0.07 点。",
+          "每域 256 个 512-token prompt、续写 512；1.4–1.5% 相对 MTP 与整体约 1.7 倍相对 AR 分开。",
+          "256 独立批次，残差信噪比低约 4 倍占约 80%；332M/7.3B 与 K=3…8 扫描。",
+          "有效秩 496/131/321/437 非准确率，显式 KL 数学微调更好仍保留。",
+          "单 H200、10.28 GFLOP/token、107GB、吞吐差 <0.07% 仅相对标准 MTP，NTP 本身更省。"
+        ],
+        "semantic_assessment": "回看旧稿和冻结上游记录后，机制、证据对象与限定条件一致；压缩铺垫和收束未删掉承重信息。",
+        "source_assessment": "来源、版本和历史核验边界仍可追溯，未升格为本轮阅读全文。"
+      },
+      "depth_and_repetition_assessment": "方法和结果承担主要深度；背景、问题、思路简明区分场景、缺口和切入。必要概念回指用于机制解释，无需要删除的纯重复铺垫。",
+      "material_limits_retained": "普通 NTP 更新不变；完整多头权重、移位和路由式未保存，通用教学例子未冒充算法。",
+      "unresolved_issues": []
+    }
+  ]
+}
