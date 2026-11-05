@@ -1,0 +1,487 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="4400" height="2860" viewBox="0 0 4400 2860" role="img" aria-labelledby="tree-title tree-desc">
+<title id="tree-title">投机解码专题：43 项资料的分层阅读问题树</title>
+<desc id="tree-desc">中心主题连接技术前序与八个问题分支，各问题再连接论文。深绿色为经典入门，浅绿色为方向代表，浅灰色为专项改进。这是本专题的阅读建议，不是公认质量评级。连线表示问题归属，非历史继承。</desc>
+<rect width="4400" height="2860" fill="#f7f8f3"/>
+<g font-family="Noto Sans CJK SC,Microsoft YaHei,Droid Sans Fallback,sans-serif">
+<text x="70" y="78" font-size="29" fill="#557c67" font-weight="600">SPECULATIVE DECODING / FULL KNOWLEDGE TREE</text>
+<text x="70" y="164" font-size="70" fill="#234637" font-weight="650">投机解码 · 从草稿来源到验证与部署</text>
+<text x="70" y="222" font-size="31" fill="#587360" font-weight="400">43 项资料｜经典入门 7 · 方向代表 22 · 专项改进 14｜截至 2026-11-04</text>
+<rect x="3460" y="73" width="250" height="44" rx="8" fill="#245844" stroke="#173f30" stroke-width="1.6"/>
+<text x="3585" y="104" font-size="27" fill="#ffffff" font-weight="650" text-anchor="middle">Ⅰ 经典入门</text>
+<rect x="3740" y="73" width="250" height="44" rx="8" fill="#dfede4" stroke="#7da58b" stroke-width="1.6"/>
+<text x="3865" y="104" font-size="27" fill="#244d39" font-weight="650" text-anchor="middle">Ⅱ 方向代表</text>
+<rect x="4020" y="73" width="250" height="44" rx="8" fill="#f4f5f1" stroke="#d2dad0" stroke-width="1.6"/>
+<text x="4145" y="104" font-size="27" fill="#5b6b60" font-weight="650" text-anchor="middle">Ⅲ 专项改进</text>
+<text x="4330" y="174" font-size="31" fill="#234637" font-weight="550" text-anchor="end">中心主题 → 研究问题 → 论文</text>
+<text x="4330" y="220" font-size="26" fill="#587360" font-weight="400" text-anchor="end">颜色表示阅读层级；点击论文打开固定版本原文</text>
+<path d="M 1850 569.0 H 1900" fill="none" stroke="#94b3a3" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="1900" cy="569.0" r="6" fill="#59896f"/>
+<path d="M 1370 569.0 H 1330 M 1330 446 V 692" fill="none" stroke="#94b3a3" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="1370" y="499.0" width="480" height="140" rx="20" fill="#eaf0e5" stroke="#a9bfa9" stroke-width="1.6"/>
+<text x="1395" y="536.0" font-size="24" fill="#537b5e" font-weight="650">00</text>
+<text x="1395" y="578.0" font-size="31" fill="#234637" font-weight="600">技术前序与采样基础</text>
+<path d="M 1330 446 H 1290" fill="none" stroke="#94b3a3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<a xlink:href="https://arxiv.org/pdf/1811.03115v1" target="_blank" data-paper-id="stern" data-reading-tier="1"><title>经典入门：并行预测与最长可接受前缀的早期基础，先理解它有助于区分贪心一致与精确随机采样。 · Blockwise Parallel Decoding for Deep Autoregressive Models · v1</title>
+<rect x="70" y="410" width="1220" height="72" rx="10" fill="#245844" stroke="#173f30" stroke-width="1.6"/>
+<rect x="85" y="423" width="65" height="28" rx="5" fill="#f0db9b" stroke="none" stroke-width="1.6"/>
+<text x="117" y="444" font-size="20" fill="#34442c" font-weight="650" text-anchor="middle">经典</text>
+<text x="168" y="442" font-size="30" fill="#ffffff" font-weight="700">Stern · Blockwise</text>
+<text x="1265" y="442" font-size="23" fill="#e1ede5" font-weight="400" text-anchor="end">2018-11-07</text>
+<text x="168" y="471" font-size="25" fill="#e1ede5" font-weight="400">并行预测，接受与贪心输出一致的最长前缀。</text>
+</a>
+<path d="M 1330 528 H 1290" fill="none" stroke="#94b3a3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<a xlink:href="https://arxiv.org/pdf/2203.16487v6" target="_blank" data-paper-id="xia" data-reading-tier="2"><title>方向代表：以 seq2seq 展开独立草稿器与目标验证，是基础框架在具体生成任务中的代表。 · Speculative Decoding: Exploiting Speculative Execution for Accelerating Seq2seq Generation · v6</title>
+<rect x="70" y="492" width="1220" height="72" rx="10" fill="#dfede4" stroke="#7da58b" stroke-width="1.6"/>
+<rect x="85" y="505" width="65" height="28" rx="5" fill="#b7d8c2" stroke="none" stroke-width="1.6"/>
+<text x="117" y="526" font-size="20" fill="#244d39" font-weight="650" text-anchor="middle">代表</text>
+<text x="168" y="524" font-size="30" fill="#244d39" font-weight="600">Xia · SpecDec</text>
+<text x="1265" y="524" font-size="23" fill="#486652" font-weight="400" text-anchor="end">2022-03-30</text>
+<text x="168" y="553" font-size="25" fill="#486652" font-weight="400">轻量模型草稿与目标并行验证，面向 seq2seq。</text>
+</a>
+<path d="M 1330 610 H 1290" fill="none" stroke="#94b3a3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<a xlink:href="https://arxiv.org/pdf/2211.17192v2" target="_blank" data-paper-id="leviathan" data-reading-tier="1"><title>经典入门：精确投机采样的基础论文；接受概率和拒绝后的残差分布是理解后续方法的共同底座。 · Fast Inference from Transformers via Speculative Decoding · v2</title>
+<rect x="70" y="574" width="1220" height="72" rx="10" fill="#245844" stroke="#173f30" stroke-width="1.6"/>
+<rect x="85" y="587" width="65" height="28" rx="5" fill="#f0db9b" stroke="none" stroke-width="1.6"/>
+<text x="117" y="608" font-size="20" fill="#34442c" font-weight="650" text-anchor="middle">经典</text>
+<text x="168" y="606" font-size="30" fill="#ffffff" font-weight="700">Leviathan 等</text>
+<text x="1265" y="606" font-size="23" fill="#e1ede5" font-weight="400" text-anchor="end">2022-11-30</text>
+<text x="168" y="635" font-size="25" fill="#e1ede5" font-weight="400">拒绝与残差采样，恢复目标采样分布。</text>
+</a>
+<path d="M 1330 692 H 1290" fill="none" stroke="#94b3a3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<a xlink:href="https://arxiv.org/pdf/2302.01318v1" target="_blank" data-paper-id="chen" data-reading-tier="1"><title>经典入门：独立提出保留目标分布的投机采样，可与 Leviathan 对照学习正确性与实现步骤。 · Accelerating Large Language Model Decoding with Speculative Sampling · v1</title>
+<rect x="70" y="656" width="1220" height="72" rx="10" fill="#245844" stroke="#173f30" stroke-width="1.6"/>
+<rect x="85" y="669" width="65" height="28" rx="5" fill="#f0db9b" stroke="none" stroke-width="1.6"/>
+<text x="117" y="690" font-size="20" fill="#34442c" font-weight="650" text-anchor="middle">经典</text>
+<text x="168" y="688" font-size="30" fill="#ffffff" font-weight="700">Chen 等</text>
+<text x="1265" y="688" font-size="23" fill="#e1ede5" font-weight="400" text-anchor="end">2023-02-02</text>
+<text x="168" y="717" font-size="25" fill="#e1ede5" font-weight="400">独立提出投机采样，保留目标输出分布。</text>
+</a>
+<path d="M 1850 1085.0 H 1900" fill="none" stroke="#94b3a3" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="1900" cy="1085.0" r="6" fill="#59896f"/>
+<path d="M 1370 1085.0 H 1330 M 1330 839 V 1331" fill="none" stroke="#94b3a3" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="1370" y="1015.0" width="480" height="140" rx="20" fill="#eaf0e5" stroke="#a9bfa9" stroke-width="1.6"/>
+<text x="1395" y="1052.0" font-size="24" fill="#537b5e" font-weight="650">01</text>
+<text x="1395" y="1094.0" font-size="31" fill="#234637" font-weight="600">草稿可以复用什么？</text>
+<path d="M 1330 839 H 1290" fill="none" stroke="#94b3a3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<a xlink:href="https://arxiv.org/pdf/2304.04487v1" target="_blank" data-paper-id="reference" data-reading-tier="2"><title>方向代表：复制参考文本再验证，适合作为无模型草稿的直观入口；这里不把 LLMA 等同于所有 n-gram 方法。 · Inference with Reference: Lossless Acceleration of Large Language Models · v1</title>
+<rect x="70" y="803" width="1220" height="72" rx="10" fill="#dfede4" stroke="#7da58b" stroke-width="1.6"/>
+<rect x="85" y="816" width="65" height="28" rx="5" fill="#b7d8c2" stroke="none" stroke-width="1.6"/>
+<text x="117" y="837" font-size="20" fill="#244d39" font-weight="650" text-anchor="middle">代表</text>
+<text x="168" y="835" font-size="30" fill="#244d39" font-weight="600">n-gram / LLMA</text>
+<text x="1265" y="835" font-size="23" fill="#486652" font-weight="400" text-anchor="end">2023-04-10</text>
+<text x="168" y="864" font-size="25" fill="#486652" font-weight="400">从参考文本复制续写，再验证最长可用前缀。</text>
+</a>
+<path d="M 1330 921 H 1290" fill="none" stroke="#94b3a3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<a xlink:href="https://arxiv.org/pdf/2311.08252v2" target="_blank" data-paper-id="rest" data-reading-tier="2"><title>方向代表：从外部语料检索草稿，清楚展示检索型方案的收益来源与语料条件。 · REST: Retrieval-Based Speculative Decoding · v2</title>
+<rect x="70" y="885" width="1220" height="72" rx="10" fill="#dfede4" stroke="#7da58b" stroke-width="1.6"/>
+<rect x="85" y="898" width="65" height="28" rx="5" fill="#b7d8c2" stroke="none" stroke-width="1.6"/>
+<text x="117" y="919" font-size="20" fill="#244d39" font-weight="650" text-anchor="middle">代表</text>
+<text x="168" y="917" font-size="30" fill="#244d39" font-weight="600">REST</text>
+<text x="1265" y="917" font-size="23" fill="#486652" font-weight="400" text-anchor="end">2023-11-14</text>
+<text x="168" y="946" font-size="25" fill="#486652" font-weight="400">检索外部文本片段，构造候选并批量验证。</text>
+</a>
+<path d="M 1330 1003 H 1290" fill="none" stroke="#94b3a3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<a xlink:href="https://arxiv.org/pdf/2402.02057v1" target="_blank" data-paper-id="lookahead" data-reading-tier="2"><title>方向代表：以 Jacobi 式并行推测与验证组织无独立草稿器的路线，与简单文本复制有实质区别。 · Break the Sequential Dependency of LLM Inference Using Lookahead Decoding · v1</title>
+<rect x="70" y="967" width="1220" height="72" rx="10" fill="#dfede4" stroke="#7da58b" stroke-width="1.6"/>
+<rect x="85" y="980" width="65" height="28" rx="5" fill="#b7d8c2" stroke="none" stroke-width="1.6"/>
+<text x="117" y="1001" font-size="20" fill="#244d39" font-weight="650" text-anchor="middle">代表</text>
+<text x="168" y="999" font-size="30" fill="#244d39" font-weight="600">Lookahead</text>
+<text x="1265" y="999" font-size="23" fill="#486652" font-weight="400" text-anchor="end">2024-02-03</text>
+<text x="168" y="1028" font-size="25" fill="#486652" font-weight="400">Jacobi 生成 n-gram，合并候选再验证。</text>
+</a>
+<path d="M 1330 1085 H 1290" fill="none" stroke="#94b3a3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<a xlink:href="https://arxiv.org/pdf/2408.08696v3" target="_blank" data-paper-id="recycling" data-reading-tier="3"><title>专项改进：把已计算的候选信息复用为下一轮草稿，适合在掌握候选树与验证机制之后补读。 · Turning Trash into Treasure: Accelerating Inference of Large Language Models with Token Recycling · v3</title>
+<rect x="70" y="1049" width="1220" height="72" rx="10" fill="#f4f5f1" stroke="#d2dad0" stroke-width="1.6"/>
+<rect x="85" y="1062" width="65" height="28" rx="5" fill="#e5e9e2" stroke="none" stroke-width="1.6"/>
+<text x="117" y="1083" font-size="20" fill="#5b6b60" font-weight="650" text-anchor="middle">专项</text>
+<text x="168" y="1081" font-size="30" fill="#5b6b60" font-weight="500">Token Recycling</text>
+<text x="1265" y="1081" font-size="23" fill="#617166" font-weight="400" text-anchor="end">2024-08-16</text>
+<text x="168" y="1110" font-size="25" fill="#617166" font-weight="400">缓存验证时的 top-k 后继，再组装草稿树。</text>
+</a>
+<path d="M 1330 1167 H 1290" fill="none" stroke="#94b3a3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<a xlink:href="https://arxiv.org/pdf/2411.03786v1" target="_blank" data-paper-id="ngrammys" data-reading-tier="3"><title>专项改进：重点是 n-gram 索引和草稿预算配置，在理解无模型草稿后再研究其具体设计。 · The N-Grammys: Accelerating Autoregressive Inference with Learning-Free Batched Speculation · v1</title>
+<rect x="70" y="1131" width="1220" height="72" rx="10" fill="#f4f5f1" stroke="#d2dad0" stroke-width="1.6"/>
+<rect x="85" y="1144" width="65" height="28" rx="5" fill="#e5e9e2" stroke="none" stroke-width="1.6"/>
+<text x="117" y="1165" font-size="20" fill="#5b6b60" font-weight="650" text-anchor="middle">专项</text>
+<text x="168" y="1163" font-size="30" fill="#5b6b60" font-weight="500">N-Grammys</text>
+<text x="1265" y="1163" font-size="23" fill="#617166" font-weight="400" text-anchor="end">2024-11-06</text>
+<text x="168" y="1192" font-size="25" fill="#617166" font-weight="400">混合模型导出 n-gram 与上下文匹配，批量验证。</text>
+</a>
+<path d="M 1330 1249 H 1290" fill="none" stroke="#94b3a3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<a xlink:href="https://arxiv.org/pdf/2411.04975v3" target="_blank" data-paper-id="suffix" data-reading-tier="3"><title>专项改进：细化后缀匹配、候选组织与长度选择；本专题把它安排在检索草稿框架之后阅读。 · SuffixDecoding: Extreme Speculative Decoding for Emerging AI Applications · v3</title>
+<rect x="70" y="1213" width="1220" height="72" rx="10" fill="#f4f5f1" stroke="#d2dad0" stroke-width="1.6"/>
+<rect x="85" y="1226" width="65" height="28" rx="5" fill="#e5e9e2" stroke="none" stroke-width="1.6"/>
+<text x="117" y="1247" font-size="20" fill="#5b6b60" font-weight="650" text-anchor="middle">专项</text>
+<text x="168" y="1245" font-size="30" fill="#5b6b60" font-weight="500">SuffixDecoding</text>
+<text x="1265" y="1245" font-size="23" fill="#617166" font-weight="400" text-anchor="end">2024-11-07</text>
+<text x="168" y="1274" font-size="25" fill="#617166" font-weight="400">后缀树复用跨请求文本，按频率分配候选。</text>
+</a>
+<path d="M 1330 1331 H 1290" fill="none" stroke="#94b3a3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<a xlink:href="https://arxiv.org/pdf/2411.10666v3" target="_blank" data-paper-id="sam" data-reading-tier="3"><title>专项改进：用后缀自动机改善匹配与候选检索，属于已有复用思路中的专项数据结构设计。 · SAM Decoding: Speculative Decoding via Suffix Automaton · v3</title>
+<rect x="70" y="1295" width="1220" height="72" rx="10" fill="#f4f5f1" stroke="#d2dad0" stroke-width="1.6"/>
+<rect x="85" y="1308" width="65" height="28" rx="5" fill="#e5e9e2" stroke="none" stroke-width="1.6"/>
+<text x="117" y="1329" font-size="20" fill="#5b6b60" font-weight="650" text-anchor="middle">专项</text>
+<text x="168" y="1327" font-size="30" fill="#5b6b60" font-weight="500">SAM-Decoding</text>
+<text x="1265" y="1327" font-size="23" fill="#617166" font-weight="400" text-anchor="end">2024-11-16</text>
+<text x="168" y="1356" font-size="25" fill="#617166" font-weight="400">静态／动态后缀自动机，按匹配长度选草稿。</text>
+</a>
+<path d="M 1850 1601.0 H 1900" fill="none" stroke="#94b3a3" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="1900" cy="1601.0" r="6" fill="#59896f"/>
+<path d="M 1370 1601.0 H 1330 M 1330 1478 V 1724" fill="none" stroke="#94b3a3" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="1370" y="1531.0" width="480" height="140" rx="20" fill="#eaf0e5" stroke="#a9bfa9" stroke-width="1.6"/>
+<text x="1395" y="1568.0" font-size="24" fill="#537b5e" font-weight="650">03</text>
+<text x="1395" y="1610.0" font-size="31" fill="#234637" font-weight="600">怎样使用</text>
+<text x="1395" y="1647.0" font-size="31" fill="#234637" font-weight="600">目标模型信息？</text>
+<path d="M 1330 1478 H 1290" fill="none" stroke="#94b3a3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<a xlink:href="https://arxiv.org/pdf/2401.15077v3" target="_blank" data-paper-id="eagle" data-reading-tier="1"><title>经典入门：以目标模型特征辅助轻量草稿，建立了后续 EAGLE 系列的核心问题和方法入口。 · EAGLE: Speculative Sampling Requires Rethinking Feature Uncertainty · v3</title>
+<rect x="70" y="1442" width="1220" height="72" rx="10" fill="#245844" stroke="#173f30" stroke-width="1.6"/>
+<rect x="85" y="1455" width="65" height="28" rx="5" fill="#f0db9b" stroke="none" stroke-width="1.6"/>
+<text x="117" y="1476" font-size="20" fill="#34442c" font-weight="650" text-anchor="middle">经典</text>
+<text x="168" y="1474" font-size="30" fill="#ffffff" font-weight="700">EAGLE</text>
+<text x="1265" y="1474" font-size="23" fill="#e1ede5" font-weight="400" text-anchor="end">2024-01-26</text>
+<text x="168" y="1503" font-size="25" fill="#e1ede5" font-weight="400">用目标特征与已知 token 预测下一步特征。</text>
+</a>
+<path d="M 1330 1560 H 1290" fill="none" stroke="#94b3a3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<a xlink:href="https://arxiv.org/pdf/2404.16710v4" target="_blank" data-paper-id="layerskip" data-reading-tier="2"><title>方向代表：使用提前退出层自投机，代表同一模型内部完成草稿与验证的独立路线。 · LayerSkip: Enabling Early Exit Inference and Self-Speculative Decoding · v4</title>
+<rect x="70" y="1524" width="1220" height="72" rx="10" fill="#dfede4" stroke="#7da58b" stroke-width="1.6"/>
+<rect x="85" y="1537" width="65" height="28" rx="5" fill="#b7d8c2" stroke="none" stroke-width="1.6"/>
+<text x="117" y="1558" font-size="20" fill="#244d39" font-weight="650" text-anchor="middle">代表</text>
+<text x="168" y="1556" font-size="30" fill="#244d39" font-weight="600">LayerSkip</text>
+<text x="1265" y="1556" font-size="23" fill="#486652" font-weight="400" text-anchor="end">2024-04-25</text>
+<text x="168" y="1585" font-size="25" fill="#486652" font-weight="400">早退层起草、深层验证，复用计算与缓存。</text>
+</a>
+<path d="M 1330 1642 H 1290" fill="none" stroke="#94b3a3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<a xlink:href="https://arxiv.org/pdf/2406.16858v2" target="_blank" data-paper-id="eagle2" data-reading-tier="2"><title>方向代表：动态候选树是候选预算分配的清晰代表；虽承接 EAGLE，仍值得作为分支重点阅读。 · EAGLE-2: Faster Inference of Language Models with Dynamic Draft Trees · v2</title>
+<rect x="70" y="1606" width="1220" height="72" rx="10" fill="#dfede4" stroke="#7da58b" stroke-width="1.6"/>
+<rect x="85" y="1619" width="65" height="28" rx="5" fill="#b7d8c2" stroke="none" stroke-width="1.6"/>
+<text x="117" y="1640" font-size="20" fill="#244d39" font-weight="650" text-anchor="middle">代表</text>
+<text x="168" y="1638" font-size="30" fill="#244d39" font-weight="600">EAGLE-2</text>
+<text x="1265" y="1638" font-size="23" fill="#486652" font-weight="400" text-anchor="end">2024-06-24</text>
+<text x="168" y="1667" font-size="25" fill="#486652" font-weight="400">按草稿置信度动态展开候选树。</text>
+</a>
+<path d="M 1330 1724 H 1290" fill="none" stroke="#94b3a3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<a xlink:href="https://arxiv.org/pdf/2503.01840v3" target="_blank" data-paper-id="eagle3" data-reading-tier="2"><title>方向代表：训练时模拟推理并融合多层特征，形成更完整的训练与草稿设计，是 EAGLE 方向的重点进阶工作。 · EAGLE-3: Scaling up Inference Acceleration of Large Language Models via Training-Time Test · v3</title>
+<rect x="70" y="1688" width="1220" height="72" rx="10" fill="#dfede4" stroke="#7da58b" stroke-width="1.6"/>
+<rect x="85" y="1701" width="65" height="28" rx="5" fill="#b7d8c2" stroke="none" stroke-width="1.6"/>
+<text x="117" y="1722" font-size="20" fill="#244d39" font-weight="650" text-anchor="middle">代表</text>
+<text x="168" y="1720" font-size="30" fill="#244d39" font-weight="600">EAGLE-3</text>
+<text x="1265" y="1720" font-size="23" fill="#486652" font-weight="400" text-anchor="end">2025-03-03</text>
+<text x="168" y="1749" font-size="25" fill="#486652" font-weight="400">融合多层特征，并以训练时测试贴近推理。</text>
+</a>
+<path d="M 1850 2076.0 H 1900" fill="none" stroke="#94b3a3" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="1900" cy="2076.0" r="6" fill="#59896f"/>
+<path d="M 1370 2076.0 H 1330 M 1330 1871 V 2281" fill="none" stroke="#94b3a3" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="1370" y="2006.0" width="480" height="140" rx="20" fill="#eaf0e5" stroke="#a9bfa9" stroke-width="1.6"/>
+<text x="1395" y="2043.0" font-size="24" fill="#537b5e" font-weight="650">05</text>
+<text x="1395" y="2085.0" font-size="31" fill="#234637" font-weight="600">怎样把候选</text>
+<text x="1395" y="2122.0" font-size="31" fill="#234637" font-weight="600">变成有效输出？</text>
+<path d="M 1330 1871 H 1290" fill="none" stroke="#94b3a3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<a xlink:href="https://arxiv.org/pdf/2305.09781v4" target="_blank" data-paper-id="specinfer" data-reading-tier="1"><title>经典入门：系统化地以目标模型验证候选 token 树，是理解树注意力与树式验证的基础入口。 · SpecInfer: Accelerating Generative Large Language Model Serving with Tree-based Speculative Inference and Verification · v4</title>
+<rect x="70" y="1835" width="1220" height="72" rx="10" fill="#245844" stroke="#173f30" stroke-width="1.6"/>
+<rect x="85" y="1848" width="65" height="28" rx="5" fill="#f0db9b" stroke="none" stroke-width="1.6"/>
+<text x="117" y="1869" font-size="20" fill="#34442c" font-weight="650" text-anchor="middle">经典</text>
+<text x="168" y="1867" font-size="30" fill="#ffffff" font-weight="700">SpecInfer</text>
+<text x="1265" y="1867" font-size="23" fill="#e1ede5" font-weight="400" text-anchor="end">2023-05-16</text>
+<text x="168" y="1896" font-size="25" fill="#e1ede5" font-weight="400">合并多草稿为树，以树注意力并行验证。</text>
+</a>
+<path d="M 1330 1953 H 1290" fill="none" stroke="#94b3a3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<a xlink:href="https://arxiv.org/pdf/2310.15141v2" target="_blank" data-paper-id="spectr" data-reading-tier="2"><title>方向代表：用最优传输组织验证问题，代表从概率耦合出发设计接受规则的理论路线。 · SpecTr: Fast Speculative Decoding via Optimal Transport · v2</title>
+<rect x="70" y="1917" width="1220" height="72" rx="10" fill="#dfede4" stroke="#7da58b" stroke-width="1.6"/>
+<rect x="85" y="1930" width="65" height="28" rx="5" fill="#b7d8c2" stroke="none" stroke-width="1.6"/>
+<text x="117" y="1951" font-size="20" fill="#244d39" font-weight="650" text-anchor="middle">代表</text>
+<text x="168" y="1949" font-size="30" fill="#244d39" font-weight="600">SpecTr</text>
+<text x="1265" y="1949" font-size="23" fill="#486652" font-weight="400" text-anchor="end">2023-10-23</text>
+<text x="168" y="1978" font-size="25" fill="#486652" font-weight="400">以最优传输组织多草稿选择与残差采样。</text>
+</a>
+<path d="M 1330 2035 H 1290" fill="none" stroke="#94b3a3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<a xlink:href="https://arxiv.org/pdf/2402.12374v3" target="_blank" data-paper-id="sequoia" data-reading-tier="2"><title>方向代表：把候选树形状与验证预算一起优化，是树预算设计的重要分支代表。 · Sequoia: Scalable, Robust, and Hardware-aware Speculative Decoding · v3</title>
+<rect x="70" y="1999" width="1220" height="72" rx="10" fill="#dfede4" stroke="#7da58b" stroke-width="1.6"/>
+<rect x="85" y="2012" width="65" height="28" rx="5" fill="#b7d8c2" stroke="none" stroke-width="1.6"/>
+<text x="117" y="2033" font-size="20" fill="#244d39" font-weight="650" text-anchor="middle">代表</text>
+<text x="168" y="2031" font-size="30" fill="#244d39" font-weight="600">Sequoia</text>
+<text x="1265" y="2031" font-size="23" fill="#486652" font-weight="400" text-anchor="end">2024-02-19</text>
+<text x="168" y="2060" font-size="25" fill="#486652" font-weight="400">按硬件与接受率优化候选树的形状。</text>
+</a>
+<path d="M 1330 2117 H 1290" fill="none" stroke="#94b3a3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<a xlink:href="https://arxiv.org/pdf/2403.10444v3" target="_blank" data-paper-id="blockverify" data-reading-tier="2"><title>方向代表：从逐 token 接受转向块级验证，代表改变验证单位的理论与算法方向。 · Block Verification Accelerates Speculative Decoding · v3</title>
+<rect x="70" y="2081" width="1220" height="72" rx="10" fill="#dfede4" stroke="#7da58b" stroke-width="1.6"/>
+<rect x="85" y="2094" width="65" height="28" rx="5" fill="#b7d8c2" stroke="none" stroke-width="1.6"/>
+<text x="117" y="2115" font-size="20" fill="#244d39" font-weight="650" text-anchor="middle">代表</text>
+<text x="168" y="2113" font-size="30" fill="#244d39" font-weight="600">Block Verification</text>
+<text x="1265" y="2113" font-size="23" fill="#486652" font-weight="400" text-anchor="end">2024-03-15</text>
+<text x="168" y="2142" font-size="25" fill="#486652" font-weight="400">联合验证前缀子块，配套调整残差分布。</text>
+</a>
+<path d="M 1330 2199 H 1290" fill="none" stroke="#94b3a3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<a xlink:href="https://arxiv.org/pdf/2604.25925v1" target="_blank" data-paper-id="spectrgbv" data-reading-tier="3"><title>专项改进：在限定耦合类别中进一步组织通用块验证，适合先掌握 SpecTr 与块验证后阅读。 · SpecTr-GBV: Multi-Draft Block Verification Accelerating Speculative Decoding · v1</title>
+<rect x="70" y="2163" width="1220" height="72" rx="10" fill="#f4f5f1" stroke="#d2dad0" stroke-width="1.6"/>
+<rect x="85" y="2176" width="65" height="28" rx="5" fill="#e5e9e2" stroke="none" stroke-width="1.6"/>
+<text x="117" y="2197" font-size="20" fill="#5b6b60" font-weight="650" text-anchor="middle">专项</text>
+<text x="168" y="2195" font-size="30" fill="#5b6b60" font-weight="500">SpecTr-GBV</text>
+<text x="1265" y="2195" font-size="23" fill="#617166" font-weight="400" text-anchor="end">2026-04-01</text>
+<text x="168" y="2224" font-size="25" fill="#617166" font-weight="400">结合多草稿与块验证，选择最长有效子块。</text>
+</a>
+<path d="M 1330 2281 H 1290" fill="none" stroke="#94b3a3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<a xlink:href="https://arxiv.org/pdf/2607.08642v4" target="_blank" data-paper-id="domino-tree" data-reading-tier="3"><title>专项改进：面向已有并行草稿的树结构与验证安排作进一步设计，作为专项延伸阅读。 · DominoTree: Conditional Tree-Structured Drafting with Domino for Speculative Decoding · v4</title>
+<rect x="70" y="2245" width="1220" height="72" rx="10" fill="#f4f5f1" stroke="#d2dad0" stroke-width="1.6"/>
+<rect x="85" y="2258" width="65" height="28" rx="5" fill="#e5e9e2" stroke="none" stroke-width="1.6"/>
+<text x="117" y="2279" font-size="20" fill="#5b6b60" font-weight="650" text-anchor="middle">专项</text>
+<text x="168" y="2277" font-size="30" fill="#5b6b60" font-weight="500">DominoTree</text>
+<text x="1265" y="2277" font-size="23" fill="#617166" font-weight="400" text-anchor="end">2026-07-09</text>
+<text x="168" y="2306" font-size="25" fill="#617166" font-weight="400">将 Domino 的条件草稿扩展到树结构。</text>
+</a>
+<path d="M 1900 569.0 V 2076.0" fill="none" stroke="#94b3a3" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 1950 1370 H 1900" fill="none" stroke="#94b3a3" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 2550 535.0 H 2500" fill="none" stroke="#94b3a3" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="2500" cy="535.0" r="6" fill="#59896f"/>
+<path d="M 3030 535.0 H 3070 M 3070 371 V 699" fill="none" stroke="#94b3a3" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="2550" y="465.0" width="480" height="140" rx="20" fill="#eaf0e5" stroke="#a9bfa9" stroke-width="1.6"/>
+<text x="2575" y="502.0" font-size="24" fill="#537b5e" font-weight="650">02</text>
+<text x="2575" y="544.0" font-size="31" fill="#234637" font-weight="600">多头预测怎样</text>
+<text x="2575" y="581.0" font-size="31" fill="#234637" font-weight="600">保留连贯性？</text>
+<path d="M 3070 371 H 3110" fill="none" stroke="#94b3a3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<a xlink:href="https://arxiv.org/pdf/2401.10774v3" target="_blank" data-paper-id="medusa" data-reading-tier="1"><title>经典入门：多预测头与候选树验证的代表性基础，是理解并行草稿结构的清晰入口。 · Medusa: Simple LLM Inference Acceleration Framework with Multiple Decoding Heads · v3</title>
+<rect x="3110" y="335" width="1220" height="72" rx="10" fill="#245844" stroke="#173f30" stroke-width="1.6"/>
+<rect x="3125" y="348" width="65" height="28" rx="5" fill="#f0db9b" stroke="none" stroke-width="1.6"/>
+<text x="3157" y="369" font-size="20" fill="#34442c" font-weight="650" text-anchor="middle">经典</text>
+<text x="3208" y="367" font-size="30" fill="#ffffff" font-weight="700">Medusa</text>
+<text x="4305" y="367" font-size="23" fill="#e1ede5" font-weight="400" text-anchor="end">2024-01-19</text>
+<text x="3208" y="396" font-size="25" fill="#e1ede5" font-weight="400">共享目标骨干，多头提出候选并作树验证。</text>
+</a>
+<path d="M 3070 453 H 3110" fill="none" stroke="#94b3a3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<a xlink:href="https://arxiv.org/pdf/2402.05109v2" target="_blank" data-paper-id="hydra" data-reading-tier="3"><title>专项改进：围绕 Medusa 式多头预测的条件依赖做顺序化改进，先读多头框架再看更容易。 · Hydra: Sequentially-Dependent Draft Heads for Medusa Decoding · v2</title>
+<rect x="3110" y="417" width="1220" height="72" rx="10" fill="#f4f5f1" stroke="#d2dad0" stroke-width="1.6"/>
+<rect x="3125" y="430" width="65" height="28" rx="5" fill="#e5e9e2" stroke="none" stroke-width="1.6"/>
+<text x="3157" y="451" font-size="20" fill="#5b6b60" font-weight="650" text-anchor="middle">专项</text>
+<text x="3208" y="449" font-size="30" fill="#5b6b60" font-weight="500">Hydra / ++</text>
+<text x="4305" y="449" font-size="23" fill="#617166" font-weight="400" text-anchor="end">2024-02-07</text>
+<text x="3208" y="478" font-size="25" fill="#617166" font-weight="400">让后续草稿头读取先前候选，补上顺序依赖。</text>
+</a>
+<path d="M 3070 535 H 3110" fill="none" stroke="#94b3a3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<a xlink:href="https://arxiv.org/pdf/2403.09919v5" target="_blank" data-paper-id="redrafter" data-reading-tier="2"><title>方向代表：循环草稿器与动态树组织构成完整替代方案，适合比较多头预测之外的草稿结构。 · Recurrent Drafter for Fast Speculative Decoding in Large Language Models · v5</title>
+<rect x="3110" y="499" width="1220" height="72" rx="10" fill="#dfede4" stroke="#7da58b" stroke-width="1.6"/>
+<rect x="3125" y="512" width="65" height="28" rx="5" fill="#b7d8c2" stroke="none" stroke-width="1.6"/>
+<text x="3157" y="533" font-size="20" fill="#244d39" font-weight="650" text-anchor="middle">代表</text>
+<text x="3208" y="531" font-size="30" fill="#244d39" font-weight="600">ReDrafter</text>
+<text x="4305" y="531" font-size="23" fill="#486652" font-weight="400" text-anchor="end">2024-03-14</text>
+<text x="3208" y="560" font-size="25" fill="#486652" font-weight="400">循环小草稿与 beam search，共享前缀验证。</text>
+</a>
+<path d="M 3070 617 H 3110" fill="none" stroke="#94b3a3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<a xlink:href="https://arxiv.org/pdf/2404.09221v2" target="_blank" data-paper-id="refinement" data-reading-tier="3"><title>专项改进：在 blockwise 草稿之后增加精修，聚焦已有并行候选的质量修补。 · Exploring and Improving Drafts in Blockwise Parallel Decoding · v2</title>
+<rect x="3110" y="581" width="1220" height="72" rx="10" fill="#f4f5f1" stroke="#d2dad0" stroke-width="1.6"/>
+<rect x="3125" y="594" width="65" height="28" rx="5" fill="#e5e9e2" stroke="none" stroke-width="1.6"/>
+<text x="3157" y="615" font-size="20" fill="#5b6b60" font-weight="650" text-anchor="middle">专项</text>
+<text x="3208" y="613" font-size="30" fill="#5b6b60" font-weight="500">BPD Draft Refinement</text>
+<text x="4305" y="613" font-size="23" fill="#617166" font-weight="400" text-anchor="end">2024-04-14</text>
+<text x="3208" y="642" font-size="25" fill="#617166" font-weight="400">对多头候选格点重打分，恢复局部连贯性。</text>
+</a>
+<path d="M 3070 699 H 3110" fill="none" stroke="#94b3a3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<a xlink:href="https://arxiv.org/pdf/2404.19737v1" target="_blank" data-paper-id="mtp" data-reading-tier="2"><title>方向代表：把预测多个未来 token 纳入训练目标，代表训练阶段与推理加速协同设计的方向。 · Better &amp; Faster Large Language Models via Multi-token Prediction · v1</title>
+<rect x="3110" y="663" width="1220" height="72" rx="10" fill="#dfede4" stroke="#7da58b" stroke-width="1.6"/>
+<rect x="3125" y="676" width="65" height="28" rx="5" fill="#b7d8c2" stroke="none" stroke-width="1.6"/>
+<text x="3157" y="697" font-size="20" fill="#244d39" font-weight="650" text-anchor="middle">代表</text>
+<text x="3208" y="695" font-size="30" fill="#244d39" font-weight="600">MTP</text>
+<text x="4305" y="695" font-size="23" fill="#486652" font-weight="400" text-anchor="end">2024-04-30</text>
+<text x="3208" y="724" font-size="25" fill="#486652" font-weight="400">多 token 训练目标，也可用预测头自投机。</text>
+</a>
+<path d="M 2550 1092.0 H 2500" fill="none" stroke="#94b3a3" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="2500" cy="1092.0" r="6" fill="#59896f"/>
+<path d="M 3030 1092.0 H 3070 M 3070 846 V 1338" fill="none" stroke="#94b3a3" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="2550" y="1022.0" width="480" height="140" rx="20" fill="#eaf0e5" stroke="#a9bfa9" stroke-width="1.6"/>
+<text x="2575" y="1059.0" font-size="24" fill="#537b5e" font-weight="650">04</text>
+<text x="2575" y="1101.0" font-size="31" fill="#234637" font-weight="600">并行草稿怎样</text>
+<text x="2575" y="1138.0" font-size="31" fill="#234637" font-weight="600">恢复条件依赖？</text>
+<path d="M 3070 846 H 3110" fill="none" stroke="#94b3a3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<a xlink:href="https://arxiv.org/pdf/2504.18583v4" target="_blank" data-paper-id="pard" data-reading-tier="2"><title>方向代表：直接组织并行自回归草稿，是理解并行草稿与条件依赖权衡的一个代表。 · PARD: Accelerating LLM Inference with Low-Cost PARallel Draft Model Adaptation · v4</title>
+<rect x="3110" y="810" width="1220" height="72" rx="10" fill="#dfede4" stroke="#7da58b" stroke-width="1.6"/>
+<rect x="3125" y="823" width="65" height="28" rx="5" fill="#b7d8c2" stroke="none" stroke-width="1.6"/>
+<text x="3157" y="844" font-size="20" fill="#244d39" font-weight="650" text-anchor="middle">代表</text>
+<text x="3208" y="842" font-size="30" fill="#244d39" font-weight="600">PARD</text>
+<text x="4305" y="842" font-size="23" fill="#486652" font-weight="400" text-anchor="end">2025-04-23</text>
+<text x="3208" y="871" font-size="25" fill="#486652" font-weight="400">把已有 AR 草稿适配为一次前向的并行草稿。</text>
+</a>
+<path d="M 3070 928 H 3110" fill="none" stroke="#94b3a3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<a xlink:href="https://arxiv.org/pdf/2602.01469v1" target="_blank" data-paper-id="peagle" data-reading-tier="3"><title>专项改进：将 EAGLE 类草稿改为并行生成，阅读重点是串行草稿中的哪些依赖被改变。 · P-EAGLE: Parallel-Drafting EAGLE with Scalable Training · v1</title>
+<rect x="3110" y="892" width="1220" height="72" rx="10" fill="#f4f5f1" stroke="#d2dad0" stroke-width="1.6"/>
+<rect x="3125" y="905" width="65" height="28" rx="5" fill="#e5e9e2" stroke="none" stroke-width="1.6"/>
+<text x="3157" y="926" font-size="20" fill="#5b6b60" font-weight="650" text-anchor="middle">专项</text>
+<text x="3208" y="924" font-size="30" fill="#5b6b60" font-weight="500">P-EAGLE</text>
+<text x="4305" y="924" font-size="23" fill="#617166" font-weight="400" text-anchor="end">2026-02-01</text>
+<text x="3208" y="953" font-size="25" fill="#617166" font-weight="400">并行多位置草稿，扩展训练与候选验证。</text>
+</a>
+<path d="M 3070 1010 H 3110" fill="none" stroke="#94b3a3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<a xlink:href="https://arxiv.org/pdf/2602.06036v2" target="_blank" data-paper-id="dflash" data-reading-tier="2"><title>方向代表：以扩散式并行草稿配合自回归目标验证，作为新草稿范式的代表阅读，暂不按经典定位。 · DFlash: Block Diffusion for Flash Speculative Decoding · v2</title>
+<rect x="3110" y="974" width="1220" height="72" rx="10" fill="#dfede4" stroke="#7da58b" stroke-width="1.6"/>
+<rect x="3125" y="987" width="65" height="28" rx="5" fill="#b7d8c2" stroke="none" stroke-width="1.6"/>
+<text x="3157" y="1008" font-size="20" fill="#244d39" font-weight="650" text-anchor="middle">代表</text>
+<text x="3208" y="1006" font-size="30" fill="#244d39" font-weight="600">DFlash</text>
+<text x="4305" y="1006" font-size="23" fill="#486652" font-weight="400" text-anchor="end">2026-02-05</text>
+<text x="3208" y="1035" font-size="25" fill="#486652" font-weight="400">目标上下文特征 + 块内 mask 并行草稿。</text>
+</a>
+<path d="M 3070 1092 H 3110" fill="none" stroke="#94b3a3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<a xlink:href="https://arxiv.org/pdf/2605.29707v1" target="_blank" data-paper-id="domino" data-reading-tier="2"><title>方向代表：围绕并行草稿的条件修正组织方法，是理解并行效率与依赖恢复的代表路线。 · Domino: Decoupling Causal Modeling from Autoregressive Drafting in Speculative Decoding · v1</title>
+<rect x="3110" y="1056" width="1220" height="72" rx="10" fill="#dfede4" stroke="#7da58b" stroke-width="1.6"/>
+<rect x="3125" y="1069" width="65" height="28" rx="5" fill="#b7d8c2" stroke="none" stroke-width="1.6"/>
+<text x="3157" y="1090" font-size="20" fill="#244d39" font-weight="650" text-anchor="middle">代表</text>
+<text x="3208" y="1088" font-size="30" fill="#244d39" font-weight="600">Domino</text>
+<text x="4305" y="1088" font-size="23" fill="#486652" font-weight="400" text-anchor="end">2026-05-28</text>
+<text x="3208" y="1117" font-size="25" fill="#486652" font-weight="400">并行主干后接轻量因果修正。</text>
+</a>
+<path d="M 3070 1174 H 3110" fill="none" stroke="#94b3a3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<a xlink:href="https://inco.ai/blog/dflash2/" target="_blank" data-paper-id="dflash2" data-reading-tier="3"><title>专项改进：在已有 DFlash 路线上细化结构与局部信息交互，适合在掌握原方法后补读。 · DFlash 2: Keep Drafting Parallel · web-snapshot-2026-11-04</title>
+<rect x="3110" y="1138" width="1220" height="72" rx="10" fill="#f4f5f1" stroke="#d2dad0" stroke-width="1.6"/>
+<rect x="3125" y="1151" width="65" height="28" rx="5" fill="#e5e9e2" stroke="none" stroke-width="1.6"/>
+<text x="3157" y="1172" font-size="20" fill="#5b6b60" font-weight="650" text-anchor="middle">专项</text>
+<text x="3208" y="1170" font-size="30" fill="#5b6b60" font-weight="500">DFlash 2</text>
+<text x="4305" y="1170" font-size="23" fill="#617166" font-weight="400" text-anchor="end">2026-08-18</text>
+<text x="3208" y="1199" font-size="25" fill="#617166" font-weight="400">并行草稿后做轻量上下文修正。</text>
+</a>
+<path d="M 3070 1256 H 3110" fill="none" stroke="#94b3a3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<a xlink:href="https://arxiv.org/pdf/2609.14717v1" target="_blank" data-paper-id="carryover" data-reading-tier="3"><title>专项改进：复用上一轮被拒绝草稿状态作为只读信息，聚焦跨轮状态利用这一局部问题。 · Carryover Drafting: Recycling Rejected States for Speculative Decoding · v1</title>
+<rect x="3110" y="1220" width="1220" height="72" rx="10" fill="#f4f5f1" stroke="#d2dad0" stroke-width="1.6"/>
+<rect x="3125" y="1233" width="65" height="28" rx="5" fill="#e5e9e2" stroke="none" stroke-width="1.6"/>
+<text x="3157" y="1254" font-size="20" fill="#5b6b60" font-weight="650" text-anchor="middle">专项</text>
+<text x="3208" y="1252" font-size="30" fill="#5b6b60" font-weight="500">Carryover Drafting</text>
+<text x="4305" y="1252" font-size="23" fill="#617166" font-weight="400" text-anchor="end">2026-09-13</text>
+<text x="3208" y="1281" font-size="25" fill="#617166" font-weight="400">被拒绝位置的目标状态，作为下一轮草稿上下文。</text>
+</a>
+<path d="M 3070 1338 H 3110" fill="none" stroke="#94b3a3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<a xlink:href="https://arxiv.org/pdf/2610.12570v1" target="_blank" data-paper-id="context-correction" data-reading-tier="3"><title>专项改进：重点修正并行草稿的上下文失配，放在理解基础并行草稿框架之后。 · Contextual Correction of Parallel Drafts for Speculative Decoding · v1</title>
+<rect x="3110" y="1302" width="1220" height="72" rx="10" fill="#f4f5f1" stroke="#d2dad0" stroke-width="1.6"/>
+<rect x="3125" y="1315" width="65" height="28" rx="5" fill="#e5e9e2" stroke="none" stroke-width="1.6"/>
+<text x="3157" y="1336" font-size="20" fill="#5b6b60" font-weight="650" text-anchor="middle">专项</text>
+<text x="3208" y="1334" font-size="30" fill="#5b6b60" font-weight="500">DCOCO</text>
+<text x="4305" y="1334" font-size="23" fill="#617166" font-weight="400" text-anchor="end">2026-10-08</text>
+<text x="3208" y="1363" font-size="25" fill="#617166" font-weight="400">用已选 token 对并行预测做局部条件修正。</text>
+</a>
+<path d="M 2550 1567.0 H 2500" fill="none" stroke="#94b3a3" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="2500" cy="1567.0" r="6" fill="#59896f"/>
+<path d="M 3030 1567.0 H 3070 M 3070 1485 V 1649" fill="none" stroke="#94b3a3" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="2550" y="1497.0" width="480" height="140" rx="20" fill="#eaf0e5" stroke="#a9bfa9" stroke-width="1.6"/>
+<text x="2575" y="1534.0" font-size="24" fill="#537b5e" font-weight="650">06</text>
+<text x="2575" y="1576.0" font-size="31" fill="#234637" font-weight="600">长上下文的 KV 成本</text>
+<text x="2575" y="1613.0" font-size="31" fill="#234637" font-weight="600">怎样压低？</text>
+<path d="M 3070 1485 H 3110" fill="none" stroke="#94b3a3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<a xlink:href="https://arxiv.org/pdf/2404.11912v3" target="_blank" data-paper-id="triforce" data-reading-tier="2"><title>方向代表：通过层级式投机处理长上下文，代表多层草稿与完整目标验证的组合设计。 · TriForce: Lossless Acceleration of Long Sequence Generation with Hierarchical Speculative Decoding · v3</title>
+<rect x="3110" y="1449" width="1220" height="72" rx="10" fill="#dfede4" stroke="#7da58b" stroke-width="1.6"/>
+<rect x="3125" y="1462" width="65" height="28" rx="5" fill="#b7d8c2" stroke="none" stroke-width="1.6"/>
+<text x="3157" y="1483" font-size="20" fill="#244d39" font-weight="650" text-anchor="middle">代表</text>
+<text x="3208" y="1481" font-size="30" fill="#244d39" font-weight="600">TriForce</text>
+<text x="4305" y="1481" font-size="23" fill="#486652" font-weight="400" text-anchor="end">2024-04-18</text>
+<text x="3208" y="1510" font-size="25" fill="#486652" font-weight="400">小草稿 → 稀疏 KV 目标 → 完整 KV 目标。</text>
+</a>
+<path d="M 3070 1567 H 3110" fill="none" stroke="#94b3a3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<a xlink:href="https://arxiv.org/pdf/2408.11049v5" target="_blank" data-paper-id="magicdec" data-reading-tier="2"><title>方向代表：把长上下文、高吞吐与草稿成本联系起来，适合建立负载变化下的成本直觉。 · MagicDec: Breaking the Latency-Throughput Tradeoff for Long Context Generation with Speculative Decoding · v5</title>
+<rect x="3110" y="1531" width="1220" height="72" rx="10" fill="#dfede4" stroke="#7da58b" stroke-width="1.6"/>
+<rect x="3125" y="1544" width="65" height="28" rx="5" fill="#b7d8c2" stroke="none" stroke-width="1.6"/>
+<text x="3157" y="1565" font-size="20" fill="#244d39" font-weight="650" text-anchor="middle">代表</text>
+<text x="3208" y="1563" font-size="30" fill="#244d39" font-weight="600">MagicDec</text>
+<text x="4305" y="1563" font-size="23" fill="#486652" font-weight="400" text-anchor="end">2024-08-20</text>
+<text x="3208" y="1592" font-size="25" fill="#486652" font-weight="400">按 KV 瓶颈选择草稿、缓存预算和长度。</text>
+</a>
+<path d="M 3070 1649 H 3110" fill="none" stroke="#94b3a3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<a xlink:href="https://arxiv.org/pdf/2502.17421v4" target="_blank" data-paper-id="longspec" data-reading-tier="2"><title>方向代表：围绕长上下文统一设计草稿缓存和验证，代表该方向的一条完整架构路线。 · LongSpec: Long-Context Lossless Speculative Decoding with Efficient Drafting and Verification · v4</title>
+<rect x="3110" y="1613" width="1220" height="72" rx="10" fill="#dfede4" stroke="#7da58b" stroke-width="1.6"/>
+<rect x="3125" y="1626" width="65" height="28" rx="5" fill="#b7d8c2" stroke="none" stroke-width="1.6"/>
+<text x="3157" y="1647" font-size="20" fill="#244d39" font-weight="650" text-anchor="middle">代表</text>
+<text x="3208" y="1645" font-size="30" fill="#244d39" font-weight="600">LongSpec</text>
+<text x="4305" y="1645" font-size="23" fill="#486652" font-weight="400" text-anchor="end">2025-02-24</text>
+<text x="3208" y="1674" font-size="25" fill="#486652" font-weight="400">局部草稿 KV，跨注意力复用目标缓存。</text>
+</a>
+<path d="M 2550 1960.0 H 2500" fill="none" stroke="#94b3a3" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="2500" cy="1960.0" r="6" fill="#59896f"/>
+<path d="M 3030 1960.0 H 3070 M 3070 1796 V 2124" fill="none" stroke="#94b3a3" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="2550" y="1890.0" width="480" height="140" rx="20" fill="#eaf0e5" stroke="#a9bfa9" stroke-width="1.6"/>
+<text x="2575" y="1927.0" font-size="24" fill="#537b5e" font-weight="650">07</text>
+<text x="2575" y="1969.0" font-size="31" fill="#234637" font-weight="600">怎样适配真实计算</text>
+<text x="2575" y="2006.0" font-size="31" fill="#234637" font-weight="600">与服务预算？</text>
+<path d="M 3070 1796 H 3110" fill="none" stroke="#94b3a3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<a xlink:href="https://arxiv.org/pdf/2404.15778v2" target="_blank" data-paper-id="bass" data-reading-tier="2"><title>方向代表：以批处理中的不规则接受长度和 KV 组织为中心，代表从单请求转向服务吞吐的设计。 · BASS: Batched Attention-optimized Speculative Sampling · v2</title>
+<rect x="3110" y="1760" width="1220" height="72" rx="10" fill="#dfede4" stroke="#7da58b" stroke-width="1.6"/>
+<rect x="3125" y="1773" width="65" height="28" rx="5" fill="#b7d8c2" stroke="none" stroke-width="1.6"/>
+<text x="3157" y="1794" font-size="20" fill="#244d39" font-weight="650" text-anchor="middle">代表</text>
+<text x="3208" y="1792" font-size="30" fill="#244d39" font-weight="600">BASS</text>
+<text x="4305" y="1792" font-size="23" fill="#486652" font-weight="400" text-anchor="end">2024-04-24</text>
+<text x="3208" y="1821" font-size="25" fill="#486652" font-weight="400">请求各自接受前缀，处理不规则 KV 批次。</text>
+</a>
+<path d="M 3070 1878 H 3110" fill="none" stroke="#94b3a3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<a xlink:href="https://arxiv.org/pdf/2406.02532v3" target="_blank" data-paper-id="specexec" data-reading-tier="2"><title>方向代表：在权重卸载条件下预计算目标概率并并行展开候选，代表消费级设备上的不同成本结构。 · SpecExec: Massively Parallel Speculative Decoding for Interactive LLM Inference on Consumer Devices · v3</title>
+<rect x="3110" y="1842" width="1220" height="72" rx="10" fill="#dfede4" stroke="#7da58b" stroke-width="1.6"/>
+<rect x="3125" y="1855" width="65" height="28" rx="5" fill="#b7d8c2" stroke="none" stroke-width="1.6"/>
+<text x="3157" y="1876" font-size="20" fill="#244d39" font-weight="650" text-anchor="middle">代表</text>
+<text x="3208" y="1874" font-size="30" fill="#244d39" font-weight="600">SpecExec</text>
+<text x="4305" y="1874" font-size="23" fill="#486652" font-weight="400" text-anchor="end">2024-06-04</text>
+<text x="3208" y="1903" font-size="25" fill="#486652" font-weight="400">权重卸载场景，预计算目标概率的候选树。</text>
+</a>
+<path d="M 3070 1960 H 3110" fill="none" stroke="#94b3a3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<a xlink:href="https://arxiv.org/pdf/2607.05147v1" target="_blank" data-paper-id="dspark" data-reading-tier="2"><title>方向代表：以半自回归块修正和置信度调度组织计算预算，作为近期方向代表，仍需按具体负载评价。 · DSpark: Confidence-Scheduled Speculative Decoding with Semi-Autoregressive Generation · v1</title>
+<rect x="3110" y="1924" width="1220" height="72" rx="10" fill="#dfede4" stroke="#7da58b" stroke-width="1.6"/>
+<rect x="3125" y="1937" width="65" height="28" rx="5" fill="#b7d8c2" stroke="none" stroke-width="1.6"/>
+<text x="3157" y="1958" font-size="20" fill="#244d39" font-weight="650" text-anchor="middle">代表</text>
+<text x="3208" y="1956" font-size="30" fill="#244d39" font-weight="600">DSpark</text>
+<text x="4305" y="1956" font-size="23" fill="#486652" font-weight="400" text-anchor="end">2026-07-06</text>
+<text x="3208" y="1985" font-size="25" fill="#486652" font-weight="400">半自回归块修正与置信度预算调度。</text>
+</a>
+<path d="M 3070 2042 H 3110" fill="none" stroke="#94b3a3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<a xlink:href="https://arxiv.org/pdf/2610.19792v2" target="_blank" data-paper-id="jetspecpp" data-reading-tier="3"><title>专项改进：在跨轮并行流水线中加入前瞻与精修，适合在掌握草稿、验证和重叠调度后研究。 · JetSpec++: Foresight Parallel Drafting with Self Refinements · v2</title>
+<rect x="3110" y="2006" width="1220" height="72" rx="10" fill="#f4f5f1" stroke="#d2dad0" stroke-width="1.6"/>
+<rect x="3125" y="2019" width="65" height="28" rx="5" fill="#e5e9e2" stroke="none" stroke-width="1.6"/>
+<text x="3157" y="2040" font-size="20" fill="#5b6b60" font-weight="650" text-anchor="middle">专项</text>
+<text x="3208" y="2038" font-size="30" fill="#5b6b60" font-weight="500">JetSpec++</text>
+<text x="4305" y="2038" font-size="23" fill="#617166" font-weight="400" text-anchor="end">2026-10-14</text>
+<text x="3208" y="2067" font-size="25" fill="#617166" font-weight="400">预判验证结果，重叠下一块草稿并做自精修。</text>
+</a>
+<path d="M 3070 2124 H 3110" fill="none" stroke="#94b3a3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<a xlink:href="https://raw.githubusercontent.com/eagle-hq/EAGLE-4/75436712e7415d352cf9f17d070019d07410786f/EAGLE4_Paper.pdf" target="_blank" data-paper-id="eagle4" data-reading-tier="3"><title>专项改进：进一步适配不同 batch 与硬件的草稿和服务策略，本专题把它放在 EAGLE 主线之后。 · EAGLE-4: One Flexible Drafter for All Batch Sizes and Hardware · github-75436712</title>
+<rect x="3110" y="2088" width="1220" height="72" rx="10" fill="#f4f5f1" stroke="#d2dad0" stroke-width="1.6"/>
+<rect x="3125" y="2101" width="65" height="28" rx="5" fill="#e5e9e2" stroke="none" stroke-width="1.6"/>
+<text x="3157" y="2122" font-size="20" fill="#5b6b60" font-weight="650" text-anchor="middle">专项</text>
+<text x="3208" y="2120" font-size="30" fill="#5b6b60" font-weight="500">EAGLE-4</text>
+<text x="4305" y="2120" font-size="23" fill="#617166" font-weight="400" text-anchor="end">2026-10-20</text>
+<text x="3208" y="2149" font-size="25" fill="#617166" font-weight="400">按 batch 与硬件选择草稿及服务策略。</text>
+</a>
+<path d="M 2550 2312.0 H 2500" fill="none" stroke="#94b3a3" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="2500" cy="2312.0" r="6" fill="#59896f"/>
+<path d="M 3030 2312.0 H 3070 M 3070 2271 V 2353" fill="none" stroke="#94b3a3" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="2550" y="2242.0" width="480" height="140" rx="20" fill="#eaf0e5" stroke="#a9bfa9" stroke-width="1.6"/>
+<text x="2575" y="2279.0" font-size="24" fill="#537b5e" font-weight="650">08</text>
+<text x="2575" y="2321.0" font-size="31" fill="#234637" font-weight="600">怎样判断</text>
+<text x="2575" y="2358.0" font-size="31" fill="#234637" font-weight="600">是真的变快？</text>
+<path d="M 3070 2271 H 3110" fill="none" stroke="#94b3a3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<a xlink:href="https://aclanthology.org/2024.findings-acl.456.pdf" target="_blank" data-paper-id="specbench" data-reading-tier="1"><title>经典入门：综述与统一评测入口，帮助初学者建立全貌，并学会在共同条件下比较方法。 · Unlocking Efficiency in Large Language Model Inference: A Comprehensive Survey of Speculative Decoding · ACL2024-published</title>
+<rect x="3110" y="2235" width="1220" height="72" rx="10" fill="#245844" stroke="#173f30" stroke-width="1.6"/>
+<rect x="3125" y="2248" width="65" height="28" rx="5" fill="#f0db9b" stroke="none" stroke-width="1.6"/>
+<text x="3157" y="2269" font-size="20" fill="#34442c" font-weight="650" text-anchor="middle">经典</text>
+<text x="3208" y="2267" font-size="30" fill="#ffffff" font-weight="700">Spec-Bench</text>
+<text x="4305" y="2267" font-size="23" fill="#e1ede5" font-weight="400" text-anchor="end">2024-08</text>
+<text x="3208" y="2296" font-size="25" fill="#e1ede5" font-weight="400">统一设备和任务集比较，区分温度与任务。</text>
+</a>
+<path d="M 3070 2353 H 3110" fill="none" stroke="#94b3a3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<a xlink:href="https://arxiv.org/pdf/2604.09557v2" target="_blank" data-paper-id="speedbench" data-reading-tier="2"><title>方向代表：以任务多样性、输入输出长度和并发补充评测维度，是进阶实验设计的参考。 · SPEED-Bench: A Unified and Diverse Benchmark for Speculative Decoding · v2</title>
+<rect x="3110" y="2317" width="1220" height="72" rx="10" fill="#dfede4" stroke="#7da58b" stroke-width="1.6"/>
+<rect x="3125" y="2330" width="65" height="28" rx="5" fill="#b7d8c2" stroke="none" stroke-width="1.6"/>
+<text x="3157" y="2351" font-size="20" fill="#244d39" font-weight="650" text-anchor="middle">代表</text>
+<text x="3208" y="2349" font-size="30" fill="#244d39" font-weight="600">SPEED-Bench</text>
+<text x="4305" y="2349" font-size="23" fill="#486652" font-weight="400" text-anchor="end">2026-02-10</text>
+<text x="3208" y="2378" font-size="25" fill="#486652" font-weight="400">多样任务与吞吐两套数据，覆盖长度和并发。</text>
+</a>
+<path d="M 2500 535.0 V 2312.0" fill="none" stroke="#94b3a3" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 2450 1370 H 2500" fill="none" stroke="#94b3a3" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="1950" y="1260" width="500" height="220" rx="28" fill="#23543f" stroke="none" stroke-width="1.6"/>
+<text x="2200" y="1323" font-size="58" fill="white" font-weight="650" text-anchor="middle">投机解码</text>
+<text x="2200" y="1374" font-size="31" fill="#e3eee4" font-weight="500" text-anchor="middle">草稿 · 验证 · 预算</text>
+<text x="2200" y="1418" font-size="28" fill="#d1e1d2" font-weight="400" text-anchor="middle">每个有效 token</text>
+<text x="2200" y="1454" font-size="28" fill="#d1e1d2" font-weight="400" text-anchor="middle">花了多少总成本？</text>
+<path d="M 70 2490 H 4330" fill="none" stroke="#d7e2d4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="70" y="2546" font-size="34" fill="#234637" font-weight="650">明确关系单列：不把时间顺序画成继承</text>
+<rect x="70" y="2584" width="2090" height="56" rx="10" fill="#eaf0e5" stroke="none" stroke-width="1.6"/>
+<text x="92" y="2622" font-size="29" fill="#234637" font-weight="400">Stern → Draft Refinement：沿 blockwise 草稿改进候选质量。</text>
+<rect x="2240" y="2584" width="2090" height="56" rx="10" fill="#eaf0e5" stroke="none" stroke-width="1.6"/>
+<text x="2262" y="2622" font-size="29" fill="#234637" font-weight="400">SAM + EAGLE-2／Token Recycling：根据匹配情况选用辅助草稿。</text>
+<rect x="70" y="2654" width="2090" height="56" rx="10" fill="#eaf0e5" stroke="none" stroke-width="1.6"/>
+<text x="92" y="2692" font-size="29" fill="#234637" font-weight="400">TriForce → MagicDec：后者明确引用其稀疏 KV 思路。</text>
+<rect x="2240" y="2654" width="2090" height="56" rx="10" fill="#eaf0e5" stroke="none" stroke-width="1.6"/>
+<text x="2262" y="2692" font-size="29" fill="#234637" font-weight="400">SpecTr + Block Verification → SpecTr-GBV：多草稿与子块验证汇合。</text>
+<text x="70" y="2774" font-size="28" fill="#587360" font-weight="400">按基础性、方向代表性与入门价值分层；专项改进表示建议后读，并不等于质量低。</text>
+<text x="4330" y="2823" font-size="26" fill="#587360" font-weight="400" text-anchor="end">原文图表与详细机制见配套专题 HTML · 矢量画布 4400 × 2860</text>
+</g>
+</svg>

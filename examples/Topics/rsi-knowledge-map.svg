@@ -1,0 +1,304 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="4000" height="1760" viewBox="0 0 4000 1760" role="group" aria-labelledby="rsi-tree-title rsi-tree-desc">
+<title id="rsi-tree-title">RSI 知识体系 · 三层阅读问题树</title>
+<desc id="rsi-tree-desc">中心主题、七个阅读分支及二十七项资料。深绿色优先阅读，浅绿色方向代表，灰色专项改进。</desc>
+<rect x="0" y="0" width="4000" height="1760" rx="0" fill="#f8f9f3" stroke="none" stroke-width="1.6"/>
+<g font-family="Noto Sans CJK SC,Microsoft YaHei,PingFang SC,sans-serif">
+<text x="52" y="70" font-size="25" fill="#587865" font-weight="650" text-anchor="start">RECURSIVE SELF-IMPROVEMENT / READING MAP</text>
+<text x="52" y="144" font-size="61" fill="#234637" font-weight="700" text-anchor="start">递归自我改进 · 从改任务到改改进器</text>
+<text x="52" y="201" font-size="29" fill="#577360" font-weight="500" text-anchor="start">27 项资料 · 6 个研究问题 + 前序 · 截至 2026-11-04</text>
+<rect x="3065" y="52" width="263" height="45" rx="8" fill="#245844" stroke="none" stroke-width="1.6"/>
+<text x="3196" y="83" font-size="25" fill="#ffffff" font-weight="650" text-anchor="middle">经典入门 · 7</text>
+<rect x="3359" y="52" width="263" height="45" rx="8" fill="#dfede4" stroke="none" stroke-width="1.6"/>
+<text x="3490" y="83" font-size="25" fill="#244d39" font-weight="650" text-anchor="middle">方向代表 · 17</text>
+<rect x="3653" y="52" width="263" height="45" rx="8" fill="#f2f3ef" stroke="none" stroke-width="1.6"/>
+<text x="3784" y="83" font-size="25" fill="#52665b" font-weight="650" text-anchor="middle">专项改进 · 3</text>
+<text x="3950" y="187" font-size="27" fill="#577360" font-weight="500" text-anchor="end">树线连接研究问题与论文</text>
+<path d="M 1130 301 V 547 M 1130 424.0 H 1170 M 1620 424.0 H 1680" fill="none" stroke="#87a594" stroke-width="3" stroke-linecap="round"/>
+<rect x="1170" y="368.0" width="450" height="112" rx="14" fill="#eaf0e5" stroke="#abbeab" stroke-width="1.6"/>
+<text x="1192" y="399.0" font-size="22" fill="#577360" font-weight="700" text-anchor="start">00</text>
+<text x="1192" y="432.0" font-size="31" fill="#234637" font-weight="700" text-anchor="start">前序与阅读框架</text>
+<text x="1192" y="462.0" font-size="23" fill="#567460" font-weight="500" text-anchor="start">对象、算子与对照</text>
+<path d="M 1130 301 H 1090" fill="none" stroke="#87a594" stroke-width="3" stroke-linecap="round"/>
+<a href="https://arxiv.org/pdf/2610.14625v1" target="_blank" rel="noopener noreferrer" data-paper-id="survey"><title>RSI 综述 · 经典入门</title>
+<rect x="50" y="265" width="1040" height="72" rx="10" fill="#245844" stroke="#c0cfbf" stroke-width="1.6"/>
+<rect x="64" y="276" width="63" height="28" rx="5" fill="#edd79a" stroke="none" stroke-width="1.6"/>
+<text x="95" y="297" font-size="19" fill="#394527" font-weight="650" text-anchor="middle">经典</text>
+<text x="143" y="297" font-size="29" fill="#ffffff" font-weight="650" text-anchor="start">RSI 综述</text>
+<text x="1069" y="296" font-size="21" fill="#e2efe7" font-weight="500" text-anchor="end">2026-10-10</text>
+<text x="143" y="326" font-size="23" fill="#e2efe7" font-weight="500" text-anchor="start">用提出候选、反馈和保留三个算子拆解 RSI。</text>
+</a>
+<path d="M 1130 383 H 1090" fill="none" stroke="#87a594" stroke-width="3" stroke-linecap="round"/>
+<a href="https://arxiv.org/pdf/2408.08435v2" target="_blank" rel="noopener noreferrer" data-paper-id="adas"><title>ADAS · 经典入门</title>
+<rect x="50" y="347" width="1040" height="72" rx="10" fill="#245844" stroke="#c0cfbf" stroke-width="1.6"/>
+<rect x="64" y="358" width="63" height="28" rx="5" fill="#edd79a" stroke="none" stroke-width="1.6"/>
+<text x="95" y="379" font-size="19" fill="#394527" font-weight="650" text-anchor="middle">经典</text>
+<text x="143" y="379" font-size="29" fill="#ffffff" font-weight="650" text-anchor="start">ADAS</text>
+<text x="1069" y="378" font-size="21" fill="#e2efe7" font-weight="500" text-anchor="end">2024-08-15</text>
+<text x="143" y="408" font-size="23" fill="#e2efe7" font-weight="500" text-anchor="start">让固定的元设计器从档案中构造新的 Agent 程序。</text>
+</a>
+<path d="M 1130 465 H 1090" fill="none" stroke="#87a594" stroke-width="3" stroke-linecap="round"/>
+<a href="https://arxiv.org/pdf/2410.04444v4" target="_blank" rel="noopener noreferrer" data-paper-id="godel"><title>Gödel Agent · 方向代表</title>
+<rect x="50" y="429" width="1040" height="72" rx="10" fill="#dfede4" stroke="#c0cfbf" stroke-width="1.6"/>
+<rect x="64" y="440" width="63" height="28" rx="5" fill="#b7d8c2" stroke="none" stroke-width="1.6"/>
+<text x="95" y="461" font-size="19" fill="#244d39" font-weight="650" text-anchor="middle">代表</text>
+<text x="143" y="461" font-size="29" fill="#244d39" font-weight="650" text-anchor="start">Gödel Agent</text>
+<text x="1069" y="460" font-size="21" fill="#486652" font-weight="500" text-anchor="end">2024-10-06</text>
+<text x="143" y="490" font-size="23" fill="#486652" font-weight="500" text-anchor="start">在同一 Agent 内开放任务行动与自修改行动。</text>
+</a>
+<path d="M 1130 547 H 1090" fill="none" stroke="#87a594" stroke-width="3" stroke-linecap="round"/>
+<a href="https://arxiv.org/pdf/2507.19457v2" target="_blank" rel="noopener noreferrer" data-paper-id="gepa"><title>GEPA · 方向代表</title>
+<rect x="50" y="511" width="1040" height="72" rx="10" fill="#dfede4" stroke="#c0cfbf" stroke-width="1.6"/>
+<rect x="64" y="522" width="63" height="28" rx="5" fill="#b7d8c2" stroke="none" stroke-width="1.6"/>
+<text x="95" y="543" font-size="19" fill="#244d39" font-weight="650" text-anchor="middle">代表</text>
+<text x="143" y="543" font-size="29" fill="#244d39" font-weight="650" text-anchor="start">GEPA</text>
+<text x="1069" y="542" font-size="21" fill="#486652" font-weight="500" text-anchor="end">2025-07-25</text>
+<text x="143" y="572" font-size="23" fill="#486652" font-weight="500" text-anchor="start">用执行轨迹做文字反思，再用多目标档案挑选提示词。</text>
+</a>
+<path d="M 1130 674 V 1002 M 1130 838.0 H 1170 M 1620 838.0 H 1680" fill="none" stroke="#87a594" stroke-width="3" stroke-linecap="round"/>
+<rect x="1170" y="782.0" width="450" height="112" rx="14" fill="#eaf0e5" stroke="#abbeab" stroke-width="1.6"/>
+<text x="1192" y="813.0" font-size="22" fill="#577360" font-weight="700" text-anchor="start">01</text>
+<text x="1192" y="846.0" font-size="31" fill="#234637" font-weight="700" text-anchor="start">候选怎样产生和保留</text>
+<text x="1192" y="876.0" font-size="23" fill="#567460" font-weight="500" text-anchor="start">档案、谱系与选择预算</text>
+<path d="M 1130 674 H 1090" fill="none" stroke="#87a594" stroke-width="3" stroke-linecap="round"/>
+<a href="https://arxiv.org/pdf/2505.22954v3" target="_blank" rel="noopener noreferrer" data-paper-id="dgm"><title>Darwin Gödel Machine · 经典入门</title>
+<rect x="50" y="638" width="1040" height="72" rx="10" fill="#245844" stroke="#c0cfbf" stroke-width="1.6"/>
+<rect x="64" y="649" width="63" height="28" rx="5" fill="#edd79a" stroke="none" stroke-width="1.6"/>
+<text x="95" y="670" font-size="19" fill="#394527" font-weight="650" text-anchor="middle">经典</text>
+<text x="143" y="670" font-size="29" fill="#ffffff" font-weight="650" text-anchor="start">Darwin Gödel Machine</text>
+<text x="1069" y="669" font-size="21" fill="#e2efe7" font-weight="500" text-anchor="end">2025-05-29</text>
+<text x="143" y="699" font-size="23" fill="#e2efe7" font-weight="500" text-anchor="start">让代码 Agent 修改自身并把后代保留到演化档案。</text>
+</a>
+<path d="M 1130 756 H 1090" fill="none" stroke="#87a594" stroke-width="3" stroke-linecap="round"/>
+<a href="https://arxiv.org/pdf/2510.21614v3" target="_blank" rel="noopener noreferrer" data-paper-id="hgm"><title>Huxley Gödel Machine · 方向代表</title>
+<rect x="50" y="720" width="1040" height="72" rx="10" fill="#dfede4" stroke="#c0cfbf" stroke-width="1.6"/>
+<rect x="64" y="731" width="63" height="28" rx="5" fill="#b7d8c2" stroke="none" stroke-width="1.6"/>
+<text x="95" y="752" font-size="19" fill="#244d39" font-weight="650" text-anchor="middle">代表</text>
+<text x="143" y="752" font-size="29" fill="#244d39" font-weight="650" text-anchor="start">Huxley Gödel Machine</text>
+<text x="1069" y="751" font-size="21" fill="#486652" font-weight="500" text-anchor="end">2025-10-24</text>
+<text x="143" y="781" font-size="23" fill="#486652" font-weight="500" text-anchor="start">以谱系后代的表现估计一个父代继续产生改进的价值。</text>
+</a>
+<path d="M 1130 838 H 1090" fill="none" stroke="#87a594" stroke-width="3" stroke-linecap="round"/>
+<a href="https://arxiv.org/pdf/2608.07645v1" target="_blank" rel="noopener noreferrer" data-paper-id="mendel"><title>Mendel Gödel Machine · 方向代表</title>
+<rect x="50" y="802" width="1040" height="72" rx="10" fill="#dfede4" stroke="#c0cfbf" stroke-width="1.6"/>
+<rect x="64" y="813" width="63" height="28" rx="5" fill="#b7d8c2" stroke="none" stroke-width="1.6"/>
+<text x="95" y="834" font-size="19" fill="#244d39" font-weight="650" text-anchor="middle">代表</text>
+<text x="143" y="834" font-size="29" fill="#244d39" font-weight="650" text-anchor="start">Mendel Gödel Machine</text>
+<text x="1069" y="833" font-size="21" fill="#486652" font-weight="500" text-anchor="end">2026-08-07</text>
+<text x="143" y="863" font-size="23" fill="#486652" font-weight="500" text-anchor="start">用跨任务和跨谱系轨迹生成更有依据的代码变体。</text>
+</a>
+<path d="M 1130 920 H 1090" fill="none" stroke="#87a594" stroke-width="3" stroke-linecap="round"/>
+<a href="https://arxiv.org/pdf/2609.24972v3" target="_blank" rel="noopener noreferrer" data-paper-id="rrsi"><title>RRSI · 专项改进</title>
+<rect x="50" y="884" width="1040" height="72" rx="10" fill="#f2f3ef" stroke="#c0cfbf" stroke-width="1.6"/>
+<rect x="64" y="895" width="63" height="28" rx="5" fill="#e1e7dd" stroke="none" stroke-width="1.6"/>
+<text x="95" y="916" font-size="19" fill="#52665b" font-weight="650" text-anchor="middle">专项</text>
+<text x="143" y="916" font-size="29" fill="#52665b" font-weight="650" text-anchor="start">RRSI</text>
+<text x="1069" y="915" font-size="21" fill="#586b60" font-weight="500" text-anchor="end">2026-09-21</text>
+<text x="143" y="945" font-size="23" fill="#586b60" font-weight="500" text-anchor="start">对 harness 候选的生成幅度和保留条件施加正则。</text>
+</a>
+<path d="M 1130 1002 H 1090" fill="none" stroke="#87a594" stroke-width="3" stroke-linecap="round"/>
+<a href="https://arxiv.org/pdf/2609.08944v1" target="_blank" rel="noopener noreferrer" data-paper-id="skilladam"><title>SkillAdam · 专项改进</title>
+<rect x="50" y="966" width="1040" height="72" rx="10" fill="#f2f3ef" stroke="#c0cfbf" stroke-width="1.6"/>
+<rect x="64" y="977" width="63" height="28" rx="5" fill="#e1e7dd" stroke="none" stroke-width="1.6"/>
+<text x="95" y="998" font-size="19" fill="#52665b" font-weight="650" text-anchor="middle">专项</text>
+<text x="143" y="998" font-size="29" fill="#52665b" font-weight="650" text-anchor="start">SkillAdam</text>
+<text x="1069" y="997" font-size="21" fill="#586b60" font-weight="500" text-anchor="end">2026-09-08</text>
+<text x="143" y="1027" font-size="23" fill="#586b60" font-weight="500" text-anchor="start">保留优化记忆并按收益波动调节下一轮技能编辑幅度。</text>
+</a>
+<path d="M 1130 1129 V 1457 M 1130 1293.0 H 1170 M 1620 1293.0 H 1680" fill="none" stroke="#87a594" stroke-width="3" stroke-linecap="round"/>
+<rect x="1170" y="1237.0" width="450" height="112" rx="14" fill="#eaf0e5" stroke="#abbeab" stroke-width="1.6"/>
+<text x="1192" y="1268.0" font-size="22" fill="#577360" font-weight="700" text-anchor="start">02</text>
+<text x="1192" y="1301.0" font-size="31" fill="#234637" font-weight="700" text-anchor="start">执行系统具体改哪里</text>
+<text x="1192" y="1331.0" font-size="23" fill="#567460" font-weight="500" text-anchor="start">工作流、模块、记忆与诊断</text>
+<path d="M 1130 1129 H 1090" fill="none" stroke="#87a594" stroke-width="3" stroke-linecap="round"/>
+<a href="https://arxiv.org/pdf/2607.15524v1" target="_blank" rel="noopener noreferrer" data-paper-id="rhi"><title>RHI · 经典入门</title>
+<rect x="50" y="1093" width="1040" height="72" rx="10" fill="#245844" stroke="#c0cfbf" stroke-width="1.6"/>
+<rect x="64" y="1104" width="63" height="28" rx="5" fill="#edd79a" stroke="none" stroke-width="1.6"/>
+<text x="95" y="1125" font-size="19" fill="#394527" font-weight="650" text-anchor="middle">经典</text>
+<text x="143" y="1125" font-size="29" fill="#ffffff" font-weight="650" text-anchor="start">RHI</text>
+<text x="1069" y="1124" font-size="21" fill="#e2efe7" font-weight="500" text-anchor="end">2026-07-17</text>
+<text x="143" y="1154" font-size="23" fill="#e2efe7" font-weight="500" text-anchor="start">把文字 harness 与前几轮经验交给优化器继续修订。</text>
+</a>
+<path d="M 1130 1211 H 1090" fill="none" stroke="#87a594" stroke-width="3" stroke-linecap="round"/>
+<a href="https://arxiv.org/pdf/2609.14857v2" target="_blank" rel="noopener noreferrer" data-paper-id="modular"><title>ModularRSI · 方向代表</title>
+<rect x="50" y="1175" width="1040" height="72" rx="10" fill="#dfede4" stroke="#c0cfbf" stroke-width="1.6"/>
+<rect x="64" y="1186" width="63" height="28" rx="5" fill="#b7d8c2" stroke="none" stroke-width="1.6"/>
+<text x="95" y="1207" font-size="19" fill="#244d39" font-weight="650" text-anchor="middle">代表</text>
+<text x="143" y="1207" font-size="29" fill="#244d39" font-weight="650" text-anchor="start">ModularRSI</text>
+<text x="1069" y="1206" font-size="21" fill="#486652" font-weight="500" text-anchor="end">2026-09-14</text>
+<text x="143" y="1236" font-size="23" fill="#486652" font-weight="500" text-anchor="start">从对比轨迹定位失效模块，再分别演化和整合。</text>
+</a>
+<path d="M 1130 1293 H 1090" fill="none" stroke="#87a594" stroke-width="3" stroke-linecap="round"/>
+<a href="https://arxiv.org/pdf/2608.24876v1" target="_blank" rel="noopener noreferrer" data-paper-id="recuris"><title>Recuris · 方向代表</title>
+<rect x="50" y="1257" width="1040" height="72" rx="10" fill="#dfede4" stroke="#c0cfbf" stroke-width="1.6"/>
+<rect x="64" y="1268" width="63" height="28" rx="5" fill="#b7d8c2" stroke="none" stroke-width="1.6"/>
+<text x="95" y="1289" font-size="19" fill="#244d39" font-weight="650" text-anchor="middle">代表</text>
+<text x="143" y="1289" font-size="29" fill="#244d39" font-weight="650" text-anchor="start">Recuris</text>
+<text x="1069" y="1288" font-size="21" fill="#486652" font-weight="500" text-anchor="end">2026-08-25</text>
+<text x="143" y="1318" font-size="23" fill="#486652" font-weight="500" text-anchor="start">任务内更新可信工作状态，跨任务维护经验与记忆控制。</text>
+</a>
+<path d="M 1130 1375 H 1090" fill="none" stroke="#87a594" stroke-width="3" stroke-linecap="round"/>
+<a href="https://arxiv.org/pdf/2610.05701v2" target="_blank" rel="noopener noreferrer" data-paper-id="sorsi"><title>SO-RSI · 方向代表</title>
+<rect x="50" y="1339" width="1040" height="72" rx="10" fill="#dfede4" stroke="#c0cfbf" stroke-width="1.6"/>
+<rect x="64" y="1350" width="63" height="28" rx="5" fill="#b7d8c2" stroke="none" stroke-width="1.6"/>
+<text x="95" y="1371" font-size="19" fill="#244d39" font-weight="650" text-anchor="middle">代表</text>
+<text x="143" y="1371" font-size="29" fill="#244d39" font-weight="650" text-anchor="start">SO-RSI</text>
+<text x="1069" y="1370" font-size="21" fill="#486652" font-weight="500" text-anchor="end">2026-10-05</text>
+<text x="143" y="1400" font-size="23" fill="#486652" font-weight="500" text-anchor="start">由异常触发诊断探针，再修改可复用形式验证工作流。</text>
+</a>
+<path d="M 1130 1457 H 1090" fill="none" stroke="#87a594" stroke-width="3" stroke-linecap="round"/>
+<a href="https://arxiv.org/pdf/2608.08311v3" target="_blank" rel="noopener noreferrer" data-paper-id="ouroboros"><title>Ouroboros · 专项改进</title>
+<rect x="50" y="1421" width="1040" height="72" rx="10" fill="#f2f3ef" stroke="#c0cfbf" stroke-width="1.6"/>
+<rect x="64" y="1432" width="63" height="28" rx="5" fill="#e1e7dd" stroke="none" stroke-width="1.6"/>
+<text x="95" y="1453" font-size="19" fill="#52665b" font-weight="650" text-anchor="middle">专项</text>
+<text x="143" y="1453" font-size="29" fill="#52665b" font-weight="650" text-anchor="start">Ouroboros</text>
+<text x="1069" y="1452" font-size="21" fill="#586b60" font-weight="500" text-anchor="end">2026-08-08</text>
+<text x="143" y="1482" font-size="23" fill="#586b60" font-weight="500" text-anchor="start">用受监督运行时管理子任务、隔离工作树和审核后的核心变更。</text>
+</a>
+<path d="M 1680 424.0 V 1293.0 M 1680 910 H 1750" fill="none" stroke="#87a594" stroke-width="3" stroke-linecap="round"/>
+<path d="M 2870 301 V 629 M 2870 465.0 H 2830 M 2380 465.0 H 2320" fill="none" stroke="#87a594" stroke-width="3" stroke-linecap="round"/>
+<rect x="2380" y="409.0" width="450" height="112" rx="14" fill="#eaf0e5" stroke="#abbeab" stroke-width="1.6"/>
+<text x="2402" y="440.0" font-size="22" fill="#577360" font-weight="700" text-anchor="start">03</text>
+<text x="2402" y="473.0" font-size="31" fill="#234637" font-weight="700" text-anchor="start">谁来改进改进器</text>
+<text x="2402" y="503.0" font-size="23" fill="#567460" font-weight="500" text-anchor="start">程序、元技能和层级结构</text>
+<path d="M 2870 301 H 2910" fill="none" stroke="#87a594" stroke-width="3" stroke-linecap="round"/>
+<a href="https://arxiv.org/pdf/2603.19461v2" target="_blank" rel="noopener noreferrer" data-paper-id="hyper"><title>Hyperagents · 经典入门</title>
+<rect x="2910" y="265" width="1040" height="72" rx="10" fill="#245844" stroke="#c0cfbf" stroke-width="1.6"/>
+<rect x="2924" y="276" width="63" height="28" rx="5" fill="#edd79a" stroke="none" stroke-width="1.6"/>
+<text x="2955" y="297" font-size="19" fill="#394527" font-weight="650" text-anchor="middle">经典</text>
+<text x="3003" y="297" font-size="29" fill="#ffffff" font-weight="650" text-anchor="start">Hyperagents</text>
+<text x="3929" y="296" font-size="21" fill="#e2efe7" font-weight="500" text-anchor="end">2026-03-19</text>
+<text x="3003" y="326" font-size="23" fill="#e2efe7" font-weight="500" text-anchor="start">把任务 Agent 和可编辑的元 Agent 放入同一后代程序。</text>
+</a>
+<path d="M 2870 383 H 2910" fill="none" stroke="#87a594" stroke-width="3" stroke-linecap="round"/>
+<a href="https://arxiv.org/pdf/2608.24735v1" target="_blank" rel="noopener noreferrer" data-paper-id="metan"><title>Metaⁿ · 方向代表</title>
+<rect x="2910" y="347" width="1040" height="72" rx="10" fill="#dfede4" stroke="#c0cfbf" stroke-width="1.6"/>
+<rect x="2924" y="358" width="63" height="28" rx="5" fill="#b7d8c2" stroke="none" stroke-width="1.6"/>
+<text x="2955" y="379" font-size="19" fill="#244d39" font-weight="650" text-anchor="middle">代表</text>
+<text x="3003" y="379" font-size="29" fill="#244d39" font-weight="650" text-anchor="start">Metaⁿ</text>
+<text x="3929" y="378" font-size="21" fill="#486652" font-weight="500" text-anchor="end">2026-08-25</text>
+<text x="3003" y="408" font-size="23" fill="#486652" font-weight="500" text-anchor="start">固定元操作 Ω，让新层读取和包裹已有求解器栈。</text>
+</a>
+<path d="M 2870 465 H 2910" fill="none" stroke="#87a594" stroke-width="3" stroke-linecap="round"/>
+<a href="https://arxiv.org/pdf/2610.14224v1" target="_blank" rel="noopener noreferrer" data-paper-id="harness2"><title>Harness² · 方向代表</title>
+<rect x="2910" y="429" width="1040" height="72" rx="10" fill="#dfede4" stroke="#c0cfbf" stroke-width="1.6"/>
+<rect x="2924" y="440" width="63" height="28" rx="5" fill="#b7d8c2" stroke="none" stroke-width="1.6"/>
+<text x="2955" y="461" font-size="19" fill="#244d39" font-weight="650" text-anchor="middle">代表</text>
+<text x="3003" y="461" font-size="29" fill="#244d39" font-weight="650" text-anchor="start">Harness²</text>
+<text x="3929" y="460" font-size="21" fill="#486652" font-weight="500" text-anchor="end">2026-10-09</text>
+<text x="3003" y="490" font-size="23" fill="#486652" font-weight="500" text-anchor="start">任务内提出、探测、合成，任务间积累可迁移的改进经验。</text>
+</a>
+<path d="M 2870 547 H 2910" fill="none" stroke="#87a594" stroke-width="3" stroke-linecap="round"/>
+<a href="https://arxiv.org/pdf/2607.05297v1" target="_blank" rel="noopener noreferrer" data-paper-id="metaskill"><title>MetaSkill-Evolve · 方向代表</title>
+<rect x="2910" y="511" width="1040" height="72" rx="10" fill="#dfede4" stroke="#c0cfbf" stroke-width="1.6"/>
+<rect x="2924" y="522" width="63" height="28" rx="5" fill="#b7d8c2" stroke="none" stroke-width="1.6"/>
+<text x="2955" y="543" font-size="19" fill="#244d39" font-weight="650" text-anchor="middle">代表</text>
+<text x="3003" y="543" font-size="29" fill="#244d39" font-weight="650" text-anchor="start">MetaSkill-Evolve</text>
+<text x="3929" y="542" font-size="21" fill="#486652" font-weight="500" text-anchor="end">2026-07-06</text>
+<text x="3003" y="572" font-size="23" fill="#486652" font-weight="500" text-anchor="start">任务技能快更新，分析、检索与提案等元技能慢更新。</text>
+</a>
+<path d="M 2870 629 H 2910" fill="none" stroke="#87a594" stroke-width="3" stroke-linecap="round"/>
+<a href="https://arxiv.org/pdf/2602.23413v2" target="_blank" rel="noopener noreferrer" data-paper-id="evox"><title>EvoX · 方向代表</title>
+<rect x="2910" y="593" width="1040" height="72" rx="10" fill="#dfede4" stroke="#c0cfbf" stroke-width="1.6"/>
+<rect x="2924" y="604" width="63" height="28" rx="5" fill="#b7d8c2" stroke="none" stroke-width="1.6"/>
+<text x="2955" y="625" font-size="19" fill="#244d39" font-weight="650" text-anchor="middle">代表</text>
+<text x="3003" y="625" font-size="29" fill="#244d39" font-weight="650" text-anchor="start">EvoX</text>
+<text x="3929" y="624" font-size="21" fill="#486652" font-weight="500" text-anchor="end">2026-02-26</text>
+<text x="3003" y="654" font-size="23" fill="#486652" font-weight="500" text-anchor="start">内层演化解，外层演化产生和筛选解的搜索策略。</text>
+</a>
+<path d="M 2870 756 V 920 M 2870 838.0 H 2830 M 2380 838.0 H 2320" fill="none" stroke="#87a594" stroke-width="3" stroke-linecap="round"/>
+<rect x="2380" y="782.0" width="450" height="112" rx="14" fill="#eaf0e5" stroke="#abbeab" stroke-width="1.6"/>
+<text x="2402" y="813.0" font-size="22" fill="#577360" font-weight="700" text-anchor="start">04</text>
+<text x="2402" y="846.0" font-size="31" fill="#234637" font-weight="700" text-anchor="start">反馈如何进入下一轮</text>
+<text x="2402" y="876.0" font-size="23" fill="#567460" font-weight="500" text-anchor="start">回放、模型权重和研究程序</text>
+<path d="M 2870 756 H 2910" fill="none" stroke="#87a594" stroke-width="3" stroke-linecap="round"/>
+<a href="https://arxiv.org/pdf/2609.14858v2" target="_blank" rel="noopener noreferrer" data-paper-id="dream"><title>Dream-RSI · 方向代表</title>
+<rect x="2910" y="720" width="1040" height="72" rx="10" fill="#dfede4" stroke="#c0cfbf" stroke-width="1.6"/>
+<rect x="2924" y="731" width="63" height="28" rx="5" fill="#b7d8c2" stroke="none" stroke-width="1.6"/>
+<text x="2955" y="752" font-size="19" fill="#244d39" font-weight="650" text-anchor="middle">代表</text>
+<text x="3003" y="752" font-size="29" fill="#244d39" font-weight="650" text-anchor="start">Dream-RSI</text>
+<text x="3929" y="751" font-size="21" fill="#486652" font-weight="500" text-anchor="end">2026-09-14</text>
+<text x="3003" y="781" font-size="23" fill="#486652" font-weight="500" text-anchor="start">把真实发现树编成可回放模拟器，在回放上改探索策略。</text>
+</a>
+<path d="M 2870 838 H 2910" fill="none" stroke="#87a594" stroke-width="3" stroke-linecap="round"/>
+<a href="https://arxiv.org/pdf/2506.10943v2" target="_blank" rel="noopener noreferrer" data-paper-id="seal"><title>SEAL · 经典入门</title>
+<rect x="2910" y="802" width="1040" height="72" rx="10" fill="#245844" stroke="#c0cfbf" stroke-width="1.6"/>
+<rect x="2924" y="813" width="63" height="28" rx="5" fill="#edd79a" stroke="none" stroke-width="1.6"/>
+<text x="2955" y="834" font-size="19" fill="#394527" font-weight="650" text-anchor="middle">经典</text>
+<text x="3003" y="834" font-size="29" fill="#ffffff" font-weight="650" text-anchor="start">SEAL</text>
+<text x="3929" y="833" font-size="21" fill="#e2efe7" font-weight="500" text-anchor="end">2025-06-12</text>
+<text x="3003" y="863" font-size="23" fill="#e2efe7" font-weight="500" text-anchor="start">让模型写出自编辑数据，再用下游反馈训练自编辑策略。</text>
+</a>
+<path d="M 2870 920 H 2910" fill="none" stroke="#87a594" stroke-width="3" stroke-linecap="round"/>
+<a href="https://arxiv.org/pdf/2609.26457v1" target="_blank" rel="noopener noreferrer" data-paper-id="research-rsi"><title>AIDE² · 方向代表</title>
+<rect x="2910" y="884" width="1040" height="72" rx="10" fill="#dfede4" stroke="#c0cfbf" stroke-width="1.6"/>
+<rect x="2924" y="895" width="63" height="28" rx="5" fill="#b7d8c2" stroke="none" stroke-width="1.6"/>
+<text x="2955" y="916" font-size="19" fill="#244d39" font-weight="650" text-anchor="middle">代表</text>
+<text x="3003" y="916" font-size="29" fill="#244d39" font-weight="650" text-anchor="start">AIDE²</text>
+<text x="3929" y="915" font-size="21" fill="#486652" font-weight="500" text-anchor="end">2026-09-22</text>
+<text x="3003" y="945" font-size="23" fill="#486652" font-weight="500" text-anchor="start">让研究 Agent 修改自身搜索程序，经私有评分保留后代。</text>
+</a>
+<path d="M 2870 1047 V 1129 M 2870 1088.0 H 2830 M 2380 1088.0 H 2320" fill="none" stroke="#87a594" stroke-width="3" stroke-linecap="round"/>
+<rect x="2380" y="1032.0" width="450" height="112" rx="14" fill="#eaf0e5" stroke="#abbeab" stroke-width="1.6"/>
+<text x="2402" y="1063.0" font-size="22" fill="#577360" font-weight="700" text-anchor="start">05</text>
+<text x="2402" y="1096.0" font-size="31" fill="#234637" font-weight="700" text-anchor="start">如何确认能力真的提升</text>
+<text x="2402" y="1126.0" font-size="23" fill="#567460" font-weight="500" text-anchor="start">等预算、独立反馈与迁移</text>
+<path d="M 2870 1047 H 2910" fill="none" stroke="#87a594" stroke-width="3" stroke-linecap="round"/>
+<a href="https://arxiv.org/pdf/2606.26294v3" target="_blank" rel="noopener noreferrer" data-paper-id="rqgm"><title>Red Queen Gödel Machine · 方向代表</title>
+<rect x="2910" y="1011" width="1040" height="72" rx="10" fill="#dfede4" stroke="#c0cfbf" stroke-width="1.6"/>
+<rect x="2924" y="1022" width="63" height="28" rx="5" fill="#b7d8c2" stroke="none" stroke-width="1.6"/>
+<text x="2955" y="1043" font-size="19" fill="#244d39" font-weight="650" text-anchor="middle">代表</text>
+<text x="3003" y="1043" font-size="29" fill="#244d39" font-weight="650" text-anchor="start">Red Queen Gödel Machine</text>
+<text x="3929" y="1042" font-size="21" fill="#486652" font-weight="500" text-anchor="end">2026-06-24</text>
+<text x="3003" y="1072" font-size="23" fill="#486652" font-weight="500" text-anchor="start">固定阶段内效用，在阶段边界用锚点筛选新的评价器。</text>
+</a>
+<path d="M 2870 1129 H 2910" fill="none" stroke="#87a594" stroke-width="3" stroke-linecap="round"/>
+<a href="https://arxiv.org/pdf/2607.12227v4" target="_blank" rel="noopener noreferrer" data-paper-id="eval"><title>重审 Harness 演化评估 · 方向代表</title>
+<rect x="2910" y="1093" width="1040" height="72" rx="10" fill="#dfede4" stroke="#c0cfbf" stroke-width="1.6"/>
+<rect x="2924" y="1104" width="63" height="28" rx="5" fill="#b7d8c2" stroke="none" stroke-width="1.6"/>
+<text x="2955" y="1125" font-size="19" fill="#244d39" font-weight="650" text-anchor="middle">代表</text>
+<text x="3003" y="1125" font-size="29" fill="#244d39" font-weight="650" text-anchor="start">重审 Harness 演化评估</text>
+<text x="3929" y="1124" font-size="21" fill="#486652" font-weight="500" text-anchor="end">2026-07-14</text>
+<text x="3003" y="1154" font-size="23" fill="#486652" font-weight="500" text-anchor="start">用等反馈与推理预算基线、独立任务和游戏环境复核。</text>
+</a>
+<path d="M 2870 1256 V 1420 M 2870 1338.0 H 2830 M 2380 1338.0 H 2320" fill="none" stroke="#87a594" stroke-width="3" stroke-linecap="round"/>
+<rect x="2380" y="1282.0" width="450" height="112" rx="14" fill="#eaf0e5" stroke="#abbeab" stroke-width="1.6"/>
+<text x="2402" y="1313.0" font-size="22" fill="#577360" font-weight="700" text-anchor="start">06</text>
+<text x="2402" y="1346.0" font-size="31" fill="#234637" font-weight="700" text-anchor="start">怎么迁移到实际系统</text>
+<text x="2402" y="1376.0" font-size="23" fill="#567460" font-weight="500" text-anchor="start">PaperStudio 与 OCR 应用设计</text>
+<path d="M 2870 1256 H 2910" fill="none" stroke="#87a594" stroke-width="3" stroke-linecap="round"/>
+<a href="https://arxiv.org/pdf/2310.10108v3" target="_blank" rel="noopener noreferrer" data-paper-id="agent4rec"><title>Agent4Rec · 经典入门</title>
+<rect x="2910" y="1220" width="1040" height="72" rx="10" fill="#245844" stroke="#c0cfbf" stroke-width="1.6"/>
+<rect x="2924" y="1231" width="63" height="28" rx="5" fill="#edd79a" stroke="none" stroke-width="1.6"/>
+<text x="2955" y="1252" font-size="19" fill="#394527" font-weight="650" text-anchor="middle">经典</text>
+<text x="3003" y="1252" font-size="29" fill="#ffffff" font-weight="650" text-anchor="start">Agent4Rec</text>
+<text x="3929" y="1251" font-size="21" fill="#e2efe7" font-weight="500" text-anchor="end">2023-10-16</text>
+<text x="3003" y="1281" font-size="23" fill="#e2efe7" font-weight="500" text-anchor="start">用画像、记忆和行动模拟用户与列表推荐的交互。</text>
+</a>
+<path d="M 2870 1338 H 2910" fill="none" stroke="#87a594" stroke-width="3" stroke-linecap="round"/>
+<a href="https://arxiv.org/pdf/2508.18142v3" target="_blank" rel="noopener noreferrer" data-paper-id="mirrorer"><title>UserMirrorer · 方向代表</title>
+<rect x="2910" y="1302" width="1040" height="72" rx="10" fill="#dfede4" stroke="#c0cfbf" stroke-width="1.6"/>
+<rect x="2924" y="1313" width="63" height="28" rx="5" fill="#b7d8c2" stroke="none" stroke-width="1.6"/>
+<text x="2955" y="1334" font-size="19" fill="#244d39" font-weight="650" text-anchor="middle">代表</text>
+<text x="3003" y="1334" font-size="29" fill="#244d39" font-weight="650" text-anchor="start">UserMirrorer</text>
+<text x="3929" y="1333" font-size="21" fill="#486652" font-weight="500" text-anchor="end">2025-08-25</text>
+<text x="3003" y="1363" font-size="23" fill="#486652" font-weight="500" text-anchor="start">从行为反馈提炼决策解释与高价值样本，训练模拟用户。</text>
+</a>
+<path d="M 2870 1420 H 2910" fill="none" stroke="#87a594" stroke-width="3" stroke-linecap="round"/>
+<a href="https://arxiv.org/pdf/2601.00930v1" target="_blank" rel="noopener noreferrer" data-paper-id="alignuser"><title>AlignUSER · 方向代表</title>
+<rect x="2910" y="1384" width="1040" height="72" rx="10" fill="#dfede4" stroke="#c0cfbf" stroke-width="1.6"/>
+<rect x="2924" y="1395" width="63" height="28" rx="5" fill="#b7d8c2" stroke="none" stroke-width="1.6"/>
+<text x="2955" y="1416" font-size="19" fill="#244d39" font-weight="650" text-anchor="middle">代表</text>
+<text x="3003" y="1416" font-size="29" fill="#244d39" font-weight="650" text-anchor="start">AlignUSER</text>
+<text x="3929" y="1415" font-size="21" fill="#486652" font-weight="500" text-anchor="end">2026-01-02</text>
+<text x="3003" y="1445" font-size="23" fill="#486652" font-weight="500" text-anchor="start">以真实轨迹学环境动态，再用反事实反思对齐行为。</text>
+</a>
+<path d="M 2320 465.0 V 1338.0 M 2320 910 H 2250" fill="none" stroke="#87a594" stroke-width="3" stroke-linecap="round"/>
+<rect x="1750" y="810" width="500" height="200" rx="25" fill="#245844" stroke="none" stroke-width="1.6"/>
+<text x="2000" y="881" font-size="53" fill="white" font-weight="700" text-anchor="middle">递归自我改进</text>
+<text x="2000" y="930" font-size="30" fill="#e3efe6" font-weight="550" text-anchor="middle">提出候选 → 反馈 → 保留</text>
+<text x="2000" y="966" font-size="27" fill="#e3efe6" font-weight="500" text-anchor="middle">下一轮如何继承？</text>
+<path d="M50 1588 H3950" fill="none" stroke="#87a594" stroke-width="3" stroke-linecap="round"/>
+<text x="50" y="1640" font-size="32" fill="#234637" font-weight="650" text-anchor="start">建议先读综述框架 → DGM → Hyperagents → 等预算评估，再选执行、回放或权重分支。</text>
+<text x="50" y="1692" font-size="26" fill="#577360" font-weight="500" text-anchor="start">高亮按阅读顺序分层。原文结果保留模型、任务、预算和评价口径。</text>
+<text x="3950" y="1717" font-size="24" fill="#577360" font-weight="500" text-anchor="end">4000 × 1760 · RSI 专题</text>
+</g></svg>

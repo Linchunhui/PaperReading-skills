@@ -15,6 +15,31 @@
 
 ![PaperStudio 解读选路图，含单篇精读、同方向串讲和雷达发现](assets/paperstudio-reading-modes.svg)
 
+## 在线阅读与目录
+
+[打开 GitHub Pages 阅读首页](https://linchunhui.github.io/PaperReading-skills/)。首页先展示 Weekly 和 Monthly，随后是专题知识体系与各研究方向。
+
+![PaperReading 阅读目录，包含周报、月报、专题与研究方向](assets/reading-directory-map.svg)
+
+| 文件夹 | 内容 | 在线入口 |
+| --- | --- | --- |
+| [examples/Weekly-Radar](examples/Weekly-Radar/) | 每周论文速读 | [查看目录](https://linchunhui.github.io/PaperReading-skills/#weekly-radar) |
+| [examples/Monthly-Radar](examples/Monthly-Radar/) | 每月论文速读 | [查看目录](https://linchunhui.github.io/PaperReading-skills/#monthly-radar) |
+| [examples/Topics](examples/Topics/) | 专题知识体系 | [查看目录](https://linchunhui.github.io/PaperReading-skills/#topics) |
+| [examples/LLM-Foundations](examples/LLM-Foundations/) | 大模型基础 | [查看目录](https://linchunhui.github.io/PaperReading-skills/#llm-foundations) |
+| [examples/VLM](examples/VLM/) | 视觉语言模型 | [查看目录](https://linchunhui.github.io/PaperReading-skills/#vlm) |
+| [examples/WAM](examples/WAM/) | 世界与动作模型 | [查看目录](https://linchunhui.github.io/PaperReading-skills/#wam) |
+| [examples/VLA](examples/VLA/) | 视觉语言动作模型 | [查看目录](https://linchunhui.github.io/PaperReading-skills/#vla) |
+| [examples/Agentic_AI](examples/Agentic_AI/) | Agentic AI 教程 | [查看目录](https://linchunhui.github.io/PaperReading-skills/#agi) |
+| [examples/Others](examples/Others/) | 其他研究方向 | [查看目录](https://linchunhui.github.io/PaperReading-skills/#others) |
+
+### 专题直达
+
+- [RSI：递归自我改进](https://linchunhui.github.io/PaperReading-skills/examples/Topics/rsi-knowledge-system.html) · [SVG 知识图](https://linchunhui.github.io/PaperReading-skills/examples/Topics/rsi-knowledge-map.svg)
+- [投机解码：草稿、验证与预算](https://linchunhui.github.io/PaperReading-skills/examples/Topics/speculative-decoding-topic.html) · [SVG 知识图](https://linchunhui.github.io/PaperReading-skills/examples/Topics/speculative-decoding-map.svg)
+
+两个专题保留完整正文、内嵌论文原图与来源。公开版仅将原调研笔记的私人文件链接改为笔记名称，论文原文链接保留。历史[投机解码演化串讲](https://linchunhui.github.io/PaperReading-skills/examples/speculative-decoding-evolution.html)继续保留。
+
 ## 专题研究
 
 | Skill | 负责 | 输出 |
