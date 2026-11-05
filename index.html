@@ -1,144 +1,216 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" data-theme="light">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PaperReading - 论文阅读笔记</title>
+<meta name="description" content="PaperReading 论文阅读笔记：每周与每月研究雷达、专题知识体系，以及大模型、多模态、世界模型和 Agent 技术笔记。">
+<meta name="color-scheme" content="light dark">
+<title>PaperReading · 论文阅读笔记</title>
+<script>
+  // Apply the saved appearance before paint; storage is optional.
+  (() => {
+    let theme = 'system';
+    try { theme = localStorage.getItem('paperreading-theme') || 'system'; } catch (_) {}
+    if (!['light', 'dark', 'system'].includes(theme)) theme = 'system';
+    document.documentElement.dataset.themePreference = theme;
+    document.documentElement.dataset.theme = theme === 'system'
+      ? (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme;
+  })();
+</script>
 <style>
   :root {
-    --bg: #0d1117;
-    --surface: #161b22;
-    --border: #30363d;
-    --text: #e6edf3;
-    --text-muted: #8b949e;
-    --accent: #58a6ff;
-    --accent-hover: #79c0ff;
+    color-scheme: light;
+    --bg: #f5f5f0; --surface: #ffffff; --surface-soft: #eeefe8;
+    --text: #202e28; --muted: #59665d; --border: #dbdfd5;
+    --accent: #26634b; --accent-soft: #e3eee4; --accent-line: #b2cbb8;
+    --hero: #e7eddf; --shadow: 0 8px 28px #1c38250b;
   }
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    line-height: 1.6;
-    min-height: 100vh;
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --bg: #131916; --surface: #1b231e; --surface-soft: #242e27;
+    --text: #e5eae2; --muted: #a5b1a5; --border: #344035;
+    --accent: #b2d8ac; --accent-soft: #2b3e2e; --accent-line: #526f55;
+    --hero: #223126; --shadow: 0 8px 28px #0000001c;
   }
-  .container { max-width: 960px; margin: 0 auto; padding: 3rem 1.5rem; }
-
-  /* Header */
-  header { text-align: center; margin-bottom: 2.5rem; }
-  header h1 {
-    font-size: 2.2rem; font-weight: 700; margin-bottom: 0.5rem;
-    background: linear-gradient(135deg, var(--accent), #bc8cff);
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; scroll-padding-top: 28px; }
+  body { margin: 0; background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif; line-height: 1.6; }
+  button, input { font: inherit; }
+  button, a, input { -webkit-tap-highlight-color: transparent; }
+  button, a { touch-action: manipulation; }
+  button { cursor: pointer; }
+  a { color: inherit; }
+  button:focus-visible, a:focus-visible, input:focus-visible, [tabindex="-1"]:focus-visible { outline: 3px solid var(--accent); outline-offset: 4px; }
+  [hidden] { display: none !important; }
+  .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+  .skip-link { position: fixed; top: 10px; left: 12px; z-index: 20; transform: translateY(-150%); padding: 10px 18px; border-radius: 10px; background: var(--surface); }
+  .skip-link:focus { transform: none; }
+  .page { max-width: 1440px; margin: 0 auto; padding: 0 40px; }
+  .topbar { min-height: 100px; display: flex; align-items: center; justify-content: space-between; gap: 20px; border-bottom: 1px solid var(--border); margin-bottom: 36px; }
+  .brand { display: flex; align-items: center; gap: 12px; text-decoration: none; font-size: 19px; font-weight: 750; letter-spacing: -.6px; }
+  .brand-mark { width: 38px; height: 38px; display: grid; place-items: center; background: var(--accent); color: var(--bg); border-radius: 11px; }
+  .brand-mark svg { width: 23px; height: 23px; }
+  .brand small { display: block; color: var(--muted); font-size: 10px; letter-spacing: 1.7px; font-weight: 600; line-height: 1.2; margin-top: 2px; }
+  .top-actions { display: flex; align-items: center; gap: 22px; }
+  .repo-link { text-decoration: none; font-size: 12px; color: var(--muted); }
+  .repo-link:hover { color: var(--accent); }
+  .theme-switch { display: flex; gap: 3px; padding: 4px; background: var(--surface-soft); border: 1px solid var(--border); border-radius: 12px; }
+  .theme-switch button { border: 0; min-height: 36px; padding: 6px 12px; border-radius: 8px; background: transparent; color: var(--muted); font-size: 12px; }
+  .theme-switch button[aria-pressed="true"] { color: var(--text); background: var(--surface); box-shadow: 0 1px 5px #0000000d; }
+  .theme-switch button:hover { color: var(--text); }
+  .layout { display: grid; grid-template-columns: 220px minmax(0, 1fr); column-gap: 40px; }
+  main { display: contents; }
+  .hero, .search-panel, .content, footer { grid-column: 2; min-width: 0; }
+  .hero { grid-row: 1; }
+  .search-panel { grid-row: 2; }
+  .content { grid-row: 3; }
+  footer { grid-row: 4; }
+  .sidebar { grid-column: 1; grid-row: 1 / span 4; position: sticky; top: 28px; align-self: start; max-height: calc(100vh - 56px); overflow-y: auto; scrollbar-width: thin; padding: 4px 2px; }
+  .directory-heading { display: flex; align-items: center; justify-content: space-between; margin: 0 12px 16px; }
+  .directory-heading h2 { font-size: 13px; margin: 0; font-weight: 650; }
+  .directory-heading span { font-family: ui-monospace, monospace; font-size: 10px; color: var(--muted); letter-spacing: 1.5px; }
+  .directory-links { display: grid; gap: 5px; }
+  .directory-link { display: flex; align-items: center; min-height: 48px; gap: 10px; padding: 9px 12px; border: 1px solid transparent; border-radius: 10px; text-decoration: none; font-size: 13px; color: var(--muted); }
+  .directory-link:hover { background: var(--surface-soft); color: var(--text); }
+  .directory-link[aria-current="location"] { background: var(--accent-soft); border-color: var(--accent-line); color: var(--accent); }
+  .nav-label { flex: 1; min-width: 0; overflow-wrap: anywhere; line-height: 1.3; }
+  .nav-label small { display: block; margin-top: 3px; font-size: 10px; opacity: 1; }
+  .nav-count { flex-shrink: 0; font-size: 11px; font-variant-numeric: tabular-nums; }
+  .nav-icon { font-size: 16px; }
+  .sidebar-note { padding: 20px 12px 0; margin-top: 22px; border-top: 1px solid var(--border); font-size: 11px; line-height: 1.9; color: var(--muted); }
+  .sidebar-note b { display: block; margin-bottom: 4px; color: var(--text); font-weight: 500; }
+  .hero { position: relative; padding: 34px 36px 28px; border-radius: 18px; background: var(--hero); border: 1px solid var(--accent-line); overflow: hidden; }
+  .hero::after { content: ''; position: absolute; width: 180px; height: 180px; border: 1px solid var(--accent-line); border-radius: 50%; top: -105px; right: -55px; box-shadow: 0 0 0 25px var(--hero), 0 0 0 26px var(--accent-line); pointer-events: none; }
+  .eyebrow { margin: 0 0 12px; color: var(--accent); font-family: ui-monospace, "SFMono-Regular", Consolas, monospace; font-size: 10px; font-weight: 600; letter-spacing: 2px; }
+  h1 { position: relative; z-index: 1; margin: 0; font-size: clamp(28px, 3vw, 40px); line-height: 1.3; font-weight: 650; letter-spacing: -1.4px; }
+  .hero-desc { margin: 14px 0 25px; color: var(--muted); font-size: 13px; max-width: 570px; }
+  .hero-bottom { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px; padding-top: 22px; border-top: 1px solid var(--accent-line); }
+  .stats { display: flex; gap: 26px; }
+  .stat { display: flex; align-items: baseline; gap: 7px; }
+  .stat strong { font-size: 22px; line-height: 1.2; font-weight: 650; font-variant-numeric: tabular-nums; letter-spacing: -.7px; }
+  .stat span { font-size: 11px; color: var(--muted); }
+  .hero-link { display: inline-flex; align-items: center; justify-content: center; gap: 18px; padding: 8px 14px; min-height: 40px; border-radius: 8px; text-decoration: none; color: var(--accent); background: var(--surface); font-size: 12px; font-weight: 600; }
+  .hero-link:hover { box-shadow: var(--shadow); }
+  .search-panel { margin: 25px 0 32px; }
+  .search-box { position: relative; display: flex; align-items: center; gap: 12px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 0 16px; }
+  .search-box:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+  .search-box svg { width: 18px; height: 18px; color: var(--muted); flex-shrink: 0; }
+  .search-box input { width: 100%; min-width: 0; padding: 16px 0; border: 0; background: transparent; color: var(--text); font-size: 13px; outline: none; }
+  .search-box input::placeholder { color: var(--muted); }
+  .search-box input:focus-visible { outline: none; }
+  .clear-search { flex-shrink: 0; padding: 8px; border: 0; background: transparent; color: var(--muted); border-radius: 5px; font-size: 12px; }
+  .clear-search:hover { background: var(--surface-soft); color: var(--text); }
+  .search-meta { margin: 10px 2px 0; color: var(--muted); font-size: 11px; }
+  .category { margin: 0 0 38px; scroll-margin-top: 28px; }
+  .category-header { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+  .category-icon { width: 40px; height: 40px; display: grid; place-items: center; background: var(--surface-soft); border: 1px solid var(--border); border-radius: 11px; flex-shrink: 0; font-size: 18px; }
+  .category-titles { min-width: 0; }
+  .category-header h2 { margin: 0; font-size: 18px; line-height: 1.4; font-weight: 650; letter-spacing: -.35px; overflow-wrap: anywhere; }
+  .category-subtitle { margin: 1px 0 0; font-size: 11px; color: var(--muted); }
+  .badge { margin-left: auto; white-space: nowrap; font-size: 11px; color: var(--muted); border: 1px solid var(--border); background: var(--surface-soft); border-radius: 20px; padding: 3px 9px; font-variant-numeric: tabular-nums; }
+  .category-desc { margin: 0 0 16px; color: var(--muted); font-size: 12px; line-height: 1.8; }
+  .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+  .card { position: relative; min-width: 0; padding: 18px; display: flex; flex-direction: column; align-items: flex-start; gap: 10px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; text-decoration: none; transition: border-color .18s, transform .18s, box-shadow .18s; overflow-wrap: anywhere; }
+  .card:hover { border-color: var(--accent-line); box-shadow: var(--shadow); transform: translateY(-2px); }
+  .card-top { width: 100%; display: flex; align-items: center; justify-content: space-between; color: var(--muted); font-family: ui-monospace, monospace; font-size: 9px; letter-spacing: 1px; }
+  .card-arrow { font-family: inherit; font-size: 15px; color: var(--accent); transition: transform .18s; }
+  .card:hover .card-arrow { transform: translate(2px, -2px); }
+  .card .title { font-size: 14px; font-weight: 650; line-height: 1.55; }
+  .card .desc { font-size: 11px; color: var(--muted); line-height: 1.8; }
+  .category-footer { display: flex; justify-content: center; padding-top: 13px; }
+  .expand-button { display: inline-flex; align-items: center; justify-content: center; gap: 12px; min-height: 40px; padding: 8px 18px; background: transparent; border: 1px solid var(--border); border-radius: 8px; color: var(--muted); font-size: 11px; }
+  .expand-button:hover { color: var(--accent); border-color: var(--accent-line); background: var(--accent-soft); }
+  .expand-button svg { width: 12px; height: 12px; }
+  .expand-button[aria-expanded="true"] svg { transform: rotate(180deg); }
+  .empty-state { text-align: center; padding: 45px 20px; border: 1px dashed var(--border); border-radius: 16px; }
+  .empty-state h2 { margin: 0 0 8px; font-size: 18px; }
+  .empty-state p { color: var(--muted); font-size: 13px; }
+  .empty-state button { padding: 10px 18px; border: 1px solid var(--accent-line); background: var(--accent-soft); color: var(--accent); border-radius: 9px; font-size: 13px; }
+  footer { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 15px; border-top: 1px solid var(--border); padding: 24px 0 35px; color: var(--muted); font-size: 10px; }
+  footer p { margin: 0; }
+  footer a { text-decoration: none; }
+  footer a:hover { text-decoration: underline; color: var(--accent); }
+  noscript p { padding: 16px; border: 1px solid var(--border); border-radius: 10px; }
+  @media (max-width: 1199px) { .page { padding: 0 28px; } .layout { grid-template-columns: 205px minmax(0, 1fr); column-gap: 28px; } .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .hero { padding: 28px; } }
+  @media (max-width: 899px) {
+    .page { padding: 0 24px; } .topbar { min-height: 86px; margin-bottom: 24px; }
+    .layout { grid-template-columns: minmax(0, 1fr); }
+    .hero, .search-panel, .content, footer, .sidebar { grid-column: 1; }
+    .hero { grid-row: 1; } .sidebar { grid-row: 2; position: static; max-height: none; overflow: visible; margin: 24px 0 0; padding: 0; }
+    .search-panel { grid-row: 3; margin-top: 20px; } .content { grid-row: 4; } footer { grid-row: 5; }
+    .directory-heading { margin: 0 2px 12px; } .directory-links { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+    .directory-link { border-color: var(--border); background: var(--surface); padding: 10px; }
+    .sidebar-note { display: none; } .repo-link { display: none; }
   }
-  header p { color: var(--text-muted); font-size: 1.05rem; max-width: 620px; margin: 0 auto; }
-
-  /* Stats */
-  .stats { display: flex; justify-content: center; gap: 1.2rem; margin: 1.5rem 0 2.5rem; flex-wrap: wrap; }
-  .stat {
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: 10px; padding: 0.8rem 1.5rem; text-align: center; min-width: 110px;
+  @media (max-width: 599px) {
+    html { scroll-padding-top: 18px; } .page { padding: 0 18px; }
+    .topbar { gap: 8px; min-height: 78px; margin-bottom: 20px; }
+    .brand { font-size: 15px; gap: 8px; letter-spacing: -.4px; } .brand-mark { width: 31px; height: 34px; border-radius: 8px; } .brand-mark svg { width: 20px; height: 20px; } .brand small { font-size: 8px; letter-spacing: 1px; }
+    .theme-switch { padding: 3px; gap: 1px; } .theme-switch button { font-size: 10px; padding: 6px 8px; min-height: 34px; }
+    .hero { padding: 24px 22px; border-radius: 14px; } h1 { font-size: 28px; letter-spacing: -.9px; } .eyebrow { font-size: 9px; letter-spacing: 1.3px; }
+    .hero-desc { font-size: 12px; margin-bottom: 22px; } .hero-bottom { padding-top: 19px; gap: 18px; } .stats { gap: 22px; } .stat strong { font-size: 22px; }
+    .directory-links { grid-template-columns: repeat(2, minmax(0, 1fr)); } .directory-link { gap: 8px; font-size: 11px; } .nav-label small { font-size: 9px; } .nav-count { font-size: 10px; }
+    .grid { grid-template-columns: minmax(0, 1fr); gap: 10px; } .card { padding: 18px; } .card .desc { font-size: 12px; } .card .title { font-size: 15px; }
+    .category-header h2 { font-size: 17px; } .category-desc { font-size: 12px; } .category { margin-bottom: 32px; } .category-subtitle { font-size: 10px; } .badge { font-size: 10px; padding: 3px 7px; }
+    .search-box { padding: 0 13px; } .search-box input { font-size: 16px; } .search-meta { font-size: 10px; } .category-icon { width: 36px; height: 36px; font-size: 16px; }
+    footer { font-size: 10px; }
   }
-  .stat .num { font-size: 1.6rem; font-weight: 700; color: var(--accent); }
-  .stat .label { font-size: 0.8rem; color: var(--text-muted); margin-top: 0.15rem; }
-
-  /* Search */
-  .search-box { display: flex; justify-content: center; margin-bottom: 2.5rem; }
-  .search-box input {
-    width: 100%; max-width: 480px; padding: 0.7rem 1rem;
-    border-radius: 8px; border: 1px solid var(--border);
-    background: var(--surface); color: var(--text); font-size: 0.95rem;
-    outline: none; transition: border-color 0.2s;
-  }
-  .search-box input:focus { border-color: var(--accent); }
-  .search-box input::placeholder { color: var(--text-muted); }
-
-  /* Category */
-  .category { margin-bottom: 2.5rem; }
-  .category-header {
-    display: flex; align-items: center; gap: 0.7rem;
-    margin-bottom: 1rem; padding-bottom: 0.5rem;
-    border-bottom: 1px solid var(--border);
-  }
-  .category-icon {
-    width: 36px; height: 36px; border-radius: 8px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 1.1rem; flex-shrink: 0;
-  }
-  .category-header h2 { font-size: 1.2rem; font-weight: 600; }
-  .category-header .badge {
-    font-size: 0.75rem; color: var(--text-muted);
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: 20px; padding: 0.1rem 0.6rem; margin-left: auto;
-  }
-  .category-desc { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem; }
-
-  /* Icon themes */
-  .icon-llm  { background: #0f8f9d22; color: #56d4dd; }
-  .icon-vlm  { background: #1f6feb22; color: #58a6ff; }
-  .icon-wam  { background: #23883522; color: #3fb950; }
-  .icon-vla  { background: #9e6a0322; color: #d29922; }
-  .icon-agi  { background: #db6d2822; color: #db6d28; }
-  .icon-radar { background: #2ea04322; color: #56d364; }
-  .icon-other { background: #8957e522; color: #bc8cff; }
-
-  /* Grid */
-  .grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-    gap: 0.85rem;
-  }
-  .card {
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: 10px; padding: 1.1rem 1.3rem;
-    text-decoration: none; color: var(--text);
-    transition: border-color 0.2s, transform 0.15s, box-shadow 0.2s;
-    display: flex; flex-direction: column; gap: 0.4rem;
-  }
-  .card:hover {
-    border-color: var(--accent); transform: translateY(-2px);
-    box-shadow: 0 4px 20px #0004;
-  }
-  .card .title { font-size: 1rem; font-weight: 600; color: var(--accent); }
-  .card .desc  { font-size: 0.82rem; color: var(--text-muted); }
-
-  /* Footer */
-  footer {
-    text-align: center; margin-top: 3rem; padding-top: 1.5rem;
-    border-top: 1px solid var(--border); color: var(--text-muted); font-size: 0.85rem;
-  }
-  footer a { color: var(--accent); text-decoration: none; }
-  footer a:hover { text-decoration: underline; }
-
-  .hidden { display: none !important; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } *, *::before, *::after { transition: none !important; } }
 </style>
 </head>
-<body>
-<div class="container">
-  <header>
-    <h1>PaperReading</h1>
-    <p>把研究论文读成"可长期保存的思想笔记" — 结构化 HTML 阅读笔记合集</p>
+<body id="top">
+<a class="skip-link" href="#main-content">跳到主要内容</a>
+<div class="page">
+  <header class="topbar">
+    <a class="brand" href="#top" aria-label="PaperReading 首页">
+      <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6c-2.5-2-6-2-9-1v14c3-1 6.5-1 9 1 2.5-2 6-2 9-1V5c-3-1-6.5-1-9 1Z"/><path d="M12 6v14M6 8h3M6 11h3M15 8h3M15 11h3"/></svg></span>
+      <span>PaperReading<small>READ · CONNECT · UNDERSTAND</small></span>
+    </a>
+    <div class="top-actions">
+      <a class="repo-link" href="https://github.com/Linchunhui/PaperReading-skills">GitHub 仓库 ↗</a>
+      <div class="theme-switch" role="group" aria-label="外观主题">
+        <button type="button" data-theme-choice="light" aria-pressed="false" aria-label="浅色主题">浅色</button>
+        <button type="button" data-theme-choice="dark" aria-pressed="false" aria-label="深色主题">深色</button>
+        <button type="button" data-theme-choice="system" aria-pressed="false" aria-label="跟随系统主题">系统</button>
+      </div>
+    </div>
   </header>
-
-  <div class="stats">
-    <div class="stat"><div class="num" id="total">0</div><div class="label">篇笔记</div></div>
-    <div class="stat"><div class="num">9</div><div class="label">个分类</div></div>
-    <div class="stat"><div class="num">VLM</div><div class="label">视觉语言</div></div>
-    <div class="stat"><div class="num">WAM</div><div class="label">世界模型</div></div>
-    <div class="stat"><div class="num">AGI</div><div class="label">Agentic AI</div></div>
+  <div class="layout">
+    <aside class="sidebar" aria-labelledby="directory-title">
+      <div class="directory-heading"><h2 id="directory-title">阅读目录</h2><span>EXPLORE</span></div>
+      <nav id="directory" class="directory-links" aria-label="全部笔记分类"></nav>
+      <div class="sidebar-note"><b>少一些堆积，多一些理解。</b>从研究雷达到专题精读，<br>让每一次阅读留下线索。</div>
+    </aside>
+    <main>
+      <section class="hero" id="main-content" tabindex="-1" aria-labelledby="page-title">
+        <p class="eyebrow">A PERSONAL LIBRARY OF IDEAS</p>
+        <h1 id="page-title">读论文，也读懂它们的联系。</h1>
+        <p class="hero-desc">把研究论文读成「可长期保存的思想笔记」。<br>结构化 HTML 阅读笔记合集，从每周前沿，到值得反复读的基础。</p>
+        <div class="hero-bottom">
+          <div class="stats" aria-label="笔记库统计">
+            <div class="stat"><strong id="total">—</strong><span>篇笔记</span></div>
+            <div class="stat"><strong id="category-total">—</strong><span>个分类</span></div>
+          </div>
+          <a class="hero-link" href="#weekly-radar">从每周雷达开始 <span aria-hidden="true">↓</span></a>
+        </div>
+      </section>
+      <div class="search-panel" role="search" aria-label="搜索笔记库">
+        <div class="search-box">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.7"/><path d="m16 16 4.5 4.5"/></svg>
+          <label for="search" class="sr-only">搜索论文标题、关键词或研究方向</label>
+          <input type="search" id="search" placeholder="搜索论文、关键词或研究方向…" autocomplete="off" aria-describedby="search-status">
+          <button class="clear-search" id="clear-search" type="button" hidden>清除</button>
+        </div>
+        <p class="search-meta" id="search-status" role="status" aria-live="polite" aria-atomic="true">每个分类默认展示两行，展开可查看全部笔记。</p>
+      </div>
+      <div id="content" class="content">
+        <div class="empty-state" id="empty-state" hidden><h2>暂时没有找到相关笔记</h2><p>试试模型名称、研究方向，或更短的关键词。</p><button id="reset-search" type="button">清除搜索，浏览全部</button></div>
+        <noscript><p>请启用 JavaScript 以使用分类目录、搜索和主题切换。也可以在 <a href="https://github.com/Linchunhui/PaperReading-skills/tree/main/examples">GitHub 浏览全部笔记</a>。</p></noscript>
+      </div>
+      <footer><p>PaperReading · 把阅读积累成理解</p><p>Powered by <a href="https://pages.github.com" target="_blank" rel="noopener noreferrer">GitHub Pages</a> · Generated by PaperStudio <span aria-hidden="true"> / </span> <a href="#top">回到顶部 ↑</a></p></footer>
+    </main>
   </div>
-
-  <div class="search-box">
-    <input type="text" id="search" placeholder="搜索论文笔记..." autocomplete="off">
-  </div>
-
-  <div id="content"></div>
-
-  <footer>
-    <p>Powered by <a href="https://pages.github.com" target="_blank">GitHub Pages</a> · Generated by PaperStudio</p>
-  </footer>
 </div>
-
 <script>
 const categories = [
   {
@@ -309,50 +381,207 @@ const categories = [
   },
 ];
 
-const contentEl = document.getElementById("content");
-const totalEl = document.getElementById("total");
-let totalCount = 0;
+const contentEl = document.getElementById('content');
+const directoryEl = document.getElementById('directory');
+const searchEl = document.getElementById('search');
+const clearEl = document.getElementById('clear-search');
+const emptyEl = document.getElementById('empty-state');
+const statusEl = document.getElementById('search-status');
+const themeMedia = matchMedia('(prefers-color-scheme: dark)');
+const records = [];
+const labels = {
+  'weekly-radar': ['Weekly Radar', '每周论文速读'],
+  'monthly-radar': ['Monthly Radar', '每月论文速读'],
+  'topics': ['Topics', '专题知识体系'],
+  'llm-foundations': ['LLM Foundations', '大模型基础'],
+  'vlm': ['VLM', '视觉语言模型'],
+  'wam': ['WAM', '世界与动作模型'],
+  'vla': ['VLA', '视觉语言动作模型'],
+  'agi': ['Agentic AI', '从 RL 到 Agent 系统'],
+  'others': ['Others', '其他研究方向']
+};
+const escapeHTML = value => String(value).replace(/[&<>"']/g, char => ({
+  '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+}[char]));
 
-categories.forEach(cat => {
-  totalCount += cat.papers.length;
-  const section = document.createElement("div");
-  section.className = "category";
+function applyTheme(preference, save = false) {
+  if (!['light', 'dark', 'system'].includes(preference)) preference = 'system';
+  document.documentElement.dataset.themePreference = preference;
+  document.documentElement.dataset.theme = preference === 'system'
+    ? (themeMedia.matches ? 'dark' : 'light') : preference;
+  document.querySelectorAll('[data-theme-choice]').forEach(button => {
+    button.setAttribute('aria-pressed', String(button.dataset.themeChoice === preference));
+  });
+  if (save) { try { localStorage.setItem('paperreading-theme', preference); } catch (_) {} }
+}
+document.querySelectorAll('[data-theme-choice]').forEach(button => {
+  button.addEventListener('click', () => applyTheme(button.dataset.themeChoice, true));
+});
+themeMedia.addEventListener('change', () => {
+  if (document.documentElement.dataset.themePreference === 'system') applyTheme('system');
+});
+window.addEventListener('storage', event => {
+  if (event.key === 'paperreading-theme') applyTheme(event.newValue || 'system');
+});
+applyTheme(document.documentElement.dataset.themePreference || 'system');
+
+categories.forEach((cat, categoryIndex) => {
+  const [shortName, subtitle] = labels[cat.id] || [cat.name, ''];
+  const headingParts = cat.name.split(' — ');
+  const section = document.createElement('section');
+  section.className = 'category';
   section.id = cat.id;
-
+  section.tabIndex = -1;
+  section.setAttribute('aria-labelledby', `${cat.id}-heading`);
   section.innerHTML = `
     <div class="category-header">
-      <div class="category-icon ${cat.icon}">${cat.emoji}</div>
-      <h2>${cat.name}</h2>
+      <span class="category-icon ${escapeHTML(cat.icon)}" aria-hidden="true">${cat.emoji}</span>
+      <div class="category-titles">
+        <h2 id="${cat.id}-heading">${escapeHTML(headingParts[0])}</h2>
+        ${headingParts[1] ? `<p class="category-subtitle">${escapeHTML(headingParts.slice(1).join(' — '))}</p>` : ''}
+      </div>
       <span class="badge">${cat.papers.length} 篇</span>
     </div>
-    <p class="category-desc">${cat.desc}</p>
-    <div class="grid">
-      ${cat.papers.map(p => `
-        <a class="card" href="${p.file}" data-search="${(p.title + ' ' + p.desc).toLowerCase()}">
-          <span class="title">${p.title}</span>
-          <span class="desc">${p.desc}</span>
+    <p class="category-desc">${escapeHTML(cat.desc)}</p>
+    <div class="grid" id="${cat.id}-papers">
+      ${cat.papers.map((paper, i) => `
+        <a class="card" href="${escapeHTML(paper.file)}">
+          <span class="card-top" aria-hidden="true"><span>${String(categoryIndex + 1).padStart(2, '0')} / ${String(i + 1).padStart(2, '0')}</span><span class="card-arrow">↗</span></span>
+          <span class="title">${escapeHTML(paper.title)}</span>
+          <span class="desc">${escapeHTML(paper.desc)}</span>
         </a>
-      `).join("")}
+      `).join('')}
     </div>
-  `;
-  contentEl.appendChild(section);
-});
-totalEl.textContent = new Set(categories.flatMap(cat => cat.papers.map(p => p.file))).size;
+    <div class="category-footer">
+      <button type="button" class="expand-button" aria-expanded="false" aria-controls="${cat.id}-papers">
+        <span class="expand-label"></span><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="m2 4 4 4 4-4"/></svg>
+      </button>
+    </div>`;
+  contentEl.insertBefore(section, emptyEl);
 
-document.getElementById("search").addEventListener("input", function () {
-  const q = this.value.toLowerCase().trim();
-  document.querySelectorAll(".category").forEach(section => {
-    let visibleCount = 0;
-    section.querySelectorAll(".card").forEach(card => {
-      const match = !q || card.dataset.search.includes(q);
-      card.classList.toggle("hidden", !match);
-      if (match) visibleCount++;
-    });
-    section.classList.toggle("hidden", visibleCount === 0);
+  const navLink = document.createElement('a');
+  navLink.className = 'directory-link';
+  navLink.href = `#${cat.id}`;
+  navLink.innerHTML = `<span class="nav-icon" aria-hidden="true">${cat.emoji}</span><span class="nav-label">${escapeHTML(shortName)}<small>${escapeHTML(subtitle)}</small></span><span class="nav-count" aria-label="${cat.papers.length} 篇">${cat.papers.length}</span>`;
+  directoryEl.appendChild(navLink);
+
+  const record = {
+    cat, section, navLink, expanded: false,
+    grid: section.querySelector('.grid'),
+    cards: [...section.querySelectorAll('.card')],
+    button: section.querySelector('.expand-button'),
+    footer: section.querySelector('.category-footer'),
+    badge: section.querySelector('.badge'),
+    searchable: cat.papers.map(paper => `${paper.title} ${paper.desc} ${cat.name} ${cat.desc} ${subtitle}`.normalize('NFKC').toLowerCase())
+  };
+  record.button.addEventListener('click', event => {
+    const firstHiddenCard = record.cards.find(card => card.hidden);
+    record.expanded = !record.expanded;
+    updateView();
+    // Keep the collapsing control in view, including after a long chapter list.
+    if (!record.expanded) record.button.scrollIntoView({ block: 'nearest', behavior: 'instant' });
+    else if (event.detail === 0 && firstHiddenCard) firstHiddenCard.focus();
   });
+  navLink.addEventListener('click', () => {
+    // Every directory entry stays reachable while a search is active.
+    if (record.section.hidden) clearSearch(false);
+    setActiveCategory(cat.id);
+  });
+  records.push(record);
 });
+
+document.getElementById('total').textContent = new Set(categories.flatMap(cat => cat.papers.map(paper => paper.file))).size;
+document.getElementById('category-total').textContent = categories.length;
+
+document.querySelector('.hero-link').addEventListener('click', () => {
+  if (records[0].section.hidden) clearSearch(false);
+});
+
+function updateView() {
+  const query = searchEl.value.normalize('NFKC').trim().toLowerCase();
+  const terms = query.split(/\s+/).filter(Boolean);
+  const matchedFiles = new Set();
+  let visibleCategories = 0;
+  records.forEach(record => {
+    const matches = record.cards.map((_, i) => terms.every(term => record.searchable[i].includes(term)));
+    const matchCount = matches.filter(Boolean).length;
+    record.section.hidden = matchCount === 0;
+    if (!matchCount) return;
+    visibleCategories++;
+    // Use the rendered grid's real column count: always two complete rows,
+    // whether the viewport currently fits one, two, or three columns.
+    const columns = getComputedStyle(record.grid).gridTemplateColumns.trim().split(/\s+/).length;
+    const limit = Math.max(1, columns) * 2;
+    let seen = 0;
+    record.cards.forEach((card, i) => {
+      if (matches[i]) { seen++; matchedFiles.add(record.cat.papers[i].file); }
+      card.hidden = !matches[i] || (!query && !record.expanded && seen > limit);
+    });
+    record.badge.textContent = query ? `${matchCount} / ${record.cards.length} 篇` : `${record.cards.length} 篇`;
+    record.footer.hidden = !!query || record.cards.length <= limit;
+    record.button.setAttribute('aria-expanded', String(record.expanded));
+    const actionLabel = record.expanded ? '收起至两行' : `展开其余 ${Math.max(0, record.cards.length - limit)} 篇`;
+    record.button.querySelector('.expand-label').textContent = actionLabel;
+    record.button.setAttribute('aria-label', `${record.cat.name}：${actionLabel}`);
+  });
+  clearEl.hidden = !searchEl.value;
+  emptyEl.hidden = visibleCategories > 0;
+  statusEl.textContent = query
+    ? `找到 ${matchedFiles.size} 篇笔记，分布在 ${visibleCategories} 个分类。搜索时展示全部匹配结果。`
+    : '每个分类默认展示两行，展开可查看全部笔记。';
+  updateActiveCategory();
+}
+
+function clearSearch(focus = true) {
+  searchEl.value = '';
+  updateView();
+  if (focus) searchEl.focus();
+}
+searchEl.addEventListener('input', updateView);
+searchEl.addEventListener('keydown', event => { if (event.key === 'Escape') clearSearch(); });
+clearEl.addEventListener('click', () => clearSearch());
+document.getElementById('reset-search').addEventListener('click', () => clearSearch());
+
+function setActiveCategory(id) {
+  records.forEach(record => {
+    if (record.cat.id === id) record.navLink.setAttribute('aria-current', 'location');
+    else record.navLink.removeAttribute('aria-current');
+  });
+}
+function updateActiveCategory() {
+  const visible = records.filter(record => !record.section.hidden);
+  let current = visible[0];
+  for (const record of visible) {
+    if (record.section.getBoundingClientRect().top <= Math.min(innerHeight * .3, 220)) current = record;
+  }
+  setActiveCategory(current ? current.cat.id : '');
+}
+let scrollFrame = 0;
+window.addEventListener('scroll', () => {
+  if (scrollFrame) return;
+  scrollFrame = requestAnimationFrame(() => { scrollFrame = 0; updateActiveCategory(); });
+}, { passive: true });
+let resizeFrame = 0;
+let lastWidth = 0;
+function scheduleLayout() {
+  cancelAnimationFrame(resizeFrame);
+  resizeFrame = requestAnimationFrame(updateView);
+}
+if ('ResizeObserver' in window) {
+  new ResizeObserver(entries => {
+    const width = entries[0].contentRect.width;
+    if (Math.abs(width - lastWidth) > .5) { lastWidth = width; scheduleLayout(); }
+  }).observe(contentEl);
+} else {
+  window.addEventListener('resize', scheduleLayout);
+}
+updateView();
+// Dynamic categories need one explicit anchor restoration on direct deep links.
+if (location.hash) {
+  const target = records.find(record => `#${record.cat.id}` === location.hash);
+  if (target) requestAnimationFrame(() => target.section.scrollIntoView({ behavior: 'instant' }));
+}
+
 </script>
 </body>
 </html>
-
-
