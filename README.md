@@ -19,7 +19,15 @@
 
 [打开 GitHub Pages 阅读首页](https://linchunhui.github.io/PaperReading-skills/)。首页先展示 Weekly 和 Monthly，随后是专题知识体系与各研究方向。
 
-![PaperReading 阅读目录，包含周报、月报、专题与研究方向](assets/reading-directory-map.svg)
+<a href="https://linchunhui.github.io/PaperReading-skills/">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/reading-index-dark.jpg">
+    <source media="(prefers-color-scheme: light)" srcset="assets/reading-index-light.jpg">
+    <img alt="PaperReading 新版阅读首页实景，包含侧边目录、搜索框、两行卡片预览与主题切换" src="assets/reading-index-light.jpg">
+  </picture>
+</a>
+
+新版首页实景截图：侧边目录、站内搜索、两行卡片预览与浅色 / 深色主题。点击图片进入在线阅读。
 
 | 文件夹 | 内容 | 在线入口 |
 | --- | --- | --- |
