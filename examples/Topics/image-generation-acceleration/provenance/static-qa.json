@@ -9,5 +9,6 @@
   "private_paths": "none",
   "minimum_palette_contrast": 4.75,
   "original_sha256": "5782641a862c25c93b21b560e99bc138ef4aaaf0bb975d31411814bbc03d51e2",
-  "browser_qa": "pending published URL"
+  "browser_qa": "passed on published URL; see browser-qa.json",
+  "html_sha256": "81a53c6d1d924b5cb13b09f7ba235b0422ea40c069598bfd2acb746bdbc9eefd"
 }

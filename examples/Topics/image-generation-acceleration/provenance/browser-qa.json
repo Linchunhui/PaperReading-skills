@@ -1,0 +1,34 @@
+{
+  "status": "passed",
+  "tested_commit": "59e753feb00f74e7d90a334de396c830400933b1",
+  "deployment": "https://github.com/Linchunhui/PaperReading-skills/actions/runs/42016911856",
+  "url": "https://linchunhui.github.io/PaperReading-skills/examples/Topics/image-generation-acceleration/",
+  "method": "Actual browser interactions on published GitHub Pages; static file and SHA checks separately recorded.",
+  "checks": {
+    "rendered_papers": 72,
+    "paper_images_loaded_and_decoded": 25,
+    "svg_resources_loaded_and_decoded": 6,
+    "themes": "light, dark, system; dark retained after reload; system matched current dark preference",
+    "viewport_widths_css_px": [
+      1280,
+      390
+    ],
+    "mobile_viewport_height_css_px": 844,
+    "mobile_document_scroll_width_css_px": 375,
+    "document_horizontal_overflow": false,
+    "wide_selection_table": "1100 px table within 315 px overflow:auto container",
+    "image_zoom": "All 25 expand and collapse controls exercised; Glance white background and responsive image visually inspected",
+    "map_navigation": "Expanded maps; fewstep map visually inspected; InstaFlow SVG node opened matching paper anchor",
+    "catalog_search": "CFG returned 66 original-snapshot records; clearing restored view",
+    "local_library_search": "DMD returned 12 records; unmatched query returned 0",
+    "local_library_pagination": "All 628 records; next page showed 31–60 of 628; reset to default 92-related-record snapshot",
+    "indexes": "Topics directory and root home both link to topic; root counts 3 Topics entries",
+    "browser_console_warnings_errors": []
+  },
+  "limits": [
+    "Browser viewport simulation, not physical phone testing.",
+    "No image-generation experiments reproduced.",
+    "No exhaustive screen-reader or all external-link audit."
+  ],
+  "followup": "Clarify historical catalog scope after live QA; layout and interaction code unchanged."
+}

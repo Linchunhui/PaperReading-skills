@@ -121,6 +121,8 @@ s.select_one('.report-index').clear();s.select_one('.report-index').append(fragm
 s.body.insert(0,fragment('<a class="skip-link" href="#edition">跳到正文</a>'))
 # Retain historical audit, make edition scope explicit.
 audit=s.select_one('#research-audit');audit.insert(0,fragment('<p class="editor-note">以下为原稿调研记录（64项版本），本轮另见“新增检索与核验范围”。历史候选数量不是当前正文总数。</p>'))
+if s.select_one('#catalog'):
+ s.select_one('#catalog').insert(0,fragment('<p class="editor-note">原稿发现目录（历史快照）。此区的“正文已核（64）”与候选状态沿用原稿，不是当前72项总表；本轮新增8项及核验结果见<a href="#new-audit">核验范围</a>。</p>'))
 if s.select_one('#local-materials'):
  s.select_one('#local-materials').insert(0,fragment('<p class="editor-note">下方为原稿本地候选库快照，不等于当前72项正文。InstaFlow等本轮新增状态请以上方正文及新增核验记录为准。</p>'))
 for embedded in s.select('script[type="application/json"]'):
