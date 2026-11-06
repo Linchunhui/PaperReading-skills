@@ -36,7 +36,7 @@ CSS 起手式见 [`../assets/style.css`](../assets/style.css) 的 `.overview-*`�
 
 ## 2. 按篇深读的正文骨架
 
-下面的结构为每篇重复一次，使用唯一前缀。雷达保留背景、问题、思路、方法、结果、总结六个主标题及顺序，方法与结果的小标题随论文类型和难点调整；步骤数没有配额。串讲可按共同问题调整自然标题。所有正文占位内容须写成实际解读，不能把整条机制拆成五句标签。
+下面的结构为每篇重复一次，使用唯一前缀。雷达默认按背景介绍、问题及解决思路、方法、实验及结果、总结五部分展开；模板标题是示例，主标题和内部小标题都可贴合论文措辞，导航同步实际标题。理论等类型可将实验部分改为相应的结果与分析标题；步骤数没有配额。串讲可按共同问题调整自然标题。所有正文占位内容须写成实际解读，不能把整条机制拆成五句标签。
 
 ```html
 <article class="chapter p1" id="paper-a">
@@ -46,18 +46,14 @@ CSS 起手式见 [`../assets/style.css`](../assets/style.css) 的 `.overview-*`�
   <p class="hook">{为什么值得读，保留成立条件}</p>
 
   <section id="paper-a-background">
-    <h3>背景</h3>
+    <h3>背景介绍</h3>
     <p>{任务输入、期望输出、贯穿全文的实例}</p>
   </section>
 
   <section id="paper-a-problem">
-    <h3>问题</h3>
+    <h3>问题及解决思路</h3>
     <p>{最相关旧方案的操作、卡点与后果；交代本篇要解决的目标}</p>
-  </section>
-
-  <section id="paper-a-approach">
-    <h3>思路</h3>
-    <p>{改变哪个环节、为什么可能有效、与最相关前作的差别}</p>
+    <p>{承接这个瓶颈，解释改变哪个环节、为什么可能有效、与最相关前作的差别}</p>
   </section>
 
   <section id="paper-a-met">
@@ -78,7 +74,7 @@ CSS 起手式见 [`../assets/style.css`](../assets/style.css) 的 `.overview-*`�
   </section>
 
   <section id="paper-a-exp">
-    <h3>结果</h3>
+    <h3>实验及结果</h3>
     <h4>关键结果</h4>
     <p>{主结果：任务、基线、预算、指标、精确数字及 Table/Figure 位置}</p>
     <!-- 小表或结果图，用正文解释“看哪里—比什么—支持到哪里” -->
@@ -115,11 +111,10 @@ CSS 起手式见 [`../assets/style.css`](../assets/style.css) 的 `.overview-*`�
 <aside id="toc" aria-label="阅读目录">
   <a class="lvl1" href="#overview">本期阅读路线</a>
   <a class="lvl1" href="#paper-a">① {论文 A}</a>
-  <a class="lvl2" href="#paper-a-background">背景</a>
-  <a class="lvl2" href="#paper-a-problem">问题</a>
-  <a class="lvl2" href="#paper-a-approach">思路</a>
+  <a class="lvl2" href="#paper-a-background">背景介绍</a>
+  <a class="lvl2" href="#paper-a-problem">问题及解决思路</a>
   <a class="lvl2" href="#paper-a-met">方法</a>
-  <a class="lvl2" href="#paper-a-exp">结果</a>
+  <a class="lvl2" href="#paper-a-exp">实验及结果</a>
   <a class="lvl2" href="#paper-a-recall">总结</a>
   <a class="lvl1" href="#recap">回顾</a>
 </aside>

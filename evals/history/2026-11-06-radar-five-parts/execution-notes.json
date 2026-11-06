@@ -1,0 +1,111 @@
+{
+  "generations": [
+    {
+      "version": "baseline",
+      "case": "single",
+      "agent": "five_base_single",
+      "model": "gpt-6.1-sol",
+      "fresh_context": true,
+      "task": "regression/baseline/single/task.md",
+      "task_sha256": "b621c07fbf593c1d657d49deb097d2452d964cb85c1f300607316b2b2e4f36c1"
+    },
+    {
+      "version": "baseline",
+      "case": "series",
+      "agent": "five_base_series",
+      "model": "gpt-6.1-sol",
+      "fresh_context": true,
+      "task": "regression/baseline/series/task.md",
+      "task_sha256": "d48c37dc4932f1e778073c2303617f165c0d4b359949f03e28566d1cbb3d8f02"
+    },
+    {
+      "version": "baseline",
+      "case": "radar",
+      "agent": "five_base_radar",
+      "model": "gpt-6.1-sol",
+      "fresh_context": true,
+      "task": "regression/baseline/radar/task.md",
+      "task_sha256": "579ff81717a282f776716412694f7044a54e1bd354569a2edc433848702738d5"
+    },
+    {
+      "version": "baseline",
+      "case": "theory",
+      "agent": "five_base_theory",
+      "model": "gpt-6.1-sol",
+      "fresh_context": true,
+      "task": "regression/baseline/theory/task.md",
+      "task_sha256": "29eaf77aee5768360c6b76200c5d3534f633be052d0003383a796bb856c090d3"
+    },
+    {
+      "version": "baseline",
+      "case": "radar_depth",
+      "agent": "five_base_depth",
+      "model": "gpt-6.1-sol",
+      "fresh_context": true,
+      "task": "regression/baseline/radar_depth/task.md",
+      "task_sha256": "d9bce22dd4aa29c7e3be9f3582244a719f70b531f03f1fc9f73a13a1c6e6601d"
+    },
+    {
+      "version": "candidate",
+      "case": "single",
+      "agent": "five_new_single",
+      "model": "gpt-6.1-sol",
+      "fresh_context": true,
+      "task": "regression/candidate/single/task.md",
+      "task_sha256": "a7f96a820ca7d4f1bc444aa127d7e3e0e0ed0b0ecba2d1ef210fff79fec37ca6"
+    },
+    {
+      "version": "candidate",
+      "case": "series",
+      "agent": "five_new_series",
+      "model": "gpt-6.1-sol",
+      "fresh_context": true,
+      "task": "regression/candidate/series/task.md",
+      "task_sha256": "90137d08cf6eb30b7d72a0267e32ff65fe06d6f4a0b93d48ec2e369ecd95b3a1"
+    },
+    {
+      "version": "candidate",
+      "case": "radar",
+      "agent": "five_new_radar",
+      "model": "gpt-6.1-sol",
+      "fresh_context": true,
+      "task": "regression/candidate/radar/task.md",
+      "task_sha256": "c519f9c444e5898252da08cd4e0219552ec6932cdbbd70865b415724617158cd"
+    },
+    {
+      "version": "candidate",
+      "case": "theory",
+      "agent": "five_new_theory",
+      "model": "gpt-6.1-sol",
+      "fresh_context": true,
+      "task": "regression/candidate/theory/task.md",
+      "task_sha256": "0b61ae20eb178609e524469d7ec024ee71d99bec8747833827f2f00fd7bf84f6"
+    },
+    {
+      "version": "candidate",
+      "case": "radar_depth",
+      "agent": "five_new_depth",
+      "model": "gpt-6.1-sol",
+      "fresh_context": true,
+      "task": "regression/candidate/radar_depth/task.md",
+      "task_sha256": "b1515fbe4a3a02de8f200691cea85ae5fa993d7563ba3f674cbf7ea1232c39a3"
+    }
+  ],
+  "reviewers": {
+    "baseline": "five_review_base",
+    "candidate": "five_review_new"
+  },
+  "reviewer_model": "gpt-6.1-sol",
+  "reviewers_independent_of_generators": true,
+  "all_outputs_generated_this_run": true,
+  "task_manager_access": {
+    "available": false,
+    "tools_discovery": "All available tool names/descriptions inspected twice; no schedule list/update/model-setting or cloud-skill-write tools.",
+    "local_configuration": "No task configuration in repository, /workspace/.codex or /home/agent/.codex.",
+    "user_confirmed_location": "ChatGPT / Codex scheduled-task page",
+    "tasks_modified": 0,
+    "task_count": null,
+    "cloud_installed_skill_modified": false
+  },
+  "task_model_changed_by_generation_tests": false
+}

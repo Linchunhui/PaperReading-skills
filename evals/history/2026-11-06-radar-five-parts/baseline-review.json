@@ -1,0 +1,193 @@
+{
+  "version": "baseline",
+  "evaluator": "five_review_base",
+  "cases": [
+    {
+      "id": "single",
+      "artifact_hashes": {
+        "single.md": "406cc441014cbc18cee7a7b1dd4fadf166df1013760ba1d670573d8ee028a24e"
+      },
+      "checks": {
+        "coverage": {
+          "pass": true,
+          "evidence": "单篇 §§一–七含任务、前作、思路、方法、主结果、设计分析及条件总结；对应 papers.md A§1–§6（行6–24）。"
+        },
+        "method_fidelity": {
+          "pass": true,
+          "evidence": "§§三–四明确 c<0.8 后选框、一次补读、两阶段冻结/更新和部署无证据框；对应源行8、10。流程表未添加第一版答案输入。"
+        },
+        "result_fidelity": {
+          "pass": true,
+          "evidence": "§五表格及简单子集下降0.5、token减75%而延迟95→73分开解释；对应源行12–16。"
+        },
+        "ablation_reasoning": {
+          "pass": true,
+          "evidence": "§六随机选框70.1、k=4与无门控成本及79.0双因素混杂、无重复统计完整解释；对应源18–22。"
+        },
+        "scope_and_relations": {
+          "pass": true,
+          "evidence": "只读A、中文Markdown无额外交付；英文印刷/手写和跨区域边界对应源24及task.md。"
+        },
+        "readability": {
+          "pass": true,
+          "evidence": "见notes输出先读复述：256全局→初答/c→低分选2框→全局+裁片+问题再解码，承重证据75.4/1024/73对76.2/4096/95可恢复；回源行8、14–16一致。"
+        },
+        "delivery": {
+          "pass": true,
+          "evidence": "single.md完整；实际查看mobile截图文字换行正常，统一离线/无JS检查无溢出或错误，按task.md仅Markdown。"
+        }
+      },
+      "issues": []
+    },
+    {
+      "id": "series",
+      "artifact_hashes": {
+        "series.md": "638004d621900ea10043eecaf95bdbb0d612a0cc60dfe7a8d14a6d13fc97a84e"
+      },
+      "checks": {
+        "coverage": {
+          "pass": true,
+          "evidence": "A/B各自任务、前作、方法、结果、分析和迁移条件齐备；对应papers.md行6–24、28–36。"
+        },
+        "method_fidelity": {
+          "pass": true,
+          "evidence": "A推理/训练及B缓存方法准确；B以内容哈希存4096视觉token、非旧答案、无额外训练；对应源8/10/30。"
+        },
+        "result_fidelity": {
+          "pass": true,
+          "evidence": "A主结果保留简单题负结果；B主结果52是含首问平均、首问120；对应源12–16、32。"
+        },
+        "ablation_reasoning": {
+          "pass": true,
+          "evidence": "A消融正确解释混杂；B分析1/10/20问120/52/48及两页容量条件；对应源18–22、34。"
+        },
+        "scope_and_relations": {
+          "pass": true,
+          "evidence": "共同问题与末节明确同期无继承、不同协议不排名、组合未经验证；对应源28/32/36及任务要求A+B。"
+        },
+        "readability": {
+          "pass": true,
+          "evidence": "见notes输出先读复述：B下一问复用页面表示但重新解码；容量不足交替访问失效，末节解释全页预编码与A冲突，回源30/34/36一致。"
+        },
+        "delivery": {
+          "pass": true,
+          "evidence": "series.md为唯一完整Markdown；查看mobile截图可读，统一离线/无JS检查无溢出/错误；无多余格式。"
+        }
+      },
+      "issues": []
+    },
+    {
+      "id": "radar",
+      "artifact_hashes": {
+        "radar.html": "d37c93bd48516c1df2eed93cf9c5b41f1748bc8c33c665592cd7da3f1a3971f1",
+        "radar.wechat.md": "5433c1cc2970bb2e984ebd7d25dcbbc67bb46199e7f23a758ac92169ba561d36"
+      },
+      "checks": {
+        "coverage": {
+          "pass": true,
+          "evidence": "HTML与伴随稿保留A/B/C；A/B八项主线可恢复，C背景/机制/结果缺口逐项说明；对应A/B全源及task.md摘要。"
+        },
+        "method_fidelity": {
+          "pass": true,
+          "evidence": "两份A方法保留训练与推理衔接和一次补读，B保留哈希缓存条件；对应papers.md8/10/30；C未嫁接A机制。"
+        },
+        "result_fidelity": {
+          "pass": true,
+          "evidence": "两份结果保留A1所有数值、简单题下降和token/延迟区别、B首问与平均协议；对应源12–16/32。"
+        },
+        "ablation_reasoning": {
+          "pass": true,
+          "evidence": "两份A结果保留随机/k/门控和79混杂，B保留重复数/容量分析；对应源18–22/34；C只说材料不足。"
+        },
+        "scope_and_relations": {
+          "pass": true,
+          "evidence": "固定候选全保留，无外搜；同期无继承、不按80与75.4排名、组合未验证；对应task.md及源28/32/36。"
+        },
+        "readability": {
+          "pass": true,
+          "evidence": "见notes输出先读复述：A随机选框在相同1024token降75.4→70.1支持选择质量；B当前问题读取缓存解码、以十问和容量承接成本条件；C诚实不可恢复机制。"
+        },
+        "delivery": {
+          "pass": true,
+          "evidence": "radar.html+radar.wechat.md完整同stem，主线证据一致；实际查看HTML桌面/手机及伴随稿手机截图，导航分离/卡片堆叠可读；离线无JS检查无坏锚/溢出/错误。"
+        }
+      },
+      "issues": []
+    },
+    {
+      "id": "theory",
+      "artifact_hashes": {
+        "theory.md": "0045772bda2cc1724bc31a09a09c34516ca15a7b9248586446726411d5a29021"
+      },
+      "checks": {
+        "coverage": {
+          "pass": true,
+          "evidence": "背景/问题/思路/方法/结果/总结含方向关键词与假设分析；对应theory.md4–10，无实验项未伪造。"
+        },
+        "method_fidelity": {
+          "pass": true,
+          "evidence": "方法明确从零出发收缩加扰动、r次后精确清零、下一周期重用推导；对应源6，无训练组件补造。"
+        },
+        "result_fidelity": {
+          "pass": true,
+          "evidence": "结果给出正确几何界及最大周期界，区分上界与实际误差，无准确率或加速；对应源6/8。"
+        },
+        "ablation_reasoning": {
+          "pass": true,
+          "evidence": "假设敏感性正确区分rho=1无限步与固定r界、epsilon=0边界、r增大不减；对应源8，限定为递推解释。"
+        },
+        "scope_and_relations": {
+          "pass": true,
+          "evidence": "按task.md雷达展开仅T、Markdown；不把理论界换为实际性能；对应源4/10。"
+        },
+        "readability": {
+          "pass": true,
+          "evidence": "见notes先读复述：每步旧误差收缩加epsilon，r步后清零使单周期保证重复适用；方法逐项解释rho/epsilon及几何累积，回源6一致。"
+        },
+        "delivery": {
+          "pass": true,
+          "evidence": "theory.md完整；实际查看desktop截图文字清晰，统一离线无JS检查无溢出/错误，尊重Markdown-only。"
+        }
+      },
+      "issues": []
+    },
+    {
+      "id": "radar_depth",
+      "artifact_hashes": {
+        "radar_depth.md": "a0dab7eabc357c76a63d625cc8aa8c42f2aff61e45a024e9ca56eec524105bbd"
+      },
+      "checks": {
+        "coverage": {
+          "pass": true,
+          "evidence": "R1–R6依序独立讲解，各正式条目八项主线及R5缺项完整；对应radar-depth.md各节和task.md。"
+        },
+        "method_fidelity": {
+          "pass": true,
+          "evidence": "R1写入/日志接口、R2证据簇计票、R3冻结初轮分数、R4独立分支、R6教师目标→冻结先验→掩码恢复→部署均准确；详见notes逐篇复核源13–15/41–43/70–72/98–100/136–148。"
+        },
+        "result_fidelity": {
+          "pass": true,
+          "evidence": "R1旧帧负指标、R2算术失败、R3采样/token区别、R4成对成功与68→24、R6成本和78不可部署诊断均准确；源19–27/47–56/76–84/104–110/152–174。"
+        },
+        "ablation_reasoning": {
+          "pass": true,
+          "evidence": "R1阈值权衡与历史损失、R2缺失附录、R3保底90题、R4观测替换、R6调度/重采样/缺少语义目标控制均有条件分析；对应源27/60/84/110/168–178。"
+        },
+        "scope_and_relations": {
+          "pass": true,
+          "evidence": "按顺序保留六篇，无外搜；跨篇只提问题联系/待验证评测，不将R5与R6名称写成技术继承或统一排名；对应task.md及各源任务范围。"
+        },
+        "readability": {
+          "pass": true,
+          "evidence": "见notes六篇输出先读复述，尤其R6解释z*何时可得、Pψ产物怎样进入第二阶段、二选一条件调度及一次采样四轮复用；回源136–148一致。后段可独立理解，非模板代替机制。"
+        },
+        "delivery": {
+          "pass": true,
+          "evidence": "radar_depth.md完整且Markdown-only；实际查看mobile截图文字与表格在页内，统一离线无JS检查无溢出/错误/坏锚。"
+        }
+      },
+      "issues": []
+    }
+  ],
+  "notes": "独立基线评审，未读取candidate产物。输出先读复述、逐篇原始材料定位和截图检查详见 baseline-review-notes.md。截图仅覆盖开头视口；全页溢出与锚点由统一离线无JS浏览器检查验证。未运行论文实验，不将材料核查视为复现。"
+}
