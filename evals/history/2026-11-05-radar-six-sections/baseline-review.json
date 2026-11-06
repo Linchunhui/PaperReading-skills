@@ -1,0 +1,208 @@
+{
+  "version": "baseline",
+  "evaluator": "/root/review_candidate",
+  "cases": [
+    {
+      "id": "single",
+      "artifact_hashes": {
+        "single.md": "809d61e9b4c23edcdc00628b86a683f546a390096f2164aff0371f758a8bbb5f",
+        "single.generated.md": "d006ea6d57c10f02b3deb6515d8bc58728e0cff0c926b06c8946f23fc930876d"
+      },
+      "checks": {
+        "coverage": {
+          "pass": true,
+          "evidence": "single.md:7–38 给出任务、方向、关键词、问题及切入点，40–111 恢复推理和训练，113–191 给主结果/分析，193–203 为带条件总结；对应 fixtures/papers.md 的 A §1–§6（4–24 行）。缺失原图、代码、附录、超参数逐项说明，未伪装为真实论文。"
+        },
+        "method_fidelity": {
+          "pass": true,
+          "evidence": "single.md:44–82 的 256 token 首答→c≥0.8 返回／c<0.8 先选固定网格的两框→原图裁切编码→全局/裁片/原问题二次解码后停止，与 A §2（fixture:8）一致。88–111 的同一 50k、IoU 目标、阶段一只更新选择器、阶段二冻结选择器/编码器并训练 LoRA/最终答案交叉熵，与 A §3（fixture:10）一致。示例明确非实验，未补造循环或第一版答案的二轮输入。"
+        },
+        "result_fidelity": {
+          "pass": true,
+          "evidence": "single.md:117–147 完整保留 A1（fixture:11–16）的三配置、子集、token、A100/batch=1/端到端延迟和35%触发率；153–159 保留 A2（17–22）。75% 是视觉 token 降幅，0.8 是准确率百分点差，95→73 ms 为22 ms约23.2%。简单子集下降未遗漏。145–147 的704仅为显式附加固定成本假设下的核查，仍保留源表1024。"
+        },
+        "ablation_reasoning": {
+          "pass": true,
+          "evidence": "single.md:161–191 分别解释随机选框75.4→70.1、k=4仅+0.2百分点且成本增加、去门控75.5/1536/81，以及100k数据与解码器翻倍同时变化的79.0混杂；对应 A §5（fixture:18–22）。没有把全部收益归给选择器、0.8说成最优或小差异称显著，保留校准/扫描/方差缺口。"
+        },
+        "scope_and_relations": {
+          "pass": true,
+          "evidence": "仅解释指定 A，single.md:5/205–214 清楚限定唯一构造材料，没有外部发现。193–203 的英文印刷、无手写、跨多区域推理未测、框监督和二次解码预算来自 A §6（fixture:24），迁移建议未被写成已验证落地。"
+        },
+        "readability": {
+          "pass": true,
+          "evidence": "先读产物后记录复述（candidate-review-notes.md 的 single 段）：能恢复首答置信度先于选框、选框先于裁片编码、两阶段产物与冻结对象；能解释同协议75.4/1024/73对76.2/4096/95的精度/成本取舍。single.md:54–64解释置信度非校准，93–111解释IoU及训练职责，161–203连到负结果和使用边界；复述再经A §2–§6核验。"
+        },
+        "delivery": {
+          "pass": true,
+          "evidence": "按任务交付完整 single.md，来源相对链接可解析到 fixture。共享 visual-checks.json 的最终预览在1280/390无页面溢出/错误；独立 candidate-review-markdown-visuals.json 确认美元修正后 mathml=0，截图可见金额完整。原始生成仅有三处美元被数学渲染误识别，已最小转义并归档 single.generated.md；此展示修正不计为技能质量提升。"
+        }
+      },
+      "issues": [
+        {
+          "severity": "low",
+          "status": "resolved_presentation_only",
+          "location": "single.generated.md:70,78; final single.md:70,78",
+          "description": "Original generation has three literal currency dollar signs that the gfm+tex_math_dollars review renderer treats as math. Root preserved the raw file and escaped only these three signs. Final preview displays the amounts correctly; no substantive content changed. This correction is excluded from skill-quality improvement credit.",
+          "evidence": "presentation-fixes.json; complete diff inspected; candidate-review-markdown-visuals.json reports mathml=0; screenshots/review-candidate-single-currency-corrected.png."
+        }
+      ]
+    },
+    {
+      "id": "series",
+      "artifact_hashes": {
+        "series.md": "c2764681a6794d04664b68d774a8755218c72d268a166f9e2a7a895e37c45acc"
+      },
+      "checks": {
+        "coverage": {
+          "pass": true,
+          "evidence": "series.md:27–89 的 A 与91–136的 B 各自可恢复任务、前作问题、思路、方法、主结果、分析和条件总结；方向/关键词/问题签名在29和93。对应 fixtures/papers.md 的 A §1–§6（4–24）与B §1–§5（26–36）；138–163有基于机制的关系解释，无遗漏指定论文。"
+        },
+        "method_fidelity": {
+          "pass": true,
+          "evidence": "series.md:43–59 精确恢复 A 单次门控/固定网格/一次补读及同50k两阶段更新冻结；107–111恢复 B 首次16区域4096token、64MB页缓存、内容哈希、缓存视觉表示而非旧答案、每个新问题继续解码、改页重编码、无新增训练。对应 fixture A §2–§3（8/10）与B §2（30），未虚构淘汰或哈希算法。"
+        },
+        "result_fidelity": {
+          "pass": true,
+          "evidence": "series.md:63–83 的A1/A2数值及简单子集负结果与fixture:12–22一致；115–130 的B1/B2对应fixture:32–34。52ms明确为每页10问且包含首次编码的平均，首问仍120ms；1/10/20问为120/52/48，双页交替下1页/2页容量为120/52。token和延迟、百分点和比例均未混淆。"
+        },
+        "ablation_reasoning": {
+          "pass": true,
+          "evidence": "series.md:77–83 保留 A 随机选择归因边界、k和门控的代价及数据/模型混杂；124–130 将 B 的次数/容量解释为系统条件分析，说明重复访问与存留页面是复用前提，未宣称任意负载52ms。对应A §5和B §4，未虚构显著性、校准或无限问数精确极限。"
+        },
+        "scope_and_relations": {
+          "pass": true,
+          "evidence": "series.md:13/142 明确同期无继承，115/144–146列出模型、数据和工作负载不同，80.0/52不能与75.4/73直接排高低；150–152说明全页缓存会先支付A想避免的编码成本，组合尚待验证。来源为B §1/§3/§5（fixture:28/32/36）。仅A/B中文Markdown串讲，未扩展检索。"
+        },
+        "readability": {
+          "pass": true,
+          "evidence": "在回源前已逐篇复述，记录见notes series段。尤其后段B（103–136）可独立还原缓存对象何时建立、何时可用及新问题仍须解码；十问均值/首问成本与容量失败对照能解释为何收益出现/消失。随后与B §2–§4核验一致。跨篇组合讨论给出实际编码成本联系，而非仅贴并行路线标签。"
+        },
+        "delivery": {
+          "pass": true,
+          "evidence": "单一完整中文 series.md符合Markdown-only要求，无外部呈现资源。共享visual-checks.json显示1280/390无页面溢出或脚本错误，已查看手机截图；来源章节与材料索引可回查。QA截图/评审文件为审计产物，不是论文伴随交付。"
+        }
+      },
+      "issues": []
+    },
+    {
+      "id": "radar",
+      "artifact_hashes": {
+        "radar.html": "5f67cc0be45128370d4d94c4f556e114d91515cd4f09b9b95a764810df5f8b94",
+        "radar.wechat.md": "adb6498fcd684dfcf753762e01d6a313f68bae8123c372226a12f2154a394433"
+      },
+      "checks": {
+        "coverage": {
+          "pass": true,
+          "evidence": "radar.html:282–503 和radar.wechat.md:9–103覆盖A/B的八项主线；HTML:505–524及Markdown:105–115保留C并分项说明方法、数字、实验/分析、条件与图像均缺失。A/B对应fixture papers.md A §1–§6/B §1–§5；C对应manifest.json的radar原始摘要。方向、关键词、问题签名及条件总结可找到，未用观察项伪装完整精读。"
+        },
+        "method_fidelity": {
+          "pass": true,
+          "evidence": "HTML:303–353/435–454及Markdown:21–37/73–81给出A的对象顺序、阈值、一次补读、两阶段冻结/更新和B的哈希页缓存/新问题解码，与fixture papers.md:8/10/30一致。四张SVG的流程/数据与文字一致，均标教学或重绘；未把A机制移植到只有摘要的C。"
+        },
+        "result_fidelity": {
+          "pass": true,
+          "evidence": "HTML:356–400/457–490及Markdown:39–59/83–97完整保留A1/A2和B1/B2的承重数值、协议、负结果与成本口径，对应fixture papers.md:12–22/32–34。token少75%不等于延迟少75%，52ms不是首问；A准确率图明确截断轴68–77，图上原值正确，B图保留含首次编码的平均每问口径。C无虚构数字。"
+        },
+        "ablation_reasoning": {
+          "pass": true,
+          "evidence": "HTML:397–400/489–490及Markdown:53–59/91–97解释选择质量、额外区域小收益、门控成本、数据模型混杂、缓存次数饱和和容量失效；对应A §5/B §4。未宣称统计显著、普适最优或完整组件独立归因。C处写给定材料不足而非论文没做实验（HTML:519，Markdown:113）。"
+        },
+        "scope_and_relations": {
+          "pass": true,
+          "evidence": "两种格式都只整理指定A/B/C并保留全部条目；HTML:529–536/Markdown:117–121与B §1/§3/§5一致：同期无继承、不同协议不统一排行、全页缓存与按需编码组合未验证。无发表窗口时没有声称周内新论文发现，C的未知机制不强行归类为A的升级。"
+        },
+        "readability": {
+          "pass": true,
+          "evidence": "输出优先复述见notes radar段：A的首答分数→门控→问题选框→裁片→最终解码和B的首次整页表示→缓存命中→新答案均能独立恢复；承重实验可说明A成本精度取舍与B首问无加速/容量失败。C只能复述研究主张而不能复述实验，产物如实明示断点。后段B/C及结尾均实际阅读、回源与抽样视觉检查。"
+        },
+        "delivery": {
+          "pass": true,
+          "evidence": "radar.html和同stem radar.wechat.md均交付并保留同批论文/主线/证据条件。HTML的CSS与4个SVG全部内联，无外部资产；39唯一ID、70内部链接均有目标。独立offline Chromium检查（candidate-review-visuals.json）1280/390无全页溢出/错误/SVG文字越界，桌面及手机目录点击到B有效。手机图表为明确提示的局部横向滚动。四图及后段C/来源截图已查看；共享visual-checks亦覆盖伴随Markdown。"
+        }
+      },
+      "issues": []
+    },
+    {
+      "id": "theory",
+      "artifact_hashes": {
+        "theory.md": "8da5232263fe37f78c2448d9038457fb48926200b05a5fe5cea95f2bd37a5b7b"
+      },
+      "checks": {
+        "coverage": {
+          "pass": true,
+          "evidence": "theory.md:3–15给方向/关键词/问题/前作缺口，19–50讲具体递推和主界，56–68给假设/反例分析，70–76为条件总结；对应fixtures/theory.md T §1–§4（3–10）。原材料明确无实验/附录，产物不强造组件消融或基准数字。"
+        },
+        "method_fidelity": {
+          "pass": true,
+          "evidence": "theory.md:19–50 保留e非负/e0=0、固定0≤rho<1与epsilon≥0、每r次近似后精确重置清零以及周期内几何求和，与fixture T §2（6）一致。初始/重置对象、每步操作和下一周期衔接清楚；未补造模型实现或训练过程。数值教学示例明确由公式推演。"
+        },
+        "result_fidelity": {
+          "pass": true,
+          "evidence": "theory.md:38/48准确给出epsilon(1-rho^j)/(1-rho)、周期r界及epsilon/(1-rho)上界；54的.1/.15/.175与.2计算正确，明确不是实验。50/68/72说明界不保证实际达到、无速度/准确率结果及B(r)≤delta只是充分保证，符合fixture T §2–§4。"
+        },
+        "ablation_reasoning": {
+          "pass": true,
+          "evidence": "theory.md:60–68用rho=1、epsilon=0、r变化作为假设分析，正确区分任意j无关有限界与仍固定r重置时的r*epsilon；rho=0/epsilon=0下非严格增长的细化由源公式推出。没有将反例错误扩展到固定周期无法有界；未提供成本模型因此未推加速，对应fixture T §3–§4（8–10）。"
+        },
+        "scope_and_relations": {
+          "pass": true,
+          "evidence": "仅按指定理论论文T和给定材料解读，theory.md:7/78–82说明无PDF原图/附录/实验和真实身份。与前作关系只写无重置分析增加周期界/r影响，未补造作者/引用。70–76的借鉴始终依赖收缩、扰动和精确清零假设与实际成本测量，符合T §4。"
+        },
+        "readability": {
+          "pass": true,
+          "evidence": "回源前已能复述一个周期：零初始→旧扰动乘rho衰减并叠加epsilon→r步后清零；27–40的逐步展开解释几何和。承重理论判断为rho=1的线性累积与固定重置r*epsilon之别，而非虚构实验；实际复述和源核对记录在notes theory段。符号均释义，界与实际误差区分清楚。"
+        },
+        "delivery": {
+          "pass": true,
+          "evidence": "完整theory.md符合仅中文Markdown要求；Unicode数学表达不依赖外部脚本。共享visual-checks.json在1280/390无页面溢出/错误，已查看手机截图。理论源材料无可展示原图，产物明确说明而未以新图冒充原图。"
+        }
+      },
+      "issues": []
+    },
+    {
+      "id": "radar_depth",
+      "artifact_hashes": {
+        "radar_depth.md": "596a42b0e66e6469f0c607bed51f3e6c0e502dd91d8222161941e196eb8b8ac4"
+      },
+      "checks": {
+        "coverage": {
+          "pass": true,
+          "evidence": "radar_depth.md按R1–R6顺序完整保留六项（18/71/128/181/237/265起），每篇有独立方向/问题/方法与证据/总结；R5（237–263）逐项说明摘要以外缺口。R6后段两阶段/推理/全部分析没有被压成尾部短卡。404–415索引对应fixtures/radar-depth.md所有R章节；R2附录未取得与R5摘要不足区分准确。"
+        },
+        "method_fidelity": {
+          "pass": true,
+          "evidence": "radar_depth.md:30–44匹配R1 §2的ID属性键/达标覆盖/日志与回答记忆；83–100匹配R2 §2的页码跨度IoU>0.5/簇内最大票/字符串规范化；140–154匹配R3 §2的一次计分/24+24分配/固定配额早停；193–207匹配R4 §2的保存状态后分支/各自图像/相同历史/成对AND成功。279–321精确恢复R6 §2–§4的训练专属PCA统计/z*、x-only P冻结、固定噪声、条件二选一退火、A/注意力LoRA/掩码损失和一次z_p四轮复用、已揭示不改。未补造R5结构。"
+        },
+        "result_fidelity": {
+          "pass": true,
+          "evidence": "radar_depth.md:50–65/106–122/160–175/213–231/327–361与fixture各原表逐值核对一致，保留负结果和协议：R1历史42对70，R2加法49对51、四次调用非等时，R3采样43.2→39.8但token3310→3290，R4新图替旧68→24，R6四轮63/42/18对71.5/46/27及八轮70/78/18。R6延迟含先验不含检索，78%教师测试诊断明确不可部署；R5无虚构数字。"
+        },
+        "ablation_reasoning": {
+          "pass": true,
+          "evidence": "R1阈值改善准确率但旧帧比例并非单调（61–65）；R2重叠证据去重的76对67支持目标机制且180道加法不获益（118–122）；R3零分唯一成功枝37.8对0解释均分探索，保留单种子限制（171–175）；R4控制新图像的44百分点差是行为证据，不保证内部推理（227–231）；R6条件来源62/68.5/69/71.5、重采样69.8和教师78的差别与缺零向量/打乱目标对照均在341–361解释。分别对应fixture R1 §3–4/R2 §3–4/R3 §3–4/R4 §3–4/R6 §6–7，无单因过归或虚构显著性。"
+        },
+        "scope_and_relations": {
+          "pass": true,
+          "evidence": "仅给定R1–R6、原顺序、中文Markdown，无外部搜索。369–402依据操作讨论R1/R2证据身份、R1/R4状态与行动、R3/R6预算单位；候选次数不等同揭示轮次、无统一排名/继承关系。R1接入R4明确未来实验，R5未知中间状态不等同R6文本向量。404–415忠实区分五篇可恢复主线与摘要观察项。"
+        },
+        "readability": {
+          "pass": true,
+          "evidence": "逐篇输出优先复述已在notes radar_depth记录，再核对全部178行fixture。承重例包括R2 .9/.85去重对.7+.65计票，R3零分枝仍获3次机会，以及最后R6的教师目标→提示均值→二选一条件日程→四轮固定揭示和teacher-only62对退火71.5的判断。R6:279–321明确什么对象在训练/部署可用、何时冻结/更新；351–361解释诊断边界。R5不能复述机制/实验的实际断点在249–259明确标出。后段R6及跨篇尾部已阅读全文并查看截图。"
+        },
+        "delivery": {
+          "pass": true,
+          "evidence": "交付单个完整radar_depth.md，符合无HTML/伴随稿要求，无外部视觉资产。共享visual-checks.json和独立candidate-review-markdown-visuals.json均显示1280/390无页面溢出；独立查看R6第二阶段、推理、教师诊断及末尾关系段截图，正文/表格可读。原图缺失逐篇说明，未伪称查看原图。"
+        }
+      },
+      "issues": []
+    }
+  ],
+  "notes": "Independent candidate-only evaluation; did not read baseline artifact contents or skill-version instruction contents. All five outputs were read before their respective fixtures, and actual per-paper retellings were recorded in candidate-review-notes.md before source checks. All seven keys are assessed for every case. Browser evidence: ../visual-checks.json plus candidate-review-visuals.json and candidate-review-markdown-visuals.json, with selected body/tail screenshots inspected. HTML is inline CSS/SVG with no referenced external assets; both radar deliverables are hashed. Hashes are real SHA256, relative to each case directory; single.generated.md additionally preserves the reviewed original before the minimal currency escaping. Scope limits: synthetic fixtures only, no real-paper replication, no unseen original figures/code/appendices or external results verified, Chromium at 1280/390 tested rather than every browser/accessibility combination. No unresolved substantive blockers; the resolved currency-rendering issue is documented and not credited as skill improvement.",
+  "carry_forward": {
+    "source_run": "/workspace/reviews/radar-2026-W44-20261105/regression",
+    "source_version": "candidate",
+    "reason": "Exact package, case prompts, raw fixtures and rubric hashes match. Previous independent generation/review reused unchanged; the new baseline task files only differ in output paths.",
+    "source_review_sha256": "01b5dfdd25e6359d75fb517be858d7dc76f1a0e0f82987a304893ac17c180492"
+  }
+}

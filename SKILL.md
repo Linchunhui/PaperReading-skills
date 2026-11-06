@@ -28,11 +28,13 @@ Then read the selected references completely:
 
 - **Single:** [references/single-paper.md](references/single-paper.md), the unified structured and teaching workflow.
 - **Series:** [references/series.md](references/series.md) and [references/per-paper-deep-read.md](references/per-paper-deep-read.md).
-- **Radar:** [references/radar.md](references/radar.md), [references/directions.md](references/directions.md), and [references/per-paper-deep-read.md](references/per-paper-deep-read.md).
+- **Radar:** [references/radar.md](references/radar.md), [references/directions.md](references/directions.md), [references/per-paper-deep-read.md](references/per-paper-deep-read.md), and [references/radar-writing.md](references/radar-writing.md). Follow the per-paper preparation, writing, checking and assembly sequence before producing the report overview.
 - **HTML creation/conversion:** [references/wechat-markdown.md](references/wechat-markdown.md), unless the user requests HTML only.
 - **Visuals:** [references/svg-patterns.md](references/svg-patterns.md) for SVGs; [references/layout-patterns.md](references/layout-patterns.md) for multi-paper navigation and body layout.
 
-Single expands mechanisms, examples, formulas and experimental reasoning. Series focuses on relationships around a shared question. Radar gives compact but complete explanations. Separate approach from concrete method and main results from ablation conclusions. Every paper has its own summary; navigation cards and the report-level recap do not replace it.
+Single expands mechanisms, examples, formulas and experimental reasoning. Series focuses on relationships around a shared question. Radar prepares independently understandable explanations for readers with machine-learning foundations who do not yet know each paper's mechanism. Develop the connections needed to recover that mechanism, then remove repetition. Separate approach from concrete method and main results from ablation conclusions. Every paper has its own summary; navigation cards and the report-level recap do not replace it.
+
+For radar, organize each paper around five parts: **背景介绍 → 问题及解决思路 → 方法 → 实验及结果 → 总结**. This is a reading order, not an exact-heading contract: natural, paper-specific titles are welcome when each part remains easy to find. Connect the previous method's bottleneck to the proposed approach in the same part, while keeping the motivation distinct from the concrete operations in 方法. Keep identity, direction and sources above the body. Within 实验及结果, distinguish main comparisons from ablation/analysis and explain their conditions; use a fitting title such as 理论结果与分析 for non-experimental papers. Develop additional explanation primarily in 方法 and the key evidence; keep the introduction, problem/approach and summary concise. Single and series retain their own organization. Explicit user formats take priority; source-poor entries retain their visible gaps instead of invented content.
 
 Do not set default total/per-paper word, screen or method-step quotas. Let complexity and the user's requested depth determine length. Finish the understanding chain, then remove repetition and peripheral detail. Never divide a total budget across papers, shorten later papers, or omit selected papers to finish a batch. Explicit requests for short versions or abstract-only output take priority; label their scope.
 
@@ -58,7 +60,7 @@ Read [references/core-figures.md](references/core-figures.md) for the per-paper 
 9. Unless the user requests HTML only, write `{HTML stem}.wechat.md` from the same evidence. Preserve per-paper storyline coverage while removing repetition, navigation and peripheral detail. Keep necessary conditions and exact numbers.
 10. Deliver the requested formats with source coverage and material limitations. Follow the environment's durable-file storage rules; do not deliver intermediate manifests unless requested.
 
-For radar, compute the report key before discovery. Reuse an existing same-name report only if the current scope and content requirements are satisfied and no revision is requested. Otherwise update that report after filling evidence/content gaps. Respect explicit candidate sources and direction boundaries; supplied candidates do not authorize adding unrelated discoveries.
+For radar, compute the report key before discovery. Keep a per-paper work record and save each checked body before assembling the report; follow radar-writing.md for evidence gaps, explanation gaps and retelling checks. Reuse an existing same-name report only if the current scope and content requirements are satisfied and no revision is requested. Otherwise update that report after filling evidence/content gaps. For requested before/after evaluation, preserve the original and write clearly labeled review copies in separate directories. Respect explicit candidate sources and direction boundaries; supplied candidates do not authorize adding unrelated discoveries.
 
 ## Preserve naming and portability
 
@@ -110,7 +112,7 @@ python3 scripts/fetch_content.py --start YYYY-MM-DD --end YYYY-MM-DD -o /tmp/pap
 
 Treat keyword matches as recall only. Apply semantic direction boundaries, deduplicate, and retain keep/drop reasons, primary/secondary directions, reading reasons and evidence levels. Record every requested source as successful, unconfigured or failed. Follow the user's direction set; “Diffusion” means Diffusion LLM unless visual diffusion is explicitly requested. Explicit HF-only candidate sets remain bounded by the dated HF results.
 
-Create or change an automation only when the user requests recurring work. Use the current radar prompt and the user's timezone; editing this skill alone does not modify existing schedules.
+Create or change an automation only when the user requests recurring work. Use the current radar prompt and the user's timezone; editing this skill alone does not modify existing schedules. On an authorized schedule update, preserve each task's scope and timing, bind its actual execution settings to the requested model, and configure it to load the latest skill from the approved source at each run. A model name in prose is not an execution-model setting. Read back saved settings before claiming schedules changed; see the scheduled-run section in references/radar.md.
 
 ## HTML-to-WeChat conversion
 
@@ -133,6 +135,7 @@ Whenever this package is revised, read [references/skill-iteration.md](reference
 - All supplied and selected papers are accounted for; evidence-poor watch items do not count as completed full-paper reads.
 - Series relations have evidence; shared direction alone is not direct inheritance. Radar reports obey candidate/time/direction boundaries.
 - Content depth matches the mode without fixed quotas or later-paper shrinkage; all batches are assembled.
+- Radar assembly preserves the checked per-paper bodies and selected-paper set, following the five-part reading order with natural headings. The problem connects to its proposed solution; method and evidence depth remains in their own parts, and main results/analysis remain distinguishable. Check these content roles rather than exact heading strings. Retelling and evidence checks have concrete outcomes; unresolved source gaps remain visible and do not become invented explanations.
 - Every formal paper has an original core figure with source and reading guidance, or an evidence-backed visible exception; figure coverage is checked per paper, not by report totals.
 - HTML naming, embedded images, offline formulas, source links, navigation and mobile layout pass. File validation does not certify semantic completeness.
 - Requested companion Markdown preserves the same papers and core evidence, with mobile-friendly paragraphs, a final reference list and portable assets.

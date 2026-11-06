@@ -1,0 +1,226 @@
+{
+  "date": "2026-11-05",
+  "baseline_git_head": "90f87036d203f4111f9126a27243c378108404dc",
+  "work_directory": "/workspace/reviews/radar-2026-W44-20261105",
+  "original_w44_sha256": "c8ae798ccc11e920c253514e7d9ee984f66d65d89f09ff219eb4f34dc3d26726",
+  "package_hash_definition": "SHA-256 of sorted compact JSON mapping relative paths to SHA-256; excludes .git, __pycache__, evals, as run_regression.package_hash.",
+  "packages": {
+    "baseline": "afea270c9c7c1b2d6cc11f25b211e4c785854a6f7b9a8380742b1c4b16daa2cc",
+    "candidate": "5d1aca3e9a37ec21fd90b5239214ab5f580c97124f0d4b118b986e9d97fe13b0"
+  },
+  "sources": {
+    "theory.md": "975fd1cda7604134071d52523aa4d6421b6819d0dfe4f5909170782246ebe821",
+    "papers.md": "b0af9157930f0cf18bafef03925281eb6a769cb1429b3e0e6698caf1e5593bf5",
+    "radar-depth.md": "f1bd1da5a19d914322ec1c36cc684e5a1d329ce233a5863beea95ab1aea5b6c6"
+  },
+  "rubric_sha256": "859397141d2d38c89efeed313e8306a69d282742b269bbec7b02de0ba2c9bf2f",
+  "independence": "Ten generation tasks in independent fresh contexts; no rubric or sibling output. Two separate evaluators did output-first retellings then source checks. Separate W44 reviewer did not author the articles.",
+  "execution_notes": {
+    "baseline_generation": "Four original baseline tasks began from the frozen baseline-skill before prepare; package hashes equal regression/packages/baseline. Original fixture bytes match. Outputs copied unchanged after generation. New radar_depth runs from prepare task.md. All generation workers used fresh contexts, were not shown rubric or sibling output.",
+    "W44_comparison": "Existing historical report versus same-upstream-material rewrite, not a fully controlled A/B generation. Original PDF access blocked (CONNECT 403); no new discovery performed."
+  },
+  "presentation_fixes": [
+    {
+      "artifact": "candidate/single/single.md",
+      "raw_artifact": "candidate/single/single.generated.md",
+      "change": "Escape three literal dollar currency signs for GFM plus math rendering; no mechanism or numerical changes.",
+      "reason": "Independent reviewer observed currency symbols being parsed as math."
+    }
+  ],
+  "reviews": {
+    "baseline": {
+      "sha256": "f870d1f1178c45be35c2c07d35a50d0d40fe6ba1a47feaf1221a84dcad116fa5",
+      "evaluator": "/root/review_baseline",
+      "cases": [
+        {
+          "id": "single",
+          "artifact_hashes": {
+            "single.md": "204b014a5b8018c37bdefb5a0c226d8f26f236652c72a8c611742944063302e5"
+          },
+          "checks": {
+            "coverage": true,
+            "method_fidelity": true,
+            "result_fidelity": true,
+            "ablation_reasoning": true,
+            "scope_and_relations": true,
+            "readability": true,
+            "delivery": true
+          }
+        },
+        {
+          "id": "series",
+          "artifact_hashes": {
+            "series.md": "521f09d64f5b438ec3e4fb9edb27f136a9cc2df3469663ebef5eb82fbfee87e9"
+          },
+          "checks": {
+            "coverage": true,
+            "method_fidelity": true,
+            "result_fidelity": true,
+            "ablation_reasoning": true,
+            "scope_and_relations": true,
+            "readability": true,
+            "delivery": true
+          }
+        },
+        {
+          "id": "radar",
+          "artifact_hashes": {
+            "radar.html": "6ffba2496c8851cd94cbdbc015e260c31e7428b070ae8256a9093d21de53517a",
+            "radar.wechat.md": "407e2dc187e656ed7b3f13274e252d49b8cf0c038e110dd6157038b2f9499a6a",
+            "radar.wechat-assets/a-route.png": "3643e474e750016f297fb014972b3cb358faa64bdf2467d3aebac7badc818b3b",
+            "radar.wechat-assets/b-cache.png": "7afd4220e3a19653a6c3423355294e50776a37d882d4763c5e71027f70634ae5"
+          },
+          "checks": {
+            "coverage": true,
+            "method_fidelity": true,
+            "result_fidelity": true,
+            "ablation_reasoning": true,
+            "scope_and_relations": true,
+            "readability": true,
+            "delivery": true
+          }
+        },
+        {
+          "id": "theory",
+          "artifact_hashes": {
+            "theory.md": "63ee2ae9e4fe2ca0e743e8d1cbec957846c24ef62d14d0f3bf3706c28ac2cfc0"
+          },
+          "checks": {
+            "coverage": true,
+            "method_fidelity": true,
+            "result_fidelity": true,
+            "ablation_reasoning": true,
+            "scope_and_relations": true,
+            "readability": true,
+            "delivery": true
+          }
+        },
+        {
+          "id": "radar_depth",
+          "artifact_hashes": {
+            "radar_depth.md": "c2632d042fa22b7e84bd0ea3b683d5ec1b5aaabf23d9025c0a66153f1eae1409"
+          },
+          "checks": {
+            "coverage": true,
+            "method_fidelity": true,
+            "result_fidelity": true,
+            "ablation_reasoning": true,
+            "scope_and_relations": true,
+            "readability": true,
+            "delivery": true
+          }
+        }
+      ]
+    },
+    "candidate": {
+      "sha256": "01b5dfdd25e6359d75fb517be858d7dc76f1a0e0f82987a304893ac17c180492",
+      "evaluator": "/root/review_candidate",
+      "cases": [
+        {
+          "id": "single",
+          "artifact_hashes": {
+            "single.md": "809d61e9b4c23edcdc00628b86a683f546a390096f2164aff0371f758a8bbb5f",
+            "single.generated.md": "d006ea6d57c10f02b3deb6515d8bc58728e0cff0c926b06c8946f23fc930876d"
+          },
+          "checks": {
+            "coverage": true,
+            "method_fidelity": true,
+            "result_fidelity": true,
+            "ablation_reasoning": true,
+            "scope_and_relations": true,
+            "readability": true,
+            "delivery": true
+          }
+        },
+        {
+          "id": "series",
+          "artifact_hashes": {
+            "series.md": "c2764681a6794d04664b68d774a8755218c72d268a166f9e2a7a895e37c45acc"
+          },
+          "checks": {
+            "coverage": true,
+            "method_fidelity": true,
+            "result_fidelity": true,
+            "ablation_reasoning": true,
+            "scope_and_relations": true,
+            "readability": true,
+            "delivery": true
+          }
+        },
+        {
+          "id": "radar",
+          "artifact_hashes": {
+            "radar.html": "5f67cc0be45128370d4d94c4f556e114d91515cd4f09b9b95a764810df5f8b94",
+            "radar.wechat.md": "adb6498fcd684dfcf753762e01d6a313f68bae8123c372226a12f2154a394433"
+          },
+          "checks": {
+            "coverage": true,
+            "method_fidelity": true,
+            "result_fidelity": true,
+            "ablation_reasoning": true,
+            "scope_and_relations": true,
+            "readability": true,
+            "delivery": true
+          }
+        },
+        {
+          "id": "theory",
+          "artifact_hashes": {
+            "theory.md": "8da5232263fe37f78c2448d9038457fb48926200b05a5fe5cea95f2bd37a5b7b"
+          },
+          "checks": {
+            "coverage": true,
+            "method_fidelity": true,
+            "result_fidelity": true,
+            "ablation_reasoning": true,
+            "scope_and_relations": true,
+            "readability": true,
+            "delivery": true
+          }
+        },
+        {
+          "id": "radar_depth",
+          "artifact_hashes": {
+            "radar_depth.md": "596a42b0e66e6469f0c607bed51f3e6c0e502dd91d8222161941e196eb8b8ac4"
+          },
+          "checks": {
+            "coverage": true,
+            "method_fidelity": true,
+            "result_fidelity": true,
+            "ablation_reasoning": true,
+            "scope_and_relations": true,
+            "readability": true,
+            "delivery": true
+          }
+        }
+      ]
+    }
+  },
+  "w44_review_sha256": "ffc4bdec342b26e5c06180e46a0c80e24ce4f002355fff506420e84166b89838",
+  "w44_summary": {
+    "papers_reviewed": 13,
+    "preserved_figures_visually_reviewed": 13,
+    "missing_final_files": [],
+    "blockers": 0,
+    "high_severity_issues": 0,
+    "medium_severity_issues": 0,
+    "low_severity_advisories": 0,
+    "ready_as_upstream_material_rewrite": 13,
+    "assessment": "All 13 bodies retain visible source limitations, preserve the material numerical conditions and negative results in their upstream records, and add substantive mechanism explanations. Three low-severity wording ambiguities were corrected by the parent agent and independently rechecked. No invented paper configuration, paper equation, new empirical result, or claim of renewed full-text verification was identified.",
+    "quality_note": "The expansion is primarily mechanistic rather than repetitive padding. Some source-scope and non-guarantee statements recur in FSPO, RynnUnify, and LOWN, but they attach to distinct implementation or inference boundaries and do not obstruct readiness.",
+    "resolved_low_severity_advisories": 3,
+    "unresolved_issues": 0
+  },
+  "delivery_sha256": {
+    "comparison.html": "5df160579f58a195e171aef67820fc5b7aa0cb5fb675fa33a762092d393ff89c",
+    "before/2026-W44-radar.html": "c8ae798ccc11e920c253514e7d9ee984f66d65d89f09ff219eb4f34dc3d26726",
+    "after/2026-W44-radar.html": "cf1b525a4960be6ceaacfaa6cf11d5c44dfcf55d0a087a364e41ef475011cce8",
+    "after/2026-W44-radar.wechat.md": "8bb166497d3a95d6320cb868c378280444643bb238a0eefbbd0470f8298588bb",
+    "comparison-qa.json": "282f6cb8119be4611eb4852e73b03bde4411c9aa6e6f8ffda9b5780b0ef65228"
+  },
+  "limits": [
+    "W44 is an upstream-report rewrite, not fresh full-text verification or strict skill-only A/B.",
+    "No live discovery, scheduler, new real-PDF extraction, monthly end-to-end generation or publishing tested.",
+    "quick_validate was unavailable; no writable personal skill installation. Repository-only changes; no environment publication."
+  ]
+}

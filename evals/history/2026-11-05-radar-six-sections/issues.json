@@ -1,0 +1,32 @@
+[
+  {
+    "id": "RADAR-SIX-01",
+    "trigger": "用户反馈扩写稿改变了原有统一结构",
+    "output_excerpt": "旧扩写稿以“经历相同，回答接口却不相同”“归一化要避免篇幅多变成更重要”等自由标题组织正文。",
+    "source_location": "W44 previous-articles/2610.34283.md；上一轮技能允许不固定标题。",
+    "root_cause_hypothesis": "只规定八项内容职责，未约束雷达的可见栏目；写作与布局模板仍鼓励自由叙事标题。",
+    "revision": "雷达固定背景、问题、思路、方法、结果、总结；同步主入口、写作规范、HTML骨架与公众号层级；single/series 保留自身组织。",
+    "retest": "13 篇、78 个栏目与职责独立检查通过；三个新雷达类合成任务检查六栏及内容。",
+    "recurrence": "本轮未复发；标题检查不替代内容理解。"
+  },
+  {
+    "id": "RADAR-SIX-02",
+    "trigger": "自由章节把推理与实验结果混合",
+    "output_excerpt": "Soft-MTP 旧标题“推理仍然要验证草稿，主结果也要分两条看”。",
+    "source_location": "W44 previous-articles/2610.38331.md",
+    "root_cause_hypothesis": "局部叙事连贯但跨栏目职责不清，增加定位负担。",
+    "revision": "推理验证归方法，质量/速度/成本归结果；背景、问题、思路拆清，总结简明收束。",
+    "retest": "独立逐篇复述与旧稿/上游对照通过；13 篇作者正文和原图在 HTML 中完整保留。",
+    "recurrence": "本轮未发现职责混淆或承重事实遗漏。"
+  },
+  {
+    "id": "RADAR-SIX-03",
+    "trigger": "合成 radar B 教学图只画串行箭头",
+    "output_excerpt": "图内写了命中跳过编码，但连线未明确显示缓存命中分支。",
+    "source_location": "candidate/radar/radar.before-figure-fix.html 的 B 方法 SVG；fixtures/papers.md B §2",
+    "root_cause_hypothesis": "图内标签表达正确条件，连线却容易让单看图的读者恢复为单一路径。",
+    "revision": "保留原始图稿，仅修命中/未命中分支及汇入当前问题解码的连线；正文与伴随稿不变，技能规则不变。",
+    "retest": "原生成者局部修图，独立评审复看图与最终哈希，桌面/手机显示通过。",
+    "recurrence": "最终候选已修正；不将产物展示修正计为技能生成增益。"
+  }
+]

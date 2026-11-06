@@ -1,0 +1,103 @@
+{
+  "passed": true,
+  "errors": [],
+  "improved_checks": [],
+  "interpretation": "No observed regression in this suite; no measured gain",
+  "limits": "Verifies review records and artifacts, not semantic truth or general performance.",
+  "metrics": {
+    "baseline": {
+      "single": {
+        "coverage": 1,
+        "method_fidelity": 1,
+        "result_fidelity": 1,
+        "ablation_reasoning": 1,
+        "scope_and_relations": 1,
+        "readability": 1,
+        "delivery": 1
+      },
+      "series": {
+        "coverage": 1,
+        "method_fidelity": 1,
+        "result_fidelity": 1,
+        "ablation_reasoning": 1,
+        "scope_and_relations": 1,
+        "readability": 1,
+        "delivery": 1
+      },
+      "radar": {
+        "coverage": 1,
+        "method_fidelity": 1,
+        "result_fidelity": 1,
+        "ablation_reasoning": 1,
+        "scope_and_relations": 1,
+        "readability": 1,
+        "delivery": 1
+      },
+      "theory": {
+        "coverage": 1,
+        "method_fidelity": 1,
+        "result_fidelity": 1,
+        "ablation_reasoning": 1,
+        "scope_and_relations": 1,
+        "readability": 1,
+        "delivery": 1
+      },
+      "radar_depth": {
+        "coverage": 1,
+        "method_fidelity": 1,
+        "result_fidelity": 1,
+        "ablation_reasoning": 1,
+        "scope_and_relations": 1,
+        "readability": 1,
+        "delivery": 1
+      }
+    },
+    "candidate": {
+      "single": {
+        "coverage": 1,
+        "method_fidelity": 1,
+        "result_fidelity": 1,
+        "ablation_reasoning": 1,
+        "scope_and_relations": 1,
+        "readability": 1,
+        "delivery": 1
+      },
+      "series": {
+        "coverage": 1,
+        "method_fidelity": 1,
+        "result_fidelity": 1,
+        "ablation_reasoning": 1,
+        "scope_and_relations": 1,
+        "readability": 1,
+        "delivery": 1
+      },
+      "radar": {
+        "coverage": 1,
+        "method_fidelity": 1,
+        "result_fidelity": 1,
+        "ablation_reasoning": 1,
+        "scope_and_relations": 1,
+        "readability": 1,
+        "delivery": 1
+      },
+      "theory": {
+        "coverage": 1,
+        "method_fidelity": 1,
+        "result_fidelity": 1,
+        "ablation_reasoning": 1,
+        "scope_and_relations": 1,
+        "readability": 1,
+        "delivery": 1
+      },
+      "radar_depth": {
+        "coverage": 1,
+        "method_fidelity": 1,
+        "result_fidelity": 1,
+        "ablation_reasoning": 1,
+        "scope_and_relations": 1,
+        "readability": 1,
+        "delivery": 1
+      }
+    }
+  }
+}

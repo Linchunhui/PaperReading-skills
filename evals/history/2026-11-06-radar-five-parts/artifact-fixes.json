@@ -1,0 +1,14 @@
+[
+  {
+    "issue": "B-core-figure-source",
+    "artifact": "candidate/radar/radar.html",
+    "original_snapshot": "original-outputs/candidate/radar/radar.html",
+    "original_sha256": "3b1ce4061c5ead6e78c8e7c713288754afcaacfbc8f477c8e7de80a083424559",
+    "finding": "B core-figure exception mistakenly cites papers.md A §6 and repeats A in its text; independent reviewer found after generation.",
+    "status": "resolved; independently rechecked with final hash and screenshots",
+    "skill_changed_for_fix": false,
+    "final_sha256": "feb7789c862d3b4cc477ce09011266b71f659bd83b5712365fd0692a0375bc3c",
+    "change": "B source attribute/text now refer to provided B sections and accurately state no image/PDF in supplied material.",
+    "other_artifacts_modified": false
+  }
+]

@@ -1,0 +1,26 @@
+[
+  {
+    "id": "RADAR-FIVE-01",
+    "trigger": "用户认为六个固定标题生硬，要求大致改为五部分。",
+    "previous_rule": "背景 → 问题 → 思路 → 方法 → 结果 → 总结，标题和顺序逐字固定。",
+    "root_cause": "把可检索的内容职责过度约束为固定标签，将问题与解题动机割裂。",
+    "revision": "合讲问题及解决思路，沿五部分阅读顺序自然措辞；方法与关键证据仍重点展开。",
+    "retest": "fresh gpt-6.1-sol generations for five paired cases; candidate theory uses 理论结果与分析, R4 uses 评测与分析, R6 retains both training stages and inference; independent source review passed.",
+    "recurrence": "候选中未发现六栏硬约束残留或关键内容遗漏。"
+  },
+  {
+    "issue": "B-core-figure-source",
+    "artifact": "candidate/radar/radar.html",
+    "original_snapshot": "original-outputs/candidate/radar/radar.html",
+    "original_sha256": "3b1ce4061c5ead6e78c8e7c713288754afcaacfbc8f477c8e7de80a083424559",
+    "finding": "B core-figure exception mistakenly cites papers.md A §6 and repeats A in its text; independent reviewer found after generation.",
+    "status": "resolved; independently rechecked with final hash and screenshots",
+    "skill_changed_for_fix": false,
+    "final_sha256": "feb7789c862d3b4cc477ce09011266b71f659bd83b5712365fd0692a0375bc3c",
+    "change": "B source attribute/text now refer to provided B sections and accurately state no image/PDF in supplied material.",
+    "other_artifacts_modified": false,
+    "id": "RADAR-FIVE-02",
+    "root_cause": "生成稿 B 缺图例外复制了 A 的出处，局部出处标注与相邻正确正文不一致。",
+    "retest": "仅修该声明；保留修前HTML和差异，生成者纠正后独立复核，未把辅助修正计为纯技能增益。"
+  }
+]

@@ -1,0 +1,9 @@
+[
+  {
+    "artifact": "candidate/radar/radar.html",
+    "original": "candidate/radar/radar.before-figure-fix.html",
+    "change": "Only B method teaching SVG, accessible text and caption; explicit hit/miss branches.",
+    "outside_figure_identical": true,
+    "final_sha256": "920adec5bdafef3a7bbf266db5524313526f7c3701c315d09208d1cd8dc51bfc"
+  }
+]

@@ -1,0 +1,6 @@
+{
+  "branch": "radar-w44-download-review",
+  "commit": "9d3fcd6a5b62b2c461225a92579d52d04d4a5a8d",
+  "package_scope": "Root PaperStudio SKILL.md, README, LICENSE, references, scripts, assets and agents; fixtures/cases/rubric retained. Historical HTML and nested independent skills excluded from regression packages.",
+  "requested_model": "gpt-6.1-sol"
+}

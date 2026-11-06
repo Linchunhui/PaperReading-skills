@@ -1,7 +1,7 @@
 interface:
   display_name: "PaperStudio"
   short_description: "融合教学带读的单篇精读、同方向串讲与完整主线的研究雷达发现"
-  default_prompt: "使用 $paper-studio 解读论文、串讲同方向工作或发现研究进展，讲清背景、问题、思路、方法、结果、消融与带条件总结，按需要展开为 HTML 和公众号 Markdown。"
+  default_prompt: "使用 $paper-studio 解读论文、串讲同方向工作或发现研究进展，讲清机制与证据。雷达默认按背景介绍、问题及解决思路、方法、实验及结果、总结自然展开，重点讲透方法和关键结果，保留消融与适用边界；按需要生成 HTML 和公众号 Markdown。"
   icon_small: "assets/icon.svg"
   icon_large: "assets/icon.svg"
 policy:

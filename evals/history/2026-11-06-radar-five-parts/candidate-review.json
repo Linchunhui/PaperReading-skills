@@ -1,0 +1,198 @@
+{
+  "version": "candidate",
+  "evaluator": "five_review_new",
+  "cases": [
+    {
+      "id": "single",
+      "artifact_hashes": {
+        "single.md": "d17eb1ef368a813a8d01f8ffdb07c2226ffb2b37f49e3b925ffff8c45c25336c"
+      },
+      "checks": {
+        "coverage": {
+          "pass": true,
+          "evidence": "单篇§§一–七恢复八项主线与五个自然部分；方向、问题签名及条件总结齐全；对照 papers.md A §1–§6。 详细审阅定位与限制：candidate-review-notes.md。"
+        },
+        "method_fidelity": {
+          "pass": true,
+          "evidence": "§§三–四明确256 token初答、c门控、原图top2裁片、一次重答及选择器→同50k LoRA训练衔接；对应A §2–§3。 详细审阅定位与限制：candidate-review-notes.md。"
+        },
+        "result_fidelity": {
+          "pass": true,
+          "evidence": "§五完整保留A1及简单子集-.5百分点、DenseRead精度差.8百分点与token/延迟区别；对应A §4。 详细审阅定位与限制：candidate-review-notes.md。"
+        },
+        "ablation_reasoning": {
+          "pass": true,
+          "evidence": "§六区分随机框、k=4饱和、无门控成本及79.0双因素混杂；对应A §5。 详细审阅定位与限制：candidate-review-notes.md。"
+        },
+        "scope_and_relations": {
+          "pass": true,
+          "evidence": "仅A、中文Markdown，无外部发现；教学发票例显式非实验；对应single/task.md及A §6。 详细审阅定位与限制：candidate-review-notes.md。"
+        },
+        "readability": {
+          "pass": true,
+          "evidence": "已在notes记录源前复述：初答门控→选框→局部/全局重答，随机框同token对照支持选择质量；见notes A/B outputs。 详细审阅定位与限制：candidate-review-notes.md。"
+        },
+        "delivery": {
+          "pass": true,
+          "evidence": "仅交付single.md，实际桌面截图可读；匹配hash的visual-checks报告离线及无溢出/错误，视觉限制见notes。 详细审阅定位与限制：candidate-review-notes.md。"
+        }
+      },
+      "issues": []
+    },
+    {
+      "id": "series",
+      "artifact_hashes": {
+        "series.md": "db20e4516311dfd59df1df2e2440b8529933cd2dd80ba4616ca34ae618bde821"
+      },
+      "checks": {
+        "coverage": {
+          "pass": true,
+          "evidence": "A/B各自有背景、缺口、机制、主结果与分析、总结；见series.md两篇主体，对照A §1–§6/B §1–§5。 详细审阅定位与限制：candidate-review-notes.md。"
+        },
+        "method_fidelity": {
+          "pass": true,
+          "evidence": "A推理/两阶段训练完整；B方法明确缓存视觉状态、内容变则重编码、无新增训练；对应A §2–§3/B §2。 详细审阅定位与限制：candidate-review-notes.md。"
+        },
+        "result_fidelity": {
+          "pass": true,
+          "evidence": "A主表及B十问平均52ms、首问120ms保持协议；不混同比较80.0与75.4；对应A §4/B §3。 详细审阅定位与限制：candidate-review-notes.md。"
+        },
+        "ablation_reasoning": {
+          "pass": true,
+          "evidence": "A单因素/混杂区分；B问数饱和和容量失效有解释；对应A §5/B §4。 详细审阅定位与限制：candidate-review-notes.md。"
+        },
+        "scope_and_relations": {
+          "pass": true,
+          "evidence": "共同问题及跨篇综合明确同期无继承、组合未经验证、全页缓存可能抵消按需收益；对应B §1/§5和series/task.md。 详细审阅定位与限制：candidate-review-notes.md。"
+        },
+        "readability": {
+          "pass": true,
+          "evidence": "源前能复述B保存4096视觉token而非旧答案；十问均摊与首问不变支持复用；详见notes A/B outputs。 详细审阅定位与限制：candidate-review-notes.md。"
+        },
+        "delivery": {
+          "pass": true,
+          "evidence": "完整Markdown无额外格式；已视看手机截图并核对离线无溢出元数据，限制见notes。 详细审阅定位与限制：candidate-review-notes.md。"
+        }
+      },
+      "issues": []
+    },
+    {
+      "id": "radar",
+      "artifact_hashes": {
+        "radar.html": "feb7789c862d3b4cc477ce09011266b71f659bd83b5712365fd0692a0375bc3c",
+        "radar.wechat.md": "5f42a86c5aaa49a8f9953de4d9d283a7ccc0a22b9f0a19941e6ef5ce7cc57cae"
+      },
+      "checks": {
+        "coverage": {
+          "pass": true,
+          "evidence": "HTML及伴随稿均保留A/B/C五自然部分；C按项说明未知而非伪装精读；对应radar/task.md摘要与papers.md A/B。 详细审阅定位与限制：candidate-review-notes.md。"
+        },
+        "method_fidelity": {
+          "pass": true,
+          "evidence": "A门控/两阶段手交接及B缓存状态可恢复；C不借A补机制；对应A §2–§3/B §2及任务摘要。 详细审阅定位与限制：candidate-review-notes.md。"
+        },
+        "result_fidelity": {
+          "pass": true,
+          "evidence": "HTML/伴随稿保留A正负结果与B首问/均摊条件；两教学SVG忠实于A1/A2及B2数值；对应A §4–§5/B §3–§4。 详细审阅定位与限制：candidate-review-notes.md。"
+        },
+        "ablation_reasoning": {
+          "pass": true,
+          "evidence": "A随机框、饱和、门控及混杂分析齐；B容量/负载条件及C缺证据齐；对应A §5/B §4和任务摘要。 详细审阅定位与限制：candidate-review-notes.md。"
+        },
+        "scope_and_relations": {
+          "pass": true,
+          "evidence": "仅OCR/文档问答指定三条；同期、不可排名和未验证组合清楚；对应radar/task.md/B §1/§5。 详细审阅定位与限制：candidate-review-notes.md。"
+        },
+        "readability": {
+          "pass": true,
+          "evidence": "HTML与伴随稿均能源前复述A条件补读/B跨题复用；C具体方法不可恢复并明说；详见notes A/B outputs。 详细审阅定位与限制：candidate-review-notes.md。"
+        },
+        "delivery": {
+          "pass": true,
+          "evidence": "HTML+同stem伴随稿完整；离线与导航锚点检查通过、桌面/手机初始截图可读；原始B缺图出处复制A的问题及辅助修复见notes与artifact-fixes.json。 详细审阅定位与限制：candidate-review-notes.md。"
+        }
+      },
+      "issues": [
+        {
+          "severity": "minor",
+          "description": "原始radar.html B方法缺图例外框错误引用A §6。生成后经独立评审指出，由生成者辅助修正；不能计为纯技能增益。详见candidate-review-notes.md与../artifact-fixes.json。"
+        }
+      ]
+    },
+    {
+      "id": "radar_depth",
+      "artifact_hashes": {
+        "radar_depth.md": "ac7d0bfd7496b612bc55c41f7e55f4cd8b9a6a6e2ce600e63029d7e3902efc39"
+      },
+      "checks": {
+        "coverage": {
+          "pass": true,
+          "evidence": "按R1–R6保留全部条目，正式五篇八主线及五自然部分齐，R5逐项注明缺失；对应task与R1–R6原文。 详细审阅定位与限制：candidate-review-notes.md。"
+        },
+        "method_fidelity": {
+          "pass": true,
+          "evidence": "逐篇检查状态更新时间、证据聚合、固定配额、分支隔离与R6全部训练/推理时序；对应R1–R4 §2及R6 §2–§4，详见notes。 详细审阅定位与限制：candidate-review-notes.md。"
+        },
+        "result_fidelity": {
+          "pass": true,
+          "evidence": "各表数值和协议匹配；R3次数/token不同、R4步数非时延、R6教师78非部署结果；对应R1–R4 §3及R6 §5–§6。 详细审阅定位与限制：candidate-review-notes.md。"
+        },
+        "ablation_reasoning": {
+          "pass": true,
+          "evidence": "历史损失、数值相加失败、零分分支探索、旧图替换及R6缺控制/单次训练均有条件判断；对应R1–R4 §3–§4/R6 §6–§7。 详细审阅定位与限制：candidate-review-notes.md。"
+        },
+        "scope_and_relations": {
+          "pass": true,
+          "evidence": "原顺序、跨方向范围和无统一排名遵守；R5不补机制；跨篇联系明确归纳非继承；对应depth/task.md及原始R1–R6。 详细审阅定位与限制：candidate-review-notes.md。"
+        },
+        "readability": {
+          "pass": true,
+          "evidence": "notes逐篇源前复述R1–R6，尤其R6教师→P→训练调度→一次采样四轮揭示及71.5/成本对照，后段无理解断点。 详细审阅定位与限制：candidate-review-notes.md。"
+        },
+        "delivery": {
+          "pass": true,
+          "evidence": "仅完整中文Markdown，实际手机初始截图可读，hash匹配离线/锚点/无溢出元数据；未逐页截图限制见notes。 详细审阅定位与限制：candidate-review-notes.md。"
+        }
+      },
+      "issues": []
+    },
+    {
+      "id": "theory",
+      "artifact_hashes": {
+        "theory.md": "12c08cb5fe0b3a1af682895f07f5b366537d0d8bd6562d7c6c68aeb6d8d76665"
+      },
+      "checks": {
+        "coverage": {
+          "pass": true,
+          "evidence": "五自然部分恢复背景、缺口、假设方法、理论结果/分析及条件总结；对应T §1–§4。 详细审阅定位与限制：candidate-review-notes.md。"
+        },
+        "method_fidelity": {
+          "pass": true,
+          "evidence": "§三由零起点逐步展开几何和，r步后精确归零；对应T §2。 详细审阅定位与限制：candidate-review-notes.md。"
+        },
+        "result_fidelity": {
+          "pass": true,
+          "evidence": "§四B(r)正确呈为条件上界，无模型分数或实测加速；对应T §2/§4。 详细审阅定位与限制：candidate-review-notes.md。"
+        },
+        "ablation_reasoning": {
+          "pass": true,
+          "evidence": "§四解释rho=1、epsilon=0与r影响，区分固定r界与统一界及成本未建模；对应T §3。 详细审阅定位与限制：candidate-review-notes.md。"
+        },
+        "scope_and_relations": {
+          "pass": true,
+          "evidence": "仅给定T，雷达展开中文Markdown，推导示例不冒充实验；对应theory/task.md及T §4。 详细审阅定位与限制：candidate-review-notes.md。"
+        },
+        "readability": {
+          "pass": true,
+          "evidence": "notes记有源前复述每步旧误差收缩加扰动、重置断开周期与误差预算选择r，公式术语已解释。 详细审阅定位与限制：candidate-review-notes.md。"
+        },
+        "delivery": {
+          "pass": true,
+          "evidence": "仅theory.md，实际手机初始截图可读，hash匹配元数据离线无错误/溢出；限制见notes。 详细审阅定位与限制：candidate-review-notes.md。"
+        }
+      },
+      "issues": []
+    }
+  ],
+  "notes": "独立output-first审阅全部固定产物后逐篇回源；未读baseline。五自然部分按语义识别。所有布尔检查针对最终实际hash；原始缺图出处问题及辅助修复单列。浏览器几何/离线/锚点数据与实际初始视口截图已检查，未逐页检查全长截图或逐个点击；详见candidate-review-notes.md。"
+}
