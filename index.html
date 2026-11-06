@@ -201,7 +201,7 @@
           <input type="search" id="search" placeholder="搜索论文、关键词或研究方向…" autocomplete="off" aria-describedby="search-status">
           <button class="clear-search" id="clear-search" type="button" hidden>清除</button>
         </div>
-        <p class="search-meta" id="search-status" role="status" aria-live="polite" aria-atomic="true">每个分类默认展示两行，展开可查看全部笔记。</p>
+        <p class="search-meta" id="search-status" role="status" aria-live="polite" aria-atomic="true">专题默认全部展开，其他分类默认展示两行。</p>
       </div>
       <div id="content" class="content">
         <div class="empty-state" id="empty-state" hidden><h2>暂时没有找到相关笔记</h2><p>试试模型名称、研究方向，或更短的关键词。</p><button id="reset-search" type="button">清除搜索，浏览全部</button></div>
@@ -266,8 +266,28 @@ const categories = [
     icon: "icon-other",
     emoji: "🗺️",
     papers: [
-      { file: "examples/Topics/knowledge-systems-22-20261105/", title: "22个研究专题 · 知识体系", desc: "Agent、生成模型、多模态、具身与后训练：背景、问题树、方法机制与论文原图" },
-      { file: "examples/Topics/image-generation-acceleration/", title: "图像生成 · 推理加速", desc: "39 篇近期重点论文 · 七条问题路线 · 30 组原图与详细导读 · 深浅主题" },
+      {"file": "examples/Topics/harness-system-topic.html", "title": "Agent Harness：从运行状态到可靠演进", "desc": "状态分层 · 工具契约 · 恢复语义 · 框架演进 · 等预算评测"},
+      {"file": "examples/Topics/agent-general-topic.html", "title": "Agent通用机制：行动、记忆与协作", "desc": "同一任务贯穿 · 规划与工具 · 反思重试 · 长期记忆 · 异构协作"},
+      {"file": "examples/Topics/agent-tasks-topic.html", "title": "任务型Agent：从仓库修复到完整交付", "desc": "代码修复 · GUI交互 · 数据分析 · 开放技能 · 长程工作流"},
+      {"file": "examples/Topics/research-system-topic.html", "title": "Deep Research：从搜索到可追溯结论", "desc": "多视角规划 · 多轮发现 · 全文证据 · 按问题综合 · 独立核验"},
+      {"file": "examples/Topics/image-foundation-topic.html", "title": "图像生成基模", "desc": "从视觉压缩、生成主干到后训练：图像模型怎样学会画对细节"},
+      {"file": "examples/Topics/image-control-edit-topic.html", "title": "图像可控生成与编辑", "desc": "从结构与身份条件到局部编辑：把该改的改对，把该留的留下"},
+      {"file": "examples/Topics/image-design-topic.html", "title": "图中文字与版式设计", "desc": "从文字布局与字形控制到可编辑矢量：面向设计交付的生成方法"},
+      {"file": "examples/Topics/video-model-topic.html", "title": "视频生成基模与长视频", "desc": "从时空建模到长视频历史：连贯画面如何生成并持续下去"},
+      {"file": "examples/Topics/video-control-edit-topic.html", "title": "视频可控生成与编辑", "desc": "从镜头和人物到声音与实时编辑：视频创作中的不同控制对象"},
+      {"file": "examples/Topics/document-parsing-topic.html", "title": "文档解析：从页面像素到可靠结构", "desc": "全局布局 · 阅读顺序 · 公式表格 · 视觉保真 · 文档级验收"},
+      {"file": "examples/Topics/multimodal-core-topic.html", "title": "多模态理解：感知、接地与证据推理", "desc": "沿同一张房间图，分清看见、定位、推理和验收分别改变了什么。"},
+      {"file": "examples/Topics/multimodal-context-topic.html", "title": "多图、长视频与空间多模态理解", "desc": "同一段“移动红杯”的录像，从跨图对应、长程检索到几何与声画对齐。"},
+      {"file": "examples/Topics/unified-model-topic.html", "title": "多模态统一理解与生成：表示、目标与专家分工", "desc": "从“看懂杯子布局”到“画出交换后的布局”，比较共享哪些环节才有效。"},
+      {"file": "examples/Topics/world-main-topic.html", "title": "世界模型：从未来预测到可执行的想象", "desc": "沿同一轮推杯任务，串起状态表示、视频预测、记忆、规划和交互验收。"},
+      {"file": "examples/Topics/embodied-vla-topic.html", "title": "具身VLA：从视觉指令到可迁移的动作策略", "desc": "沿“抓起纸杯、放到右侧托盘”解释动作表示、示范数据、泛化与强化学习。"},
+      {"file": "examples/Topics/embodied-interaction-topic.html", "title": "具身接触与全身操作：触觉闭环、预测与协调", "desc": "抓起薄纸杯不只要到达位置，还要控制接触、及时纠错，并让全身跟上。"},
+      {"file": "examples/Topics/architecture-main-topic.html", "title": "基础模型架构：状态与计算如何组织", "desc": "以同一键值检索算例串起注意力、递推、专家与循环深度"},
+      {"file": "examples/Topics/rl-main-topic.html", "title": "后训练强化学习：目标、更新与系统", "desc": "以GRPO为计算基线，串起奖励、采样、信用分配和异步训练"},
+      {"file": "examples/Topics/opd-main-topic.html", "title": "OPD：学生轨迹上的在线蒸馏", "desc": "从轨迹分布与KL方向，到有效token、教师信息差和训练成本"},
+      {"file": "examples/Topics/diffusion-main-topic.html", "title": "Diffusion LLM：从去掩码到多模态", "desc": "语言建模、视觉条件、统一生成、并行纠错与后训练"},
+      {"file": "examples/Topics/inference-main-topic.html", "title": "LLM推理加速：从一次前向到整套服务", "desc": "代表性投机解码，连同KV、量化、算子、调度和推理预算"},
+      {"file": "examples/Topics/image-acceleration-topic.html", "title": "图像生成 · 推理加速", "desc": "少步、单步成本、缓存、压缩与并行：沿计算链寻找加速机会"},
       { file: "examples/Topics/rsi-knowledge-system.html", title: "RSI · 递归自我改进", desc: "27 项资料 · 问题树、研究脉络与 27 幅论文原图中文导读" },
       { file: "examples/Topics/speculative-decoding-topic.html", title: "投机解码 · 草稿、验证与预算", desc: "43 项工作 · 经典入口、方向代表与专项改进，附原图和机制对照" },
     ]
@@ -468,7 +488,7 @@ categories.forEach((cat, categoryIndex) => {
   directoryEl.appendChild(navLink);
 
   const record = {
-    cat, section, navLink, expanded: false,
+    cat, section, navLink, expanded: cat.id === 'topics',
     grid: section.querySelector('.grid'),
     cards: [...section.querySelectorAll('.card')],
     button: section.querySelector('.expand-button'),
@@ -530,7 +550,7 @@ function updateView() {
   emptyEl.hidden = visibleCategories > 0;
   statusEl.textContent = query
     ? `找到 ${matchedFiles.size} 篇笔记，分布在 ${visibleCategories} 个分类。搜索时展示全部匹配结果。`
-    : '每个分类默认展示两行，展开可查看全部笔记。';
+    : '专题默认全部展开，其他分类默认展示两行。';
   updateActiveCategory();
 }
 
