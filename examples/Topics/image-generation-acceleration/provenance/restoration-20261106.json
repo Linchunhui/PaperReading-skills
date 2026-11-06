@@ -1,0 +1,58 @@
+{
+  "date": "2026-11-06",
+  "baseline_commit": "4ac7b0784e5c4d3bc654af532fe00d5f02688c1c",
+  "full_edition_commit": "4fa2b5e53da4cd5e9db6cc1eef1fc6a76645f655",
+  "full_edition_blob": "176ab8c82b037f2df3f007d47e4444cb9022d0f0",
+  "summary_archive_blob": "c465526449fc84cadd6aedd77295fc4efd6becf0",
+  "canonical": "../image-acceleration-topic.html",
+  "backup": "../image-acceleration-summary-20261105.html",
+  "content": {
+    "article.paper": 39,
+    "article.classic": 8,
+    "figure": 30,
+    "section.chapter": 7,
+    "#background": 1,
+    "#map": 1,
+    "#practice": 1,
+    "unchanged_image_files": 32,
+    "summary_archive_byte_identical": true,
+    "internal_links_and_assets": "all resolve",
+    "baseline": "4ac7b0784e5c4d3bc654af532fe00d5f02688c1c"
+  },
+  "browser": {
+    "images_loaded": 32,
+    "responsive_widths": [
+      360,
+      390,
+      768,
+      1440
+    ],
+    "themes": "light/dark/system, live OS changes, reload and homepage preference passed",
+    "search": "case-insensitive, empty result, reset passed",
+    "navigation_and_map": "passed",
+    "figure_dialogs_tested": 30,
+    "legacy_redirect_and_aliases": "passed with query and fragments",
+    "archive_materials": {
+      "initial_cards": 30,
+      "buttons": [
+        "上一页",
+        "下一页",
+        "上一页",
+        "下一页"
+      ],
+      "search_pagination_scope": "passed"
+    },
+    "without_javascript": "all 39 paper bodies available",
+    "js_errors": [],
+    "failed_http": []
+  },
+  "not_retested": [
+    "External paper/PDF availability and scientific claims were preserved from the historical source, not independently re-reviewed.",
+    "Safari, Firefox and physical mobile hardware."
+  ],
+  "supplements": [
+    "xDiT parallelism context retained from the concise edition in the systems chapter.",
+    "AutoTarget solver-specific equivalence qualification retained from the concise edition."
+  ],
+  "scope": "Only the image-acceleration topic, its compatibility entry, supporting reader files, archive and homepage card description."
+}
