@@ -43,9 +43,29 @@
 
 ### 专题直达
 
-- [22个研究专题 · 知识体系](https://linchunhui.github.io/PaperReading-skills/examples/Topics/knowledge-systems-22-20261105/) · 从背景与前序到问题树、方法机制和实验边界，覆盖 Agent、生成模型、多模态、具身与后训练。
+- [Agent Harness：从运行状态到可靠演进](https://linchunhui.github.io/PaperReading-skills/examples/Topics/harness-system-topic.html)
+- [Agent通用机制：行动、记忆与协作](https://linchunhui.github.io/PaperReading-skills/examples/Topics/agent-general-topic.html)
+- [任务型Agent：从仓库修复到完整交付](https://linchunhui.github.io/PaperReading-skills/examples/Topics/agent-tasks-topic.html)
+- [Deep Research：从搜索到可追溯结论](https://linchunhui.github.io/PaperReading-skills/examples/Topics/research-system-topic.html)
+- [图像生成基模](https://linchunhui.github.io/PaperReading-skills/examples/Topics/image-foundation-topic.html)
+- [图像可控生成与编辑](https://linchunhui.github.io/PaperReading-skills/examples/Topics/image-control-edit-topic.html)
+- [图中文字与版式设计](https://linchunhui.github.io/PaperReading-skills/examples/Topics/image-design-topic.html)
+- [视频生成基模与长视频](https://linchunhui.github.io/PaperReading-skills/examples/Topics/video-model-topic.html)
+- [视频可控生成与编辑](https://linchunhui.github.io/PaperReading-skills/examples/Topics/video-control-edit-topic.html)
+- [文档解析：从页面像素到可靠结构](https://linchunhui.github.io/PaperReading-skills/examples/Topics/document-parsing-topic.html)
+- [多模态理解：感知、接地与证据推理](https://linchunhui.github.io/PaperReading-skills/examples/Topics/multimodal-core-topic.html)
+- [多图、长视频与空间多模态理解](https://linchunhui.github.io/PaperReading-skills/examples/Topics/multimodal-context-topic.html)
+- [多模态统一理解与生成：表示、目标与专家分工](https://linchunhui.github.io/PaperReading-skills/examples/Topics/unified-model-topic.html)
+- [世界模型：从未来预测到可执行的想象](https://linchunhui.github.io/PaperReading-skills/examples/Topics/world-main-topic.html)
+- [具身VLA：从视觉指令到可迁移的动作策略](https://linchunhui.github.io/PaperReading-skills/examples/Topics/embodied-vla-topic.html)
+- [具身接触与全身操作：触觉闭环、预测与协调](https://linchunhui.github.io/PaperReading-skills/examples/Topics/embodied-interaction-topic.html)
+- [基础模型架构：状态与计算如何组织](https://linchunhui.github.io/PaperReading-skills/examples/Topics/architecture-main-topic.html)
+- [后训练强化学习：目标、更新与系统](https://linchunhui.github.io/PaperReading-skills/examples/Topics/rl-main-topic.html)
+- [OPD：学生轨迹上的在线蒸馏](https://linchunhui.github.io/PaperReading-skills/examples/Topics/opd-main-topic.html)
+- [Diffusion LLM：从去掩码到多模态](https://linchunhui.github.io/PaperReading-skills/examples/Topics/diffusion-main-topic.html)
+- [LLM推理加速：从一次前向到整套服务](https://linchunhui.github.io/PaperReading-skills/examples/Topics/inference-main-topic.html)
+- [图像生成 · 推理加速](https://linchunhui.github.io/PaperReading-skills/examples/Topics/image-acceleration-topic.html)
 
-- [图像生成 · 推理加速](https://linchunhui.github.io/PaperReading-skills/examples/Topics/image-generation-acceleration/) · 39篇2025–2026重点论文、七条问题路线、八篇经典基础；30组原图与深浅主题
 
 - [RSI：递归自我改进](https://linchunhui.github.io/PaperReading-skills/examples/Topics/rsi-knowledge-system.html) · [SVG 知识图](https://linchunhui.github.io/PaperReading-skills/examples/Topics/rsi-knowledge-map.svg)
 - [投机解码：草稿、验证与预算](https://linchunhui.github.io/PaperReading-skills/examples/Topics/speculative-decoding-topic.html) · [SVG 知识图](https://linchunhui.github.io/PaperReading-skills/examples/Topics/speculative-decoding-map.svg)
