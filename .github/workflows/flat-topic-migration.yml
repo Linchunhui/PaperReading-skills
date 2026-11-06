@@ -1,0 +1,40 @@
+name: Flatten independent topic HTML
+on:
+  push:
+    branches: [codex/flat-topic-html-20261106]
+    paths:
+      - '.github/workflows/flat-topic-migration.yml'
+      - '.github/flat-topic-migration/**'
+permissions:
+  contents: write
+jobs:
+  migrate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: codex/flat-topic-html-20261106
+      - name: Restore original source when retrying
+        run: |
+          if [ ! -f examples/Topics/knowledge-systems-22-20261105/reading-manifest.json ]; then
+            git fetch --depth=1 origin 1b1560d39b3169a0f2ebfee881f8a54d3e3b8bb7
+            git restore --source=FETCH_HEAD --worktree -- examples/Topics/knowledge-systems-22-20261105
+          fi
+      - name: Build independent HTML pages
+        run: python3 .github/flat-topic-migration/build.py --repo . --snapshot /tmp/flat-source --qa /tmp/flat-qa
+      - name: Source content and structural checks
+        run: python3 .github/flat-topic-migration/check.py --repo . --snapshot /tmp/flat-source --qa /tmp/flat-qa
+      - name: Install browser test library
+        run: npm install --no-save --prefix /tmp/topic-browser-qa playwright@1.56.1
+      - name: Check browser reading and navigation
+        run: NODE_PATH=/tmp/topic-browser-qa/node_modules node .github/flat-topic-migration/browser-check.cjs
+      - name: Save checked candidate
+        run: |
+          cp -r /tmp/flat-qa .github/flat-topic-migration/qa
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -- index.html README.md examples/Topics .github/flat-topic-migration/qa
+          git diff --cached --check
+          git commit -m 'Make 22 research topics independent sibling HTML pages'
+          git push origin HEAD:codex/flat-topic-html-20261106
