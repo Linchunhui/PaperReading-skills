@@ -59,7 +59,9 @@ const wait=ms=>new Promise(r=>setTimeout(r,ms));
      if(new URL(page.url()).hash!==expected)throw Error('Aux hash not preserved '+row.topic_id+' '+new URL(page.url()).hash+' '+expected);
     }
     if(row.topic_id==='opd-main'||row.topic_id==='image-acceleration'){
-     await page.locator('#expanded-reading').scrollIntoViewIfNeeded();
+     await wait(350);
+     await page.locator('#expanded-reading > summary').scrollIntoViewIfNeeded();
+     await wait(40);
      await page.screenshot({path:path.join(qa,'screenshots',row.topic_id+'-expanded-mobile.png')});
     }
     delete appendix.links;

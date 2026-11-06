@@ -25,6 +25,10 @@ jobs:
         run: python3 .github/flat-topic-migration/build.py --repo . --snapshot /tmp/flat-source --qa /tmp/flat-qa
       - name: Source content and structural checks
         run: python3 .github/flat-topic-migration/check.py --repo . --snapshot /tmp/flat-source --qa /tmp/flat-qa
+      - name: Add Chinese fonts to the isolated test runner
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y fonts-noto-cjk
       - name: Install browser test library
         run: npm install --no-save --prefix /tmp/topic-browser-qa playwright@1.56.1
       - name: Check browser reading and navigation
@@ -36,6 +40,7 @@ jobs:
           if [ -f /tmp/flat-qa/structural-results.json ]; then cat /tmp/flat-qa/structural-results.json; fi
       - name: Save checked candidate
         run: |
+          rm -rf -- .github/flat-topic-migration/qa
           cp -r /tmp/flat-qa .github/flat-topic-migration/qa
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
