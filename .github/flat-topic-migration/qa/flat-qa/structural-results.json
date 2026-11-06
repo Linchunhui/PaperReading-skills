@@ -1,0 +1,378 @@
+{
+  "ok": true,
+  "method": "Source manifest hashes, every original main/aux ID and article word order, embedded child HTML decoding, local link closure and JavaScript syntax",
+  "topics": [
+    {
+      "id": "harness-system",
+      "bytes": 1453243,
+      "main_ids": 51,
+      "main_articles": 7,
+      "aux_ids": 47,
+      "aux_articles": 6,
+      "source_documents": 2,
+      "article_text_preserved": true,
+      "excluded_home_navigation": {
+        "main": [
+          "← 返回阅读首页"
+        ],
+        "aux": []
+      }
+    },
+    {
+      "id": "agent-general",
+      "bytes": 1613051,
+      "main_ids": 47,
+      "main_articles": 7,
+      "aux_ids": 43,
+      "aux_articles": 6,
+      "source_documents": 2,
+      "article_text_preserved": true,
+      "excluded_home_navigation": {
+        "main": [
+          "← 返回阅读首页"
+        ],
+        "aux": []
+      }
+    },
+    {
+      "id": "agent-tasks",
+      "bytes": 2092119,
+      "main_ids": 55,
+      "main_articles": 9,
+      "aux_ids": 51,
+      "aux_articles": 8,
+      "source_documents": 2,
+      "article_text_preserved": true,
+      "excluded_home_navigation": {
+        "main": [
+          "← 返回阅读首页"
+        ],
+        "aux": []
+      }
+    },
+    {
+      "id": "research-system",
+      "bytes": 1950272,
+      "main_ids": 53,
+      "main_articles": 7,
+      "aux_ids": 49,
+      "aux_articles": 6,
+      "source_documents": 2,
+      "article_text_preserved": true,
+      "excluded_home_navigation": {
+        "main": [
+          "← 返回阅读首页"
+        ],
+        "aux": []
+      }
+    },
+    {
+      "id": "image-foundation",
+      "bytes": 9107847,
+      "main_ids": 44,
+      "main_articles": 6,
+      "aux_ids": 49,
+      "aux_articles": 9,
+      "source_documents": 2,
+      "article_text_preserved": true,
+      "excluded_home_navigation": {
+        "main": [
+          "← 返回阅读首页"
+        ],
+        "aux": [
+          "← 返回阅读首页"
+        ]
+      }
+    },
+    {
+      "id": "image-control-edit",
+      "bytes": 5999977,
+      "main_ids": 47,
+      "main_articles": 5,
+      "aux_ids": 49,
+      "aux_articles": 9,
+      "source_documents": 2,
+      "article_text_preserved": true,
+      "excluded_home_navigation": {
+        "main": [
+          "← 返回阅读首页"
+        ],
+        "aux": [
+          "← 返回阅读首页"
+        ]
+      }
+    },
+    {
+      "id": "image-design",
+      "bytes": 3385338,
+      "main_ids": 49,
+      "main_articles": 5,
+      "aux_ids": 48,
+      "aux_articles": 8,
+      "source_documents": 2,
+      "article_text_preserved": true,
+      "excluded_home_navigation": {
+        "main": [
+          "← 返回阅读首页"
+        ],
+        "aux": [
+          "← 返回阅读首页"
+        ]
+      }
+    },
+    {
+      "id": "video-model",
+      "bytes": 6598907,
+      "main_ids": 41,
+      "main_articles": 5,
+      "aux_ids": 46,
+      "aux_articles": 6,
+      "source_documents": 2,
+      "article_text_preserved": true,
+      "excluded_home_navigation": {
+        "main": [
+          "← 返回阅读首页"
+        ],
+        "aux": [
+          "← 返回阅读首页"
+        ]
+      }
+    },
+    {
+      "id": "video-control-edit",
+      "bytes": 7499986,
+      "main_ids": 56,
+      "main_articles": 6,
+      "aux_ids": 53,
+      "aux_articles": 7,
+      "source_documents": 2,
+      "article_text_preserved": true,
+      "excluded_home_navigation": {
+        "main": [
+          "← 返回阅读首页"
+        ],
+        "aux": [
+          "← 返回阅读首页"
+        ]
+      }
+    },
+    {
+      "id": "document-parsing",
+      "bytes": 1126292,
+      "main_ids": 57,
+      "main_articles": 7,
+      "aux_ids": 0,
+      "aux_articles": 0,
+      "source_documents": 1,
+      "article_text_preserved": true,
+      "excluded_home_navigation": {
+        "main": [
+          "← 返回阅读首页"
+        ],
+        "aux": []
+      }
+    },
+    {
+      "id": "multimodal-core",
+      "bytes": 976032,
+      "main_ids": 49,
+      "main_articles": 8,
+      "aux_ids": 0,
+      "aux_articles": 0,
+      "source_documents": 1,
+      "article_text_preserved": true,
+      "excluded_home_navigation": {
+        "main": [
+          "← 返回阅读首页"
+        ],
+        "aux": []
+      }
+    },
+    {
+      "id": "multimodal-context",
+      "bytes": 626034,
+      "main_ids": 52,
+      "main_articles": 9,
+      "aux_ids": 0,
+      "aux_articles": 0,
+      "source_documents": 1,
+      "article_text_preserved": true,
+      "excluded_home_navigation": {
+        "main": [
+          "← 返回阅读首页"
+        ],
+        "aux": []
+      }
+    },
+    {
+      "id": "unified-model",
+      "bytes": 771799,
+      "main_ids": 51,
+      "main_articles": 8,
+      "aux_ids": 0,
+      "aux_articles": 0,
+      "source_documents": 1,
+      "article_text_preserved": true,
+      "excluded_home_navigation": {
+        "main": [
+          "← 返回阅读首页"
+        ],
+        "aux": []
+      }
+    },
+    {
+      "id": "world-main",
+      "bytes": 539855,
+      "main_ids": 51,
+      "main_articles": 8,
+      "aux_ids": 0,
+      "aux_articles": 0,
+      "source_documents": 1,
+      "article_text_preserved": true,
+      "excluded_home_navigation": {
+        "main": [
+          "← 返回阅读首页"
+        ],
+        "aux": []
+      }
+    },
+    {
+      "id": "embodied-vla",
+      "bytes": 580659,
+      "main_ids": 51,
+      "main_articles": 8,
+      "aux_ids": 0,
+      "aux_articles": 0,
+      "source_documents": 1,
+      "article_text_preserved": true,
+      "excluded_home_navigation": {
+        "main": [
+          "← 返回阅读首页"
+        ],
+        "aux": []
+      }
+    },
+    {
+      "id": "embodied-interaction",
+      "bytes": 2284681,
+      "main_ids": 54,
+      "main_articles": 7,
+      "aux_ids": 0,
+      "aux_articles": 0,
+      "source_documents": 1,
+      "article_text_preserved": true,
+      "excluded_home_navigation": {
+        "main": [
+          "← 返回阅读首页"
+        ],
+        "aux": []
+      }
+    },
+    {
+      "id": "architecture-main",
+      "bytes": 3552040,
+      "main_ids": 54,
+      "main_articles": 9,
+      "aux_ids": 0,
+      "aux_articles": 0,
+      "source_documents": 1,
+      "article_text_preserved": true,
+      "excluded_home_navigation": {
+        "main": [
+          "← 返回阅读首页"
+        ],
+        "aux": []
+      }
+    },
+    {
+      "id": "rl-main",
+      "bytes": 3684012,
+      "main_ids": 88,
+      "main_articles": 16,
+      "aux_ids": 90,
+      "aux_articles": 33,
+      "source_documents": 2,
+      "article_text_preserved": true,
+      "excluded_home_navigation": {
+        "main": [
+          "← 返回阅读首页"
+        ],
+        "aux": []
+      }
+    },
+    {
+      "id": "opd-main",
+      "bytes": 9699039,
+      "main_ids": 126,
+      "main_articles": 27,
+      "aux_ids": 76,
+      "aux_articles": 29,
+      "source_documents": 2,
+      "article_text_preserved": true,
+      "excluded_home_navigation": {
+        "main": [
+          "← 返回阅读首页"
+        ],
+        "aux": []
+      }
+    },
+    {
+      "id": "diffusion-main",
+      "bytes": 8956164,
+      "main_ids": 133,
+      "main_articles": 32,
+      "aux_ids": 83,
+      "aux_articles": 31,
+      "source_documents": 2,
+      "article_text_preserved": true,
+      "excluded_home_navigation": {
+        "main": [
+          "← 返回阅读首页"
+        ],
+        "aux": []
+      }
+    },
+    {
+      "id": "inference-main",
+      "bytes": 8577106,
+      "main_ids": 79,
+      "main_articles": 16,
+      "aux_ids": 0,
+      "aux_articles": 0,
+      "source_documents": 1,
+      "article_text_preserved": true,
+      "excluded_home_navigation": {
+        "main": [
+          "← 返回阅读首页"
+        ],
+        "aux": []
+      }
+    },
+    {
+      "id": "image-acceleration",
+      "bytes": 16938170,
+      "main_ids": 57,
+      "main_articles": 7,
+      "aux_ids": 140,
+      "aux_articles": 72,
+      "source_documents": 2,
+      "article_text_preserved": true,
+      "excluded_home_navigation": {
+        "main": [
+          "← 返回阅读首页"
+        ],
+        "aux": [
+          "← 返回阅读首页",
+          "← 返回阅读首页"
+        ]
+      }
+    }
+  ],
+  "counts": {
+    "topics": 22,
+    "source_documents": 35,
+    "aux": 13
+  },
+  "errors": [],
+  "cross_document_links_checked": 5798
+}
