@@ -1,50 +1,30 @@
-name: Flatten independent topic HTML
+name: Verify independent topic publication
 on:
   push:
     branches: [codex/flat-topic-html-20261106]
-    paths:
-      - '.github/workflows/flat-topic-migration.yml'
-      - '.github/flat-topic-migration/**'
+    paths: ['.github/workflows/flat-topic-migration.yml']
 permissions:
-  contents: write
+  contents: read
 jobs:
-  migrate:
+  verify:
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    timeout-minutes: 5
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
-        with:
-          ref: codex/flat-topic-html-20261106
-      - name: Restore original source when retrying
+      - name: Compare every live HTML with the published Git blob
         run: |
-          if [ ! -f examples/Topics/knowledge-systems-22-20261105/reading-manifest.json ]; then
-            git fetch --depth=1 origin 1b1560d39b3169a0f2ebfee881f8a54d3e3b8bb7
-            git restore --source=FETCH_HEAD --worktree -- examples/Topics/knowledge-systems-22-20261105
-          fi
-      - name: Build independent HTML pages
-        run: python3 .github/flat-topic-migration/build.py --repo . --snapshot /tmp/flat-source --qa /tmp/flat-qa
-      - name: Source content and structural checks
-        run: python3 .github/flat-topic-migration/check.py --repo . --snapshot /tmp/flat-source --qa /tmp/flat-qa
-      - name: Add Chinese fonts to the isolated test runner
-        run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y fonts-noto-cjk
-      - name: Install browser test library
-        run: npm install --no-save --prefix /tmp/topic-browser-qa playwright@1.56.1
-      - name: Check browser reading and navigation
-        run: NODE_PATH=/tmp/topic-browser-qa/node_modules node .github/flat-topic-migration/browser-check.cjs
-      - name: Diagnose browser failure
-        if: failure()
-        run: |
-          if [ -f /tmp/flat-qa/browser-failure.json ]; then cat /tmp/flat-qa/browser-failure.json; fi
-          if [ -f /tmp/flat-qa/structural-results.json ]; then cat /tmp/flat-qa/structural-results.json; fi
-      - name: Save checked candidate
-        run: |
-          rm -rf -- .github/flat-topic-migration/qa
-          cp -r /tmp/flat-qa .github/flat-topic-migration/qa
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add -- index.html README.md examples/Topics .github/flat-topic-migration/qa
-          git diff --cached --check
-          git commit -m 'Make 22 research topics independent sibling HTML pages'
-          git push origin HEAD:codex/flat-topic-html-20261106
+          python3 - <<'PY'
+          import concurrent.futures,hashlib,json,urllib.request,time
+          expected=json.loads("[{\"path\":\"examples/Topics/agent-general-topic.html\",\"sha\":\"71abca7f046ccb97a34424cc6b5d7f337dfdcda7\"},{\"path\":\"examples/Topics/agent-tasks-topic.html\",\"sha\":\"4d330081643ec1ca76b06c41bbc1019ec921d30a\"},{\"path\":\"examples/Topics/architecture-main-topic.html\",\"sha\":\"e826059b5cc4f25d3e140352ac054370b22d9694\"},{\"path\":\"examples/Topics/diffusion-main-topic.html\",\"sha\":\"1e98f2f95bf442cf91deee2e5d7cdff5c7a062dd\"},{\"path\":\"examples/Topics/document-parsing-topic.html\",\"sha\":\"8f21d1423013b28faaddfdd58a8e8154cbe0e2d4\"},{\"path\":\"examples/Topics/embodied-interaction-topic.html\",\"sha\":\"019e065c06c2854fefd18572e8239c94789be3e8\"},{\"path\":\"examples/Topics/embodied-vla-topic.html\",\"sha\":\"5a2b4261c8dc2ce0bfdf8ae661e68e7a5086cc04\"},{\"path\":\"examples/Topics/harness-system-topic.html\",\"sha\":\"24dcb61022fe2a5b11f2e5c0995b5925d3ce9c01\"},{\"path\":\"examples/Topics/image-acceleration-topic.html\",\"sha\":\"c465526449fc84cadd6aedd77295fc4efd6becf0\"},{\"path\":\"examples/Topics/image-control-edit-topic.html\",\"sha\":\"c6de9b1eccd56f8209deb6209c53b77778ab5541\"},{\"path\":\"examples/Topics/image-design-topic.html\",\"sha\":\"911ef975a4de99b801633feccf2380412b5a55b9\"},{\"path\":\"examples/Topics/image-foundation-topic.html\",\"sha\":\"e61bc648cb9ba8118d49f027cfb41f70afbb3e46\"},{\"path\":\"examples/Topics/inference-main-topic.html\",\"sha\":\"380705cb30c46384825ced7a012d1dbfc0581a65\"},{\"path\":\"examples/Topics/multimodal-context-topic.html\",\"sha\":\"5565d1212dca5dd55121fa40b71f65b0eed6a905\"},{\"path\":\"examples/Topics/multimodal-core-topic.html\",\"sha\":\"a2ae962491be7b23b999989ded8c14d5c119ec68\"},{\"path\":\"examples/Topics/opd-main-topic.html\",\"sha\":\"f5d303038942bf73871b380bca9342a57b59ead9\"},{\"path\":\"examples/Topics/research-system-topic.html\",\"sha\":\"4456867a9b5cade4e836b174b954dcfb83457fec\"},{\"path\":\"examples/Topics/rl-main-topic.html\",\"sha\":\"85b5753286b51bb0554a64e0753a28993f346d84\"},{\"path\":\"examples/Topics/unified-model-topic.html\",\"sha\":\"c138872dbf34a9266ce59dbf1dffb4465b5a1ec8\"},{\"path\":\"examples/Topics/video-control-edit-topic.html\",\"sha\":\"304db281a0e2b6a0669239cc5b31ada0643ac756\"},{\"path\":\"examples/Topics/video-model-topic.html\",\"sha\":\"44ab0ab50fd6383daa3ba18404e6f513162d49bb\"},{\"path\":\"examples/Topics/world-main-topic.html\",\"sha\":\"6a3ea220d7db32703c1efd63df15e92ea026454f\"},{\"path\":\"index.html\",\"sha\":\"460441c73ba0dd5b63cb59ecc36cea75f52b700f\"}]")
+          base='https://linchunhui.github.io/PaperReading-skills/'
+          def check(item):
+           url=base+item['path']
+           request=urllib.request.Request(url,headers={'User-Agent':'Topic-publication-check/1.0','Accept-Encoding':'identity'})
+           with urllib.request.urlopen(request,timeout=60) as response:
+            data=response.read();status=response.status
+           sha=hashlib.sha1(b'blob '+str(len(data)).encode()+b'\0'+data).hexdigest()
+           assert status==200 and sha==item['sha'],(item['path'],status,sha,item['sha'])
+           return {'path':item['path'],'http':status,'bytes':len(data),'matches_published_git_blob':True}
+          with concurrent.futures.ThreadPoolExecutor(max_workers=4) as pool:
+           results=list(pool.map(check,expected))
+          print(json.dumps({'ok':True,'checked_urls':len(results),'commit':'f8ea5d07c78ba0038beef5d4328527d7e7769ecb','results':results}))
+          PY
