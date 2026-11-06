@@ -49,11 +49,11 @@ const wait=ms=>new Promise(r=>setTimeout(r,ms));
     if(!frame)throw Error('Missing frame '+row.topic_id);
     await frame.waitForLoadState('load');
     await page.waitForFunction(()=>{const f=document.querySelector('#expanded-reading iframe');return f&&parseInt(f.style.height)>1000;},{timeout:30000});
-    appendix=await frame.evaluate(()=>({title:document.title,h1:document.querySelector('h1')?.innerText,articles:document.querySelectorAll('article[id]').length,images:document.images.length,broken:[...document.images].filter(x=>x.complete&&!x.naturalWidth).length,scroll:document.documentElement.scrollWidth,width:document.documentElement.clientWidth,links:[...document.querySelectorAll('a[href]')].map(a=>a.getAttribute('href')).filter(h=>h.startsWith('#')&&h.length>1&&document.getElementById(decodeURIComponent(h.slice(1))))}));
+    appendix=await frame.evaluate(()=>({title:document.title,h1:document.querySelector('h1')?.innerText,articles:document.querySelectorAll('article[id]').length,images:document.images.length,broken:[...document.images].filter(x=>x.complete&&!x.naturalWidth).length,scroll:document.documentElement.scrollWidth,width:document.documentElement.clientWidth,links:[...document.querySelectorAll('a[href]')].filter(a=>a.getClientRects().length&&getComputedStyle(a).visibility!=='hidden').map(a=>a.getAttribute('href')).filter(h=>h.startsWith('#')&&h.length>1&&document.getElementById(decodeURIComponent(h.slice(1))))}));
     if(!appendix.h1||appendix.broken||appendix.scroll>appendix.width+3)throw Error('Appendix load/layout '+row.topic_id+' '+JSON.stringify(appendix));
     if(appendix.links.length){
      const target=appendix.links.find(h=>h.startsWith('#paper-'))||appendix.links[0];
-     await frame.locator('a[href='+JSON.stringify(target)+']').first().click({force:true});
+     await frame.locator('a[href='+JSON.stringify(target)+']').filter({visible:true}).first().click();
      await page.waitForFunction(()=>location.hash.startsWith('#expanded-reading--'),{timeout:10000});
      const expected='#expanded-reading--'+encodeURIComponent(decodeURIComponent(target.slice(1)));
      if(new URL(page.url()).hash!==expected)throw Error('Aux hash not preserved '+row.topic_id+' '+new URL(page.url()).hash+' '+expected);

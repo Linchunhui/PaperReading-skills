@@ -29,6 +29,11 @@ jobs:
         run: npm install --no-save --prefix /tmp/topic-browser-qa playwright@1.56.1
       - name: Check browser reading and navigation
         run: NODE_PATH=/tmp/topic-browser-qa/node_modules node .github/flat-topic-migration/browser-check.cjs
+      - name: Diagnose browser failure
+        if: failure()
+        run: |
+          if [ -f /tmp/flat-qa/browser-failure.json ]; then cat /tmp/flat-qa/browser-failure.json; fi
+          if [ -f /tmp/flat-qa/structural-results.json ]; then cat /tmp/flat-qa/structural-results.json; fi
       - name: Save checked candidate
         run: |
           cp -r /tmp/flat-qa .github/flat-topic-migration/qa
