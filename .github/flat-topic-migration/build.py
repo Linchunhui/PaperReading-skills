@@ -75,7 +75,10 @@ def payload(x,source,tid,aux,ids):
  for key in ['href','body_href','pdf_href']:
   if isinstance(d.get(key),str)and d[key]:d[key]=href(d[key],source,tid,aux,ids)[0]
  for item in d.get('other_topics',[]):
-  if item.get('id')in info:item['href']=item['id']+'-topic.html#local-materials'
+  if item.get('id')in info:
+   peer=info[item['id']]
+   suffix='#local-materials'if'local-materials'in peer['ids']else'#expanded-reading--local-materials'if'local-materials'in peer['auxids']else''
+   item['href']=item['id']+'-topic.html'+suffix
  return d
 
 def svg_owner(p):

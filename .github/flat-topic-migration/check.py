@@ -39,7 +39,7 @@ class Doc(HTMLParser):
 def subset_words(old,new):
  it=iter(new)
  return all(any(w==candidate for candidate in it)for w in old)
-errors=[];rows=[]
+errors=[];rows=[];pending_anchors=[];anchor_catalog={}
 def check_doc(doc,where,owner,main,aux):
  dup=[k for k,n in Counter(doc.ids).items()if n>1]
  if dup:errors.append([where,'duplicate_ids',dup[:12]])
@@ -51,6 +51,7 @@ def check_doc(doc,where,owner,main,aux):
   if u.scheme:errors.append([where,'unexpected_protocol',h[:140]]);continue
   if not u.path:
    f=unquote(u.fragment)
+   if f.startswith('expanded-reading--'):pending_anchors.append((where,owner+'-topic.html',f))
    if f and f not in doc.ids and not f.startswith('expanded-reading--'):errors.append([where,'missing_own_anchor',f])
    continue
   path=unquote(u.path)
@@ -58,6 +59,7 @@ def check_doc(doc,where,owner,main,aux):
   target=(root/'examples/Topics'/path).resolve()
   if target.parent!=(root/'examples/Topics').resolve()or target.name not in {t['id']+'-topic.html'for t in manifest['topics']}:
    errors.append([where,'non_sibling_local_link',h[:150]])
+  elif u.fragment:pending_anchors.append((where,target.name,unquote(u.fragment)))
  for s in doc.scripts:
   if s['type']in ['application/json','application/ld+json']:
    try:json.loads(s['code'])
@@ -70,7 +72,10 @@ def check_doc(doc,where,owner,main,aux):
   def walk(x):
    if isinstance(x,dict):
     for k,v in x.items():
-     if k in ['href','body_href','pdf_href']and isinstance(v,str)and ('knowledge-systems-22-'in v or re.match(r'index\.html#',v)):errors.append([where,'old_dynamic_link',v])
+     if k in ['href','body_href','pdf_href']and isinstance(v,str):
+      u=urlsplit(v)
+      if 'knowledge-systems-22-'in v or re.match(r'index\.html#',v):errors.append([where,'old_dynamic_link',v])
+      if not u.scheme and u.path.endswith('-topic.html')and u.fragment:pending_anchors.append((where+'/json',Path(u.path).name,unquote(u.fragment)))
      walk(v)
    elif isinstance(x,list):
     for v in x:walk(v)
@@ -116,11 +121,19 @@ for row in mapping['topics']:
   if original.suffix.lower()in ['.html','.svg','.css','.js']:continue
   encoded=base64.b64encode(original.read_bytes()).decode()
   if encoded not in combined:errors.append([tid,'original_asset_not_embedded',asset['path']])
+ anchor_catalog[tid+'-topic.html']={'main':set(parent.ids),'aux':set(child.ids)if child else set()}
  check_doc(parent,tid+'/main',tid,parent,child)
  if child:
   check_doc(child,tid+'/aux',tid,parent,child)
   if not any(s['attrs'].get('data-flat-bridge')=='child'for s in child.scripts):errors.append([tid,'missing_child_bridge'])
  rows.append({'id':tid,'bytes':path.stat().st_size,'main_ids':len(parent.ids),'main_articles':len(parent.articles),'aux_ids':len(child.ids)if child else 0,'aux_articles':len(child.articles)if child else 0,'source_documents':len(docs),'article_text_preserved':True,'excluded_home_navigation':{'main':parent.excluded_home,'aux':child.excluded_home if child else []}})
+for origin,target,fragment in pending_anchors:
+ catalog=anchor_catalog.get(target)
+ if catalog is None:errors.append([origin,'missing_peer_topic',target]);continue
+ if fragment.startswith('expanded-reading--'):
+  valid=fragment[18:]in catalog['aux']
+ else:valid=fragment in catalog['main']or fragment in catalog['aux']
+ if not valid:errors.append([origin,'missing_cross_document_anchor',target,fragment])
 home=(root/'index.html').read_text()
 for tid in expected:
  if len(re.findall(r'["\']examples/Topics/'+re.escape(tid)+r'-topic\.html["\']',home))!=1:errors.append(['homepage','missing_or_duplicate_card',tid])
@@ -128,7 +141,7 @@ for name in ['speculative-decoding-topic.html','rsi-knowledge-system.html']:
  if 'examples/Topics/'+name not in home:errors.append(['homepage','lost_existing_topic',name])
 if 'examples/Topics/knowledge-systems-22-'in home:errors.append(['homepage','collection_card_remains'])
 if (root/'examples/Topics/knowledge-systems-22-20261105').exists():errors.append(['old_collection_still_present'])
-result={'ok':not errors,'method':'Source manifest hashes, every original main/aux ID and article word order, embedded child HTML decoding, local link closure and JavaScript syntax','topics':rows,'counts':{'topics':len(rows),'source_documents':sum(r['source_documents']for r in rows),'aux':sum(r['source_documents']-1 for r in rows)},'errors':errors}
+result={'ok':not errors,'method':'Source manifest hashes, every original main/aux ID and article word order, embedded child HTML decoding, local link closure and JavaScript syntax','topics':rows,'counts':{'topics':len(rows),'source_documents':sum(r['source_documents']for r in rows),'aux':sum(r['source_documents']-1 for r in rows)},'errors':errors,'cross_document_links_checked':len(pending_anchors)}
 (qa/'structural-results.json').write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n')
 print(json.dumps({'ok':result['ok'],'counts':result['counts'],'errors':errors[:20]},ensure_ascii=False))
 if errors:raise SystemExit(1)
