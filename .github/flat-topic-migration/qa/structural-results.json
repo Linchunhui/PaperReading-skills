@@ -68,7 +68,7 @@
     },
     {
       "id": "image-foundation",
-      "bytes": 9109039,
+      "bytes": 9107847,
       "main_ids": 44,
       "main_articles": 6,
       "aux_ids": 49,
@@ -86,7 +86,7 @@
     },
     {
       "id": "image-control-edit",
-      "bytes": 5994837,
+      "bytes": 5999977,
       "main_ids": 47,
       "main_articles": 5,
       "aux_ids": 49,
@@ -104,7 +104,7 @@
     },
     {
       "id": "image-design",
-      "bytes": 3383570,
+      "bytes": 3385338,
       "main_ids": 49,
       "main_articles": 5,
       "aux_ids": 48,
@@ -122,7 +122,7 @@
     },
     {
       "id": "video-model",
-      "bytes": 6594343,
+      "bytes": 6598907,
       "main_ids": 41,
       "main_articles": 5,
       "aux_ids": 46,
@@ -140,7 +140,7 @@
     },
     {
       "id": "video-control-edit",
-      "bytes": 7499922,
+      "bytes": 7499986,
       "main_ids": 56,
       "main_articles": 6,
       "aux_ids": 53,
@@ -254,7 +254,7 @@
     },
     {
       "id": "embodied-interaction",
-      "bytes": 2292227,
+      "bytes": 2284681,
       "main_ids": 54,
       "main_articles": 7,
       "aux_ids": 0,
@@ -270,7 +270,7 @@
     },
     {
       "id": "architecture-main",
-      "bytes": 3555906,
+      "bytes": 3552040,
       "main_ids": 54,
       "main_articles": 9,
       "aux_ids": 0,
@@ -334,7 +334,7 @@
     },
     {
       "id": "inference-main",
-      "bytes": 8586550,
+      "bytes": 8577106,
       "main_ids": 79,
       "main_articles": 16,
       "aux_ids": 0,
@@ -350,7 +350,7 @@
     },
     {
       "id": "image-acceleration",
-      "bytes": 16927058,
+      "bytes": 16938170,
       "main_ids": 57,
       "main_articles": 7,
       "aux_ids": 140,
@@ -373,5 +373,6 @@
     "source_documents": 35,
     "aux": 13
   },
-  "errors": []
+  "errors": [],
+  "cross_document_links_checked": 5798
 }

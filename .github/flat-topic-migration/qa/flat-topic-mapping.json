@@ -1,5 +1,5 @@
 {
-  "built_at": "2026-11-06T03:15:14.092994+00:00",
+  "built_at": "2026-11-06T03:23:56.421427+00:00",
   "source_snapshot": "/tmp/flat-source",
   "topics": [
     {
@@ -589,7 +589,7 @@
         }
       ],
       "aux_source": "topics/image-foundation/baseline.html",
-      "aux_bytes_embedded": 6504589,
+      "aux_bytes_embedded": 6503697,
       "main_ids": [
         "backbone",
         "complete-reading",
@@ -699,8 +699,8 @@
         "paper-p2508-02324",
         "paper-p2606-27608"
       ],
-      "output_bytes": 9109039,
-      "sha256": "ac7473b3b62deda4663b624a2bdc9fcabda1f79c921bb7077536ae9e49e8078a"
+      "output_bytes": 9107847,
+      "sha256": "46123fff69d1c0c0b3aaf39c0c089867a43806a1293d07d38c429dd3031bf7dd"
     },
     {
       "id": "image-control-edit",
@@ -725,7 +725,7 @@
         }
       ],
       "aux_source": "topics/image-control-edit/baseline.html",
-      "aux_bytes_embedded": 4196462,
+      "aux_bytes_embedded": 4200316,
       "main_ids": [
         "complete-reading",
         "evaluation",
@@ -837,8 +837,8 @@
         "paper-p2401-07519",
         "paper-p2308-15070"
       ],
-      "output_bytes": 5994837,
-      "sha256": "37e7ad22f53e86e4e61fa5370e14a790058bf86b32869f82c8cf9f01d6e4d2ba"
+      "output_bytes": 5999977,
+      "sha256": "e66fff4edd1987a7f715be460c41ddfd175e2424ba90d88e2eed0f4dc949b798"
     },
     {
       "id": "image-design",
@@ -863,7 +863,7 @@
         }
       ],
       "aux_source": "topics/image-design/baseline.html",
-      "aux_bytes_embedded": 2213986,
+      "aux_bytes_embedded": 2215314,
       "main_ids": [
         "complete-reading",
         "evaluation",
@@ -975,8 +975,8 @@
         "paper-p2603-11593",
         "paper-p2602-21461"
       ],
-      "output_bytes": 3383570,
-      "sha256": "42fae1d75bbcc87a6c9bd1c513ef62c48f7eee2f51b2a96e922260a5489a517b"
+      "output_bytes": 3385338,
+      "sha256": "971a754fe0f802489bb0942de037b1c1b440b61d30bfb878362563c42df58a88"
     },
     {
       "id": "video-model",
@@ -1001,7 +1001,7 @@
         }
       ],
       "aux_source": "topics/video-model/baseline.html",
-      "aux_bytes_embedded": 4736528,
+      "aux_bytes_embedded": 4739952,
       "main_ids": [
         "complete-reading",
         "curriculum",
@@ -1101,8 +1101,8 @@
         "paper-p2403-14773",
         "paper-p2506-08009"
       ],
-      "output_bytes": 6594343,
-      "sha256": "0c941409551b5e4c491d190cb7b05919f332ee8d21c7f9c42e70a28e19bc127f"
+      "output_bytes": 6598907,
+      "sha256": "5df1cc5a4534666d29f857acdfcb43f93fe2f259fb21292cd4216420c4a4e674"
     },
     {
       "id": "video-control-edit",
@@ -1127,7 +1127,7 @@
         }
       ],
       "aux_source": "topics/video-control-edit/baseline.html",
-      "aux_bytes_embedded": 5010962,
+      "aux_bytes_embedded": 5011010,
       "main_ids": [
         "avatar",
         "complete-reading",
@@ -1251,8 +1251,8 @@
         "paper-p2505-20156",
         "paper-p2410-13720"
       ],
-      "output_bytes": 7499922,
-      "sha256": "83f7628230e51e89c41dd52a6ff4469a28ab087196d879c09835eaf3f36e0531"
+      "output_bytes": 7499986,
+      "sha256": "97dee882b52c9f9887dc44660ed5e4ee7eceb3569c21d942385b91a8c0b64e10"
     },
     {
       "id": "document-parsing",
@@ -1846,8 +1846,8 @@
         "paper-tactx"
       ],
       "aux_articles": [],
-      "output_bytes": 2292227,
-      "sha256": "5e9cbfa78ed333fdf9e64c00e4db5980c10b8c718be5b4f9d080b33144bf170b"
+      "output_bytes": 2284681,
+      "sha256": "cdddc85d20142bde850ddf4bde33af4749b1c1d4f55cc26057950b9c3f78d764"
     },
     {
       "id": "architecture-main",
@@ -1934,8 +1934,8 @@
         "paper-mura"
       ],
       "aux_articles": [],
-      "output_bytes": 3555906,
-      "sha256": "c2fd7354ca0c969a01c0ec1005384e022b3faf55f443b516855a11ecb18a3bd1"
+      "output_bytes": 3552040,
+      "sha256": "c9c246f07727f4ed810dc856748d2e7e25473681b3ac34daede5952c1f09e7e6"
     },
     {
       "id": "rl-main",
@@ -2908,8 +2908,8 @@
         "paper-kairos-arun"
       ],
       "aux_articles": [],
-      "output_bytes": 8586550,
-      "sha256": "c8aa76aca8840bc4f76dfb4f826d4b433f7b19654ce98d8485765fd51bf18bc1"
+      "output_bytes": 8577106,
+      "sha256": "825d0b9c05fb007e12715d262c4202ab76198e291b81a8be9bb7a1ef939f1aeb"
     },
     {
       "id": "image-acceleration",
@@ -2934,7 +2934,7 @@
         }
       ],
       "aux_source": "topics/image-acceleration/remote-baseline/index.html",
-      "aux_bytes_embedded": 12344595,
+      "aux_bytes_embedded": 12352927,
       "main_ids": [
         "caching",
         "complete-reading",
@@ -3214,10 +3214,10 @@
         "paper-p2406-06911",
         "paper-p2411-01738"
       ],
-      "output_bytes": 16927058,
-      "sha256": "ccf6ad4437a6a52560312d95778d5d80c35db95b0bd20a4e648c9b653ec2b7ca"
+      "output_bytes": 16938170,
+      "sha256": "6ea906c17ff2aab98b2e16bc0629b5a84dd59ae37d5d1d0ba6b88063204b1a61"
     }
   ],
-  "max_html_bytes": 16927058,
+  "max_html_bytes": 16938170,
   "strategy": "lazy self-contained srcdoc with automatic height and anchor bridge; research prose retained"
 }
